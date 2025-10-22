@@ -116,6 +116,15 @@
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.casting-applications.edit', $castingApplication->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
+                                    @if($castingApplication->status !== 'selected')
+                                        <button class="btn btn-xs btn-success" type="button"
+                                            data-toggle="modal"
+                                            data-target="#approveApplicationModal"
+                                            data-route="{{ route('admin.casting-applications.approve', $castingApplication) }}"
+                                            data-name="{{ $castingApplication->talent_profile->display_name ?? $castingApplication->talent_profile->legal_name }}">
+                                            {{ trans('global.approve') }}
+                                        </button>
+                                    @endif
                                 @endcan
 
                                 @can('casting_application_delete')
@@ -187,5 +196,42 @@
   
 })
 
+$('#approveApplicationModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+    var route = button.data('route')
+    var name = button.data('name')
+    var modal = $(this)
+
+    modal.find('form').attr('action', route)
+    modal.find('textarea[name="admin_notes"]').val('')
+    modal.find('.modal-title').text(name ? name + ' {{ trans('notifications.approval_modal_title') }}' : '{{ trans('notifications.approval_modal_default_title') }}')
+})
+
 </script>
+<div class="modal fade" id="approveApplicationModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ trans('notifications.approval_modal_default_title') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="#">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="admin_notes">{{ trans('cruds.castingApplication.fields.admin_notes') }}</label>
+                        <textarea name="admin_notes" id="admin_notes" class="form-control" rows="4"></textarea>
+                        <small class="form-text text-muted">{{ trans('notifications.approval_modal_note_help') }}</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('global.cancel') }}</button>
+                    <button type="submit" class="btn btn-success">{{ trans('global.approve') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

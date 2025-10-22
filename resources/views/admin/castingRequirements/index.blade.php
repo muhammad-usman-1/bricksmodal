@@ -1,17 +1,13 @@
 @extends('layouts.admin')
 @section('content')
-@can('casting_requirement_create')
-    <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route('admin.casting-requirements.create') }}">
-                {{ trans('global.add') }} {{ trans('cruds.castingRequirement.title_singular') }}
-            </a>
-        </div>
-    </div>
-@endcan
 <div class="card">
-    <div class="card-header">
-        {{ trans('cruds.castingRequirement.title_singular') }} {{ trans('global.list') }}
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>{{ trans('cruds.castingRequirement.title_singular') }} {{ trans('global.list') }}</span>
+        @can('casting_requirement_create')
+            <a class="btn btn-primary" href="{{ route('admin.casting-requirements.create') }}">
+                {{ trans('global.create_new_project') }}
+            </a>
+        @endcan
     </div>
 
     <div class="card-body">
@@ -19,57 +15,13 @@
             <table class=" table table-bordered table-striped table-hover datatable datatable-CastingRequirement">
                 <thead>
                     <tr>
-                        <th width="10">
-
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.id') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.project_name') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.client_name') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.location') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.shoot_date_time') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.hair_color') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.age_range') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.gender') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.outfit') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.reference') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.count') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.notes') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.user') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.rate_per_model') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingRequirement.fields.status') }}
-                        </th>
-                        <th>
-                            &nbsp;
-                        </th>
+                        <th width="10"></th>
+                        <th>{{ trans('cruds.castingRequirement.fields.project_name') }}</th>
+                        <th>{{ trans('cruds.castingRequirement.fields.location') }}</th>
+                        <th>{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</th>
+                        <th>{{ trans('cruds.castingRequirement.fields.status') }}</th>
+                        <th>{{ trans('global.applicants') }}</th>
+                        <th>{{ trans('global.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,13 +31,7 @@
 
                             </td>
                             <td>
-                                {{ $castingRequirement->id ?? '' }}
-                            </td>
-                            <td>
                                 {{ $castingRequirement->project_name ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->client_name ?? '' }}
                             </td>
                             <td>
                                 {{ $castingRequirement->location ?? '' }}
@@ -94,49 +40,23 @@
                                 {{ $castingRequirement->shoot_date_time ?? '' }}
                             </td>
                             <td>
-                                {{ $castingRequirement->hair_color ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->age_range ?? '' }}
-                            </td>
-                            <td>
-                                {{ App\Models\CastingRequirement::GENDER_SELECT[$castingRequirement->gender] ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->outfit ?? '' }}
-                            </td>
-                            <td>
-                                @foreach($castingRequirement->reference as $key => $media)
-                                    <a href="{{ $media->getUrl() }}" target="_blank">
-                                        {{ trans('global.view_file') }}
-                                    </a>
-                                @endforeach
-                            </td>
-                            <td>
-                                {{ $castingRequirement->count ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->notes ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->user->name ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingRequirement->rate_per_model ?? '' }}
-                            </td>
-                            <td>
                                 {{ App\Models\CastingRequirement::STATUS_SELECT[$castingRequirement->status] ?? '' }}
                             </td>
                             <td>
-                                @can('casting_requirement_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
-                                        {{ trans('global.view') }}
-                                    </a>
-                                @endcan
-
+                                <a class="btn btn-xs btn-outline-primary" href="{{ route('admin.casting-requirements.applicants', $castingRequirement->id) }}">
+                                    {{ trans('global.view_applicants') }}
+                                </a>
+                            </td>
+                            <td>
                                 @can('casting_requirement_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.casting-requirements.edit', $castingRequirement->id) }}">
                                         {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
+
+                                @can('casting_requirement_show')
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
+                                        {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
@@ -144,7 +64,7 @@
                                     <form action="{{ route('admin.casting-requirements.destroy', $castingRequirement->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                        <button type="submit" class="btn btn-xs btn-danger">{{ trans('global.delete') }}</button>
                                     </form>
                                 @endcan
 

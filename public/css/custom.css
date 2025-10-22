@@ -14,15 +14,16 @@ table.dataTable tbody th.select-checkbox::after {
     top: 50%;
 }
 
+
 .dataTables_length,
-.dataTables_filter,
 .dt-buttons {
-    margin-bottom: 0.333em;
-    margin-top: .2rem;
+    display: none !important;
 }
 
 .dataTables_filter {
-    margin-right: .2rem;
+    margin-bottom: 0.333em;
+    margin-top: .2rem;
+    display: block !important;
 }
 
 .dt-buttons .btn {
@@ -117,6 +118,41 @@ table.dataTable thead .sorting_desc {
 .form-group .required::after {
     content: " *";
     color: red;
+}
+
+.c-app,
+body {
+    background-color: #f2f3f5;
+}
+
+.c-sidebar {
+    background-color: #f2f3f5 !important;
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-brand,
+.c-sidebar .c-sidebar-nav-link,
+.c-sidebar .c-sidebar-nav-dropdown-toggle {
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-nav-icon {
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-nav-link:hover,
+.c-sidebar .c-sidebar-nav-dropdown-toggle:hover {
+    background-color: #e0e1e5 !important;
+    color: #000 !important;
+}
+
+.c-sidebar .c-active {
+    background-color: #d5d6da !important;
+    color: #000 !important;
+}
+
+.c-sidebar .c-active .c-sidebar-nav-icon {
+    color: #000 !important;
 }
 
 .form-check.is-invalid ~ .invalid-feedback {

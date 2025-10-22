@@ -18,6 +18,9 @@ class User extends Authenticatable
 
     public $table = 'users';
 
+    public const TYPE_ADMIN = 'admin';
+    public const TYPE_TALENT = 'talent';
+
     protected $hidden = [
         'remember_token',
         'password',
@@ -96,6 +99,11 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function talentProfile()
+    {
+        return $this->hasOne(TalentProfile::class);
     }
 
     public function getOtpExpiresAtAttribute($value)

@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard'     => 'web',
-        'passwords' => 'users',
+        'guard'     => 'admin',
+        'passwords' => 'admins',
     ],
 
     /*
@@ -36,6 +36,16 @@ return [
     */
 
     'guards' => [
+        'admin' => [
+            'driver'   => 'session',
+            'provider' => 'admins',
+        ],
+
+        'talent' => [
+            'driver'   => 'session',
+            'provider' => 'talents',
+        ],
+
         'web' => [
             'driver'   => 'session',
             'provider' => 'users',
@@ -66,6 +76,16 @@ return [
     */
 
     'providers' => [
+        'admins' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\User::class,
+        ],
+
+        'talents' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\User::class,
+        ],
+
         'users' => [
             'driver' => 'eloquent',
             'model'  => App\Models\User::class,
@@ -95,6 +115,18 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table'    => 'password_resets',
+            'expire'   => 60,
+        ],
+
+        'admins' => [
+            'provider' => 'admins',
+            'table'    => 'password_resets',
+            'expire'   => 60,
+        ],
+
+        'talents' => [
+            'provider' => 'talents',
             'table'    => 'password_resets',
             'expire'   => 60,
         ],

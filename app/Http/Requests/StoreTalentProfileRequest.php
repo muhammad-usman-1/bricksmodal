@@ -93,6 +93,10 @@ class StoreTalentProfileRequest extends FormRequest
                 'min:-2147483648',
                 'max:2147483647',
             ],
+            'whatsapp_number' => [
+                'required',
+                'regex:/^\\+?[0-9\\s\\-()]{7,20}$/',
+            ],
             'user_id' => [
                 'required',
                 'integer',

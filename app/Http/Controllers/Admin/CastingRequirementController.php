@@ -8,7 +8,10 @@ use App\Http\Requests\MassDestroyCastingRequirementRequest;
 use App\Http\Requests\StoreCastingRequirementRequest;
 use App\Http\Requests\UpdateCastingRequirementRequest;
 use App\Models\CastingRequirement;
+use App\Models\CastingApplication;
+use App\Models\TalentProfile;
 use App\Models\User;
+use App\Support\EmailTemplateManager;
 use Gate;
 use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -41,12 +44,19 @@ class CastingRequirementController extends Controller
         $castingRequirement = CastingRequirement::create($request->all());
 
         foreach ($request->input('reference', []) as $file) {
-            $castingRequirement->addMedia(storage_path('tmp/uploads/' . basename($file)))->toMediaCollection('reference');
+            $path = storage_path('tmp/uploads/' . basename($file));
+            if (! file_exists($path)) {
+                \Log::warning('Temporary upload missing for casting requirement reference', ['path' => $path]);
+                continue;
+            }
+            $castingRequirement->addMedia($path)->toMediaCollection('reference');
         }
 
         if ($media = $request->input('ck-media', false)) {
             Media::whereIn('id', $media)->update(['model_id' => $castingRequirement->id]);
         }
+
+        $this->notifyApprovedTalents($castingRequirement);
 
         return redirect()->route('admin.casting-requirements.index');
     }
@@ -75,8 +85,12 @@ class CastingRequirementController extends Controller
         }
         $media = $castingRequirement->reference->pluck('file_name')->toArray();
         foreach ($request->input('reference', []) as $file) {
-            if (count($media) === 0 || ! in_array($file, $media)) {
-                $castingRequirement->addMedia(storage_path('tmp/uploads/' . basename($file)))->toMediaCollection('reference');
+            $path = storage_path('tmp/uploads/' . basename($file));
+            if ((count($media) === 0 || ! in_array($file, $media)) && file_exists($path)) {
+                $castingRequirement->addMedia($path)->toMediaCollection('reference');
+            }
+            if (! file_exists($path)) {
+                \Log::warning('Temporary upload missing for casting requirement reference (update)', ['path' => $path]);
             }
         }
 
@@ -122,5 +136,47 @@ class CastingRequirementController extends Controller
         $media         = $model->addMediaFromRequest('upload')->toMediaCollection('ck-media');
 
         return response()->json(['id' => $media->id, 'url' => $media->getUrl()], Response::HTTP_CREATED);
+    }
+
+    protected function notifyApprovedTalents(CastingRequirement $castingRequirement): void
+    {
+        $templateKey = 'project_created_notification';
+
+        TalentProfile::where('verification_status', 'approved')
+            ->with('user')
+            ->chunk(200, function ($profiles) use ($castingRequirement, $templateKey) {
+                foreach ($profiles as $profile) {
+                    $user = $profile->user;
+
+                    if (! $user) {
+                        continue;
+                    }
+
+                    EmailTemplateManager::sendToUser($user, $templateKey, [
+                        'project_name'     => $castingRequirement->project_name,
+                        'project_location' => $castingRequirement->location ?? trans('global.not_set'),
+                        'project_notes'    => $castingRequirement->notes ?? '',
+                        'project_url'      => route('talent.projects.show', $castingRequirement),
+                        'project_date'     => $castingRequirement->shoot_date_time ?? '',
+                    ], [
+                        'casting_requirement_id' => $castingRequirement->id,
+                        'type'                    => 'project_created',
+                        'fallback_subject'        => trans('notifications.project_created_subject', ['project' => $castingRequirement->project_name]),
+                        'fallback_body'           => trans('notifications.project_created_fallback', ['project' => $castingRequirement->project_name, 'url' => route('talent.projects.show', $castingRequirement)]),
+                    ]);
+                }
+            });
+    }
+
+    public function applicants(CastingRequirement $castingRequirement)
+    {
+        abort_if(Gate::denies('casting_requirement_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $castingRequirement->load(['castingApplications.talent_profile.user']);
+
+        return view('admin.castingRequirements.applicants', [
+            'castingRequirement' => $castingRequirement,
+            'applications'       => $castingRequirement->castingApplications,
+        ]);
     }
 }

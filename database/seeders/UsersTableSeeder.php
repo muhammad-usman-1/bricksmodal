@@ -19,6 +19,7 @@ class UsersTableSeeder extends Seeder
                 'phone_country_code' => '',
                 'phone_number'       => '',
                 'otp'                => '',
+                'type'               => User::TYPE_ADMIN,
             ],
         ];
 

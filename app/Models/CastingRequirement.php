@@ -66,6 +66,9 @@ class CastingRequirement extends Model implements HasMedia
 
     public function registerMediaConversions(Media $media = null): void
     {
+        if (! extension_loaded('gd') && ! extension_loaded('imagick')) {
+            return;
+        }
         $this->addMediaConversion('thumb')->fit('crop', 50, 50);
         $this->addMediaConversion('preview')->fit('crop', 120, 120);
     }
@@ -88,5 +91,10 @@ class CastingRequirement extends Model implements HasMedia
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function castingApplications()
+    {
+        return $this->hasMany(CastingApplication::class, 'casting_requirement_id');
     }
 }

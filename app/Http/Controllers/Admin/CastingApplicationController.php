@@ -9,6 +9,10 @@ use App\Http\Requests\UpdateCastingApplicationRequest;
 use App\Models\CastingApplication;
 use App\Models\CastingRequirement;
 use App\Models\TalentProfile;
+use App\Support\EmailTemplateManager;
+use Illuminate\Support\Facades\Log;
+use Stripe\Checkout\Session as StripeCheckoutSession;
+use Stripe\Stripe;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,5 +93,167 @@ class CastingApplicationController extends Controller
         }
 
         return response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    public function approve(Request $request, CastingApplication $castingApplication)
+    {
+        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $data = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $castingApplication->update([
+            'status'      => 'selected',
+            'admin_notes' => $data['admin_notes'] ?? null,
+        ]);
+
+        $talent = optional($castingApplication->talent_profile)->user;
+
+        EmailTemplateManager::sendToUser($talent, 'talent_application_selected', [
+            'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            'notes'        => $data['admin_notes'] ?? '',
+        ], [
+            'casting_application_id' => $castingApplication->id,
+            'type'                   => 'application_selected',
+            'fallback_subject'       => trans('notifications.application_selected_subject', ['project' => optional($castingApplication->casting_requirement)->project_name]),
+            'fallback_body'          => trans('notifications.application_selected_body', ['project' => optional($castingApplication->casting_requirement)->project_name, 'notes' => $data['admin_notes'] ?? '']),
+        ]);
+
+        return back()->with('message', trans('notifications.application_approved'));
+    }
+
+    public function reject(Request $request, CastingApplication $castingApplication)
+    {
+        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $data = $request->validate([
+            'admin_notes' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $castingApplication->update([
+            'status'      => 'rejected',
+            'admin_notes' => $data['admin_notes'],
+        ]);
+
+        $talent = optional($castingApplication->talent_profile)->user;
+
+        EmailTemplateManager::sendToUser($talent, 'talent_application_rejected', [
+            'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            'notes'        => $data['admin_notes'] ?? '',
+        ], [
+            'casting_application_id' => $castingApplication->id,
+            'type'                   => 'application_rejected',
+            'fallback_subject'       => trans('notifications.application_rejected_subject', ['project' => optional($castingApplication->casting_requirement)->project_name]),
+            'fallback_body'          => trans('notifications.application_rejected_body', ['project' => optional($castingApplication->casting_requirement)->project_name, 'notes' => $data['admin_notes'] ?? '']),
+        ]);
+
+        return back()->with('message', trans('notifications.application_rejected'));
+    }
+
+    public function pay(Request $request, CastingApplication $castingApplication)
+    {
+        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        if ($castingApplication->payment_processed === 'paid') {
+            return back()->with('message', trans('notifications.application_already_paid'));
+        }
+
+        $amount = $castingApplication->rate_offered ?? $castingApplication->rate;
+
+        if (! $amount || $amount <= 0) {
+            return back()->withErrors(['payment' => trans('notifications.application_amount_missing')]);
+        }
+
+        $stripeSecret = config('services.stripe.secret');
+
+        if (! $stripeSecret) {
+            return back()->withErrors(['payment' => trans('notifications.stripe_missing_keys')]);
+        }
+
+        Stripe::setApiKey($stripeSecret);
+
+        try {
+            $successUrl = route('admin.payments.success', [], true) . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl  = route('admin.payments.cancel', $castingApplication, true);
+
+            $session = StripeCheckoutSession::create([
+                'mode' => 'payment',
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => $castingApplication->casting_requirement->project_name ?? 'Casting Project Payment',
+                        ],
+                        'unit_amount' => (int) ceil($amount * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'metadata' => [
+                    'casting_application_id' => $castingApplication->id,
+                ],
+                'success_url' => $successUrl,
+                'cancel_url'  => $cancelUrl,
+            ]);
+
+            $castingApplication->update([
+                'stripe_session_id'    => $session->id,
+                'payment_processed'    => 'pending',
+            ]);
+
+            return redirect($session->url);
+        } catch (\Exception $exception) {
+            Log::error('Stripe payment session error', [
+                'application_id' => $castingApplication->id,
+                'exception'      => $exception->getMessage(),
+            ]);
+
+            return back()->withErrors(['payment' => trans('notifications.payment_session_error', ['message' => $exception->getMessage()])]);
+        }
+    }
+
+    public function paymentSuccess(Request $request)
+    {
+        $sessionId = $request->query('session_id');
+
+        if (! $sessionId) {
+            return redirect()->route('admin.casting-requirements.index')->withErrors(['payment' => trans('notifications.payment_missing_session')]);
+        }
+
+        $stripeSecret = config('services.stripe.secret');
+
+        if (! $stripeSecret) {
+            return redirect()->route('admin.casting-requirements.index')->withErrors(['payment' => trans('notifications.stripe_missing_keys')]);
+        }
+
+        Stripe::setApiKey($stripeSecret);
+
+        try {
+            $session = StripeCheckoutSession::retrieve($sessionId);
+        } catch (\Exception $exception) {
+            Log::error('Stripe retrieve session error', ['session_id' => $sessionId, 'exception' => $exception->getMessage()]);
+            return redirect()->route('admin.casting-requirements.index')->withErrors(['payment' => trans('notifications.payment_session_error')]);
+        }
+
+        $applicationId = $session->metadata['casting_application_id'] ?? null;
+        $application   = $applicationId ? CastingApplication::find($applicationId) : null;
+
+        if ($session->payment_status === 'paid' && $application) {
+            $application->update([
+                'payment_processed'     => 'paid',
+                'stripe_session_id'     => $session->id,
+                'stripe_payment_intent' => $session->payment_intent,
+            ]);
+
+            return redirect()->route('admin.casting-requirements.applicants', $application->casting_requirement_id)->with('message', trans('notifications.payment_success'));
+        }
+
+        return redirect()->route('admin.casting-requirements.index')->withErrors(['payment' => trans('notifications.payment_not_completed')]);
+    }
+
+    public function paymentCancel(CastingApplication $castingApplication)
+    {
+        return redirect()->route('admin.casting-requirements.applicants', $castingApplication->casting_requirement_id)->withErrors(['payment' => trans('notifications.payment_cancelled')]);
     }
 }

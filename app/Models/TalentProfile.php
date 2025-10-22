@@ -6,6 +6,7 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\CastingApplication;
 
 class TalentProfile extends Model
 {
@@ -46,6 +47,8 @@ class TalentProfile extends Model
         'bio',
         'daily_rate',
         'hourly_rate',
+        'date_of_birth',
+        'gender',
         'height',
         'weight',
         'chest',
@@ -55,11 +58,40 @@ class TalentProfile extends Model
         'hair_color',
         'eye_color',
         'shoe_size',
+        'whatsapp_number',
         'user_id',
+        'id_front_path',
+        'id_back_path',
+        'headshot_center_path',
+        'headshot_left_path',
+        'headshot_right_path',
+        'full_body_front_path',
+        'full_body_right_path',
+        'full_body_back_path',
+        'onboarding_step',
+        'onboarding_completed_at',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
+
+    protected $casts = [
+        'date_of_birth'           => 'date',
+        'onboarding_completed_at' => 'datetime',
+        'height'                  => 'float',
+        'weight'                  => 'float',
+        'chest'                   => 'float',
+        'waist'                   => 'float',
+        'hips'                    => 'float',
+        'shoe_size'               => 'float',
+        'daily_rate'              => 'float',
+        'hourly_rate'             => 'float',
+    ];
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return ! is_null($this->onboarding_completed_at);
+    }
 
     protected function serializeDate(DateTimeInterface $date)
     {
@@ -74,5 +106,10 @@ class TalentProfile extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function castingApplications()
+    {
+        return $this->hasMany(CastingApplication::class, 'talent_profile_id');
     }
 }

@@ -27,6 +27,7 @@ class Kernel extends HttpKernel
         'signed'           => \App\Http\Middleware\ValidateSignature::class,
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'talent.onboarded' => \App\Http\Middleware\EnsureTalentOnboarded::class,
     ];
 
     protected $middlewareGroups = [

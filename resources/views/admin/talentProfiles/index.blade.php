@@ -157,9 +157,41 @@
                                 @endcan
 
                                 @can('talent_profile_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.talent-profiles.edit', $talentProfile->id) }}">
-                                        {{ trans('global.edit') }}
-                                    </a>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        @if($talentProfile->verification_status !== 'approved')
+                                            <button class="btn btn-success" type="button"
+                                                data-toggle="modal"
+                                                data-target="#talentActionModal"
+                                                data-action="approve"
+                                                data-route="{{ route('admin.talent-profiles.approve', $talentProfile) }}"
+                                                data-name="{{ $talentProfile->display_name ?? $talentProfile->legal_name }}"
+                                                data-whatsapp="{{ $talentProfile->whatsapp_number }}">
+                                                {{ trans('global.approve') }}
+                                            </button>
+                                        @endif
+                                        @if($talentProfile->verification_status !== 'rejected')
+                                            <button class="btn btn-warning" type="button"
+                                                data-toggle="modal"
+                                                data-target="#talentActionModal"
+                                                data-action="reject"
+                                                data-route="{{ route('admin.talent-profiles.reject', $talentProfile) }}"
+                                                data-name="{{ $talentProfile->display_name ?? $talentProfile->legal_name }}"
+                                                data-whatsapp="{{ $talentProfile->whatsapp_number }}">
+                                                {{ trans('global.reject') }}
+                                            </button>
+                                        @endif
+                                        @if($talentProfile->verification_status === 'rejected')
+                                            <button class="btn btn-info" type="button"
+                                                data-toggle="modal"
+                                                data-target="#talentActionModal"
+                                                data-action="reactivate"
+                                                data-route="{{ route('admin.talent-profiles.reactivate', $talentProfile) }}"
+                                                data-name="{{ $talentProfile->display_name ?? $talentProfile->legal_name }}"
+                                                data-whatsapp="{{ $talentProfile->whatsapp_number }}">
+                                                {{ trans('global.reactivate') }}
+                                            </button>
+                                        @endif
+                                    </div>
                                 @endcan
 
                                 @can('talent_profile_delete')
@@ -186,6 +218,12 @@
 @section('scripts')
 @parent
 <script>
+    const whatsappTemplates = {
+        approve: @json(trans('notifications.whatsapp_template_approved', ['name' => ':name'])),
+        reject: @json(trans('notifications.whatsapp_template_rejected', ['name' => ':name'])),
+        reactivate: @json(trans('notifications.whatsapp_template_reactivated', ['name' => ':name'])),
+    };
+
     $(function () {
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
 @can('talent_profile_delete')
@@ -231,5 +269,66 @@
   
 })
 
+$(document).on('show.bs.modal', '#talentActionModal', function (event) {
+    var button = $(event.relatedTarget)
+    var action = button.data('action')
+    var route = button.data('route')
+    var name = button.data('name') || ''
+    var whatsapp = button.data('whatsapp') || ''
+    var modal = $(this)
+    var notesField = modal.find('textarea[name="notes"]')
+    var notesGroup = modal.find('.notes-group')
+    var whatsappField = modal.find('#whatsapp_message')
+    var whatsappButton = modal.find('#sendWhatsAppAction')
+
+    modal.find('form').attr('action', route)
+    notesField.val('')
+    modal.find('.modal-title').text(action.charAt(0).toUpperCase() + action.slice(1) + ' {{ trans('cruds.talentProfile.title_singular') }}')
+
+    if (action === 'approve') {
+        notesGroup.hide()
+        notesField.prop('required', false)
+    } else {
+        notesGroup.show()
+        notesField.prop('required', true)
+    }
+
+    var template = whatsappTemplates[action] || ''
+    var defaultMessage = template.replace(':name', name)
+    whatsappField.val(defaultMessage)
+
+    if (whatsapp) {
+        whatsappButton.prop('disabled', false)
+            .data('phone', whatsapp)
+            .data('name', name)
+            .data('action', action)
+            .removeClass('disabled')
+            .attr('title', '')
+    } else {
+        whatsappButton.prop('disabled', true)
+            .data('phone', '')
+            .addClass('disabled')
+            .attr('title', '{{ trans('notifications.whatsapp_number_missing') }}')
+    }
+})
+
+$(document).on('click', '#sendWhatsAppAction', function () {
+    var phone = $(this).data('phone')
+    if (!phone) {
+        alert('{{ trans('notifications.whatsapp_number_missing') }}')
+        return
+    }
+
+    var message = $('#whatsapp_message').val() || ''
+    if (!message.trim()) {
+        alert('{{ trans('notifications.whatsapp_message_required') }}')
+        return
+    }
+
+    var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message)
+    window.open(url, '_blank')
+})
+
 </script>
+@include('admin.talentProfiles.partials.action-modal')
 @endsection

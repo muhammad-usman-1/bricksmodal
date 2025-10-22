@@ -43,6 +43,8 @@ class CastingApplication extends Model
         'rating',
         'reviews',
         'payment_processed',
+        'stripe_session_id',
+        'stripe_payment_intent',
         'created_at',
         'updated_at',
         'deleted_at',
