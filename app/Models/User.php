@@ -108,11 +108,24 @@ class User extends Authenticatable
 
     public function getOtpExpiresAtAttribute($value)
     {
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+        if (! $value) {
+            $this->attributes['otp_expires_at'] = null;
+            return;
+        }
+
+        // If a DateTime/Carbon instance is provided, format it directly
+        if ($value instanceof DateTimeInterface) {
+            $this->attributes['otp_expires_at'] = $value->format('Y-m-d H:i:s');
+            return;
+        }
+
+        // Try to parse using configured panel formats, otherwise fallback to Carbon::parse
+        try {
+            $this->attributes['otp_expires_at'] = Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s');
+        } catch (\Throwable $e) {
+            $this->attributes['otp_expires_at'] = Carbon::parse($value)->format('Y-m-d H:i:s');
+        }
     }
 
-    public function setOtpExpiresAtAttribute($value)
-    {
-        $this->attributes['otp_expires_at'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
-    }
+
 }

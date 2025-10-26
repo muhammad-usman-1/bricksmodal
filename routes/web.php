@@ -33,6 +33,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::middleware('auth:admin')->group(function () {
         Route::get('/', [AdminHomeController::class, 'index'])->name('home');
+        Route::get('notifications', [\App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('notifications.index');
+        Route::get('notifications/{notification}', [\App\Http\Controllers\Admin\NotificationsController::class, 'show'])->name('notifications.show');
+        Route::get('notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
         Route::get('projects', [CastingRequirementController::class, 'index'])->name('projects.dashboard');
         Route::get('talents', [TalentsDashboardController::class, 'index'])->name('talents.dashboard');
         Route::get('payments', [PaymentDashboardController::class, 'index'])->name('payments.dashboard');
@@ -98,6 +101,8 @@ Route::prefix('talent')->as('talent.')->group(function () {
     Route::middleware('guest:talent')->group(function () {
         Route::get('login', [TalentLoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [TalentLoginController::class, 'login'])->name('login.submit');
+        Route::get('otp', [TalentLoginController::class, 'showOtpForm'])->name('otp.form');
+        Route::post('otp/verify', [TalentLoginController::class, 'verifyOtp'])->name('otp.verify');
         Route::get('register', [TalentRegisterController::class, 'showRegistrationForm'])->name('register');
         Route::post('register', [TalentRegisterController::class, 'register'])->name('register.submit');
     });

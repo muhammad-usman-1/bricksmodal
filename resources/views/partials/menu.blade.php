@@ -1,8 +1,8 @@
 <div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show">
 
-    <div class="c-sidebar-brand d-md-down-none">
-        <a class="c-sidebar-brand-full h4" href="#">
-            {{ trans('panel.site_title') }}
+     <div class="c-sidebar-brand d-md-down-none">
+        <a class="c-sidebar-brand-full h4" href="{{ route('talent.dashboard') }}">
+            <img src="{{ asset('storage/bricks_logo.png') }}" alt="Logo" style="height: 27px; width: auto;">
         </a>
     </div>
 
@@ -13,6 +13,15 @@
 
                 </i>
                 {{ trans('global.admin_dashboard') }}
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a href="{{ route('admin.notifications.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/notifications*') ? 'c-active' : '' }}">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-bell"></i>
+                {{ trans('global.notifications') ?? 'Notifications' }}
+                @if(auth()->check() && auth()->user()->unreadNotifications->count() > 0)
+                    <span class="badge badge-danger ml-auto" style="margin-left:8px">{{ auth()->user()->unreadNotifications->count() }}</span>
+                @endif
             </a>
         </li>
         <li class="c-sidebar-nav-item">

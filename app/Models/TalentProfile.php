@@ -12,6 +12,21 @@ class TalentProfile extends Model
 {
     use SoftDeletes, HasFactory;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($talentProfile) {
+            $admins = User::whereHas('roles', function ($query) {
+                $query->where('id', 1); // Admin role ID
+            })->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new \App\Notifications\TalentProfileSubmitted($talentProfile));
+            }
+        });
+    }
+
     public $table = 'talent_profiles';
 
     protected $dates = [

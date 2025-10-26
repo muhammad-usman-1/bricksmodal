@@ -40,6 +40,45 @@
             </button>
 
             <ul class="c-header-nav ml-auto">
+                <li class="c-header-nav-item dropdown">
+                    <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="badge badge-danger">{{ auth()->user()->unreadNotifications->count() }}</span>
+                        @endif
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
+                        <div class="dropdown-header bg-light py-2">
+                            <strong>Notifications</strong>
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <a href="{{ route('admin.notifications.mark-all-read') }}" class="float-right text-muted" style="font-size: 0.8em;">
+                                    Mark all as read
+                                </a>
+                            @endif
+                        </div>
+                        @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
+                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}" 
+                               href="{{ route('admin.notifications.show', $notification->id) }}">
+                                @if($notification->data['type'] === 'talent_profile')
+                                    <i class="fas fa-user text-info"></i>
+                                @else
+                                    <i class="fas fa-video text-warning"></i>
+                                @endif
+                                {{ $notification->data['title'] }}
+                                <div class="small text-muted">{{ $notification->data['message'] }}</div>
+                                <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
+                            </a>
+                        @empty
+                            <div class="dropdown-item text-center text-muted">
+                                No notifications
+                            </div>
+                        @endforelse
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">
+                            View all notifications
+                        </a>
+                    </div>
+                </li>
                 @if(count(config('panel.available_languages', [])) > 1)
                     <li class="c-header-nav-item dropdown d-md-down-none">
                         <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
