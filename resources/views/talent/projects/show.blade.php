@@ -352,12 +352,15 @@
         @endif
 
         {{-- Outfit & Nails --}}
-        @if (!empty($castingRequirement->outfit) || !empty($castingRequirement->nails))
+        @php
+            $outfitText = $castingRequirement->outfit_summary ?? '';
+            $nailsText = $castingRequirement->nails ?? '';
+            $combinedText = trim(($outfitText ? $outfitText . "\n" : '') . $nailsText);
+        @endphp
+        @if (!empty($combinedText))
             <div class="section">
                 <h6>{{ __('Outfit & Nails') }}</h6>
-                <div class="body">{!! nl2br(
-                    e(($castingRequirement->outfit ? $castingRequirement->outfit . "\n" : '') . ($castingRequirement->nails ?? '')),
-                ) !!}</div>
+                <div class="body">{!! nl2br(e($combinedText)) !!}</div>
             </div>
         @endif
 

@@ -27,6 +27,12 @@ class AuthGates
 
         foreach ($permissionsArray as $title => $roles) {
             Gate::define($title, function ($user) use ($roles) {
+                // Allow all admin users to access everything
+                if ($user && $user->type === 'admin') {
+                    return true;
+                }
+
+                // Fallback to original permission checking for non-admin users
                 return count(array_intersect($user->roles->pluck('id')->toArray(), $roles)) > 0;
             });
         }

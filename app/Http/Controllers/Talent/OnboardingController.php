@@ -93,7 +93,7 @@ class OnboardingController extends Controller
                     'hips'            => ['nullable', 'integer', 'between:0,300'],
                     'date_of_birth'   => ['required', 'date'],
                     'gender'          => ['required', 'string', 'max:20'],
-                    'whatsapp_number' => ['required', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
+                    'whatsapp_number' => ['required', 'regex:/^\\+?[0-9\\s\\-()]{7,20}$/'],
                     'skin_tone'       => ['nullable', 'in:' . implode(',', array_keys(TalentProfile::SKIN_TONE_SELECT))],
                     'hair_color'      => ['nullable', 'string', 'max:120'],
                     'eye_color'       => ['nullable', 'string', 'max:120'],

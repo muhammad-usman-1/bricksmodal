@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Services\KwtSmsService;
 
 class LoginController extends Controller
 {
+    protected $smsService;
+
+    public function __construct(KwtSmsService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
     public function showLoginForm()
     {
         return view('talent.auth.login');
@@ -43,8 +50,32 @@ class LoginController extends Controller
         $user->otp_attempts = 0;
         $user->save();
 
-        // TODO: integrate with SMS provider. For now log and flash the OTP for development.
-        Log::info('Talent OTP for phone ' . $user->phone_country_code . $user->phone_number . ': ' . $otp);
+        // Send OTP via SMS
+        $smsSent = $this->smsService->sendOtp(
+            $user->phone_country_code,
+            $user->phone_number,
+            $otp
+        );
+
+        if (! $smsSent) {
+            Log::error('Failed to send OTP via SMS', [
+                'phone' => $user->phone_country_code . $user->phone_number
+            ]);
+
+            // Respect environment flag to require SMS send success before proceeding.
+            // Set KWT_SMS_REQUIRE_SUCCESS=true in your .env to enforce strict behavior.
+            if (env('KWT_SMS_REQUIRE_SUCCESS', false)) {
+                throw ValidationException::withMessages([
+                    'phone_number' => ['Failed to send OTP. Please try again.']
+                ]);
+            }
+
+            // Otherwise continue but surface a warning to the user and (in debug) show the OTP for testing.
+            session()->flash('warning', 'Unable to send SMS. Please check the phone number or try again.');
+            if (config('app.debug')) {
+                session()->flash('debug_otp', $otp);
+            }
+        }
 
         $request->session()->put('talent_phone', [
             'phone_country_code' => $user->phone_country_code,

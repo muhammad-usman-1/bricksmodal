@@ -15,7 +15,7 @@
                 {{ trans('global.admin_dashboard') }}
             </a>
         </li>
-        <li class="c-sidebar-nav-item">
+        {{--  <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.notifications.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/notifications*') ? 'c-active' : '' }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-bell"></i>
                 {{ trans('global.notifications') ?? 'Notifications' }}
@@ -23,31 +23,37 @@
                     <span class="badge badge-danger ml-auto" style="margin-left:8px">{{ auth()->user()->unreadNotifications->count() }}</span>
                 @endif
             </a>
-        </li>
+        </li>  --}}
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.projects.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-project-diagram">
-
-                </i>
+                <i class="c-sidebar-nav-icon fas fa-fw fa-project-diagram"></i>
                 {{ trans('global.projects_dashboard') }}
             </a>
         </li>
+
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.talents.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-user-friends">
-
-                </i>
+                <i class="c-sidebar-nav-icon fas fa-fw fa-user-friends"></i>
                 {{ trans('global.talents_dashboard') }}
             </a>
         </li>
+
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.payments.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-wallet">
-
-                </i>
-                {{ trans('global.payment_dashboard') }}
+                <i class="c-sidebar-nav-icon fas fa-fw fa-wallet"></i>
+                Payments
             </a>
         </li>
+        @if(auth()->check() && auth()->user()->hasRole('Super Admin'))
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.admins.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/admins*') ? 'c-active' : '' }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-user-shield">
+
+                    </i>
+                    Admins
+                </a>
+            </li>
+        @endif
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.settings.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-cog">
@@ -98,7 +104,7 @@
                 </ul>
             </li>
         @endcan  --}}
-        @can('talent_profile_access')
+        {{--  @can('talent_profile_access')
             <li class="c-sidebar-nav-item">
                 <a href="{{ route("admin.talent-profiles.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/talent-profiles") || request()->is("admin/talent-profiles/*") ? "c-active" : "" }}">
                     <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
@@ -107,7 +113,7 @@
                     {{ trans('cruds.talentProfile.title') }}
                 </a>
             </li>
-        @endcan
+        @endcan  --}}
         {{--  @can('language_access')
             <li class="c-sidebar-nav-item">
                 <a href="{{ route("admin.languages.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/languages") || request()->is("admin/languages/*") ? "c-active" : "" }}">

@@ -19,7 +19,7 @@
             align-items: flex-start;
             justify-content: center;
             padding-top: 30vh;
-          
+
             font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
             color: var(--ink);
         }
@@ -94,6 +94,24 @@
     <div class="otp-page">
         <div class="otp-wrap">
             <div class="otp-title">OTP Code Verification</div>
+
+            @if(session('warning'))
+                <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
+            @endif
+
+            @if(session('debug_otp'))
+                <div class="alert alert-info" role="alert">Debug OTP (app.debug): <strong>{{ session('debug_otp') }}</strong></div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <form id="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
                 @csrf

@@ -10,10 +10,10 @@ use App\Models\CastingApplication;
 use App\Models\CastingRequirement;
 use App\Models\TalentProfile;
 use App\Support\EmailTemplateManager;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeCheckoutSession;
 use Stripe\Stripe;
-use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -95,16 +95,84 @@ class CastingApplicationController extends Controller
         return response(null, Response::HTTP_NO_CONTENT);
     }
 
+    public function updateStatus(Request $request, CastingApplication $castingApplication)
+    {
+        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $data = $request->validate([
+            'status' => ['required', 'string', 'in:selected,rejected,applied'],
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $castingApplication->update([
+            'status' => $data['status'],
+            'admin_notes' => $data['admin_notes'] ?? null,
+        ]);
+
+        // Send email and WhatsApp notifications
+        $talent = optional($castingApplication->talent_profile)->user;
+        $talentProfile = $castingApplication->talent_profile;
+        $projectName = optional($castingApplication->casting_requirement)->project_name;
+
+        if ($data['status'] === 'selected') {
+            // Send approval email
+            EmailTemplateManager::sendToUser($talent, 'talent_application_selected', [
+                'project_name' => $projectName,
+                'notes'        => $data['admin_notes'] ?? '',
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'application_selected',
+                'fallback_subject'       => trans('notifications.application_selected_subject', ['project' => $projectName]),
+                'fallback_body'          => trans('notifications.application_selected_body', ['project' => $projectName, 'notes' => $data['admin_notes'] ?? '']),
+            ]);
+
+            // Send WhatsApp notification
+            $this->sendWhatsAppNotification($talentProfile, 'selected', $projectName, $data['admin_notes'] ?? '');
+
+        } elseif ($data['status'] === 'rejected') {
+            // Send rejection email
+            EmailTemplateManager::sendToUser($talent, 'talent_application_rejected', [
+                'project_name' => $projectName,
+                'notes'        => $data['admin_notes'] ?? '',
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'application_rejected',
+                'fallback_subject'       => trans('notifications.application_rejected_subject', ['project' => $projectName]),
+                'fallback_body'          => trans('notifications.application_rejected_body', ['project' => $projectName, 'notes' => $data['admin_notes'] ?? '']),
+            ]);
+
+            // Send WhatsApp notification
+            $this->sendWhatsAppNotification($talentProfile, 'rejected', $projectName, $data['admin_notes'] ?? '');
+        }
+
+        $statusText = [
+            'selected' => 'approved',
+            'rejected' => 'rejected',
+            'applied' => 'marked as applied',
+        ][$data['status']] ?? $data['status'];
+
+        return back()->with('message', "Application has been {$statusText} successfully. Notifications sent to talent.");
+    }
+
     public function approve(Request $request, CastingApplication $castingApplication)
     {
         abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $data = $request->validate([
+            'casting_requirement_id' => ['required', 'integer', 'exists:casting_requirements,id'],
+            'talent_profile_id' => ['required', 'integer', 'exists:talent_profiles,id'],
+            'rate' => ['required', 'numeric', 'min:0'],
+            'status' => ['required', 'string', 'in:selected,rejected,pending'],
+            'payment_processed' => ['required', 'string', 'in:pending,paid,not_paid'],
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $castingApplication->update([
-            'status'      => 'selected',
+            'casting_requirement_id' => $data['casting_requirement_id'],
+            'talent_profile_id' => $data['talent_profile_id'],
+            'rate' => $data['rate'],
+            'status' => 'selected',
+            'payment_processed' => $data['payment_processed'],
             'admin_notes' => $data['admin_notes'] ?? null,
         ]);
 
@@ -255,5 +323,118 @@ class CastingApplicationController extends Controller
     public function paymentCancel(CastingApplication $castingApplication)
     {
         return redirect()->route('admin.casting-requirements.applicants', $castingApplication->casting_requirement_id)->withErrors(['payment' => trans('notifications.payment_cancelled')]);
+    }
+
+    /**
+     * Send WhatsApp notification to talent
+     */
+    private function sendWhatsAppNotification($talentProfile, $status, $projectName, $notes = '')
+    {
+        if (!$talentProfile || !$talentProfile->whatsapp_number) {
+            return false;
+        }
+
+        try {
+            $smsService = new \App\Services\KwtSmsService();
+
+            // Prepare the message based on status
+            if ($status === 'selected') {
+                $message = "🎉 Congratulations! You have been SELECTED for the project: {$projectName}";
+                if ($notes) {
+                    $message .= "\n\nAdditional Notes: {$notes}";
+                }
+                $message .= "\n\nPlease check your email for further details.";
+            } else {
+                $message = "Thank you for applying to: {$projectName}. Unfortunately, you were not selected for this project.";
+                if ($notes) {
+                    $message .= "\n\nFeedback: {$notes}";
+                }
+                $message .= "\n\nDon't worry, keep applying to other projects!";
+            }
+
+            // Extract country code and number from WhatsApp number
+            $whatsappNumber = preg_replace('/[^0-9+]/', '', $talentProfile->whatsapp_number);
+
+            // If number starts with +, extract country code
+            if (str_starts_with($whatsappNumber, '+')) {
+                // For Kuwait numbers (+965), extract country code
+                if (str_starts_with($whatsappNumber, '+965')) {
+                    $countryCode = '965';
+                    $number = substr($whatsappNumber, 4);
+                } else {
+                    // Generic extraction for other countries
+                    $countryCode = substr($whatsappNumber, 1, 3); // Assume 3-digit country code
+                    $number = substr($whatsappNumber, 4);
+                }
+            } else {
+                // Assume Kuwait if no country code
+                $countryCode = '965';
+                $number = ltrim($whatsappNumber, '0'); // Remove leading zero if present
+            }
+
+            // Send SMS using the existing OTP method (repurposing for notifications)
+            return $this->sendCustomSms($countryCode, $number, $message);
+
+        } catch (\Exception $e) {
+            Log::error('WhatsApp notification failed', [
+                'talent_profile_id' => $talentProfile->id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Send custom SMS message
+     */
+    private function sendCustomSms(string $countryCode, string $phoneNumber, string $message): bool
+    {
+        try {
+            $smsService = new \App\Services\KwtSmsService();
+
+            // Use reflection to access the private sendSms method or create a custom implementation
+            $apiUrl = 'https://www.kwtsms.com/API/send/';
+            $username = env('KWT_SMS_USERNAME', 'brickskw');
+            $password = env('KWT_SMS_PASSWORD', 'sNdBfF@g988');
+            $sender = env('KWT_SMS_SENDER', 'KWT-SMS');
+
+            // Format phone number
+            $country = preg_replace('/[^0-9]/', '', (string)$countryCode);
+            $number = preg_replace('/[^0-9]/', '', (string)$phoneNumber);
+
+            if (strlen($number) > 1 && $number[0] === '0') {
+                $number = ltrim($number, '0');
+            }
+
+            $mobile = $country . $number;
+
+            // Build request params
+            $params = [
+                'username' => $username,
+                'password' => $password,
+                'sender'   => $sender,
+                'mobile'   => $mobile,
+                'lang'     => '1', // 1 for English
+                'message'  => $message,
+            ];
+
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get($apiUrl, $params);
+            $status = $response->status();
+            $body = trim($response->body());
+
+            Log::info('WhatsApp notification sent', [
+                'mobile' => $mobile,
+                'status' => $status,
+                'response' => $body
+            ]);
+
+            return $response->successful() && stripos($body, 'ERR') === false;
+
+        } catch (\Exception $e) {
+            Log::error('Custom SMS failed', [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 }

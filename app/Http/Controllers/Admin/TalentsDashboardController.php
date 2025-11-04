@@ -14,16 +14,16 @@ class TalentsDashboardController extends Controller
         abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $talents = TalentProfile::with(['languages', 'user'])
-            ->latest()
-            ->take(5)
+            ->latest('updated_at')
             ->get();
 
         $stats = [
-            'total'    => TalentProfile::count(),
-            'approved' => TalentProfile::where('verification_status', 'approved')->count(),
-            'pending'  => TalentProfile::where('verification_status', 'pending')->count(),
-            'rejected' => TalentProfile::where('verification_status', 'rejected')->count(),
+            'all'       => $talents->count(),
+            'approved'  => $talents->where('verification_status', 'approved')->count(),
+            'pending'   => $talents->where('verification_status', 'pending')->count(),
+            'rejected'  => $talents->where('verification_status', 'rejected')->count(),
         ];
+        $stats['available'] = $stats['approved'];
 
         return view('admin.dashboards.talents', compact('talents', 'stats'));
     }

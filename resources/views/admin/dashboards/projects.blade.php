@@ -124,8 +124,23 @@
                                 $rawEndDate = $project->getRawOriginal('shoot_date_time');
                                 $endDate = $rawEndDate ? \Carbon\Carbon::parse($rawEndDate)->format(config('panel.date_format')) : trans('global.not_set');
                                 $rate = $project->rate_per_model ? 'KWD ' . number_format($project->rate_per_model, 2) : trans('global.not_set');
-                                $statusLabel = $statusDisplay[$project->status] ?? $project->status;
-                                $statusClass = $statusLabel === 'open' ? 'badge-success' : ($statusLabel === 'close' ? 'badge-secondary' : 'badge-info');
+
+                                // Dynamic status display based on project status
+                                $projectStatus = $project->status ?? 'advertised';
+
+                                // Use the CastingRequirement STATUS_SELECT mapping
+                                $statusMapping = \App\Models\CastingRequirement::STATUS_SELECT;
+
+                                $statusLabel = $statusMapping[$projectStatus] ?? ucfirst($projectStatus);
+
+                                // Status badge colors matching the actual status values
+                                $statusClasses = [
+                                    'Advertised' => 'badge-success',   // Green for active/advertised
+                                    'Processing' => 'badge-warning',   // Yellow for in progress
+                                    'Completed' => 'badge-primary'     // Blue for finished
+                                ];
+
+                                $statusClass = $statusClasses[$statusLabel] ?? 'badge-info';
                             @endphp
                             <tr>
                                 <td>
@@ -138,6 +153,7 @@
                                 <td>{{ number_format($project->casting_applications_count ?? 0) }}</td>
                                 <td>
                                     <span class="badge status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    <small class="text-muted d-block">Raw: {{ $project->status ?? 'null' }}</small>
                                 </td>
                                 <td class="text-right">
                                     <div class="dropdown">

@@ -25,27 +25,22 @@ class RegisterController extends Controller
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $talent = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-            'type'     => User::TYPE_TALENT,
-        ]);
-
-        TalentProfile::firstOrCreate(
-            ['user_id' => $talent->id],
-            [
-                'legal_name'  => $data['name'],
+        // Store registration data in session, do not create any DB record yet
+        session(['talent_registration' => [
+            'user' => [
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'password' => $data['password'], // hash later
+                'type'     => \App\Models\User::TYPE_TALENT,
+            ],
+            'profile' => [
+                'legal_name'   => $data['name'],
                 'display_name'=> $data['name'],
                 'daily_rate'  => 0,
                 'hourly_rate' => 0,
                 'onboarding_step' => 'profile',
-            ]
-        );
-
-        event(new Registered($talent));
-
-        Auth::guard('talent')->login($talent);
+            ],
+        ]]);
 
         return redirect()->route('talent.onboarding.start');
     }

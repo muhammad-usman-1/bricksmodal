@@ -165,6 +165,7 @@ class TalentProfileController extends Controller
             return;
         }
 
+        // Send email notification
         EmailTemplateManager::sendToUser($user, 'talent_profile_' . $status, [
             'name'   => $user->name,
             'status' => ucfirst($status),
@@ -176,6 +177,125 @@ class TalentProfileController extends Controller
             'fallback_body'     => $message,
             'fallback_subject'  => trans('notifications.mail.subject'),
         ]);
+
+        // Send WhatsApp notification
+        $this->sendWhatsAppNotification($talentProfile, $status, $notes ?? '');
+    }
+
+    /**
+     * Send WhatsApp notification to talent
+     */
+    private function sendWhatsAppNotification($talentProfile, $status, $notes = '')
+    {
+        if (!$talentProfile || !$talentProfile->whatsapp_number) {
+            return false;
+        }
+
+        try {
+            // Prepare the message based on status
+            $name = $talentProfile->display_name ?: $talentProfile->legal_name;
+
+            if ($status === 'approved') {
+                $message = "🎉 Congratulations {$name}! Your talent profile has been APPROVED and you can now start applying to casting projects.";
+                if ($notes) {
+                    $message .= "\n\nAdmin Notes: {$notes}";
+                }
+                $message .= "\n\nLogin to your account to start browsing available projects!";
+            } elseif ($status === 'rejected') {
+                $message = "Hello {$name}, unfortunately your talent profile has been rejected at this time.";
+                if ($notes) {
+                    $message .= "\n\nReason: {$notes}";
+                }
+                $message .= "\n\nPlease review the feedback and feel free to reapply after making necessary improvements.";
+            } else {
+                $message = "Hello {$name}, your talent profile status has been updated to: " . ucfirst($status);
+                if ($notes) {
+                    $message .= "\n\nNotes: {$notes}";
+                }
+            }
+
+            // Extract country code and number from WhatsApp number
+            $whatsappNumber = preg_replace('/[^0-9+]/', '', $talentProfile->whatsapp_number);
+
+            // If number starts with +, extract country code
+            if (str_starts_with($whatsappNumber, '+')) {
+                // For Kuwait numbers (+965), extract country code
+                if (str_starts_with($whatsappNumber, '+965')) {
+                    $countryCode = '965';
+                    $number = substr($whatsappNumber, 4);
+                } else {
+                    // Generic extraction for other countries
+                    $countryCode = substr($whatsappNumber, 1, 3); // Assume 3-digit country code
+                    $number = substr($whatsappNumber, 4);
+                }
+            } else {
+                // Assume Kuwait if no country code
+                $countryCode = '965';
+                $number = ltrim($whatsappNumber, '0'); // Remove leading zero if present
+            }
+
+            // Send SMS using the KWT SMS service
+            return $this->sendCustomSms($countryCode, $number, $message);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp notification failed', [
+                'talent_profile_id' => $talentProfile->id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Send custom SMS message using KWT SMS service
+     */
+    private function sendCustomSms(string $countryCode, string $phoneNumber, string $message): bool
+    {
+        try {
+            // Use KWT SMS service directly
+            $apiUrl = 'https://www.kwtsms.com/API/send/';
+            $username = env('KWT_SMS_USERNAME', 'brickskw');
+            $password = env('KWT_SMS_PASSWORD', 'sNdBfF@g988');
+            $sender = env('KWT_SMS_SENDER', 'KWT-SMS');
+
+            // Format phone number
+            $country = preg_replace('/[^0-9]/', '', (string)$countryCode);
+            $number = preg_replace('/[^0-9]/', '', (string)$phoneNumber);
+
+            if (strlen($number) > 1 && $number[0] === '0') {
+                $number = ltrim($number, '0');
+            }
+
+            $mobile = $country . $number;
+
+            // Build request params
+            $params = [
+                'username' => $username,
+                'password' => $password,
+                'sender'   => $sender,
+                'mobile'   => $mobile,
+                'lang'     => '1', // 1 for English
+                'message'  => $message,
+            ];
+
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get($apiUrl, $params);
+            $status = $response->status();
+            $body = trim($response->body());
+
+            \Illuminate\Support\Facades\Log::info('Talent WhatsApp notification sent', [
+                'mobile' => $mobile,
+                'status' => $status,
+                'response' => $body
+            ]);
+
+            return $response->successful() && stripos($body, 'ERR') === false;
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Talent SMS failed', [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     protected function removeTalentProfile(TalentProfile $talentProfile, bool $notify = false): void

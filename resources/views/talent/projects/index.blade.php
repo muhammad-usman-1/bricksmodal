@@ -2,6 +2,7 @@
 
 @section('content')
     <style>
+
         :root {
             --rose-10: #fff9f8;
             --rose-100: #f6e6e4;
@@ -18,10 +19,9 @@
             max-width: none !important;
             width: 100% !important;
         }
-
         .projects-wrap {
             margin: 0 !important;
-            padding: 16px 24px !important;
+
         }
 
         /* Search: no shadow */

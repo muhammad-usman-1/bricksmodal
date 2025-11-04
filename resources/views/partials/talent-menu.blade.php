@@ -20,6 +20,12 @@
             </a>
         </li>
         <li class="c-sidebar-nav-item">
+            <a href="{{ Route::has('talent.payment-methods.index') ? route('talent.payment-methods.index') : '#' }}" class="c-sidebar-nav-link {{ request()->routeIs('talent.payment-methods.*') ? 'c-active' : '' }}">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-credit-card"></i>
+                Billing
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
             <a href="{{ Route::has('talent.payments.index') ? route('talent.payments.index') : '#' }}" class="c-sidebar-nav-link {{ request()->routeIs('talent.payments.*') ? 'c-active' : '' }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-wallet"></i>
                 {{ trans('global.payment_dashboard') }}

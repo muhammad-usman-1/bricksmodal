@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\OutfitOptions;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,7 @@ class CastingRequirement extends Model implements HasMedia
 
     protected $appends = [
         'reference',
+        'outfit_summary',
     ];
 
     public $table = 'casting_requirements';
@@ -75,17 +77,83 @@ class CastingRequirement extends Model implements HasMedia
 
     public function getShootDateTimeAttribute($value)
     {
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+        return $value ? Carbon::parse($value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
     }
 
     public function setShootDateTimeAttribute($value)
     {
-        $this->attributes['shoot_date_time'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
+        if (!$value) {
+            $this->attributes['shoot_date_time'] = null;
+            return;
+        }
+
+        try {
+            // Try parsing with the configured format first
+            $date = Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value);
+        } catch (\Exception $e) {
+            // If that fails, try flexible parsing
+            try {
+                $date = Carbon::parse($value);
+            } catch (\Exception $e) {
+                // If all parsing fails, set to null
+                $this->attributes['shoot_date_time'] = null;
+                return;
+            }
+        }
+
+        $this->attributes['shoot_date_time'] = $date->format('Y-m-d H:i:s');
     }
 
     public function getReferenceAttribute()
     {
         return $this->getMedia('reference');
+    }
+
+    public function getOutfitAttribute($value)
+    {
+        if ($value === null) {
+            return OutfitOptions::emptySelection();
+        }
+
+        if (is_array($value)) {
+            return OutfitOptions::normalize($value);
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return OutfitOptions::normalize($decoded);
+        }
+
+        return $value;
+    }
+
+    public function setOutfitAttribute($value): void
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $value = $decoded;
+            } else {
+                $this->attributes['outfit'] = $value;
+
+                return;
+            }
+        }
+
+        if (is_array($value)) {
+            $this->attributes['outfit'] = json_encode(OutfitOptions::normalize($value));
+
+            return;
+        }
+
+        $this->attributes['outfit'] = null;
+    }
+
+    public function getOutfitSummaryAttribute(): string
+    {
+        return OutfitOptions::summarize($this->outfit);
     }
 
     public function user()

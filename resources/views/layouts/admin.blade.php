@@ -28,7 +28,7 @@
 <body class="c-app">
     @include('partials.menu')
     <div class="c-wrapper">
-        <header class="c-header c-header-fixed px-3">
+        {{--  <header class="c-header c-header-fixed px-3">
             <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
                 <i class="fas fa-fw fa-bars"></i>
             </button>
@@ -57,7 +57,7 @@
                             @endif
                         </div>
                         @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
-                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}" 
+                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
                                href="{{ route('admin.notifications.show', $notification->id) }}">
                                 @if($notification->data['type'] === 'talent_profile')
                                     <i class="fas fa-user text-info"></i>
@@ -94,7 +94,7 @@
 
 
             </ul>
-        </header>
+        </header>  --}}
 
         <div class="c-body">
             <main class="c-main">
@@ -264,6 +264,49 @@
 });
 
     </script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Permission Check Script -->
+    <script>
+        // User permissions from server
+        const userPermissions = @json(auth('admin')->check() ? auth('admin')->user()->getAllPermissions()->pluck('title')->toArray() : []);
+
+        function checkPermissionAndNavigate(event, requiredPermission, targetUrl) {
+            event.preventDefault();
+            
+            if (userPermissions.includes(requiredPermission)) {
+                // User has permission, navigate to the page
+                window.location.href = targetUrl;
+            } else {
+                // User doesn't have permission, show SweetAlert
+                let permissionName = '';
+                switch(requiredPermission) {
+                    case 'project_management':
+                        permissionName = 'Project Management';
+                        break;
+                    case 'talent_management':
+                        permissionName = 'Talent Management';
+                        break;
+                    case 'payment_management':
+                        permissionName = 'Payment Management';
+                        break;
+                    default:
+                        permissionName = 'this feature';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Access Denied',
+                    text: `You don't have permission to access ${permissionName}. Please contact your Super Admin to grant you access.`,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        }
+    </script>
+
     @yield('scripts')
 </body>
 

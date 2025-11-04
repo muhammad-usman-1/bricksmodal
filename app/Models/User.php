@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use DateTimeInterface;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -59,6 +59,7 @@ class User extends Authenticatable
         'otp_consumed',
         'otp_channel',
         'type',
+        'stripe_customer_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -74,14 +75,50 @@ class User extends Authenticatable
         return $this->roles()->where('id', 1)->exists();
     }
 
+    public function getIsSuperAdminAttribute()
+    {
+        return $this->roles()->where('id', 3)->exists();
+    }
+
+    public function hasRole($roleTitle)
+    {
+        return $this->roles()->where('title', $roleTitle)->exists();
+    }
+
+    public function hasPermission($permissionTitle)
+    {
+        return $this->roles()->whereHas('permissions', function($query) use ($permissionTitle) {
+            $query->where('title', $permissionTitle);
+        })->exists();
+    }
+
+    public function getAllPermissions()
+    {
+        return $this->roles()->with('permissions')->get()->pluck('permissions')->flatten()->unique('id');
+    }
+
     public function getEmailVerifiedAtAttribute($value)
     {
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+        if (!$value) return null;
+        try {
+            return Carbon::parse($value)->format(config('panel.date_format', 'Y-m-d') . ' ' . config('panel.time_format', 'H:i:s'));
+        } catch (\Exception $e) {
+            return $value;
+        }
     }
 
     public function setEmailVerifiedAtAttribute($value)
     {
-        $this->attributes['email_verified_at'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
+        if (!$value) {
+            $this->attributes['email_verified_at'] = null;
+            return;
+        }
+        
+        try {
+            $this->attributes['email_verified_at'] = Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            $this->attributes['email_verified_at'] = now()->format('Y-m-d H:i:s');
+        }
     }
 
     public function setPasswordAttribute($input)
@@ -104,6 +141,11 @@ class User extends Authenticatable
     public function talentProfile()
     {
         return $this->hasOne(TalentProfile::class);
+    }
+
+    public function paymentMethods()
+    {
+        return $this->hasMany(PaymentMethod::class);
     }
 
     public function getOtpExpiresAtAttribute($value)

@@ -122,16 +122,16 @@ table.dataTable thead .sorting_desc {
 
 .c-app,
 body {
-    background-color: #f2f3f5;
+    background-color: white
 }
 
 .c-sidebar {
-    background-color: #f2f3f5 !important;
+    background-color: white!important;
     color: #111 !important;
 }
 
 .c-sidebar .c-sidebar-brand{
-    background-color: #f2f3f5 !important;
+    background-color: white !important;
 }
 .c-sidebar .c-sidebar-nav-link,
 .c-sidebar .c-sidebar-nav-dropdown-toggle {
@@ -143,16 +143,16 @@ body {
 }
 
 .c-sidebar .c-sidebar-nav-link:hover {
-    background-color: #e0e1e5  ;
+    background-color: white  ;
     color: #000 !important;
 }
 .c-sidebar .c-sidebar-nav-dropdown-toggle:hover {
-    background-color: #e0e1e5 !important;
+    background-color: white !important;
     color: #000 !important;
 }
 
 .c-sidebar .c-active {
-    background-color: #d5d6da !important;
+    background-color: white !important;
     color: #000 !important;
 }
 

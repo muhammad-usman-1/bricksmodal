@@ -84,7 +84,7 @@
                             {{ trans('cruds.castingRequirement.fields.outfit') }}
                         </th>
                         <td>
-                            {{ $castingRequirement->outfit }}
+                            {{ is_array($castingRequirement->outfit) ? $castingRequirement->outfit_summary : $castingRequirement->outfit }}
                         </td>
                     </tr>
                     <tr>

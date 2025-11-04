@@ -12,8 +12,11 @@ use App\Models\CastingApplication;
 use App\Models\TalentProfile;
 use App\Models\User;
 use App\Support\EmailTemplateManager;
-use Gate;
+use App\Support\OutfitOptions;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,7 +28,11 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('casting_requirement_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $castingRequirements = CastingRequirement::with(['user', 'media'])->get();
+        $castingRequirements = CastingRequirement::with([
+            'user',
+            'media',
+            'castingApplications.talent_profile.user'
+        ])->get();
 
         return view('admin.castingRequirements.index', compact('castingRequirements'));
     }
@@ -34,47 +41,104 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('casting_requirement_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
-
-        return view('admin.castingRequirements.create', compact('users'));
+        return view('admin.castingRequirements.create');
     }
 
     public function store(StoreCastingRequirementRequest $request)
     {
-        $castingRequirement = CastingRequirement::create($request->all());
+        try {
+            $data = $request->validated();
+            $data['user_id'] = $request->user()->id;
 
-        foreach ($request->input('reference', []) as $file) {
-            $path = storage_path('tmp/uploads/' . basename($file));
-            if (! file_exists($path)) {
-                \Log::warning('Temporary upload missing for casting requirement reference', ['path' => $path]);
-                continue;
+            // Handle outfit data
+            if (isset($data['outfit'])) {
+                $normalizedOutfit = OutfitOptions::validateAndNormalize($data['outfit']);
+
+                if ($normalizedOutfit === null) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['outfit' => 'Please select at least one valid outfit option.']);
+                }
+
+                $data['outfit'] = $normalizedOutfit;
             }
-            $castingRequirement->addMedia($path)->toMediaCollection('reference');
+
+            // Handle shoot date time format
+            if (!empty($data['shoot_date_time'])) {
+                try {
+                    $data['shoot_date_time'] = Carbon::createFromFormat(
+                        config('panel.date_format') . ' ' . config('panel.time_format'),
+                        $data['shoot_date_time']
+                    )->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['shoot_date_time' => 'Invalid date time format.']);
+                }
+            }
+
+            // Create the casting requirement
+            $castingRequirement = CastingRequirement::create($data);
+
+            // Handle reference files
+            foreach ($request->input('reference', []) as $file) {
+                $path = storage_path('tmp/uploads/' . basename($file));
+                if (!file_exists($path)) {
+                    Log::warning('Temporary upload missing for casting requirement reference', ['path' => $path]);
+                    continue;
+                }
+                $castingRequirement->addMedia($path)->toMediaCollection('reference');
+            }
+
+            // Handle CKEditor uploaded media
+            if ($media = $request->input('ck-media', false)) {
+                Media::whereIn('id', $media)->update(['model_id' => $castingRequirement->id]);
+            }
+
+            // Notify approved talents
+            $this->notifyApprovedTalents($castingRequirement);
+
+            return redirect()
+                ->route('admin.casting-requirements.index')
+                ->with('message', 'Casting requirement created successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Error creating casting requirement: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'An error occurred while creating the casting requirement.');
         }
-
-        if ($media = $request->input('ck-media', false)) {
-            Media::whereIn('id', $media)->update(['model_id' => $castingRequirement->id]);
-        }
-
-        $this->notifyApprovedTalents($castingRequirement);
-
-        return redirect()->route('admin.casting-requirements.index');
     }
 
     public function edit(CastingRequirement $castingRequirement)
     {
         abort_if(Gate::denies('casting_requirement_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
-
         $castingRequirement->load('user');
+
+        $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         return view('admin.castingRequirements.edit', compact('castingRequirement', 'users'));
     }
 
     public function update(UpdateCastingRequirementRequest $request, CastingRequirement $castingRequirement)
     {
-        $castingRequirement->update($request->all());
+        $data = $request->all();
+
+        if (isset($data['outfit'])) {
+            $decoded = json_decode($data['outfit'], true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $data['outfit'] = OutfitOptions::normalize($decoded);
+            } elseif (is_array($data['outfit'])) {
+                $data['outfit'] = OutfitOptions::normalize($data['outfit']);
+            }
+        }
+
+        unset($data['user_id']);
+
+        $castingRequirement->update($data);
 
         if (count($castingRequirement->reference) > 0) {
             foreach ($castingRequirement->reference as $media) {
@@ -90,11 +154,13 @@ class CastingRequirementController extends Controller
                 $castingRequirement->addMedia($path)->toMediaCollection('reference');
             }
             if (! file_exists($path)) {
-                \Log::warning('Temporary upload missing for casting requirement reference (update)', ['path' => $path]);
+                Log::warning('Temporary upload missing for casting requirement reference (update)', ['path' => $path]);
             }
         }
 
-        return redirect()->route('admin.casting-requirements.index');
+        return redirect()
+            ->route('admin.casting-requirements.index')
+            ->with('message', 'Casting requirement updated successfully.');
     }
 
     public function show(CastingRequirement $castingRequirement)
@@ -112,7 +178,9 @@ class CastingRequirementController extends Controller
 
         $castingRequirement->delete();
 
-        return back();
+        return redirect()
+            ->route('admin.casting-requirements.index')
+            ->with('message', 'Casting requirement deleted successfully.');
     }
 
     public function massDestroy(MassDestroyCastingRequirementRequest $request)

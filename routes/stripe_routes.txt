@@ -1,0 +1,21 @@
+// Add these routes in routes/web.php
+
+// Talent routes
+Route::middleware(['auth:talent'])->prefix('talent')->name('talent.')->group(function () {
+    Route::get('payment-methods', [App\Http\Controllers\Talent\PaymentMethodController::class, 'index'])
+        ->name('payment-methods.index');
+    Route::get('payment-methods/create', [App\Http\Controllers\Talent\PaymentMethodController::class, 'create'])
+        ->name('payment-methods.create');
+    Route::post('payment-methods', [App\Http\Controllers\Talent\PaymentMethodController::class, 'store'])
+        ->name('payment-methods.store');
+});
+
+// Admin routes
+Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
+        ->name('payments.index');
+    Route::get('payments/create/{user}', [App\Http\Controllers\Admin\PaymentController::class, 'create'])
+        ->name('payments.create');
+    Route::post('payments/{user}', [App\Http\Controllers\Admin\PaymentController::class, 'store'])
+        ->name('payments.store');
+});

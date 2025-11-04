@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/talent/login');
 
+// Stripe Webhook
+Route::post('webhook/stripe', [App\Http\Controllers\WebhookController::class, 'handleStripeWebhook'])->name('webhook.stripe');
+
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('login');
@@ -32,15 +35,27 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::post('logout', [AdminLoginController::class, 'logout'])->middleware('auth:admin')->name('logout');
 
     Route::middleware('auth:admin')->group(function () {
-        Route::get('/', [AdminHomeController::class, 'index'])->name('home');
-        Route::get('notifications', [\App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('notifications.index');
+    Route::get('/', [AdminHomeController::class, 'index'])->name('home');
+    Route::get('notifications', [\App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('notifications.index');
         Route::get('notifications/{notification}', [\App\Http\Controllers\Admin\NotificationsController::class, 'show'])->name('notifications.show');
         Route::get('notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
-        Route::get('projects', [CastingRequirementController::class, 'index'])->name('projects.dashboard');
+            Route::get('projects', [CastingRequirementController::class, 'index'])->name('projects.dashboard');
         Route::get('talents', [TalentsDashboardController::class, 'index'])->name('talents.dashboard');
-        Route::get('payments', [PaymentDashboardController::class, 'index'])->name('payments.dashboard');
+        Route::get('payments', [PaymentDashboardController::class, 'dashboard'])->name('payments.dashboard');
+        Route::post('payments/request', [PaymentDashboardController::class, 'requestPayment'])->name('payments.request');
+
+        // Admin payments management (custom)
+        Route::get('payments/manage', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+        Route::get('payments/manage/create/{user}', [\App\Http\Controllers\Admin\PaymentController::class, 'create'])->name('payments.create');
+        Route::post('payments/manage/{user}', [\App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('payments.store');
+
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class)->only(['index', 'edit', 'update']);
+
+        // Admin Management (Super Admin only)
+        Route::middleware('super.admin')->group(function () {
+            Route::resource('admins', \App\Http\Controllers\Admin\AdminController::class);
+        });
 
         // Permissions
         Route::delete('permissions/destroy', [PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
@@ -74,6 +89,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     // Casting Application
     Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');
+    Route::patch('casting-applications/{casting_application}/update-status', [CastingApplicationController::class, 'updateStatus'])->name('casting-applications.update-status');
     Route::post('casting-applications/{casting_application}/approve', [CastingApplicationController::class, 'approve'])->name('casting-applications.approve');
     Route::post('casting-applications/{casting_application}/reject', [CastingApplicationController::class, 'reject'])->name('casting-applications.reject');
     Route::post('casting-applications/{casting_application}/pay', [CastingApplicationController::class, 'pay'])->name('casting-applications.pay');
@@ -114,7 +130,24 @@ Route::prefix('talent')->as('talent.')->group(function () {
         Route::get('onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');
+        Route::middleware(['auth:talent'])->prefix('talent')->name('talent.')->group(function () {
+            Route::get('payment-methods', [App\Http\Controllers\Talent\PaymentMethodController::class, 'index'])
+                ->name('payment-methods.index');
+            Route::get('payment-methods/create', [App\Http\Controllers\Talent\PaymentMethodController::class, 'create'])
+                ->name('payment-methods.create');
+            Route::post('payment-methods', [App\Http\Controllers\Talent\PaymentMethodController::class, 'store'])
+                ->name('payment-methods.store');
+        });
 
+        // Admin routes
+        Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+            Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
+                ->name('payments.index');
+            Route::get('payments/create/{user}', [App\Http\Controllers\Admin\PaymentController::class, 'create'])
+                ->name('payments.create');
+            Route::post('payments/{user}', [App\Http\Controllers\Admin\PaymentController::class, 'store'])
+                ->name('payments.store');
+        });
         Route::middleware('talent.onboarded')->group(function () {
             Route::get('dashboard', TalentDashboardController::class)->name('dashboard');
             // Additional talent routes will live here.
@@ -122,6 +155,14 @@ Route::prefix('talent')->as('talent.')->group(function () {
             Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
             Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');
             Route::get('payments', [\App\Http\Controllers\Talent\PaymentController::class, 'index'])->name('payments.index');
+
+            // Talent billing/payment-method routes
+            Route::get('payment-methods', [\App\Http\Controllers\Talent\PaymentMethodController::class, 'index'])
+                ->name('payment-methods.index');
+            Route::get('payment-methods/create', [\App\Http\Controllers\Talent\PaymentMethodController::class, 'create'])
+                ->name('payment-methods.create');
+            Route::post('payment-methods', [\App\Http\Controllers\Talent\PaymentMethodController::class, 'store'])
+                ->name('payment-methods.store');
         });
     });
 });

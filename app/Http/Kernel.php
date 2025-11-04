@@ -28,6 +28,8 @@ class Kernel extends HttpKernel
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'talent.onboarded' => \App\Http\Middleware\EnsureTalentOnboarded::class,
+        'super.admin'      => \App\Http\Middleware\SuperAdminMiddleware::class,
+        'permission'       => \App\Http\Middleware\CheckPermission::class,
     ];
 
     protected $middlewareGroups = [

@@ -41,7 +41,7 @@
             justify-content: center;
             border-radius: 8px;
             overflow: hidden;
-      
+
             width: fit-content;
             margin: 0 auto 25px;
         }
@@ -152,12 +152,12 @@
             </div>
         </div>
     </div>
- 
+
 
     <script>
         // ---- Tabs state ----
         const state = {
-            tab: 'login', // 'login' | 'create'
+            tab: 'create', // 'login' | 'create' (default to create on the registration page)
             routes: {
                 login: @json(route('talent.login.submit')),
                 create: @json(route('talent.register.submit')) // <- change if needed
@@ -200,9 +200,11 @@
 
         function initPhone() {
             if (!window.intlTelInput) return; // in case the lib is already globally loaded in layout
+            const allowed = @json(config('kwt_sms.countries', ['kw']));
             iti = window.intlTelInput(phoneInput, {
-                initialCountry: 'kw',
-                preferredCountries: ['kw', 'ae', 'pk', 'us'],
+                initialCountry: allowed.length ? allowed[0] : 'kw',
+                onlyCountries: allowed,
+                preferredCountries: allowed,
                 separateDialCode: true,
                 utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js'
             });
@@ -226,6 +228,6 @@
             }
         });
 
-         
+
     </script>
 @endsection
