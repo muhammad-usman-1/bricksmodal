@@ -1,0 +1,303 @@
+.ck-editor__editable,
+textarea {
+    min-height: 150px;
+}
+
+.datatable {
+    width: 100% !important;
+}
+
+table.dataTable tbody td.select-checkbox::before,
+table.dataTable tbody td.select-checkbox::after,
+table.dataTable tbody th.select-checkbox::before,
+table.dataTable tbody th.select-checkbox::after {
+    top: 50%;
+}
+
+
+.dataTables_length,
+.dt-buttons {
+    display: none !important;
+}
+
+.dataTables_filter {
+    margin-bottom: 0.333em;
+    margin-top: .2rem;
+    display: block !important;
+}
+
+.dt-buttons .btn {
+    margin-left: 0.333em;
+    border-radius: 0;
+}
+
+.table.datatable {
+    box-sizing: border-box;
+    border-collapse: collapse;
+}
+
+table.dataTable thead th {
+    border-bottom: 2px solid #c8ced3;
+}
+
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid #c8ced3;
+}
+
+.select2 {
+    max-width: 100%;
+    width: 100% !important;
+}
+
+.select2-selection__rendered {
+    padding-bottom: 5px !important;
+}
+
+.has-error .invalid-feedback {
+    display: block !important;
+}
+
+.btn-info,
+.badge-info {
+    color: white;
+}
+
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+    background-image: none;
+}
+
+.sidebar .nav-item {
+    cursor: pointer;
+}
+
+.btn-default {
+    color: #23282c;
+    background-color: #f0f3f5;
+    border-color: #f0f3f5;
+}
+
+.btn-default.focus,
+.btn-default:focus {
+    box-shadow: 0 0 0 .2rem rgba(209, 213, 215, .5);
+}
+
+.btn-default:hover {
+    color: #23282c;
+    background-color: #d9e1e6;
+    border-color: #d1dbe1;
+}
+
+.btn-group-xs > .btn,
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.searchable-title {
+    font-weight: bold;
+}
+.searchable-fields {
+    padding-left:5px;
+}
+.searchable-link {
+    padding:0 5px 0 5px;
+}
+.searchable-link:hover   {
+    cursor: pointer;
+    background: #eaeaea;
+}
+.select2-results__option {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.form-group .required::after {
+    content: " *";
+    color: red;
+}
+
+.c-app,
+body {
+    background-color: #f2f3f5;
+}
+
+.c-sidebar {
+    background-color: #f2f3f5 !important;
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-brand{
+    background-color: #f2f3f5 !important;
+}
+.c-sidebar .c-sidebar-nav-link,
+.c-sidebar .c-sidebar-nav-dropdown-toggle {
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-nav-icon {
+    color: #111 !important;
+}
+
+.c-sidebar .c-sidebar-nav-link:hover {
+    background-color: #e0e1e5  ;
+    color: #000 !important;
+}
+.c-sidebar .c-sidebar-nav-dropdown-toggle:hover {
+    background-color: #e0e1e5 !important;
+    color: #000 !important;
+}
+
+.c-sidebar .c-active {
+    background-color: #d5d6da !important;
+    color: #000 !important;
+}
+
+.c-sidebar .c-active .c-sidebar-nav-icon {
+    color: #000 !important;
+}
+
+.form-check.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+.c-sidebar-brand .c-sidebar-brand-full:hover {
+    color: inherit;
+}
+
+.custom-select.form-control-sm {
+    padding: 0.25rem 1.5rem;
+}
+
+/* Talent auth page styles (matching design) */
+.auth-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-card {
+    width: 520px;
+    border-radius: 8px;
+    background: white;
+    padding: 32px 36px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    text-align: center;
+}
+.auth-title {
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+.auth-tabs {
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:18px;
+}
+.auth-tab {
+    border-radius:18px;
+    padding:6px 18px;
+    background:#f2dede; /* light variant */
+    color:#6b3e3e;
+    border:1px solid #e6cfcf;
+}
+.auth-tab.active {
+    background:#8f5f5f; /* main color */
+    color:white;
+}
+.phone-input-group {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    margin:16px 0 22px 0;
+}
+
+/* Dashboard cards and talent table styling to match admin design */
+.dashboard-cards .stat-card {
+    border-radius: 8px;
+    padding: 22px 18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    height:100%;
+}
+.stat-card .stat-value{
+    font-size: 28px;
+    font-weight:700;
+    color: #111827;
+}
+.stat-card .stat-label{
+    font-size: 13px;
+    color: #6b7280;
+    margin-top:6px;
+}
+.talent-table thead th{
+    background: transparent;
+    border-bottom: none;
+    color: #6b7280;
+    font-weight:600;
+}
+.talent-table tbody tr{
+    border-bottom: 1px solid #eef2f6;
+}
+.avatar-sm{
+    width:48px;
+    height:48px;
+    object-fit:cover;
+}
+.verified-badge i{
+    font-size: 14px;
+    margin-left:6px;
+    vertical-align:middle;
+}
+.talent-table .badge-success{
+    background-color:#16a34a;
+    color:#fff;
+}
+.talent-table .badge-secondary{
+    background-color:#6b7280;
+    color:#fff;
+}
+.talent-table .badge-light{
+    background-color:#e5e7eb;
+    color:#111827;
+}
+.stat-card.bg-white{ background: #ffffff; }
+.stat-card.shadow-sm{ box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
+
+.phone-input-group .country-select {
+    width:110px;
+    border:1px solid #e0d6d6;
+    padding:10px 8px;
+    border-radius:6px;
+    background:#fff;
+}
+.phone-input-group .phone-field {
+    flex:1;
+    border:1px solid #e0d6d6;
+    padding:10px 12px;
+    border-radius:6px;
+}
+.btn-auth {
+    background:#8f5f5f;
+    border-color:#8f5f5f;
+    color:#fff;
+    border-radius:8px;
+    padding:10px 18px;
+}
+.btn-auth:active, .btn-auth:focus, .btn-auth:hover { background:#7a4f4f; border-color:#7a4f4f; }
+.remember-row { margin-top:12px; text-align:left; }
+
+/* OTP box styles */
+.otp-boxes { display:flex; gap:12px; justify-content:center; margin:16px 0 8px 0; }
+.otp-boxes input { width:48px; height:48px; text-align:center; border:1px solid #e0d6d6; border-radius:6px; font-size:20px; }
+.otp-note { color:#666; margin-top:8px; }
+
+@media(max-width:600px){
+    .auth-card{ width:90%; padding:22px; }
+    .phone-input-group .country-select{ width:90px }
+}
