@@ -74,6 +74,8 @@ class TalentProfile extends Model
         'eye_color',
         'shoe_size',
         'whatsapp_number',
+        'card_number',
+        'card_holder_name',
         'user_id',
         'id_front_path',
         'id_back_path',
@@ -88,6 +90,10 @@ class TalentProfile extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+    ];
+
+    protected $hidden = [
+        'card_number', // Hide card number from JSON responses
     ];
 
     protected $casts = [
@@ -126,5 +132,41 @@ class TalentProfile extends Model
     public function castingApplications()
     {
         return $this->hasMany(CastingApplication::class, 'talent_profile_id');
+    }
+
+    /**
+     * Check if talent has card details stored
+     */
+    public function hasCardDetails(): bool
+    {
+        return !empty($this->card_number);
+    }
+
+    /**
+     * Get masked card number (show only last 4 digits)
+     */
+    public function getMaskedCardNumber(): string
+    {
+        if (empty($this->card_number)) {
+            return 'No card on file';
+        }
+
+        $cardNumber = $this->card_number;
+        $length = strlen($cardNumber);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', $length - 4) . substr($cardNumber, -4);
+    }
+
+    /**
+     * Set card number with basic sanitization
+     */
+    public function setCardNumberAttribute($value)
+    {
+        // Remove spaces and dashes for storage
+        $this->attributes['card_number'] = $value ? preg_replace('/[\s\-]/', '', $value) : null;
     }
 }

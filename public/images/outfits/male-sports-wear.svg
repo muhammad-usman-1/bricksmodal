@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Sports jersey -->
+    <path d="M -35,-25 L -30,-15 L -30,20 L -20,25 L 20,25 L 30,20 L 30,-15 L 35,-25 L 25,-20 L 10,-25 L -10,-25 L -25,-20 Z" fill="#27ae60"/>
+    <!-- Jersey stripes -->
+    <rect x="-25" y="-15" width="50" height="3" fill="#229954"/>
+    <rect x="-25" y="5" width="50" height="3" fill="#229954"/>
+    <!-- Number on jersey -->
+    <text x="0" y="5" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="white">7</text>
+    <!-- Sports shorts -->
+    <path d="M -20,25 L -22,45 L -10,45 L -8,25 Z" fill="#1a1a1a"/>
+    <path d="M 8,25 L 10,45 L 22,45 L 20,25 Z" fill="#1a1a1a"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Sports Wear</text>
+</svg>

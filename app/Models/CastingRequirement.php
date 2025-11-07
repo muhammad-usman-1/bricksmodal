@@ -59,6 +59,10 @@ class CastingRequirement extends Model implements HasMedia
         'deleted_at',
     ];
 
+    protected $casts = [
+        'outfit' => 'array',
+    ];
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
@@ -96,5 +100,14 @@ class CastingRequirement extends Model implements HasMedia
     public function castingApplications()
     {
         return $this->hasMany(CastingApplication::class, 'casting_requirement_id');
+    }
+
+    public function getSelectedOutfits()
+    {
+        if (empty($this->outfit) || !is_array($this->outfit)) {
+            return collect();
+        }
+
+        return Outfit::whereIn('id', $this->outfit)->orderBy('sort_order')->get();
     }
 }

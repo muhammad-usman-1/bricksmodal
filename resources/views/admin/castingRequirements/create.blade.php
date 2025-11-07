@@ -20,16 +20,6 @@
                 <span class="help-block">{{ trans('cruds.castingRequirement.fields.project_name_helper') }}</span>
             </div>
             <div class="form-group">
-                <label for="client_name">{{ trans('cruds.castingRequirement.fields.client_name') }}</label>
-                <input class="form-control {{ $errors->has('client_name') ? 'is-invalid' : '' }}" type="text" name="client_name" id="client_name" value="{{ old('client_name', '') }}">
-                @if($errors->has('client_name'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('client_name') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.client_name_helper') }}</span>
-            </div>
-            <div class="form-group">
                 <label for="location">{{ trans('cruds.castingRequirement.fields.location') }}</label>
                 <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}">
                 @if($errors->has('location'))
@@ -39,9 +29,9 @@
                 @endif
                 <span class="help-block">{{ trans('cruds.castingRequirement.fields.location_helper') }}</span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width: 100%;">
                 <label for="shoot_date_time">{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</label>
-                <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time') }}">
+                <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time') }}" style="width: 100%;">
                 @if($errors->has('shoot_date_time'))
                     <div class="invalid-feedback">
                         {{ $errors->first('shoot_date_time') }}
@@ -85,10 +75,41 @@
                 <span class="help-block">{{ trans('cruds.castingRequirement.fields.gender_helper') }}</span>
             </div>
             <div class="form-group">
-                <label for="outfit">{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
-                <textarea class="form-control {{ $errors->has('outfit') ? 'is-invalid' : '' }}" name="outfit" id="outfit">{{ old('outfit') }}</textarea>
+                <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
+                <p class="text-muted small">Select one or multiple outfits</p>
+
+                @foreach($outfits as $category => $categoryOutfits)
+                    <div class="outfit-category mb-4">
+                        <h6 class="text-capitalize font-weight-bold mb-3">{{ ucfirst($category) }} Outfits</h6>
+                        <div class="row">
+                            @foreach($categoryOutfits as $outfit)
+                                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                    <div class="outfit-item">
+                                        <input type="checkbox"
+                                               name="outfit[]"
+                                               value="{{ $outfit->id }}"
+                                               id="outfit_{{ $outfit->id }}"
+                                               class="outfit-checkbox"
+                                               {{ in_array($outfit->id, old('outfit', [])) ? 'checked' : '' }}>
+                                        <label for="outfit_{{ $outfit->id }}" class="outfit-label">
+                                            @if($outfit->image)
+                                                <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="outfit-image">
+                                            @else
+                                                <div class="outfit-placeholder">
+                                                    <i class="fas fa-tshirt fa-3x"></i>
+                                                </div>
+                                            @endif
+                                            <div class="outfit-name">{{ $outfit->name }}</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+
                 @if($errors->has('outfit'))
-                    <div class="invalid-feedback">
+                    <div class="text-danger">
                         {{ $errors->first('outfit') }}
                     </div>
                 @endif
@@ -124,20 +145,6 @@
                     </div>
                 @endif
                 <span class="help-block">{{ trans('cruds.castingRequirement.fields.notes_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label class="required" for="user_id">{{ trans('cruds.castingRequirement.fields.user') }}</label>
-                <select class="form-control select2 {{ $errors->has('user') ? 'is-invalid' : '' }}" name="user_id" id="user_id" required>
-                    @foreach($users as $id => $entry)
-                        <option value="{{ $id }}" {{ old('user_id') == $id ? 'selected' : '' }}>{{ $entry }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('user'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('user') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.user_helper') }}</span>
             </div>
             <div class="form-group">
                 <label class="required" for="rate_per_model">{{ trans('cruds.castingRequirement.fields.rate_per_model') }}</label>
@@ -178,6 +185,84 @@
 @endsection
 
 @section('scripts')
+<style>
+    .outfit-item {
+        position: relative;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .outfit-item:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+    }
+
+    .outfit-checkbox {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 20px;
+        height: 20px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .outfit-label {
+        display: block;
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+    }
+
+    .outfit-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .outfit-placeholder {
+        width: 100%;
+        height: 150px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+
+    .outfit-name {
+        padding: 10px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        background: #fff;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .outfit-checkbox:checked + .outfit-label {
+        background: #e7f3ff;
+    }
+
+    .outfit-checkbox:checked ~ .outfit-label .outfit-name {
+        background: #007bff;
+        color: white;
+    }
+
+    .outfit-category h6 {
+        color: #495057;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    /* Full width datetime picker */
+    .form-group .datetime {
+        width: 100% !important;
+    }
+</style>
 <script>
     var uploadedReferenceMap = {}
 Dropzone.options.referenceDropzone = {

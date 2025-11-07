@@ -15,7 +15,7 @@
                 {{ trans('global.admin_dashboard') }}
             </a>
         </li>
-        <li class="c-sidebar-nav-item">
+        {{--  <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.notifications.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/notifications*') ? 'c-active' : '' }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-bell"></i>
                 {{ trans('global.notifications') ?? 'Notifications' }}
@@ -23,7 +23,7 @@
                     <span class="badge badge-danger ml-auto" style="margin-left:8px">{{ auth()->user()->unreadNotifications->count() }}</span>
                 @endif
             </a>
-        </li>
+        </li>  --}}
         @if(auth('admin')->check() && (auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->hasModulePermission('project_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.projects.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
@@ -56,6 +56,14 @@
         @endif
         @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
             <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.payment-requests.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/payment-requests*') ? 'c-active' : '' }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-hand-holding-usd">
+
+                    </i>
+                    Payment Requests
+                </a>
+            </li>
+            <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.admin-management.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-user-shield">
 
@@ -64,14 +72,16 @@
                 </a>
             </li>
         @endif
-        <li class="c-sidebar-nav-item">
-            <a href="{{ route('admin.settings.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-cog">
+        @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.settings.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-cog">
 
-                </i>
-                {{ trans('global.settings') }}
-            </a>
-        </li>
+                    </i>
+                    {{ trans('global.settings') }}
+                </a>
+            </li>
+        @endif
         {{--  @can('user_management_access')
             <li class="c-sidebar-nav-dropdown {{ request()->is('admin/permissions*') ? 'c-show' : '' }} {{ request()->is('admin/roles*') ? 'c-show' : '' }} {{ request()->is('admin/users*') ? 'c-show' : '' }}">
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">

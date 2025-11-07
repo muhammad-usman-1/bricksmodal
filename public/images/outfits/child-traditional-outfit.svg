@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head (child) -->
+    <circle cx="0" cy="-45" r="22" fill="#fdbcb4"/>
+    <!-- Traditional head covering -->
+    <circle cx="0" cy="-58" r="20" fill="#2c3e50"/>
+    <ellipse cx="0" cy="-45" rx="22" ry="10" fill="#34495e"/>
+    <!-- Traditional outfit (thobe/traditional dress) -->
+    <path d="M -25,-23 L -28,48 L -20,48 L -12,28 L 12,28 L 20,48 L 28,48 L 25,-23 L 18,-18 L 8,-23 L -8,-23 L -18,-18 Z" fill="#ecf0f1"/>
+    <!-- Collar -->
+    <path d="M -8,-23 L -5,-18 L 5,-18 L 8,-23 Z" fill="#d5dbdb"/>
+    <!-- Embroidery line -->
+    <line x1="0" y1="-23" x2="0" y2="15" stroke="#bdc3c7" stroke-width="2"/>
+    <!-- Decorative pattern -->
+    <circle cx="0" cy="-10" r="2" fill="#95a5a6"/>
+    <circle cx="0" cy="0" r="2" fill="#95a5a6"/>
+    <circle cx="0" cy="10" r="2" fill="#95a5a6"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Traditional Outfit</text>
+</svg>

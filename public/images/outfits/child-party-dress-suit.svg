@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head (child) -->
+    <circle cx="0" cy="-45" r="22" fill="#fdbcb4"/>
+    <!-- Hair with accessories -->
+    <circle cx="0" cy="-58" r="20" fill="#4a2511"/>
+    <circle cx="-15" cy="-58" r="5" fill="#ff69b4"/>
+    <circle cx="15" cy="-58" r="5" fill="#ff69b4"/>
+    <!-- Party dress/suit -->
+    <path d="M -23,-23 L -28,10 L -32,48 L -20,48 L -12,28 L 12,28 L 20,48 L 32,48 L 28,10 L 23,-23 L 15,-18 L 8,-23 L -8,-23 L -15,-18 Z" fill="#9b59b6"/>
+    <!-- Dress collar -->
+    <ellipse cx="0" cy="-23" rx="10" ry="4" fill="#8e44ad"/>
+    <!-- Ruffles/decoration -->
+    <path d="M -28,10 Q -20,8 -12,10 Q -4,12 4,10 Q 12,8 20,10 Q 28,12 28,10" stroke="#e8daef" stroke-width="2" fill="none"/>
+    <path d="M -28,20 Q -20,18 -12,20 Q -4,22 4,20 Q 12,18 20,20 Q 28,22 28,20" stroke="#e8daef" stroke-width="2" fill="none"/>
+    <!-- Decorative flowers -->
+    <circle cx="-10" cy="15" r="3" fill="#ff69b4"/>
+    <circle cx="10" cy="15" r="3" fill="#ff69b4"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Party Dress/Suit</text>
+</svg>

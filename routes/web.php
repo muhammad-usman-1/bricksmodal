@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CastingRequirementController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\PaymentDashboardController;
+use App\Http\Controllers\Admin\PaymentRequestController;
 use App\Http\Controllers\Admin\PermissionsController;
 use App\Http\Controllers\Admin\ProjectsDashboardController;
 use App\Http\Controllers\Admin\RolesController;
@@ -60,11 +61,20 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::resource('admin-management', \App\Http\Controllers\Admin\AdminManagementController::class)->parameters([
                 'admin-management' => 'user'
             ]);
-            Route::post('casting-applications/{casting_application}/approve-payment', [CastingApplicationController::class, 'approvePayment'])->name('casting-applications.approve-payment');
+
+            // Payment Request Management (Super Admin)
+            Route::get('payment-requests', [PaymentRequestController::class, 'index'])->name('payment-requests.index');
+            Route::get('payment-requests/{casting_application}', [PaymentRequestController::class, 'show'])->name('payment-requests.show');
+            Route::post('payment-requests/{casting_application}/approve', [PaymentRequestController::class, 'approve'])->name('payment-requests.approve');
+            Route::post('payment-requests/{casting_application}/reject', [PaymentRequestController::class, 'reject'])->name('payment-requests.reject');
+            Route::get('payment-requests/{casting_application}/release', [PaymentRequestController::class, 'showReleaseForm'])->name('payment-requests.release-form');
+            Route::post('payment-requests/{casting_application}/release', [PaymentRequestController::class, 'release'])->name('payment-requests.release');
         });
 
-        // Casting Application - Request Payment
+        // Casting Application - Request Payment (Regular Admins)
         Route::post('casting-applications/{casting_application}/request-payment', [CastingApplicationController::class, 'requestPayment'])->name('casting-applications.request-payment');
+        Route::post('casting-applications/{casting_application}/reject-payment', [CastingApplicationController::class, 'rejectPayment'])->name('casting-applications.reject-payment');
+        Route::post('casting-applications/{casting_application}/release-payment', [CastingApplicationController::class, 'releasePayment'])->name('casting-applications.release-payment');
 
         // Permissions
         Route::delete('permissions/destroy', [PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
@@ -100,9 +110,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');
     Route::post('casting-applications/{casting_application}/approve', [CastingApplicationController::class, 'approve'])->name('casting-applications.approve');
     Route::post('casting-applications/{casting_application}/reject', [CastingApplicationController::class, 'reject'])->name('casting-applications.reject');
-    Route::post('casting-applications/{casting_application}/pay', [CastingApplicationController::class, 'pay'])->name('casting-applications.pay');
-    Route::get('payments/success', [CastingApplicationController::class, 'paymentSuccess'])->name('payments.success');
-    Route::get('casting-applications/{casting_application}/payments/cancel', [CastingApplicationController::class, 'paymentCancel'])->name('payments.cancel');
     Route::resource('casting-applications', CastingApplicationController::class);
 
         // Bank Detail
@@ -145,7 +152,13 @@ Route::prefix('talent')->as('talent.')->group(function () {
             Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
             Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');
+
+            // Talent Payment Routes
             Route::get('payments', [\App\Http\Controllers\Talent\PaymentController::class, 'index'])->name('payments.index');
+            Route::get('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'cardDetails'])->name('payments.card-details');
+            Route::post('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'storeCardDetails'])->name('payments.store-card-details');
+            Route::post('payments/{casting_application}/request', [\App\Http\Controllers\Talent\PaymentController::class, 'requestPayment'])->name('payments.request');
+            Route::post('payments/{casting_application}/confirm-received', [\App\Http\Controllers\Talent\PaymentController::class, 'confirmReceived'])->name('payments.confirm-received');
         });
     });
 });

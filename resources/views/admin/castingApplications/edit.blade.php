@@ -114,19 +114,19 @@
                 <span class="help-block">{{ trans('cruds.castingApplication.fields.reviews_helper') }}</span>
             </div>
             <div class="form-group">
-                <label class="required">{{ trans('cruds.castingApplication.fields.payment_processed') }}</label>
-                <select class="form-control {{ $errors->has('payment_processed') ? 'is-invalid' : '' }}" name="payment_processed" id="payment_processed" required>
-                    <option value disabled {{ old('payment_processed', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
-                    @foreach(App\Models\CastingApplication::PAYMENT_PROCESSED_SELECT as $key => $label)
-                        <option value="{{ $key }}" {{ old('payment_processed', $castingApplication->payment_processed) === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
+                <label>Payment Status</label>
+                <select class="form-control {{ $errors->has('payment_status') ? 'is-invalid' : '' }}" name="payment_status" id="payment_status">
+                    <option value disabled {{ old('payment_status', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
+                    @foreach(App\Models\CastingApplication::PAYMENT_STATUS_SELECT as $key => $label)
+                        <option value="{{ $key }}" {{ old('payment_status', $castingApplication->payment_status) === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
-                @if($errors->has('payment_processed'))
+                @if($errors->has('payment_status'))
                     <div class="invalid-feedback">
-                        {{ $errors->first('payment_processed') }}
+                        {{ $errors->first('payment_status') }}
                     </div>
                 @endif
-                <span class="help-block">{{ trans('cruds.castingApplication.fields.payment_processed_helper') }}</span>
+                <span class="help-block">Current payment workflow status</span>
             </div>
             <div class="form-group">
                 <button class="btn btn-danger" type="submit">

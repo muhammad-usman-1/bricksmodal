@@ -16,9 +16,9 @@
 
         /* ===== Layout: full-width (no centered card) ===== */
         .page-wrap {
-            max-width: none;
+
             width: 100%;
-            padding: 16px 24px;
+
         }
 
         /* ===== Header band ===== */
@@ -355,9 +355,24 @@
         @if (!empty($castingRequirement->outfit) || !empty($castingRequirement->nails))
             <div class="section">
                 <h6>{{ __('Outfit & Nails') }}</h6>
-                <div class="body">{!! nl2br(
-                    e(($castingRequirement->outfit ? $castingRequirement->outfit . "\n" : '') . ($castingRequirement->nails ?? '')),
-                ) !!}</div>
+                <div class="body">
+                    @if(!empty($castingRequirement->outfit))
+                        @php
+                            $selectedOutfits = $castingRequirement->getSelectedOutfits();
+                        @endphp
+                        @if($selectedOutfits->isNotEmpty())
+                            <strong>{{ __('Required Outfits:') }}</strong><br>
+                            <ul class="mb-2">
+                                @foreach($selectedOutfits as $outfit)
+                                    <li>{{ $outfit->name }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    @endif
+                    @if(!empty($castingRequirement->nails))
+                        {!! nl2br(e($castingRequirement->nails)) !!}
+                    @endif
+                </div>
             </div>
         @endif
 

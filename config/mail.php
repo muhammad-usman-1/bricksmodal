@@ -4,6 +4,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mail Enabled
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether email sending is enabled or disabled.
+    | Set to false to disable all email notifications without removing code.
+    |
+    */
+
+    'enabled' => env('MAIL_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Mailer
     |--------------------------------------------------------------------------
     |

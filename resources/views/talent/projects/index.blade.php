@@ -19,10 +19,7 @@
             width: 100% !important;
         }
 
-        .projects-wrap {
-            margin: 0 !important;
-            padding: 16px 24px !important;
-        }
+        
 
         /* Search: no shadow */
         .proj-search {

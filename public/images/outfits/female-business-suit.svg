@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Professional hairstyle -->
+    <path d="M -25,-65 Q -28,-50 -22,-40 L -18,-45 Z" fill="#4a4a4a"/>
+    <path d="M 25,-65 Q 28,-50 22,-40 L 18,-45 Z" fill="#4a4a4a"/>
+    <ellipse cx="0" cy="-65" rx="25" ry="15" fill="#4a4a4a"/>
+    <!-- Business blazer -->
+    <path d="M -30,-25 L -30,25 L -20,30 L 20,30 L 30,25 L 30,-25 L 20,-20 L 10,-25 L 10,-15 L -10,-15 L -10,-25 L -20,-20 Z" fill="#34495e"/>
+    <!-- Blazer lapels -->
+    <path d="M -20,-20 L -10,-15 L -10,5 L -15,10 L -20,5 Z" fill="#2c3e50"/>
+    <path d="M 20,-20 L 10,-15 L 10,5 L 15,10 L 20,5 Z" fill="#2c3e50"/>
+    <!-- White shirt underneath -->
+    <path d="M -8,-25 L -5,-20 L 0,-22 L 5,-20 L 8,-25 Z" fill="white"/>
+    <!-- Skirt -->
+    <path d="M -20,30 L -25,50 L -10,50 L -8,30 Z" fill="#34495e"/>
+    <path d="M 8,30 L 10,50 L 25,50 L 20,30 Z" fill="#34495e"/>
+    <!-- Buttons -->
+    <circle cx="0" cy="5" r="2" fill="#95a5a6"/>
+    <circle cx="0" cy="15" r="2" fill="#95a5a6"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Business Suit</text>
+</svg>

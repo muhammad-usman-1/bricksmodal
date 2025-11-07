@@ -84,7 +84,18 @@
                             {{ trans('cruds.castingRequirement.fields.outfit') }}
                         </th>
                         <td>
-                            {{ $castingRequirement->outfit }}
+                            @php
+                                $selectedOutfits = $castingRequirement->getSelectedOutfits();
+                            @endphp
+                            @if($selectedOutfits->isNotEmpty())
+                                <ul class="mb-0">
+                                    @foreach($selectedOutfits as $outfit)
+                                        <li>{{ $outfit->name }} ({{ ucfirst($outfit->category) }})</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <span class="text-muted">{{ trans('global.not_set') }}</span>
+                            @endif
                         </td>
                     </tr>
                     <tr>

@@ -28,7 +28,7 @@
 <body class="c-app">
     @include('partials.menu')
     <div class="c-wrapper">
-        <header class="c-header c-header-fixed px-3">
+        {{--  <header class="c-header c-header-fixed px-3">
             <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
                 <i class="fas fa-fw fa-bars"></i>
             </button>
@@ -57,7 +57,7 @@
                             @endif
                         </div>
                         @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
-                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}" 
+                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
                                href="{{ route('admin.notifications.show', $notification->id) }}">
                                 @if($notification->data['type'] === 'talent_profile')
                                     <i class="fas fa-user text-info"></i>
@@ -94,7 +94,7 @@
 
 
             </ul>
-        </header>
+        </header>  --}}
 
         <div class="c-body">
             <main class="c-main">

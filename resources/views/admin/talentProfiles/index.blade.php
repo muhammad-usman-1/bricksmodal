@@ -1,14 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('talent_profile_create')
-    <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route('admin.talent-profiles.create') }}">
-                {{ trans('global.add') }} {{ trans('cruds.talentProfile.title_singular') }}
-            </a>
-        </div>
-    </div>
-@endcan
+
 <div class="card">
     <div class="card-header">
         {{ trans('cruds.talentProfile.title_singular') }} {{ trans('global.list') }}
@@ -86,6 +78,7 @@
                 </thead>
                 <tbody>
                     @foreach($talentProfiles as $key => $talentProfile)
+                        @if($talentProfile->verification_status === 'approved')
                         <tr data-entry-id="{{ $talentProfile->id }}">
                             <td>
 
@@ -205,6 +198,7 @@
                             </td>
 
                         </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
@@ -266,7 +260,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 $(document).on('show.bs.modal', '#talentActionModal', function (event) {

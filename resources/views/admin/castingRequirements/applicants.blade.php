@@ -36,7 +36,7 @@
                             <th>{{ trans('cruds.castingApplication.fields.rate') }}</th>
                             <th>{{ trans('cruds.castingApplication.fields.talent_notes') }}</th>
                             <th>{{ trans('cruds.castingApplication.fields.status') }}</th>
-                            <th>{{ trans('cruds.castingApplication.fields.payment_processed') }}</th>
+                            <th>Payment Status</th>
                             <th>{{ trans('cruds.castingApplication.fields.admin_notes') }}</th>
                             <th>{{ trans('global.actions') }}</th>
                         </tr>
@@ -48,7 +48,11 @@
                                 <td>{{ $application->rate ?? trans('global.not_set') }}</td>
                                 <td>{{ $application->talent_notes ?? trans('global.not_set') }}</td>
                                 <td>{{ App\Models\CastingApplication::STATUS_SELECT[$application->status] ?? $application->status }}</td>
-                                <td>{{ App\Models\CastingApplication::PAYMENT_PROCESSED_SELECT[$application->payment_processed] ?? $application->payment_processed }}</td>
+                                <td>
+                                    <span class="badge {{ $application->getPaymentStatusBadgeClass() }}">
+                                        {{ App\Models\CastingApplication::PAYMENT_STATUS_SELECT[$application->payment_status] ?? ucfirst($application->payment_status ?? 'pending') }}
+                                    </span>
+                                </td>
                                 <td>{{ $application->admin_notes ?? trans('global.not_set') }}</td>
                                 <td class="d-flex flex-wrap gap-1" style="gap:4px;">
                                     @if($application->status !== 'selected')
@@ -61,11 +65,25 @@
                                             {{ trans('global.reject') }}
                                         </button>
                                     @endif
-                                    @if($application->status === 'selected' && $application->payment_processed !== 'paid')
-                                        <form method="POST" action="{{ route('admin.casting-applications.pay', $application) }}" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-primary">{{ trans('global.pay_now') }}</button>
-                                        </form>
+                                    @if($application->status === 'selected' && in_array($application->payment_status, ['pending', 'rejected']))
+                                        @if(auth('admin')->user()->isSuperAdmin())
+                                            <a href="{{ route('admin.payment-requests.index') }}" class="btn btn-xs btn-outline-primary">
+                                                Manage Payments
+                                            </a>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.casting-applications.request-payment', $application) }}" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-xs btn-outline-primary">Request Payment</button>
+                                            </form>
+                                        @endif
+                                    @elseif($application->payment_status === 'requested')
+                                        <span class="badge badge-info">Payment Requested</span>
+                                    @elseif($application->payment_status === 'approved')
+                                        <span class="badge badge-primary">Payment Approved</span>
+                                    @elseif($application->payment_status === 'released')
+                                        <span class="badge badge-warning">Payment Released</span>
+                                    @elseif($application->payment_status === 'received')
+                                        <span class="badge badge-success">Payment Received</span>
                                     @endif
                                     @if(optional($application->talent_profile)->whatsapp_number)
                                         <button class="btn btn-xs btn-outline-success application-whatsapp-button"

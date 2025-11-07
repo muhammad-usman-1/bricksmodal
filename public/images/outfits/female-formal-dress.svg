@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Hair -->
+    <path d="M -25,-60 Q -30,-50 -25,-40 L -20,-45 Q -22,-55 -25,-60 Z" fill="#3d2817"/>
+    <path d="M 25,-60 Q 30,-50 25,-40 L 20,-45 Q 22,-55 25,-60 Z" fill="#3d2817"/>
+    <!-- Formal dress -->
+    <path d="M -25,-25 L -30,10 L -35,50 L -20,50 L -10,30 L 10,30 L 20,50 L 35,50 L 30,10 L 25,-25 L 15,-20 L 10,-25 L -10,-25 L -15,-20 Z" fill="#8e44ad"/>
+    <!-- Dress neckline -->
+    <ellipse cx="0" cy="-25" rx="10" ry="4" fill="#7d3c98"/>
+    <!-- Belt/waist -->
+    <rect x="-30" y="10" width="60" height="3" fill="#2c3e50"/>
+    <!-- Dress details -->
+    <circle cx="-15" cy="20" r="2" fill="#9b59b6"/>
+    <circle cx="0" cy="25" r="2" fill="#9b59b6"/>
+    <circle cx="15" cy="20" r="2" fill="#9b59b6"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Formal Dress</text>
+</svg>

@@ -32,12 +32,32 @@ class CastingApplication extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'payment_requested_at',
+        'payment_approved_at',
+        'payment_released_at',
+        'payment_received_at',
+    ];
+
+    protected $casts = [
+        'payment_requested_at' => 'datetime',
+        'payment_approved_at' => 'datetime',
+        'payment_released_at' => 'datetime',
+        'payment_received_at' => 'datetime',
     ];
 
     public const PAYMENT_PROCESSED_SELECT = [
         'n/a'     => 'Not Applicable',
         'pending' => 'Pending',
         'paid'    => 'Paid',
+    ];
+
+    public const PAYMENT_STATUS_SELECT = [
+        'pending'   => 'Pending',
+        'requested' => 'Requested',
+        'approved'  => 'Approved',
+        'released'  => 'Released',
+        'received'  => 'Received',
+        'rejected'  => 'Rejected',
     ];
 
     public const STATUS_SELECT = [
@@ -57,7 +77,14 @@ class CastingApplication extends Model
         'status',
         'rating',
         'reviews',
-        'payment_processed',
+        'payment_status',
+        'payment_requested_by_admin_id',
+        'payment_requested_at',
+        'payment_approved_by_super_admin_id',
+        'payment_approved_at',
+        'payment_released_at',
+        'payment_received_at',
+        'payment_rejection_reason',
         'stripe_session_id',
         'stripe_payment_intent',
         'created_at',
@@ -78,5 +105,64 @@ class CastingApplication extends Model
     public function talent_profile()
     {
         return $this->belongsTo(TalentProfile::class, 'talent_profile_id');
+    }
+
+    public function requestedByAdmin()
+    {
+        return $this->belongsTo(User::class, 'payment_requested_by_admin_id');
+    }
+
+    public function approvedBySuperAdmin()
+    {
+        return $this->belongsTo(User::class, 'payment_approved_by_super_admin_id');
+    }
+
+    /**
+     * Check if talent can request payment
+     */
+    public function canRequestPayment(): bool
+    {
+        return $this->status === 'selected'
+            && in_array($this->payment_status, ['pending', 'rejected']);
+    }
+
+    /**
+     * Check if payment can be approved by super admin
+     */
+    public function canBeApproved(): bool
+    {
+        return $this->payment_status === 'requested';
+    }
+
+    /**
+     * Check if payment can be released
+     */
+    public function canBeReleased(): bool
+    {
+        return $this->payment_status === 'approved';
+    }
+
+    /**
+     * Get payment amount
+     */
+    public function getPaymentAmount(): float
+    {
+        return $this->rate_offered ?? $this->rate ?? 0.0;
+    }
+
+    /**
+     * Get payment status badge class
+     */
+    public function getPaymentStatusBadgeClass(): string
+    {
+        return match($this->payment_status) {
+            'pending' => 'badge-secondary',
+            'requested' => 'badge-info',
+            'approved' => 'badge-primary',
+            'released' => 'badge-warning',
+            'received' => 'badge-success',
+            'rejected' => 'badge-danger',
+            default => 'badge-secondary',
+        };
     }
 }

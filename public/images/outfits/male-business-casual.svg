@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Business casual shirt -->
+    <path d="M -30,-25 L -30,20 L -20,25 L 20,25 L 30,20 L 30,-25 L 20,-20 L 10,-25 L -10,-25 L -20,-20 Z" fill="#5dade2"/>
+    <!-- Collar -->
+    <path d="M -8,-25 L -5,-20 L 5,-20 L 8,-25 Z" fill="#3498db"/>
+    <!-- Chinos/Khakis -->
+    <path d="M -20,25 L -22,50 L -10,50 L -8,25 Z" fill="#a89968"/>
+    <path d="M 8,25 L 10,50 L 22,50 L 20,25 Z" fill="#a89968"/>
+    <!-- Pocket -->
+    <rect x="-15" y="0" width="10" height="10" rx="1" fill="#3498db"/>
+    <!-- Buttons -->
+    <circle cx="0" cy="-10" r="1.5" fill="white"/>
+    <circle cx="0" cy="0" r="1.5" fill="white"/>
+    <circle cx="0" cy="10" r="1.5" fill="white"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Business Casual</text>
+</svg>

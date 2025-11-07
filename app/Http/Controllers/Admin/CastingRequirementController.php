@@ -11,6 +11,7 @@ use App\Models\CastingRequirement;
 use App\Models\CastingApplication;
 use App\Models\TalentProfile;
 use App\Models\User;
+use App\Models\Outfit;
 use App\Support\EmailTemplateManager;
 use Gate;
 use Illuminate\Http\Request;
@@ -36,12 +37,17 @@ class CastingRequirementController extends Controller
 
         $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view('admin.castingRequirements.create', compact('users'));
+        $outfits = Outfit::active()->orderBy('category')->orderBy('sort_order')->get()->groupBy('category');
+
+        return view('admin.castingRequirements.create', compact('users', 'outfits'));
     }
 
     public function store(StoreCastingRequirementRequest $request)
     {
-        $castingRequirement = CastingRequirement::create($request->all());
+        $data = $request->all();
+        $data['user_id'] = auth('admin')->id(); // Set the authenticated admin as the user
+
+        $castingRequirement = CastingRequirement::create($data);
 
         foreach ($request->input('reference', []) as $file) {
             $path = storage_path('tmp/uploads/' . basename($file));
@@ -67,14 +73,19 @@ class CastingRequirementController extends Controller
 
         $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
+        $outfits = Outfit::active()->orderBy('category')->orderBy('sort_order')->get()->groupBy('category');
+
         $castingRequirement->load('user');
 
-        return view('admin.castingRequirements.edit', compact('castingRequirement', 'users'));
+        return view('admin.castingRequirements.edit', compact('castingRequirement', 'users', 'outfits'));
     }
 
     public function update(UpdateCastingRequirementRequest $request, CastingRequirement $castingRequirement)
     {
-        $castingRequirement->update($request->all());
+        $data = $request->all();
+        $data['user_id'] = $castingRequirement->user_id ?? auth('admin')->id(); // Keep existing user_id or set current admin
+
+        $castingRequirement->update($data);
 
         if (count($castingRequirement->reference) > 0) {
             foreach ($castingRequirement->reference as $media) {

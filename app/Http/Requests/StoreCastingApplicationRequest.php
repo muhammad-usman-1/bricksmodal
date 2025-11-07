@@ -31,6 +31,7 @@ class StoreCastingApplicationRequest extends FormRequest
             ],
             'rate_offered' => [
                 'numeric',
+                'nullable',
             ],
             'status' => [
                 'required',
@@ -41,8 +42,9 @@ class StoreCastingApplicationRequest extends FormRequest
                 'min:-2147483648',
                 'max:2147483647',
             ],
-            'payment_processed' => [
-                'required',
+            'payment_status' => [
+                'nullable',
+                'in:pending,requested,approved,released,received,rejected',
             ],
         ];
     }

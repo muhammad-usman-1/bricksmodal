@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head (child) -->
+    <circle cx="0" cy="-45" r="22" fill="#fdbcb4"/>
+    <!-- Hair -->
+    <circle cx="0" cy="-58" r="20" fill="#8b6914"/>
+    <!-- Casual T-shirt -->
+    <path d="M -28,-23 L -25,-15 L -25,12 L -18,18 L 18,18 L 25,12 L 25,-15 L 28,-23 L 20,-18 L 8,-23 L -8,-23 L -20,-18 Z" fill="#16a085"/>
+    <!-- T-shirt design (smiley) -->
+    <circle cx="0" cy="-5" r="12" fill="#1abc9c" stroke="#0e6655" stroke-width="1"/>
+    <circle cx="-5" cy="-8" r="2" fill="#0e6655"/>
+    <circle cx="5" cy="-8" r="2" fill="#0e6655"/>
+    <path d="M -6,0 Q 0,4 6,0" stroke="#0e6655" stroke-width="2" fill="none"/>
+    <!-- Shorts -->
+    <path d="M -18,18 L -20,42 L -10,42 L -8,18 Z" fill="#e67e22"/>
+    <path d="M 8,18 L 10,42 L 20,42 L 18,18 Z" fill="#e67e22"/>
+    <!-- Pocket detail -->
+    <rect x="-15" y="22" width="6" height="8" rx="1" fill="#d35400"/>
+    <rect x="9" y="22" width="6" height="8" rx="1" fill="#d35400"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Casual Shorts &amp; T-Shirt</text>
+</svg>

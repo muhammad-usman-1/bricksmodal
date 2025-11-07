@@ -44,15 +44,19 @@ class StoreCastingRequirementRequest extends FormRequest
             'reference' => [
                 'array',
             ],
+            'outfit' => [
+                'array',
+                'nullable',
+            ],
+            'outfit.*' => [
+                'integer',
+                'exists:outfits,id',
+            ],
             'count' => [
                 'required',
                 'integer',
                 'min:-2147483648',
                 'max:2147483647',
-            ],
-            'user_id' => [
-                'required',
-                'integer',
             ],
             'rate_per_model' => [
                 'numeric',

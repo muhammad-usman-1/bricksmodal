@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Hair -->
+    <path d="M -25,-60 Q -30,-45 -20,-35 L -15,-40 Z" fill="#5d4037"/>
+    <path d="M 25,-60 Q 30,-45 20,-35 L 15,-40 Z" fill="#5d4037"/>
+    <!-- Casual top -->
+    <path d="M -30,-25 L -30,15 L -20,20 L 20,20 L 30,15 L 30,-25 L 20,-20 L 10,-25 L -10,-25 L -20,-20 Z" fill="#e91e63"/>
+    <!-- Top neckline -->
+    <ellipse cx="0" cy="-25" rx="10" ry="4" fill="#c2185b"/>
+    <!-- Jeans -->
+    <path d="M -20,20 L -22,50 L -10,50 L -8,20 Z" fill="#1976d2"/>
+    <path d="M 8,20 L 10,50 L 22,50 L 20,20 Z" fill="#1976d2"/>
+    <!-- Jeans stitching -->
+    <line x1="-16" y1="25" x2="-12" y2="45" stroke="#1565c0" stroke-width="1"/>
+    <line x1="16" y1="25" x2="12" y2="45" stroke="#1565c0" stroke-width="1"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Casual Jeans &amp; Top</text>
+</svg>

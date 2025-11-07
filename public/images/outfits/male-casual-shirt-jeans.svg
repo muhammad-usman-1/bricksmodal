@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  <g transform="translate(100, 100)">
+    <!-- Head -->
+    <circle cx="0" cy="-50" r="25" fill="#fdbcb4"/>
+    <!-- Casual shirt -->
+    <path d="M -30,-25 L -30,20 L -20,25 L 20,25 L 30,20 L 30,-25 L 20,-20 L 10,-25 L -10,-25 L -20,-20 Z" fill="#4a90e2"/>
+    <!-- Shirt collar -->
+    <path d="M -8,-25 L -5,-20 L 5,-20 L 8,-25 Z" fill="#3a70b2"/>
+    <!-- Jeans -->
+    <path d="M -20,25 L -22,50 L -10,50 L -8,25 Z" fill="#2c5f8d"/>
+    <path d="M 8,25 L 10,50 L 22,50 L 20,25 Z" fill="#2c5f8d"/>
+    <!-- Shirt pockets -->
+    <rect x="-15" y="-5" width="10" height="12" rx="1" fill="#3a70b2"/>
+    <rect x="5" y="-5" width="10" height="12" rx="1" fill="#3a70b2"/>
+    <!-- Buttons -->
+    <circle cx="0" cy="-10" r="1.5" fill="white"/>
+    <circle cx="0" cy="0" r="1.5" fill="white"/>
+    <circle cx="0" cy="10" r="1.5" fill="white"/>
+  </g>
+  <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Casual Shirt &amp; Jeans</text>
+</svg>
