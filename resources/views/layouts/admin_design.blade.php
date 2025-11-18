@@ -15,6 +15,8 @@
                 @include('partials.admin-menu')
                 @yield('content')
             </div>
+
+            
         </div>
     </body>
 
