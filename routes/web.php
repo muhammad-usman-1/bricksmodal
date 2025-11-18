@@ -80,37 +80,37 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::delete('permissions/destroy', [PermissionsController::class, 'massDestroy'])->name('permissions.massDestroy');
         Route::resource('permissions', PermissionsController::class);
 
-    // Roles
-    Route::delete('roles/destroy', [RolesController::class, 'massDestroy'])->name('roles.massDestroy');
-    Route::resource('roles', RolesController::class);
+        // Roles
+        Route::delete('roles/destroy', [RolesController::class, 'massDestroy'])->name('roles.massDestroy');
+        Route::resource('roles', RolesController::class);
 
-    // Users
-    Route::delete('users/destroy', [UsersController::class, 'massDestroy'])->name('users.massDestroy');
-    Route::resource('users', UsersController::class);
+        // Users
+        Route::delete('users/destroy', [UsersController::class, 'massDestroy'])->name('users.massDestroy');
+        Route::resource('users', UsersController::class);
 
-    // Talent Profile
+        // Talent Profile
         Route::delete('talent-profiles/destroy', [TalentProfileController::class, 'massDestroy'])->name('talent-profiles.massDestroy');
-    Route::post('talent-profiles/{talent_profile}/approve', [TalentProfileController::class, 'approve'])->name('talent-profiles.approve');
-    Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
-    Route::post('talent-profiles/{talent_profile}/reactivate', [TalentProfileController::class, 'reactivate'])->name('talent-profiles.reactivate');
-    Route::resource('talent-profiles', TalentProfileController::class);
+        Route::post('talent-profiles/{talent_profile}/approve', [TalentProfileController::class, 'approve'])->name('talent-profiles.approve');
+        Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
+        Route::post('talent-profiles/{talent_profile}/reactivate', [TalentProfileController::class, 'reactivate'])->name('talent-profiles.reactivate');
+        Route::resource('talent-profiles', TalentProfileController::class);
 
-    // Language
-    Route::delete('languages/destroy', [LanguageController::class, 'massDestroy'])->name('languages.massDestroy');
-    Route::resource('languages', LanguageController::class);
+        // Language
+        Route::delete('languages/destroy', [LanguageController::class, 'massDestroy'])->name('languages.massDestroy');
+        Route::resource('languages', LanguageController::class);
 
-    // Casting Requirement
-    Route::delete('casting-requirements/destroy', [CastingRequirementController::class, 'massDestroy'])->name('casting-requirements.massDestroy');
-    Route::post('casting-requirements/media', [CastingRequirementController::class, 'storeMedia'])->name('casting-requirements.storeMedia');
-    Route::post('casting-requirements/ckmedia', [CastingRequirementController::class, 'storeCKEditorImages'])->name('casting-requirements.storeCKEditorImages');
-    Route::get('casting-requirements/{casting_requirement}/applicants', [CastingRequirementController::class, 'applicants'])->name('casting-requirements.applicants');
-    Route::resource('casting-requirements', CastingRequirementController::class);
+        // Casting Requirement
+        Route::delete('casting-requirements/destroy', [CastingRequirementController::class, 'massDestroy'])->name('casting-requirements.massDestroy');
+        Route::post('casting-requirements/media', [CastingRequirementController::class, 'storeMedia'])->name('casting-requirements.storeMedia');
+        Route::post('casting-requirements/ckmedia', [CastingRequirementController::class, 'storeCKEditorImages'])->name('casting-requirements.storeCKEditorImages');
+        Route::get('casting-requirements/{casting_requirement}/applicants', [CastingRequirementController::class, 'applicants'])->name('casting-requirements.applicants');
+        Route::resource('casting-requirements', CastingRequirementController::class);
 
-    // Casting Application
-    Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');
-    Route::post('casting-applications/{casting_application}/approve', [CastingApplicationController::class, 'approve'])->name('casting-applications.approve');
-    Route::post('casting-applications/{casting_application}/reject', [CastingApplicationController::class, 'reject'])->name('casting-applications.reject');
-    Route::resource('casting-applications', CastingApplicationController::class);
+        // Casting Application
+        Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');
+        Route::post('casting-applications/{casting_application}/approve', [CastingApplicationController::class, 'approve'])->name('casting-applications.approve');
+        Route::post('casting-applications/{casting_application}/reject', [CastingApplicationController::class, 'reject'])->name('casting-applications.reject');
+        Route::resource('casting-applications', CastingApplicationController::class);
 
         // Bank Detail
         Route::delete('bank-details/destroy', [BankDetailController::class, 'massDestroy'])->name('bank-details.massDestroy');
