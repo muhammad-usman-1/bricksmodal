@@ -250,7 +250,7 @@ l35.216-64.769h35.339L351.36,219.149z" />
     </a>
     @endif
     <!-- Logout -->
-    <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
+    <a href="{{ route('admin.logout') }}" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
         <div
             class="flex gap-4 mx-8 mb-5 py-2 rounded-lg pl-8 items-center cursor-pointer hover:bg-red-50 text-red-600 transition-colors">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -261,4 +261,8 @@ l35.216-64.769h35.339L351.36,219.149z" />
             <h1 class="text-xl">Logout</h1>
         </div>
     </a>
+
+    <form id="logoutform" action="{{ route('admin.logout') }}" method="POST" style="display:none;">
+        @csrf
+    </form>
 </div> 

@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.admin_design')
 @section('content')
 
-<div class="card">
+<div class="col-span-1 lg:col-span-10 px-4 md:px-5">
     <div class="card-header">
         {{ trans('global.create') }} {{ trans('cruds.castingRequirement.title_singular') }}
     </div>
@@ -84,7 +84,7 @@
                         <div class="row">
                             @foreach($categoryOutfits as $outfit)
                                 <div class="col-md-2 col-sm-4 col-6 mb-3">
-                                    <div class="outfit-item">
+                                    <div class="outfit-item card p-2">
                                         <input type="checkbox"
                                                name="outfit[]"
                                                value="{{ $outfit->id }}"
