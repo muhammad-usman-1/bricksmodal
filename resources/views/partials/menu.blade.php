@@ -124,7 +124,7 @@
                 </ul>
             </li>
         @endcan  --}}
-        @can('talent_profile_access')
+        <!-- @can('talent_profile_access')
             <li class="c-sidebar-nav-item">
                 <a href="{{ route("admin.talent-profiles.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/talent-profiles") || request()->is("admin/talent-profiles/*") ? "c-active" : "" }}">
                     <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
@@ -133,7 +133,7 @@
                     {{ trans('cruds.talentProfile.title') }}
                 </a>
             </li>
-        @endcan
+        @endcan -->
         {{--  @can('language_access')
             <li class="c-sidebar-nav-item">
                 <a href="{{ route("admin.languages.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/languages") || request()->is("admin/languages/*") ? "c-active" : "" }}">

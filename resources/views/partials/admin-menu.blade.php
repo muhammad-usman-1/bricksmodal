@@ -73,6 +73,36 @@ l35.216-64.769h35.339L351.36,219.149z" />
             </svg>
             <span>Payments</span>
         </a>
+        @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+        <a href="{{ route('admin.payment-requests.index') }}" class="flex items-center gap-2 py-2 px-3 rounded hover:bg-[#EBF0FA]">
+            <svg width="24" height="24" fill="none">
+                <path d="M12 2C13.1 2 14 2.9 14 4V5H16C17.1 5 18 5.9 18 7V10H20C21.1 10 22 10.9 22 12V20C22 21.1 21.1 22 20 22H12C10.9 22 10 21.1 10 20V12C10 10.9 10.9 10 12 10H14V7H12C11.4 7 11 6.6 11 6V4C11 3.4 11.4 3 12 3V2ZM12 12H10V20H12V12Z" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <span>Payment Requests</span>
+        </a>
+        <a href="{{ route('admin.admin-management.index') }}" class="flex items-center gap-2 py-2 px-3 rounded hover:bg-[#EBF0FA]">
+            <svg width="24" height="24" fill="none">
+                <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Admin Management</span>
+        </a>
+        @endif
+        <!-- @can('talent_profile_access')
+        <a href="{{ route('admin.talent-profiles.index') }}" class="flex items-center gap-2 py-2 px-3 rounded hover:bg-[#EBF0FA]">
+            <svg width="24" height="24" fill="none">
+                <path d="M12 2V6" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M12 18V22" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M4.93 4.93L7.76 7.76" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M16.24 16.24L19.07 19.07" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M2 12H6" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M18 12H22" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M4.93 19.07L7.76 16.24" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M16.24 7.76L19.07 4.93" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <span>Talent Profiles</span>
+        </a>
+        @endcan -->
+        @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+        <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-2 py-2 px-3 rounded hover:bg-[#EBF0FA]">
+            <svg width="24" height="24" fill="none">
+                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#000000" stroke-width="1.5"/><path d="M2.45801 12.5C2.73128 13.7625 3.31494 14.9445 4.16104 15.9426C5.00714 16.9407 6.09143 17.7257 7.31301 18.2275L8.31301 16.2275C7.51601 15.8875 6.80714 15.3775 6.22801 14.74C5.64888 14.1025 5.21314 13.3575 4.95801 12.5425L2.45801 12.5ZM21.542 12.5C21.2687 13.7625 20.6851 14.9445 19.839 15.9426C18.9929 16.9407 17.9086 17.7257 16.687 18.2275L15.687 16.2275C16.484 15.8875 17.1929 15.3775 17.772 14.74C18.3511 14.1025 18.7869 13.3575 19.042 12.5425L21.542 12.5ZM12.5 2.45801C13.7625 2.73128 14.9445 3.31494 15.9426 4.16104C16.9407 5.00714 17.7257 6.09143 18.2275 7.31301L16.2275 8.31301C15.8875 7.51601 15.3775 6.80714 14.74 6.22801C14.1025 5.64888 13.3575 5.21314 12.5425 4.95801L12.5 2.45801ZM12.5 21.542C13.7625 21.2687 14.9445 20.6851 15.9426 19.839C16.9407 18.9929 17.7257 17.9086 18.2275 16.687L16.2275 15.687C15.8875 16.484 15.3775 17.1929 14.74 17.772C14.1025 18.3511 13.3575 18.7869 12.5425 19.042L12.5 21.542ZM8.31301 16.2275L7.31301 18.2275C6.09143 17.7257 5.00714 16.9407 4.16104 15.9426C3.31494 14.9445 2.73128 13.7625 2.45801 12.5L4.95801 12.5425C5.21314 13.3575 5.64888 14.1025 6.22801 14.74C6.80714 15.3775 7.51601 15.8875 8.31301 16.2275ZM15.687 16.2275L16.687 18.2275C17.9086 17.7257 18.9929 16.9407 19.839 15.9426C20.6851 14.9445 21.2687 13.7625 21.542 12.5L19.042 12.5425C18.7869 13.3575 18.3511 14.1025 17.772 14.74C17.1929 15.3775 16.484 15.8875 15.687 16.2275ZM16.2275 8.31301L18.2275 7.31301C17.7257 6.09143 16.9407 5.00714 15.9426 4.16104C14.9445 3.31494 13.7625 2.73128 12.5 2.45801L12.5425 4.95801C13.3575 5.21314 14.1025 5.64888 14.74 6.22801C15.3775 6.80714 15.8875 7.51601 16.2275 8.31301ZM16.2275 15.687L18.2275 16.687C17.7257 17.9086 16.9407 18.9929 15.9426 19.839C14.9445 20.6851 13.7625 21.2687 12.5 21.542L12.5425 19.042C13.3575 18.7869 14.1025 18.3511 14.74 17.772C15.3775 17.1929 15.8875 16.484 16.2275 15.687Z" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <span>Settings</span>
+        </a>
+        @endif
         <a href="#" class="flex items-center gap-2 py-2 px-3 rounded hover:bg-red-50 text-red-600">
             <svg width="24" height="24" fill="none">
                 <path
@@ -173,6 +203,52 @@ l35.216-64.769h35.339L351.36,219.149z" />
         </div>
     </a>
 
+    @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+    <!-- Payment Requests -->
+    <a href="{{ route('admin.payment-requests.index') }}" >
+        <div
+            class="flex gap-4 mx-8 mb-5 py-2 rounded-lg pl-8 items-center cursor-pointer transition-colors {{ request()->is('admin/payment-requests*') ? 'bg-[#F1F2F4]' : 'hover:bg-[#EBF0FA]' }} ">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C13.1 2 14 2.9 14 4V5H16C17.1 5 18 5.9 18 7V10H20C21.1 10 22 10.9 22 12V20C22 21.1 21.1 22 20 22H12C10.9 22 10 21.1 10 20V12C10 10.9 10.9 10 12 10H14V7H12C11.4 7 11 6.6 11 6V4C11 3.4 11.4 3 12 3V2ZM12 12H10V20H12V12Z" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <h1 class="text-xl text-black">Payment Requests</h1>
+        </div>
+    </a>
+    <!-- Admin Management -->
+    <a href="{{ route('admin.admin-management.index') }}" >
+        <div
+            class="flex gap-4 mx-8 mb-5 py-2 rounded-lg pl-8 items-center cursor-pointer transition-colors {{ request()->is('admin/admin-management*') ? 'bg-[#F1F2F4]' : 'hover:bg-[#EBF0FA]' }} ">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h1 class="text-xl text-black">Admin Management</h1>
+        </div>
+    </a>
+    @endif
+    @can('talent_profile_access')
+    <!-- Talent Profiles -->
+    <!-- <a href="{{ route('admin.talent-profiles.index') }}" >
+        <div
+            class="flex gap-4 mx-8 mb-5 py-2 rounded-lg pl-8 items-center cursor-pointer transition-colors {{ request()->is('admin/talent-profiles*') ? 'bg-[#F1F2F4]' : 'hover:bg-[#EBF0FA]' }} ">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2V6" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M12 18V22" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M4.93 4.93L7.76 7.76" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M16.24 16.24L19.07 19.07" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M2 12H6" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M18 12H22" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M4.93 19.07L7.76 16.24" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><path d="M16.24 7.76L19.07 4.93" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <h1 class="text-xl text-black">Talent Profiles</h1>
+        </div> -->
+    </a>
+    @endcan
+    @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+    <!-- Settings -->
+    <a href="{{ route('admin.settings.index') }}" >
+        <div
+            class="flex gap-4 mx-8 mb-5 py-2 rounded-lg pl-8 items-center cursor-pointer transition-colors {{ request()->is('admin/settings') ? 'bg-[#F1F2F4]' : 'hover:bg-[#EBF0FA]' }} ">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#000000" stroke-width="1.5"/><path d="M2.45801 12.5C2.73128 13.7625 3.31494 14.9445 4.16104 15.9426C5.00714 16.9407 6.09143 17.7257 7.31301 18.2275L8.31301 16.2275C7.51601 15.8875 6.80714 15.3775 6.22801 14.74C5.64888 14.1025 5.21314 13.3575 4.95801 12.5425L2.45801 12.5ZM21.542 12.5C21.2687 13.7625 20.6851 14.9445 19.839 15.9426C18.9929 16.9407 17.9086 17.7257 16.687 18.2275L15.687 16.2275C16.484 15.8875 17.1929 15.3775 17.772 14.74C18.3511 14.1025 18.7869 13.3575 19.042 12.5425L21.542 12.5ZM12.5 2.45801C13.7625 2.73128 14.9445 3.31494 15.9426 4.16104C16.9407 5.00714 17.7257 6.09143 18.2275 7.31301L16.2275 8.31301C15.8875 7.51601 15.3775 6.80714 14.74 6.22801C14.1025 5.64888 13.3575 5.21314 12.5425 4.95801L12.5 2.45801ZM12.5 21.542C13.7625 21.2687 14.9445 20.6851 15.9426 19.839C16.9407 18.9929 17.7257 17.9086 18.2275 16.687L16.2275 15.687C15.8875 16.484 15.3775 17.1929 14.74 17.772C14.1025 18.3511 13.3575 18.7869 12.5425 19.042L12.5 21.542ZM8.31301 16.2275L7.31301 18.2275C6.09143 17.7257 5.00714 16.9407 4.16104 15.9426C3.31494 14.9445 2.73128 13.7625 2.45801 12.5L4.95801 12.5425C5.21314 13.3575 5.64888 14.1025 6.22801 14.74C6.80714 15.3775 7.51601 15.8875 8.31301 16.2275ZM15.687 16.2275L16.687 18.2275C17.9086 17.7257 18.9929 16.9407 19.839 15.9426C20.6851 14.9445 21.2687 13.7625 21.542 12.5L19.042 12.5425C18.7869 13.3575 18.3511 14.1025 17.772 14.74C17.1929 15.3775 16.484 15.8875 15.687 16.2275ZM16.2275 8.31301L18.2275 7.31301C17.7257 6.09143 16.9407 5.00714 15.9426 4.16104C14.9445 3.31494 13.7625 2.73128 12.5 2.45801L12.5425 4.95801C13.3575 5.21314 14.1025 5.64888 14.74 6.22801C15.3775 6.80714 15.8875 7.51601 16.2275 8.31301ZM16.2275 15.687L18.2275 16.687C17.7257 17.9086 16.9407 18.9929 15.9426 19.839C14.9445 20.6851 13.7625 21.2687 12.5 21.542L12.5425 19.042C13.3575 18.7869 14.1025 18.3511 14.74 17.772C15.3775 17.1929 15.8875 16.484 16.2275 15.687Z" stroke="#000000" stroke-width="1.5"/>
+            </svg>
+            <h1 class="text-xl text-black">Settings</h1>
+        </div>
+    </a>
+    @endif
     <!-- Logout -->
     <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
         <div

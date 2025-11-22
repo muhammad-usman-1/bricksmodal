@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.admin_design')
 @section('content')
 
-<div class="card">
+<div class="col-span-1 lg:col-span-10 px-4 md:px-5">
     <div class="card-header">
         <h5 class="mb-0">Add New Admin</h5>
     </div>
