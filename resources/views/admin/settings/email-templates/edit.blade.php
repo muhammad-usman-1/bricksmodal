@@ -1,7 +1,11 @@
-@extends('layouts.admin')
+
+@extends('layouts.admin_design')
+@section('styles')
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
+@endsection
 @section('content')
 
-<div class="card">
+<div class="col-span-1 lg:col-span-10 px-4 md:px-5">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>{{ trans('notifications.edit_template') }}: <code>{{ $emailTemplate->key }}</code></span>
         <a href="{{ route('admin.email-templates.index') }}" class="btn btn-sm btn-secondary">{{ trans('global.back') }}</a>
@@ -40,5 +44,4 @@
         </form>
     </div>
 </div>
-
 @endsection

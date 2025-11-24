@@ -17,10 +17,25 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $phoneNumber = $request->input('phone_number');
+        // dd($phoneNumber);
+        // Map phone numbers to admin credentials
+        $credentials = [];
+        if ($phoneNumber === '56789') {
+            $credentials = [
+                'email' => 'admin@example.com',
+                'password' => '12345678',
+            ];
+        } elseif ($phoneNumber === '12345') {
+            $credentials = [
+                'email' => 'superadmin@example.com',
+                'password' => '12345678',
+            ];
+        } else {
+            throw ValidationException::withMessages([
+                'phone_number' => ['Invalid phone number for admin login.'],
+            ]);
+        }
 
         $credentials['type'] = User::TYPE_ADMIN;
 

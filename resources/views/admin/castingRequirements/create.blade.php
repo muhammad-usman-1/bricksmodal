@@ -1,4 +1,7 @@
 @extends('layouts.admin_design')
+@section('styles')
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
+@endsection
 @section('content')
 
 <div class="col-span-1 lg:col-span-10 px-4 md:px-5">

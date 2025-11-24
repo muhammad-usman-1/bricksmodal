@@ -48,33 +48,7 @@
             color: #000;
         }
 
-        /* Tabs */
-        .tab-buttons {
-            display: flex;
-            justify-content: center;
-            border-radius: 8px;
-            overflow: hidden;
-            width: fit-content;
-            margin: 0 auto 25px;
-        }
-
-        .tab-buttons button {
-            /* no flex:1 */
-            width: 140px;
-            padding: 5px 0;
-            border: none;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: .3s;
-            background: #f4e6e3;
-
-        }
-
-        .tab-buttons button.active {
-            background: #b18b86;
-            color: #fff;
-        }
+        /* Tabs removed */
 
         .phone-input {
             margin-bottom: 20px;
@@ -131,7 +105,7 @@
 
     <!-- Logo -->
     <div class="logo-container">
-        <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+        <img src="{{ asset('images/logo.png') }}" alt="BRICKS Model Logo">
     </div>
 
     <div class="auth-container">
@@ -154,10 +128,7 @@
                 </div>
             @endif
 
-            <div class="tab-buttons">
-                <button type="button" id="tab-login" class="active">Login</button>
-                <button type="button" id="tab-create">Create account</button>
-            </div>
+
 
             <form id="auth-form" method="POST" action="{{ route('talent.login.submit') }}">
                 @csrf
@@ -179,10 +150,9 @@
                 </label>
             </form>
 
-            <div class="bottom-text">
-                Don’t have an Bricks Account?
-                <a href="javascript:void(0)" id="bottom-link">Already have</a>
-            </div>
+            <!-- <div class="bottom-text">
+                Don’t have a Bricks Account? <a href="{{ route('talent.register') }}">Create one</a>
+            </div> -->
         </div>
     </div>
 
@@ -192,45 +162,6 @@
 --}}
 
     <script>
-        // ---- Tabs state ----
-        const state = {
-            tab: 'login', // 'login' | 'create'
-            routes: {
-                login: @json(route('talent.login.submit')),
-                create: @json(route('talent.register.submit')) // <- change if needed
-            }
-        };
-
-        const form = document.getElementById('auth-form');
-        const btnLogin = document.getElementById('tab-login');
-        const btnCreate = document.getElementById('tab-create');
-        const submitBtn = document.getElementById('submit-btn');
-        const bottomLink = document.getElementById('bottom-link');
-
-        function applyTab() {
-            // toggle active style
-            btnLogin.classList.toggle('active', state.tab === 'login');
-            btnCreate.classList.toggle('active', state.tab === 'create');
-
-            // swap form action + button text + bottom link text
-            form.action = state.routes[state.tab];
-            submitBtn.textContent = 'Submit';
-            bottomLink.textContent = (state.tab === 'login') ? 'Create one' : 'Back to Login';
-        }
-
-        btnLogin.addEventListener('click', () => {
-            state.tab = 'login';
-            applyTab();
-        });
-        btnCreate.addEventListener('click', () => {
-            state.tab = 'create';
-            applyTab();
-        });
-        bottomLink.addEventListener('click', () => {
-            state.tab = (state.tab === 'login') ? 'create' : 'login';
-            applyTab();
-        });
-
         // ---- Phone (intl-tel-input) ----
         const phoneInput = document.querySelector('#phone');
         let iti = null;
@@ -256,6 +187,7 @@
             initPhone();
 
         // push dial code + national number into hidden inputs on submit
+        const form = document.getElementById('auth-form');
         form.addEventListener('submit', function(e) {
             if (iti) {
                 document.getElementById('phone_country_code').value = '+' + (iti.getSelectedCountryData()
@@ -268,8 +200,5 @@
                 document.getElementById('phone_number').value = phoneInput.value.trim();
             }
         });
-
-        // init once
-        applyTab();
     </script>
 @endsection

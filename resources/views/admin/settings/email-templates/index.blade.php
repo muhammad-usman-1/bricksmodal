@@ -1,10 +1,13 @@
-@extends('layouts.admin')
+@extends('layouts.admin_design')
+@section('styles')
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
+@endsection
 @section('content')
 
 @if(session('message'))
     <div class="alert alert-success">{{ session('message') }}</div>
 @endif
-
+<div class="col-span-1 lg:col-span-10 px-4 md:px-5">
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>{{ trans('notifications.template_heading') }}</span>
@@ -43,6 +46,7 @@
         <li><code>{{ '{' }}{notes}}</code> – {{ trans('notifications.placeholder_notes') }}</li>
         <li><code>{{ '{' }}{app_name}}</code> – {{ trans('notifications.placeholder_app_name') }}</li>
     </ul>
+</div>
 </div>
 
 @endsection

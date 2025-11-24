@@ -1,7 +1,10 @@
-@extends('layouts.admin')
+@extends('layouts.admin_design')
+@section('styles')
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
+@endsection
 @section('content')
-
-<div class="row">
+<div class="col-span-1 lg:col-span-10 px-4 md:px-5">
+<div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -90,5 +93,6 @@
         </div>
     </div>
 
+</div>
 </div>
 @endsection
