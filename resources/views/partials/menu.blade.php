@@ -24,7 +24,13 @@
                 @endif
             </a>
         </li>  --}}
-        @if(auth('admin')->check() && (auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->hasModulePermission('project_management')))
+        @php
+            $adminUser = auth('admin')->user();
+            if ($adminUser && !$adminUser->relationLoaded('roles')) {
+                $adminUser->load('roles.permissions');
+            }
+        @endphp
+        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.projects.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-project-diagram">
@@ -34,7 +40,7 @@
                 </a>
             </li>
         @endif
-        @if(auth('admin')->check() && (auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->hasModulePermission('talent_management')))
+        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.talents.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-user-friends">
@@ -44,7 +50,7 @@
                 </a>
             </li>
         @endif
-        @if(auth('admin')->check() && (auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->hasModulePermission('payment_management')))
+        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.payments.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-wallet">
@@ -54,7 +60,7 @@
                 </a>
             </li>
         @endif
-        @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+        @if($adminUser && $adminUser->isSuperAdmin())
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.payment-requests.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/payment-requests*') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-hand-holding-usd">
@@ -71,8 +77,16 @@
                     Admin Management
                 </a>
             </li>
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.role-permissions.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-key">
+
+                    </i>
+                    Role Permissions
+                </a>
+            </li>
         @endif
-        @if(auth('admin')->check() && auth('admin')->user()->isSuperAdmin())
+        @if($adminUser && $adminUser->isSuperAdmin())
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.settings.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
                     <i class="c-sidebar-nav-icon fas fa-fw fa-cog">
@@ -124,7 +138,7 @@
                 </ul>
             </li>
         @endcan  --}}
-        @can('talent_profile_access')
+        @can('talent_management_access')
             <li class="c-sidebar-nav-item">
                 <a href="{{ route("admin.talent-profiles.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/talent-profiles") || request()->is("admin/talent-profiles/*") ? "c-active" : "" }}">
                     <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">

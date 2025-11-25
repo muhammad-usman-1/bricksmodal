@@ -38,24 +38,11 @@ class AdminAccountCreated extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $permissionsList = [];
-        if (!empty($this->permissions['project_management'])) {
-            $permissionsList[] = 'Project Management';
-        }
-        if (!empty($this->permissions['talent_management'])) {
-            $permissionsList[] = 'Talent Management';
-        }
-        if (!empty($this->permissions['payment_management'])) {
-            $permissionsList[] = 'Payment Management';
-        }
-
-        $permissionsText = !empty($permissionsList)
-            ? implode(', ', $permissionsList)
-            : 'No module permissions assigned';
-
-        $canMakePayments = !empty($this->permissions['can_make_payments'])
-            ? 'Yes - You can process payments directly'
-            : 'No - You must request approval from Super Admin';
+        $permissionsText = !empty($this->permissions)
+            ? implode(', ', array_map(function($permission) {
+                return ucwords(str_replace(['_', 'management', 'access'], [' ', '', ''], $permission));
+            }, $this->permissions))
+            : 'No permissions assigned';
 
         return (new MailMessage)
                     ->subject('Your Admin Account Has Been Created')
@@ -65,9 +52,8 @@ class AdminAccountCreated extends Notification implements ShouldQueue
                     ->line('Email: **' . $notifiable->email . '**')
                     ->line('Password: **' . $this->password . '**')
                     ->line('')
-                    ->line('**Your Permissions:**')
-                    ->line('Modules: ' . $permissionsText)
-                    ->line('Payment Authorization: ' . $canMakePayments)
+                    ->line('**Your Role Permissions:**')
+                    ->line('Assigned Permissions: ' . $permissionsText)
                     ->line('')
                     ->line('Please keep your credentials secure and change your password after your first login.')
                     ->action('Login to Admin Panel', url('/admin/login'))

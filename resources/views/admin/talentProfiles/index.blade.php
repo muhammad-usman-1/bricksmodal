@@ -20,59 +20,26 @@
                         <th>
                             {{ trans('cruds.talentProfile.fields.legal_name') }}
                         </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.display_name') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.language') }}
-                        </th>
+
+
                         <th>
                             {{ trans('cruds.talentProfile.fields.verification_status') }}
                         </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.verification_notes') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.bio') }}
-                        </th>
+
+
                         <th>
                             {{ trans('cruds.talentProfile.fields.daily_rate') }}
                         </th>
                         <th>
                             {{ trans('cruds.talentProfile.fields.hourly_rate') }}
                         </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.height') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.weight') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.chest') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.waist') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.hips') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.skin_tone') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.hair_color') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.eye_color') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.talentProfile.fields.shoe_size') }}
-                        </th>
+
+
                         <th>
                             {{ trans('cruds.talentProfile.fields.user') }}
                         </th>
                         <th>
-                            &nbsp;
+                           Actions
                         </th>
                     </tr>
                 </thead>
@@ -89,56 +56,19 @@
                             <td>
                                 {{ $talentProfile->legal_name ?? '' }}
                             </td>
-                            <td>
-                                {{ $talentProfile->display_name ?? '' }}
-                            </td>
-                            <td>
-                                @foreach($talentProfile->languages as $key => $item)
-                                    <span class="badge badge-info">{{ $item->title }}</span>
-                                @endforeach
-                            </td>
+
                             <td>
                                 {{ App\Models\TalentProfile::VERIFICATION_STATUS_SELECT[$talentProfile->verification_status] ?? '' }}
                             </td>
-                            <td>
-                                {{ $talentProfile->verification_notes ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->bio ?? '' }}
-                            </td>
+                            <!-- #endregion -->
+
                             <td>
                                 {{ $talentProfile->daily_rate ?? '' }}
                             </td>
                             <td>
                                 {{ $talentProfile->hourly_rate ?? '' }}
                             </td>
-                            <td>
-                                {{ $talentProfile->height ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->weight ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->chest ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->waist ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->hips ?? '' }}
-                            </td>
-                            <td>
-                                {{ App\Models\TalentProfile::SKIN_TONE_SELECT[$talentProfile->skin_tone] ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->hair_color ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->eye_color ?? '' }}
-                            </td>
-                            <td>
-                                {{ $talentProfile->shoe_size ?? '' }}
-                            </td>
+
                             <td>
                                 {{ $talentProfile->user->name ?? '' }}
                             </td>

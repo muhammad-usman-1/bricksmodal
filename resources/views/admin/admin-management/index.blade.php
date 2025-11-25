@@ -38,7 +38,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Permissions</th>
+                        <th>Role Permissions</th>
                         <th>Can Make Payments</th>
                         <th width="15%">Actions</th>
                     </tr>
@@ -56,33 +56,25 @@
                             <td>{{ $admin->email }}</td>
                             <td>
                                 @foreach($admin->roles as $role)
-                                    <span class="badge badge-info">{{ $role->title }}</span>
+                                    <span class="badge badge-info">{{ ucfirst($role->title) }}</span>
                                 @endforeach
                             </td>
                             <td>
-                                @if($admin->is_super_admin)
+                                @if($admin->isSuperAdmin())
                                     <span class="badge badge-success">All Permissions</span>
-                                @elseif($admin->adminPermissions)
-                                    @if($admin->adminPermissions->project_management)
-                                        <span class="badge badge-primary">Projects</span>
-                                    @endif
-                                    @if($admin->adminPermissions->talent_management)
-                                        <span class="badge badge-primary">Talents</span>
-                                    @endif
-                                    @if($admin->adminPermissions->payment_management)
-                                        <span class="badge badge-primary">Payments</span>
-                                    @endif
-                                    @if(!$admin->adminPermissions->project_management && !$admin->adminPermissions->talent_management && !$admin->adminPermissions->payment_management)
+                                @else
+                                    @php $role = $admin->roles->first(); @endphp
+                                    @if($role && $role->permissions && $role->permissions->count() > 0)
+                                        @foreach($role->permissions as $permission)
+                                            <span class="badge badge-primary badge-sm">{{ ucwords(str_replace(['_', 'management', 'access'], [' ', '', ''], $permission->title)) }}</span>
+                                        @endforeach
+                                    @else
                                         <span class="badge badge-secondary">No Permissions</span>
                                     @endif
-                                @else
-                                    <span class="badge badge-secondary">No Permissions</span>
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($admin->is_super_admin)
-                                    <span class="badge badge-success">Yes</span>
-                                @elseif($admin->adminPermissions && $admin->adminPermissions->can_make_payments)
+                                @if($admin->isSuperAdmin() || $admin->canMakePayments())
                                     <span class="badge badge-success">Yes</span>
                                 @else
                                     <span class="badge badge-secondary">No</span>

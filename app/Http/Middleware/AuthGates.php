@@ -26,7 +26,7 @@ class AuthGates
         }
 
         // Super admins bypass all permission checks
-        if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+        if ($user->isSuperAdmin()) {
             // Grant super admin all permissions
             foreach ($permissionsArray as $title => $roleIds) {
                 Gate::define($title, function ($user) {
@@ -36,35 +36,11 @@ class AuthGates
             return $next($request);
         }
 
-        // For regular admins, check both role-based and module-based permissions
+        // Define gates based on role permissions
         foreach ($permissionsArray as $title => $roleIds) {
-            Gate::define($title, function ($user) use ($roleIds, $title) {
-                // First check role-based permissions
-                $hasRolePermission = count(array_intersect($user->roles->pluck('id')->toArray(), $roleIds)) > 0;
-
-                if ($hasRolePermission) {
-                    return true;
-                }
-
-                // Then check module-based permissions for admins
-                if ($user->type === 'admin' && method_exists($user, 'hasModulePermission')) {
-                    // Map permission titles to module permissions
-                    if (str_contains($title, 'casting_requirement') || str_contains($title, 'project')) {
-                        return $user->hasModulePermission('project_management');
-                    }
-                    if (str_contains($title, 'talent')) {
-                        return $user->hasModulePermission('talent_management');
-                    }
-                    if (str_contains($title, 'payment') || str_contains($title, 'casting_application')) {
-                        return $user->hasModulePermission('payment_management');
-                    }
-                    // Special case: user_management_access is used by PaymentDashboardController
-                    if ($title === 'user_management_access') {
-                        return $user->hasModulePermission('payment_management');
-                    }
-                }
-
-                return false;
+            Gate::define($title, function ($user) use ($roleIds) {
+                // Check if user has any role that has this permission
+                return count(array_intersect($user->roles->pluck('id')->toArray(), $roleIds)) > 0;
             });
         }
 

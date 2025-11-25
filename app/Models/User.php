@@ -121,7 +121,23 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->type === self::TYPE_ADMIN && $this->is_super_admin;
+        return $this->roles()->where('title', 'superadmin')->exists();
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->roles()->whereIn('title', ['admin', 'superadmin'])->exists();
+    }
+
+    /**
+     * Check if user is creator
+     */
+    public function isCreator(): bool
+    {
+        return $this->roles()->where('title', 'creator')->exists();
     }
 
     /**
@@ -133,11 +149,13 @@ class User extends Authenticatable
             return true; // Super admin has all permissions
         }
 
-        if ($this->type !== self::TYPE_ADMIN) {
+        if (!$this->isAdmin()) {
             return false;
         }
 
-        return $this->adminPermissions?->hasModulePermission($module) ?? false;
+        return $this->roles()->whereHas('permissions', function ($query) use ($module) {
+            $query->where('title', $module . '_access');
+        })->exists();
     }
 
     /**
@@ -149,7 +167,38 @@ class User extends Authenticatable
             return true;
         }
 
-        return $this->adminPermissions?->canMakePayments() ?? false;
+        return $this->hasModulePermission('payment_management');
+    }
+
+    /**
+     * Check if user has specific permission
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true; // Super admin has all permissions
+        }
+
+        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
+            $query->where('title', $permission);
+        })->exists();
+    }
+
+    /**
+     * Assign role to user and inherit permissions
+     */
+    public function assignRole($role)
+    {
+        if (is_string($role)) {
+            $role = Role::where('title', $role)->first();
+        } elseif (is_int($role) || is_numeric($role)) {
+            $role = Role::find($role);
+        }
+
+        if ($role) {
+            $this->roles()->sync([$role->id]);
+            // Permissions are automatically inherited through the role relationship
+        }
     }
 
     public function getOtpExpiresAtAttribute($value)

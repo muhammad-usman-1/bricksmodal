@@ -28,6 +28,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [AdminLoginController::class, 'login'])->name('login.submit');
+        Route::get('login/google', [AdminLoginController::class, 'redirectToGoogle'])->name('login.google');
+        Route::get('login/google/callback', [AdminLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
+        Route::get('unauthorized', [AdminLoginController::class, 'showUnauthorized'])->name('unauthorized');
     });
 
     Route::post('logout', [AdminLoginController::class, 'logout'])->middleware('auth:admin')->name('logout');
@@ -41,6 +44,13 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Projects Dashboard (requires project_management permission)
         Route::middleware('admin.module:project_management')->group(function () {
             Route::get('projects', [CastingRequirementController::class, 'index'])->name('projects.dashboard');
+
+            // Casting Requirement
+            Route::delete('casting-requirements/destroy', [CastingRequirementController::class, 'massDestroy'])->name('casting-requirements.massDestroy');
+            Route::post('casting-requirements/media', [CastingRequirementController::class, 'storeMedia'])->name('casting-requirements.storeMedia');
+            Route::post('casting-requirements/ckmedia', [CastingRequirementController::class, 'storeCKEditorImages'])->name('casting-requirements.storeCKEditorImages');
+            Route::get('casting-requirements/{casting_requirement}/applicants', [CastingRequirementController::class, 'applicants'])->name('casting-requirements.applicants');
+            Route::resource('casting-requirements', CastingRequirementController::class);
         });
 
         // Talents Dashboard (requires talent_management permission)
@@ -61,6 +71,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::resource('admin-management', \App\Http\Controllers\Admin\AdminManagementController::class)->parameters([
                 'admin-management' => 'user'
             ]);
+
+            // Role-Permission Management (Super Admin Only)
+            Route::get('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'index'])->name('role-permissions.index');
+            Route::put('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'update'])->name('role-permissions.update');
 
             // Payment Request Management (Super Admin)
             Route::get('payment-requests', [PaymentRequestController::class, 'index'])->name('payment-requests.index');
@@ -98,13 +112,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // Language
     Route::delete('languages/destroy', [LanguageController::class, 'massDestroy'])->name('languages.massDestroy');
     Route::resource('languages', LanguageController::class);
-
-    // Casting Requirement
-    Route::delete('casting-requirements/destroy', [CastingRequirementController::class, 'massDestroy'])->name('casting-requirements.massDestroy');
-    Route::post('casting-requirements/media', [CastingRequirementController::class, 'storeMedia'])->name('casting-requirements.storeMedia');
-    Route::post('casting-requirements/ckmedia', [CastingRequirementController::class, 'storeCKEditorImages'])->name('casting-requirements.storeCKEditorImages');
-    Route::get('casting-requirements/{casting_requirement}/applicants', [CastingRequirementController::class, 'applicants'])->name('casting-requirements.applicants');
-    Route::resource('casting-requirements', CastingRequirementController::class);
 
     // Casting Application
     Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');

@@ -51,7 +51,7 @@
                 <select class="form-control {{ $errors->has('role_id') ? 'is-invalid' : '' }}" name="role_id" id="role_id" required>
                     <option value="">Select a role...</option>
                     @foreach($roles as $role)
-                        <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->title }}</option>
+                        <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ ucfirst($role->title) }}</option>
                     @endforeach
                 </select>
                 @if($errors->has('role_id'))
@@ -59,43 +59,17 @@
                         {{ $errors->first('role_id') }}
                     </div>
                 @endif
-            </div>
-
-            <div class="form-group">
-                <label class="d-block mb-3"><strong>Module Permissions</strong></label>
-
-                <div class="custom-control custom-checkbox mb-2">
-                    <input type="checkbox" class="custom-control-input" name="project_management" id="project_management" value="1" {{ old('project_management') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="project_management">
-                        <i class="fas fa-project-diagram text-primary"></i> Project Management
-                    </label>
-                </div>
-
-                <div class="custom-control custom-checkbox mb-2">
-                    <input type="checkbox" class="custom-control-input" name="talent_management" id="talent_management" value="1" {{ old('talent_management') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="talent_management">
-                        <i class="fas fa-users text-info"></i> Talent Management
-                    </label>
-                </div>
-
-                <div class="custom-control custom-checkbox mb-2">
-                    <input type="checkbox" class="custom-control-input" name="payment_management" id="payment_management" value="1" {{ old('payment_management') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="payment_management">
-                        <i class="fas fa-credit-card text-success"></i> Payment Management
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="d-block mb-3"><strong>Payment Permissions</strong></label>
-
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" name="can_make_payments" id="can_make_payments" value="1" {{ old('can_make_payments') ? 'checked' : '' }}>
-                    <label class="custom-control-label" for="can_make_payments">
-                        <i class="fas fa-money-bill-wave text-warning"></i> Can Make Payments
-                    </label>
-                    <small class="form-text text-muted">If unchecked, admin can only request payment approval from super admin</small>
-                </div>
+                <small class="form-text text-muted">
+                    The selected role will automatically grant the appropriate permissions and menu access.
+                    @if($role ?? false)
+                        <strong>Selected role permissions:</strong>
+                        @if($role->permissions && $role->permissions->count() > 0)
+                            {{ $role->permissions->pluck('title')->map(function($perm) { return ucwords(str_replace(['_', 'management', 'access'], [' ', '', ''], $perm)); })->join(', ') }}
+                        @else
+                            No permissions assigned to this role
+                        @endif
+                    @endif
+                </small>
             </div>
 
             <div class="form-group">

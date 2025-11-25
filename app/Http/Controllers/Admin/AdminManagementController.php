@@ -9,6 +9,7 @@ use App\Models\AdminPermission;
 use App\Notifications\AdminAccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class AdminManagementController extends Controller
@@ -17,7 +18,7 @@ class AdminManagementController extends Controller
     {
         $admins = User::where('type', User::TYPE_ADMIN)
             ->where('id', '!=', auth('admin')->id()) // Exclude current user
-            ->with(['adminPermissions', 'roles'])
+            ->with(['roles.permissions'])
             ->orderBy('is_super_admin', 'desc')
             ->orderBy('name')
             ->get();
@@ -38,10 +39,6 @@ class AdminManagementController extends Controller
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role_id' => ['required', 'exists:roles,id'],
-            'project_management' => ['nullable', 'boolean'],
-            'talent_management' => ['nullable', 'boolean'],
-            'payment_management' => ['nullable', 'boolean'],
-            'can_make_payments' => ['nullable', 'boolean'],
         ]);
 
         // Store plain password for email notification
@@ -55,24 +52,18 @@ class AdminManagementController extends Controller
             'is_super_admin' => false,
         ]);
 
-        // Assign role
-        $admin->roles()->attach($request->role_id);
+        // Assign role - permissions are automatically inherited
+        $admin->assignRole($request->role_id);
 
-        // Create admin permissions
-        $permissions = [
-            'project_management' => $request->boolean('project_management'),
-            'talent_management' => $request->boolean('talent_management'),
-            'payment_management' => $request->boolean('payment_management'),
-            'can_make_payments' => $request->boolean('can_make_payments'),
-        ];
-
-        AdminPermission::create(array_merge(['user_id' => $admin->id], $permissions));
+        // Get role permissions for email notification
+        $role = Role::with('permissions')->find($request->role_id);
+        $permissions = $role ? $role->permissions->pluck('title')->toArray() : [];
 
         // Send email notification to the new admin
         try {
             $admin->notify(new AdminAccountCreated($plainPassword, $permissions));
         } catch (\Exception $e) {
-            \Log::error('Failed to send admin account creation email', [
+            Log::error('Failed to send admin account creation email', [
                 'admin_id' => $admin->id,
                 'email' => $admin->email,
                 'error' => $e->getMessage(),
@@ -80,7 +71,7 @@ class AdminManagementController extends Controller
         }
 
         return redirect()->route('admin.admin-management.index')
-            ->with('message', 'Admin created successfully and notification email sent.');
+            ->with('message', 'Admin created successfully with assigned role and notification email sent.');
     }
 
     public function edit(User $user)
@@ -95,7 +86,7 @@ class AdminManagementController extends Controller
         }
 
         $roles = Role::all();
-        $user->load('adminPermissions', 'roles');
+        $user->load('roles');
 
         return view('admin.admin-management.edit', compact('user', 'roles'));
     }
@@ -111,10 +102,6 @@ class AdminManagementController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'role_id' => ['required', 'exists:roles,id'],
-            'project_management' => ['nullable', 'boolean'],
-            'talent_management' => ['nullable', 'boolean'],
-            'payment_management' => ['nullable', 'boolean'],
-            'can_make_payments' => ['nullable', 'boolean'],
         ]);
 
         $user->update([
@@ -126,22 +113,11 @@ class AdminManagementController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        // Update role
-        $user->roles()->sync([$request->role_id]);
-
-        // Update permissions
-        $user->adminPermissions()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'project_management' => $request->boolean('project_management'),
-                'talent_management' => $request->boolean('talent_management'),
-                'payment_management' => $request->boolean('payment_management'),
-                'can_make_payments' => $request->boolean('can_make_payments'),
-            ]
-        );
+        // Update role - permissions are automatically inherited
+        $user->assignRole($request->role_id);
 
         return redirect()->route('admin.admin-management.index')
-            ->with('message', 'Admin updated successfully.');
+            ->with('message', 'Admin updated successfully with new role assignment.');
     }
 
     public function destroy(User $user)
@@ -154,9 +130,6 @@ class AdminManagementController extends Controller
             return redirect()->route('admin.admin-management.index')
                 ->with('error', 'Cannot delete yourself.');
         }
-
-        // Delete admin permissions first
-        $user->adminPermissions()->delete();
 
         // Detach roles
         $user->roles()->detach();

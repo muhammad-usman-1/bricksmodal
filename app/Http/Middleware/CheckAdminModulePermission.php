@@ -23,17 +23,12 @@ class CheckAdminModulePermission
             abort(403, 'Not authenticated as admin.');
         }
 
-        // Super admin has access to everything
-        if ($user->isSuperAdmin()) {
-            return $next($request);
+        // Ensure roles are loaded with permissions
+        if (!$user->relationLoaded('roles')) {
+            $user->load('roles.permissions');
         }
 
-        // Load admin permissions if not already loaded
-        if (!$user->relationLoaded('adminPermissions')) {
-            $user->load('adminPermissions');
-        }
-
-        // Check if admin has the required module permission
+        // Check if user has the required module permission
         if ($user->hasModulePermission($module)) {
             return $next($request);
         }
