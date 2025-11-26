@@ -10,20 +10,16 @@ class RolesTableSeeder extends Seeder
     public function run()
     {
         $roles = [
-            [
-                'id'    => 1,
-                'title' => 'admin',
-            ],
-            [
-                'id'    => 2,
-                'title' => 'superadmin',
-            ],
-            [
-                'id'    => 3,
-                'title' => 'creator',
-            ],
+            ['title' => 'admin'],
+            ['title' => 'superadmin'],
+            ['title' => 'creator'],
         ];
 
-        Role::insert($roles);
+        // Idempotent creation: don't rely on explicit primary keys.
+        foreach ($roles as $role) {
+            Role::firstOrCreate([
+                'title' => $role['title'],
+            ]);
+        }
     }
 }

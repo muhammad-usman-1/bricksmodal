@@ -171,6 +171,11 @@ class PermissionsTableSeeder extends Seeder
             ],
         ];
 
-        Permission::insert($permissions);
+        // Use idempotent creation so seeding is safe on existing DBs
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate([
+                'title' => $perm['title'],
+            ]);
+        }
     }
 }
