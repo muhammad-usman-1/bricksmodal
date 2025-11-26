@@ -6,7 +6,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Admin Management</h5>
             <a href="{{ route('admin.admin-management.create') }}" class="btn btn-success btn-sm">
-                <i class="fas fa-plus"></i> Add New Admin
+                <i class="fas fa-plus"></i> Add New User
             </a>
         </div>
     </div>

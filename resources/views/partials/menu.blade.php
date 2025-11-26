@@ -74,7 +74,7 @@
                     <i class="c-sidebar-nav-icon fas fa-fw fa-user-shield">
 
                     </i>
-                    Admin Management
+                    User Management
                 </a>
             </li>
             <li class="c-sidebar-nav-item">

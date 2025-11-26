@@ -74,6 +74,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
             // Role-Permission Management (Super Admin Only)
             Route::get('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'index'])->name('role-permissions.index');
+            Route::get('role-permissions/{role}/edit', [\App\Http\Controllers\Admin\RolePermissionController::class, 'edit'])->name('role-permissions.edit');
             Route::put('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'update'])->name('role-permissions.update');
 
             // Payment Request Management (Super Admin)

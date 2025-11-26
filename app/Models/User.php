@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable
 {
@@ -189,15 +190,23 @@ class User extends Authenticatable
      */
     public function assignRole($role)
     {
-        if (is_string($role)) {
+        Log::info('assignRole called with role: ' . $role . ' (type: ' . gettype($role) . ')');
+
+        // Check if role is numeric (ID) or string (title)
+        if (is_numeric($role)) {
+            $role = Role::find((int) $role);
+            Log::info('Role found by ID: ' . ($role ? $role->id : 'null'));
+        } elseif (is_string($role)) {
             $role = Role::where('title', $role)->first();
-        } elseif (is_int($role) || is_numeric($role)) {
-            $role = Role::find($role);
+            Log::info('Role found by title: ' . ($role ? $role->id : 'null'));
         }
 
         if ($role) {
             $this->roles()->sync([$role->id]);
+            Log::info('Role assigned to user ' . $this->id . ': ' . $role->id);
             // Permissions are automatically inherited through the role relationship
+        } else {
+            Log::error('Role not found for assignment: ' . $role);
         }
     }
 

@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\AdminPermission;
 use App\Notifications\AdminAccountCreated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -28,50 +29,91 @@ class AdminManagementController extends Controller
 
     public function create()
     {
+        // Only superadmin can create admin accounts
+        if (!auth('admin')->user()->isSuperAdmin()) {
+            abort(403, 'Only superadmin can create admin accounts.');
+        }
+
         $roles = Role::all();
         return view('admin.admin-management.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role_id' => ['required', 'exists:roles,id'],
-        ]);
-
-        // Store plain password for email notification
-        $plainPassword = $request->password;
-
-        $admin = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($plainPassword),
-            'type' => User::TYPE_ADMIN,
-            'is_super_admin' => false,
-        ]);
-
-        // Assign role - permissions are automatically inherited
-        $admin->assignRole($request->role_id);
-
-        // Get role permissions for email notification
-        $role = Role::with('permissions')->find($request->role_id);
-        $permissions = $role ? $role->permissions->pluck('title')->toArray() : [];
-
-        // Send email notification to the new admin
-        try {
-            $admin->notify(new AdminAccountCreated($plainPassword, $permissions));
-        } catch (\Exception $e) {
-            Log::error('Failed to send admin account creation email', [
-                'admin_id' => $admin->id,
-                'email' => $admin->email,
-                'error' => $e->getMessage(),
-            ]);
+        // Only superadmin can create admin accounts
+        if (!auth('admin')->user()->isSuperAdmin()) {
+            abort(403, 'Only superadmin can create admin accounts.');
         }
 
-        return redirect()->route('admin.admin-management.index')
-            ->with('message', 'Admin created successfully with assigned role and notification email sent.');
+        // Validate input data
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'min:2'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role_id' => ['required', 'integer', 'exists:roles,id'],
+        ]);
+
+        try {
+            // Start database transaction for atomicity
+            DB::beginTransaction();
+
+            // Create the admin user
+            $admin = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'type' => User::TYPE_ADMIN,
+                'is_super_admin' => false,
+            ]);
+
+            // Assign the selected role
+            $admin->assignRole($validated['role_id']);
+
+            // Load the role with permissions for notification
+            $role = Role::with('permissions')->find($validated['role_id']);
+
+            // Commit the transaction
+            DB::commit();
+
+            // Send notification email (outside transaction to avoid rollback on email failure)
+            try {
+                $permissions = $role ? $role->permissions->pluck('title')->toArray() : [];
+                $admin->notify(new AdminAccountCreated($validated['password'], $permissions));
+
+                Log::info('Admin account created successfully', [
+                    'admin_id' => $admin->id,
+                    'admin_email' => $admin->email,
+                    'role_id' => $validated['role_id'],
+                    'created_by' => auth('admin')->id(),
+                ]);
+
+                return redirect()->route('admin.admin-management.index')
+                    ->with('success', 'Admin account created successfully. Login credentials have been sent to the admin\'s email.');
+            } catch (\Exception $e) {
+                Log::warning('Admin account created but email notification failed', [
+                    'admin_id' => $admin->id,
+                    'admin_email' => $admin->email,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->route('admin.admin-management.index')
+                    ->with('warning', 'Admin account created successfully, but email notification could not be sent. Please share the login credentials manually.');
+            }
+
+        } catch (\Exception $e) {
+            // Rollback transaction on any error
+            DB::rollBack();
+
+            Log::error('Failed to create admin account', [
+                'error' => $e->getMessage(),
+                'input' => $request->only(['name', 'email', 'role_id']),
+                'created_by' => auth('admin')->id(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create admin account. Please try again.');
+        }
     }
 
     public function edit(User $user)

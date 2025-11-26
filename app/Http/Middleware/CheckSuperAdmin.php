@@ -18,7 +18,17 @@ class CheckSuperAdmin
     {
         $user = auth('admin')->user();
 
-        if (!$user || !$user->isSuperAdmin()) {
+        // Accept either explicit boolean flag or role-based check
+        $isSuper = false;
+        if ($user) {
+            if (isset($user->is_super_admin) && $user->is_super_admin) {
+                $isSuper = true;
+            } elseif (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+                $isSuper = true;
+            }
+        }
+
+        if (!$user || !$isSuper) {
             abort(403, 'This action is only available to Super Admins.');
         }
 
