@@ -46,9 +46,9 @@
         z-index: 1000;
     }
 
-    .logo-container img {
-        height: 50px;
-        width: auto;
+  .logo-container img {
+        height: 30px;
+        width: 130px;
     }
 
     .hs-wrap {

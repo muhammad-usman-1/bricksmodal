@@ -32,8 +32,8 @@
     }
 
     .logo-container img {
-        height: 25px;
-        width: 100px;
+        height: 30px;
+        width: 130px;
     }
 
     /* ===== Layout frame ===== */

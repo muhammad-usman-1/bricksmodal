@@ -176,42 +176,52 @@
 
 
     <script>
-        // ---- Phone (intl-tel-input) ----
-        const phoneInput = document.querySelector('#phone');
-        let iti = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            // ---- Phone (intl-tel-input) ----
+            const phoneInput = document.querySelector('#phone');
+            let iti = null;
 
-        // Supported countries from config
-        const supportedCountries = {!! json_encode(array_keys(config('countries.supported', ['kw', 'sa', 'ae', 'bh', 'om', 'qa']))) !!};
-        const preferredCountries = {!! json_encode(config('countries.preferred', ['kw', 'sa', 'ae', 'bh'])) !!};
-        const initialCountry = {!! json_encode(config('countries.initial', 'kw')) !!};
+            // Supported countries from config
+            const supportedCountries = {!! json_encode(array_keys(config('countries.supported', ['kw', 'sa', 'ae', 'bh', 'om', 'qa']))) !!};
+            const preferredCountries = {!! json_encode(config('countries.preferred', ['kw', 'sa', 'ae', 'bh'])) !!};
+            const initialCountry = {!! json_encode(config('countries.initial', 'kw')) !!};
 
-        function initPhone() {
-            if (!window.intlTelInput) return; // in case the lib is already globally loaded in layout
-            iti = window.intlTelInput(phoneInput, {
-                initialCountry: initialCountry,
-                onlyCountries: supportedCountries,
-                preferredCountries: preferredCountries,
-                separateDialCode: true,
-                utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js'
-            });
-        }
-        // If script is deferred in layout, run immediately; otherwise wait a tick
-        document.readyState === 'loading' ?
-            window.addEventListener('DOMContentLoaded', initPhone) :
+            function initPhone() {
+                if (!window.intlTelInput) return; // in case the lib is already globally loaded in layout
+                iti = window.intlTelInput(phoneInput, {
+                    initialCountry: initialCountry,
+                    onlyCountries: supportedCountries,
+                    preferredCountries: preferredCountries,
+                    separateDialCode: true,
+                    utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js'
+                });
+            }
+
             initPhone();
 
-        // push dial code + national number into hidden inputs on submit
-        form.addEventListener('submit', function(e) {
-            if (iti) {
-                document.getElementById('phone_country_code').value = '+' + (iti.getSelectedCountryData()
-                    .dialCode || '');
-                // national number without dial code
-                const number = iti.getNumber(intlTelInputUtils.numberFormat.NATIONAL) || phoneInput.value;
-                document.getElementById('phone_number').value = number.replace(/\s+/g, '').trim();
-            } else {
-                // fallback: treat whole value as phone_number; no country code
-                document.getElementById('phone_number').value = phoneInput.value.trim();
-            }
+            const form = document.getElementById('auth-form');
+
+            // ---- Phone submit handler ----
+            form.addEventListener('submit', function(e) {
+                const inputValue = phoneInput.value.trim();
+                if (iti) {
+                    document.getElementById('phone_country_code').value = '+' + (iti.getSelectedCountryData()
+                        .dialCode || '');
+                    // national number without dial code
+                    const number = iti.getNumber(intlTelInputUtils.numberFormat.NATIONAL) || inputValue;
+                    document.getElementById('phone_number').value = number.replace(/\s+/g, '').trim();
+                } else {
+                    // fallback: parse the input
+                    if (inputValue.startsWith('+')) {
+                        const parts = inputValue.split(/\s+/);
+                        document.getElementById('phone_country_code').value = parts[0];
+                        document.getElementById('phone_number').value = parts.slice(1).join('').replace(/\D/g, '');
+                    } else {
+                        document.getElementById('phone_country_code').value = '+965';
+                        document.getElementById('phone_number').value = inputValue.replace(/\D/g, '');
+                    }
+                }
+            });
         });
     </script>
 @endsection

@@ -20,8 +20,8 @@
         }
 
         .logo-container img {
-        height: 25px;
-        width: 100px;
+        height: 30px;
+        width: 130px;
     }
 
         /* Page layout: plain white, centered stack */
@@ -103,13 +103,13 @@
         }
     </style>
 
-    <!-- Logo -->
-    <div class="logo-container">
-        <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
-    </div>
-
     <div class="otp-page">
         <div class="otp-wrap">
+            <!-- Logo -->
+            <div class="logo-container" style="position: static; margin-bottom: 20px;">
+                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+            </div>
+
             <div class="otp-title">OTP Code Verification</div>
 
             <form id="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">

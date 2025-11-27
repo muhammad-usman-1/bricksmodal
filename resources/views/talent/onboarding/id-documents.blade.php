@@ -24,9 +24,9 @@
         left: 20px;
         z-index: 1000;
     }
-.logo-container img {
-        height: 25px;
-        width: 100px;
+ .logo-container img {
+        height: 30px;
+        width: 130px;
     }
 
     /* ===== Page frame (no cards, just clean spacing) ===== */
