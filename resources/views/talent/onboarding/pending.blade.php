@@ -35,7 +35,7 @@
             align-items: center;
             justify-content: center;
             padding: clamp(16px, 3vw, 28px);
-            background: linear-gradient(180deg, #fff, #fff9f8);
+
         }
 
         /* Card */
@@ -158,7 +158,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo" width="100" height="25">
 </div>
 
 <div class="pending-wrap">
@@ -193,10 +193,24 @@
             @endif
 
             <div class="pending-actions">
-                <a href="{{ route('talent.pending') }}" class="btn btn-refresh">
-                    {{ trans('global.refresh_status') }}
-                </a>
+
+                <form method="POST" action="{{ route('talent.logout') }}" style="display: inline;">
+                    @csrf
+                    
+                    <button type="submit" class="btn btn-secondary" style="margin-left: 10px; background: #6c757d; border: none; color: #fff; padding: 10px 22px; border-radius: 12px; font-weight: 800; letter-spacing: .2px; box-shadow: var(--shadow);">
+                        {{ trans('global.logout') }}
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        this.textContent = ' Refreshing';
+        this.disabled = true;
+    });
+</script>
+@endsection
