@@ -32,7 +32,7 @@ class KwtSmsService
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
         $timestamp = now()->format('Y-m-d H:i:s');
         // Build the message
-        $message = "Dear Bricks Community User, Here is your OTP: {$otp}. DO NOT DISCLOSE THIS OTP to anyone! Timestamp: {$timestamp}";
+        $message = "Dear Bricks Community User, Here is your OTP: {$otp}. DO NOT DISCLOSE THIS OTP to anyone!  {$timestamp}";
         try {
             // Send GET request with query parameters
             $response = Http::timeout(10)->get($this->apiUrl, [
