@@ -32,8 +32,8 @@
     }
 
     .logo-container img {
-        height: 50px;
-        width: auto;
+        height: 25px;
+        width: 100px;
     }
 
     /* ===== Layout frame ===== */
@@ -246,7 +246,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
 </div>
 
 <div class="ps-wrap">

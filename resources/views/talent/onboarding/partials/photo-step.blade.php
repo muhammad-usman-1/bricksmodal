@@ -212,7 +212,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
 </div>
 
 <div class="hs-wrap">

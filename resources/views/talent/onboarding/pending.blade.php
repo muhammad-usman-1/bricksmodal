@@ -23,11 +23,10 @@
             left: 20px;
             z-index: 1000;
         }
-
-        .logo-container img {
-            height: 30px;
-            width: 150px;
-        }
+.logo-container img {
+        height: 25px;
+        width: 100px;
+    }
 
         /* Page frame */
         .pending-wrap {
@@ -159,7 +158,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
 </div>
 
 <div class="pending-wrap">

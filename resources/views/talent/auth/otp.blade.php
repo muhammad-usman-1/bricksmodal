@@ -20,9 +20,9 @@
         }
 
         .logo-container img {
-            height: 30px;
-            width: 150px;
-        }
+        height: 25px;
+        width: 100px;
+    }
 
         /* Page layout: plain white, centered stack */
         .otp-page {
@@ -105,7 +105,7 @@
 
     <!-- Logo -->
     <div class="logo-container">
-        <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+        <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
     </div>
 
     <div class="otp-page">

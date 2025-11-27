@@ -45,7 +45,6 @@
                 </thead>
                 <tbody>
                     @foreach($talentProfiles as $key => $talentProfile)
-                        @if($talentProfile->verification_status === 'approved')
                         <tr data-entry-id="{{ $talentProfile->id }}">
                             <td>
 
@@ -128,7 +127,6 @@
                             </td>
 
                         </tr>
-                        @endif
                     @endforeach
                 </tbody>
             </table>

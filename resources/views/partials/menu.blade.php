@@ -2,7 +2,7 @@
 
      <div class="c-sidebar-brand d-md-down-none">
         <a class="c-sidebar-brand-full h4" href="{{ route('talent.dashboard') }}">
-            <img src="{{ asset('storage/bricks_logo.png') }}" alt="Logo" style="height: 27px; width: auto;">
+            <img src="{{ asset('images/bricks_logo.png') }}" alt="Logo" style="height: 27px; width: auto;">
         </a>
     </div>
 

@@ -15,8 +15,8 @@
         }
 
         .logo-container img {
-            height: 30px;
-            width: 150px;
+            height: 20px;
+            width: 100px;
         }
 
         .auth-container {
@@ -129,14 +129,14 @@
         }
     </style>
 
-    <!-- Logo -->
-    <div class="logo-container">
-        <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
-    </div>
-
     <div class="auth-container">
         <div class="auth-box">
-            <h6 class="auth-title">Sign up to BRICKS Model</h6>
+            <!-- Logo -->
+            <div class="logo-container" style="position: static; margin-bottom: 20px;">
+                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+            </div>
+
+            <h6 class="auth-title">Welcome to BRICKS Model</h6>
 
             @if ($errors->any())
                 <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px;">
@@ -154,11 +154,6 @@
                 </div>
             @endif
 
-            <div class="tab-buttons">
-                <button type="button" id="tab-login" class="active">Login</button>
-                <button type="button" id="tab-create">Create account</button>
-            </div>
-
             <form id="auth-form" method="POST" action="{{ route('talent.login.submit') }}">
                 @csrf
 
@@ -173,15 +168,12 @@
 
                 <button type="submit" id="submit-btn" class="submit-btn">Submit</button>
 
-                <label class="remember">
-                    <input type="checkbox" name="remember">
-                    <span>Remember me</span>
-                </label>
+                 
             </form>
 
-            <div class="bottom-text">
-                Don’t have an Bricks Account?
-                <a href="javascript:void(0)" id="bottom-link">Already have</a>
+
+            <div class="bottom-text" style="margin-top: 10px;">
+                <a href="{{ route('admin.login') }}">Sign in as Admin</a>
             </div>
         </div>
     </div>
@@ -192,45 +184,6 @@
 --}}
 
     <script>
-        // ---- Tabs state ----
-        const state = {
-            tab: 'login', // 'login' | 'create'
-            routes: {
-                login: @json(route('talent.login.submit')),
-                create: @json(route('talent.register.submit')) // <- change if needed
-            }
-        };
-
-        const form = document.getElementById('auth-form');
-        const btnLogin = document.getElementById('tab-login');
-        const btnCreate = document.getElementById('tab-create');
-        const submitBtn = document.getElementById('submit-btn');
-        const bottomLink = document.getElementById('bottom-link');
-
-        function applyTab() {
-            // toggle active style
-            btnLogin.classList.toggle('active', state.tab === 'login');
-            btnCreate.classList.toggle('active', state.tab === 'create');
-
-            // swap form action + button text + bottom link text
-            form.action = state.routes[state.tab];
-            submitBtn.textContent = 'Submit';
-            bottomLink.textContent = (state.tab === 'login') ? 'Create one' : 'Back to Login';
-        }
-
-        btnLogin.addEventListener('click', () => {
-            state.tab = 'login';
-            applyTab();
-        });
-        btnCreate.addEventListener('click', () => {
-            state.tab = 'create';
-            applyTab();
-        });
-        bottomLink.addEventListener('click', () => {
-            state.tab = (state.tab === 'login') ? 'create' : 'login';
-            applyTab();
-        });
-
         // ---- Phone (intl-tel-input) ----
         const phoneInput = document.querySelector('#phone');
         let iti = null;
@@ -268,8 +221,5 @@
                 document.getElementById('phone_number').value = phoneInput.value.trim();
             }
         });
-
-        // init once
-        applyTab();
     </script>
 @endsection

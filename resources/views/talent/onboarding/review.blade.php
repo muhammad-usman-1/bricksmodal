@@ -25,8 +25,8 @@
     }
 
     .logo-container img {
-        height: 50px;
-        width: auto;
+        height: 25px;
+        width: 100px;
     }
 
     /* ===== Full-height layout: header + info + scrollable photos + footer ===== */
@@ -281,7 +281,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
 </div>
 
 <div class="pr-wrap">

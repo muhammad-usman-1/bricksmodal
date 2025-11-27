@@ -24,10 +24,9 @@
         left: 20px;
         z-index: 1000;
     }
-
-    .logo-container img {
-        height: 50px;
-        width: auto;
+.logo-container img {
+        height: 25px;
+        width: 100px;
     }
 
     /* ===== Page frame (no cards, just clean spacing) ===== */
@@ -263,7 +262,7 @@
 
 <!-- Logo -->
 <div class="logo-container">
-    <img src="{{ asset('storage/bricks_logo.png') }}" alt="BRICKS Model Logo">
+    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
 </div>
 
 <div class="v-toast" id="vToast">Selected ✔</div>
