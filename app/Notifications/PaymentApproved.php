@@ -21,7 +21,11 @@ class PaymentApproved extends Notification
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+        if (config('mail.enabled', true)) {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     public function toMail($notifiable)

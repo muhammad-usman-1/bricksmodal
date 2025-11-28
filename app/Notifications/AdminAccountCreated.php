@@ -30,7 +30,11 @@ class AdminAccountCreated extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $channels = [];
+        if (config('mail.enabled', true)) {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     /**
