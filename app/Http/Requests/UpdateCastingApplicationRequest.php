@@ -11,7 +11,7 @@ class UpdateCastingApplicationRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('casting_application_edit');
+        return Gate::allows('casting_application_manage');
     }
 
     public function rules()

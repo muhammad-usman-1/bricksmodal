@@ -48,7 +48,7 @@ class CastingApplicationController extends Controller
 
     public function edit(CastingApplication $castingApplication)
     {
-        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $casting_requirements = CastingRequirement::pluck('project_name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
@@ -101,7 +101,7 @@ class CastingApplicationController extends Controller
      */
     public function approve(Request $request, CastingApplication $castingApplication)
     {
-        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         // Validate that application is in 'applied' status
         if ($castingApplication->status !== 'applied') {
@@ -143,7 +143,7 @@ class CastingApplicationController extends Controller
      */
     public function reject(Request $request, CastingApplication $castingApplication)
     {
-        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         // Validate that application is not already rejected
         if ($castingApplication->status === 'rejected') {
@@ -181,7 +181,7 @@ class CastingApplicationController extends Controller
      */
     public function requestPayment(CastingApplication $castingApplication)
     {
-        abort_if(Gate::denies('casting_application_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $admin = auth('admin')->user();
 

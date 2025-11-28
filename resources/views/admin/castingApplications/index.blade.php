@@ -112,7 +112,7 @@
                                     </a>
                                 @endcan
 
-                                @can('casting_application_edit')
+                                @can('casting_application_manage')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.casting-applications.edit', $castingApplication->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>

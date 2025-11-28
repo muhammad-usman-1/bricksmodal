@@ -76,7 +76,7 @@ class TalentProfileController extends Controller
 
     public function show(TalentProfile $talentProfile)
     {
-        abort_if(Gate::denies('talent_profile_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('talent_profile_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $talentProfile->load('languages', 'user');
 

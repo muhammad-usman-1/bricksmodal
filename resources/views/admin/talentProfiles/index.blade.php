@@ -72,7 +72,7 @@
                                 {{ $talentProfile->user->name ?? '' }}
                             </td>
                             <td>
-                                @can('talent_profile_show')
+                                @can('talent_profile_view')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.talent-profiles.show', $talentProfile->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
