@@ -12,7 +12,7 @@ class RolesTableSeeder extends Seeder
         $roles = [
             ['title' => 'admin'],
             ['title' => 'superadmin'],
-            ['title' => 'creator'],
+            ['title' => 'creative'],
         ];
 
         // Idempotent creation: don't rely on explicit primary keys.

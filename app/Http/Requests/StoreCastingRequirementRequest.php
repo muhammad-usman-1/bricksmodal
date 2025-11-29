@@ -62,9 +62,6 @@ class StoreCastingRequirementRequest extends FormRequest
                 'numeric',
                 'required',
             ],
-            'status' => [
-                'required',
-            ],
         ];
     }
 }

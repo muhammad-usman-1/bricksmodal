@@ -30,6 +30,7 @@
             </div>
         @endif
 
+        @php $impersonating = session('impersonate.original_admin_id'); @endphp
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-hover">
                 <thead>
@@ -39,7 +40,7 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Role Permissions</th>
-                        <th>Can Make Payments</th>
+
                         <th width="15%">Actions</th>
                     </tr>
                 </thead>
@@ -73,25 +74,29 @@
                                     @endif
                                 @endif
                             </td>
-                            <td class="text-center">
-                                @if($admin->isSuperAdmin() || $admin->canMakePayments())
-                                    <span class="badge badge-success">Yes</span>
-                                @else
-                                    <span class="badge badge-secondary">No</span>
-                                @endif
-                            </td>
+                           
                             <td>
                                 @if(!$admin->is_super_admin)
                                     <a href="{{ route('admin.admin-management.edit', $admin) }}" class="btn btn-xs btn-info">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this admin?');">
+                                    <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display: inline-block;" data-swal-confirm="Are you sure you want to delete this admin?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-xs btn-danger">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    @can('impersonate_user')
+                                        @if(!$impersonating && auth('admin')->id() !== $admin->id)
+                                            <form action="{{ route('admin.impersonate.start', $admin) }}" method="POST" style="display:inline-block" data-swal-confirm="{{ trans('global.impersonate_confirm', ['name' => $admin->name]) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-xs btn-warning">
+                                                    <i class="fas fa-user-secret"></i> {{ trans('global.impersonate') }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endcan
                                 @else
                                     <span class="text-muted">Protected</span>
                                 @endif

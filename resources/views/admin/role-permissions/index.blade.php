@@ -4,7 +4,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Role Permission Management</h5>
-        <a href="{{ route('admin.roles.create') }}" class="btn btn-success btn-sm">+ Add Role</a>
+        <a href="{{ route('admin.role-permissions.create') }}" class="btn btn-success btn-sm">+ Add Role</a>
     </div>
 
     <div class="card-body">
@@ -53,7 +53,7 @@
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('admin.role-permissions.edit', $role->id) }}" class="btn btn-sm btn-primary" title="Edit Permissions"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this role?');">
+                                <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" style="display:inline-block;" data-swal-confirm="Delete this role?">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-danger" title="Delete Role"><i class="fas fa-trash"></i></button>

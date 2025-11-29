@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BankDetailController;
 use App\Http\Controllers\Admin\CastingApplicationController;
 use App\Http\Controllers\Admin\CastingRequirementController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\PaymentDashboardController;
 use App\Http\Controllers\Admin\PaymentRequestController;
@@ -85,6 +86,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
             // Role-Permission Management (Super Admin Only)
             Route::get('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'index'])->name('role-permissions.index');
+            Route::get('role-permissions/create', [\App\Http\Controllers\Admin\RolePermissionController::class, 'create'])->name('role-permissions.create');
+            Route::post('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'store'])->name('role-permissions.store');
             Route::get('role-permissions/{role}/edit', [\App\Http\Controllers\Admin\RolePermissionController::class, 'edit'])->name('role-permissions.edit');
             Route::put('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'update'])->name('role-permissions.update');
 
@@ -113,6 +116,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // Users
     Route::delete('users/destroy', [UsersController::class, 'massDestroy'])->name('users.massDestroy');
     Route::resource('users', UsersController::class);
+    Route::post('impersonate/{user}', [ImpersonationController::class, 'start'])->name('impersonate.start');
+    Route::match(['post', 'get'], 'impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
 
     // Language
     Route::delete('languages/destroy', [LanguageController::class, 'massDestroy'])->name('languages.massDestroy');

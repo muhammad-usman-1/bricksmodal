@@ -24,7 +24,7 @@ return new class extends Migration
         $roles = [
             ['id' => 1, 'title' => 'admin', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 2, 'title' => 'superadmin', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'title' => 'creator', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'title' => 'creative', 'created_at' => now(), 'updated_at' => now()],
         ];
 
         DB::table('roles')->insert($roles);
@@ -82,28 +82,30 @@ return new class extends Migration
             // System Settings
             ['id' => 35, 'title' => 'system_settings_access', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 36, 'title' => 'profile_manage', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 37, 'title' => 'impersonate_user', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 38, 'title' => 'casting_application_access', 'created_at' => now(), 'updated_at' => now()],
         ];
 
         DB::table('permissions')->insert($permissions);
 
         // Assign permissions to roles
         // Admin role (id=1) - basic admin permissions
-        $adminPermissions = [1, 2, 3, 4, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33, 34, 35, 36];
+        $adminPermissions = [1, 2, 3, 4, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33, 34, 35, 36, 38];
         DB::table('permission_role')->insert(array_map(function($permId) {
             return ['role_id' => 1, 'permission_id' => $permId];
         }, $adminPermissions));
 
         // Superadmin role (id=2) - all permissions including role and permission management
-        $superadminPermissions = range(1, 36);
+        $superadminPermissions = range(1, 38);
         DB::table('permission_role')->insert(array_map(function($permId) {
             return ['role_id' => 2, 'permission_id' => $permId];
         }, $superadminPermissions));
 
-        // Creator role (id=3) - content creation focused permissions
-        $creatorPermissions = [14, 15, 16, 18, 20, 21, 22, 24, 31, 32, 33, 34, 36];
+        // Creative role (id=3) - content creation focused permissions
+        $creativePermissions = [14, 15, 16, 18, 20, 21, 22, 24, 31, 32, 33, 34, 36];
         DB::table('permission_role')->insert(array_map(function($permId) {
             return ['role_id' => 3, 'permission_id' => $permId];
-        }, $creatorPermissions));
+        }, $creativePermissions));
     }
 
     /**

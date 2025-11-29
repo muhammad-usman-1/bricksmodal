@@ -261,7 +261,9 @@
             <button type="submit" class="hs-next">{{ trans('global.next_step') }}</button>
         </div>
     </form>
-</div>
+@once
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endonce
 
 <script>
     (function() {
@@ -271,6 +273,22 @@
         const form = document.getElementById('hsForm');
         const err = document.getElementById('photoError');
         const captureBtn = document.getElementById('captureBtn');
+        const MAX_MB = 5;
+        const MAX_BYTES = MAX_MB * 1024 * 1024;
+
+        function showSizeAlert() {
+            const message = `Please upload a single image under ${MAX_MB} MB to continue.`;
+            if (window.Swal && typeof window.Swal.fire === 'function') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File too large',
+                    text: message,
+                    confirmButtonColor: '#8a6561',
+                });
+            } else {
+                alert(message);
+            }
+        }
 
         if (input && preview) {
             input.addEventListener('change', function() {
@@ -286,6 +304,14 @@
                     preview.src = placeholder;
                     err.style.display = 'block';
                     captureBtn.classList.add('error');
+                    return;
+                }
+                if (f.size > MAX_BYTES) {
+                    this.value = '';
+                    preview.src = placeholder;
+                    err.style.display = 'block';
+                    captureBtn.classList.add('error');
+                    showSizeAlert();
                     return;
                 }
                 const url = URL.createObjectURL(f);

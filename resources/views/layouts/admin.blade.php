@@ -101,6 +101,21 @@
 
 
                 <div class="container-fluid">
+                    @php
+                        $impersonatingId = session('impersonate.original_admin_id');
+                        $originalAdmin = $impersonatingId ? \App\Models\User::find($impersonatingId) : null;
+                    @endphp
+                    @if($impersonatingId && $originalAdmin)
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+                            <div>
+                                <strong>{{ trans('global.impersonating_notice', ['name' => auth('admin')->user()->name]) }}</strong>
+                                <span class="d-block small">{{ trans('global.impersonating_original', ['name' => $originalAdmin->name]) }}</span>
+                            </div>
+                            <a href="{{ route('admin.impersonate.stop') }}" class="btn btn-sm btn-dark">
+                                {{ trans('global.stop_impersonating') }}
+                            </a>
+                        </div>
+                    @endif
                     @if(session('message'))
                         <div class="row mb-2">
                             <div class="col-lg-12">
@@ -149,8 +164,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const attachSwal = function () {
+                document.querySelectorAll('form[data-swal-confirm]').forEach(function (form) {
+                    if (form.dataset.swalBound === 'true') {
+                        return;
+                    }
+                    form.dataset.swalBound = 'true';
+                    form.addEventListener('submit', function (e) {
+                        if (form.dataset.swalConfirmed === 'true') {
+                            return;
+                        }
+                        e.preventDefault();
+                        const message = form.dataset.swalConfirm || '{{ trans('global.areYouSure') }}';
+                        Swal.fire({
+                            text: message,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: '{{ trans('global.yes') }}'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.dataset.swalConfirmed = 'true';
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            };
+
+            attachSwal();
+
+            document.addEventListener('turbolinks:load', attachSwal);
+            document.addEventListener('ajaxComplete', attachSwal);
+        });
+
         $(function() {
   let copyButtonTrans = '{{ trans('global.datatables.copy') }}'
   let csvButtonTrans = '{{ trans('global.datatables.csv') }}'

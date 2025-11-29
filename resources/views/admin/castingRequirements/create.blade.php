@@ -1,191 +1,219 @@
 @extends('layouts.admin')
 @section('content')
 
-<div class="card">
-    <div class="card-header">
-        {{ trans('global.create') }} {{ trans('cruds.castingRequirement.title_singular') }}
+<div class="shoot-builder">
+    <div class="shoot-builder__head">
+        <div>
+            <h2>Add New Shoot</h2>
+            <p>Create a shoot in guided steps. Status defaults to Advertised.</p>
+        </div>
+        <a href="{{ route('admin.projects.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Shoots</a>
     </div>
 
-    <div class="card-body">
-        <form method="POST" action="{{ route("admin.casting-requirements.store") }}" enctype="multipart/form-data">
-            @csrf
-            <div class="form-group">
-                <label class="required" for="project_name">{{ trans('cruds.castingRequirement.fields.project_name') }}</label>
-                <input class="form-control {{ $errors->has('project_name') ? 'is-invalid' : '' }}" type="text" name="project_name" id="project_name" value="{{ old('project_name', '') }}" required>
-                @if($errors->has('project_name'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('project_name') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.project_name_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label for="location">{{ trans('cruds.castingRequirement.fields.location') }}</label>
-                <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}">
-                @if($errors->has('location'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('location') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.location_helper') }}</span>
-            </div>
-            <div class="form-group" style="width: 100%;">
-                <label for="shoot_date_time">{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</label>
-                <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time') }}" style="width: 100%;">
-                @if($errors->has('shoot_date_time'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('shoot_date_time') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.shoot_date_time_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label for="hair_color">{{ trans('cruds.castingRequirement.fields.hair_color') }}</label>
-                <input class="form-control {{ $errors->has('hair_color') ? 'is-invalid' : '' }}" type="text" name="hair_color" id="hair_color" value="{{ old('hair_color', '') }}">
-                @if($errors->has('hair_color'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('hair_color') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.hair_color_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label for="age_range">{{ trans('cruds.castingRequirement.fields.age_range') }}</label>
-                <input class="form-control {{ $errors->has('age_range') ? 'is-invalid' : '' }}" type="text" name="age_range" id="age_range" value="{{ old('age_range', '') }}">
-                @if($errors->has('age_range'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('age_range') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.age_range_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label>{{ trans('cruds.castingRequirement.fields.gender') }}</label>
-                <select class="form-control {{ $errors->has('gender') ? 'is-invalid' : '' }}" name="gender" id="gender">
-                    <option value disabled {{ old('gender', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
-                    @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
-                        <option value="{{ $key }}" {{ old('gender', 'any') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('gender'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('gender') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.gender_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
-                <p class="text-muted small">Select one or multiple outfits</p>
+    <form method="POST" action="{{ route('admin.casting-requirements.store') }}" enctype="multipart/form-data" id="shootWizard">
+        @csrf
 
-                @foreach($outfits as $category => $categoryOutfits)
-                    <div class="outfit-category mb-4">
-                        <h6 class="text-capitalize font-weight-bold mb-3">{{ ucfirst($category) }} Outfits</h6>
-                        <div class="row">
-                            @foreach($categoryOutfits as $outfit)
-                                <div class="col-md-2 col-sm-4 col-6 mb-3">
-                                    <div class="outfit-item">
-                                        <input type="checkbox"
-                                               name="outfit[]"
-                                               value="{{ $outfit->id }}"
-                                               id="outfit_{{ $outfit->id }}"
-                                               class="outfit-checkbox"
-                                               {{ in_array($outfit->id, old('outfit', [])) ? 'checked' : '' }}>
-                                        <label for="outfit_{{ $outfit->id }}" class="outfit-label">
-                                            @if($outfit->image)
-                                                <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="outfit-image">
-                                            @else
-                                                <div class="outfit-placeholder">
-                                                    <i class="fas fa-tshirt fa-3x"></i>
-                                                </div>
-                                            @endif
-                                            <div class="outfit-name">{{ $outfit->name }}</div>
-                                        </label>
-                                    </div>
-                                </div>
+        <div class="shoot-steps" data-current-step="1">
+            <div class="shoot-step" data-step="1">
+                <h4>Basic Details</h4>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="required" for="project_name">Shoot Name</label>
+                        <input class="form-control {{ $errors->has('project_name') ? 'is-invalid' : '' }}" type="text" name="project_name" id="project_name" value="{{ old('project_name', '') }}" required>
+                        @if($errors->has('project_name'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('project_name') }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="location">{{ trans('cruds.castingRequirement.fields.location') }}</label>
+                        <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}">
+                        @if($errors->has('location'))
+                            <div class="invalid-feedback">{{ $errors->first('location') }}</div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="shoot_date_time">{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</label>
+                        <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time') }}">
+                        @if($errors->has('shoot_date_time'))
+                            <div class="invalid-feedback">{{ $errors->first('shoot_date_time') }}</div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="hair_color">{{ trans('cruds.castingRequirement.fields.hair_color') }}</label>
+                        <input class="form-control {{ $errors->has('hair_color') ? 'is-invalid' : '' }}" type="text" name="hair_color" id="hair_color" value="{{ old('hair_color', '') }}">
+                        @if($errors->has('hair_color'))
+                            <div class="invalid-feedback">{{ $errors->first('hair_color') }}</div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="age_range">{{ trans('cruds.castingRequirement.fields.age_range') }}</label>
+                        <input class="form-control {{ $errors->has('age_range') ? 'is-invalid' : '' }}" type="text" name="age_range" id="age_range" value="{{ old('age_range', '') }}">
+                        @if($errors->has('age_range'))
+                            <div class="invalid-feedback">{{ $errors->first('age_range') }}</div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label>{{ trans('cruds.castingRequirement.fields.gender') }}</label>
+                        <select class="form-control {{ $errors->has('gender') ? 'is-invalid' : '' }}" name="gender" id="gender">
+                            <option value disabled {{ old('gender', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
+                            @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
+                                <option value="{{ $key }}" {{ old('gender', 'any') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
-                        </div>
+                        </select>
+                        @if($errors->has('gender'))
+                            <div class="invalid-feedback">{{ $errors->first('gender') }}</div>
+                        @endif
                     </div>
-                @endforeach
-
-                @if($errors->has('outfit'))
-                    <div class="text-danger">
-                        {{ $errors->first('outfit') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.outfit_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label for="reference">{{ trans('cruds.castingRequirement.fields.reference') }}</label>
-                <div class="needsclick dropzone {{ $errors->has('reference') ? 'is-invalid' : '' }}" id="reference-dropzone">
                 </div>
-                @if($errors->has('reference'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('reference') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.reference_helper') }}</span>
             </div>
-            <div class="form-group">
-                <label class="required" for="count">{{ trans('cruds.castingRequirement.fields.count') }}</label>
-                <input class="form-control {{ $errors->has('count') ? 'is-invalid' : '' }}" type="number" name="count" id="count" value="{{ old('count', '1') }}" step="1" required>
-                @if($errors->has('count'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('count') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.count_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label for="notes">{{ trans('cruds.castingRequirement.fields.notes') }}</label>
-                <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes">{{ old('notes') }}</textarea>
-                @if($errors->has('notes'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('notes') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.notes_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label class="required" for="rate_per_model">{{ trans('cruds.castingRequirement.fields.rate_per_model') }}</label>
-                <input class="form-control {{ $errors->has('rate_per_model') ? 'is-invalid' : '' }}" type="number" name="rate_per_model" id="rate_per_model" value="{{ old('rate_per_model', '') }}" step="0.01" required>
-                @if($errors->has('rate_per_model'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('rate_per_model') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.rate_per_model_helper') }}</span>
-            </div>
-            <div class="form-group">
-                <label class="required">{{ trans('cruds.castingRequirement.fields.status') }}</label>
-                <select class="form-control {{ $errors->has('status') ? 'is-invalid' : '' }}" name="status" id="status" required>
-                    <option value disabled {{ old('status', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
-                    @foreach(App\Models\CastingRequirement::STATUS_SELECT as $key => $label)
-                        <option value="{{ $key }}" {{ old('status', 'advertised') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
+
+            <div class="shoot-step" data-step="2">
+                <h4>Requirements & References</h4>
+                <div class="form-group">
+                    <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
+                    <p class="text-muted small">Select one or multiple outfits</p>
+
+                    @foreach($outfits as $category => $categoryOutfits)
+                        <div class="outfit-category mb-4">
+                            <h6 class="text-capitalize font-weight-bold mb-3">{{ ucfirst($category) }} Outfits</h6>
+                            <div class="row">
+                                @foreach($categoryOutfits as $outfit)
+                                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                        <div class="outfit-item">
+                                            <input type="checkbox"
+                                                   name="outfit[]"
+                                                   value="{{ $outfit->id }}"
+                                                   id="outfit_{{ $outfit->id }}"
+                                                   class="outfit-checkbox"
+                                                   {{ in_array($outfit->id, old('outfit', [])) ? 'checked' : '' }}>
+                                            <label for="outfit_{{ $outfit->id }}" class="outfit-label">
+                                                @if($outfit->image)
+                                                    <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="outfit-image">
+                                                @else
+                                                    <div class="outfit-placeholder">
+                                                        <i class="fas fa-tshirt fa-3x"></i>
+                                                    </div>
+                                                @endif
+                                                <div class="outfit-name">{{ $outfit->name }}</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     @endforeach
-                </select>
-                @if($errors->has('status'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('status') }}
+
+                    @if($errors->has('outfit'))
+                        <div class="text-danger">{{ $errors->first('outfit') }}</div>
+                    @endif
+                </div>
+
+                <div class="form-group">
+                    <label for="reference">{{ trans('cruds.castingRequirement.fields.reference') }}</label>
+                    <div class="needsclick dropzone {{ $errors->has('reference') ? 'is-invalid' : '' }}" id="reference-dropzone"></div>
+                    @if($errors->has('reference'))
+                        <div class="invalid-feedback">{{ $errors->first('reference') }}</div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="shoot-step" data-step="3">
+                <h4>Talent & Budget</h4>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="required" for="count">{{ trans('cruds.castingRequirement.fields.count') }}</label>
+                        <input class="form-control {{ $errors->has('count') ? 'is-invalid' : '' }}" type="number" name="count" id="count" value="{{ old('count', '1') }}" min="1" required>
+                        @if($errors->has('count'))
+                            <div class="invalid-feedback">{{ $errors->first('count') }}</div>
+                        @endif
                     </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.status_helper') }}</span>
+                    <div class="form-group">
+                        <label class="required" for="rate_per_model">{{ trans('cruds.castingRequirement.fields.rate_per_model') }}</label>
+                        <input class="form-control {{ $errors->has('rate_per_model') ? 'is-invalid' : '' }}" type="number" name="rate_per_model" id="rate_per_model" value="{{ old('rate_per_model', '') }}" step="0.01" required>
+                        @if($errors->has('rate_per_model'))
+                            <div class="invalid-feedback">{{ $errors->first('rate_per_model') }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">{{ trans('cruds.castingRequirement.fields.notes') }}</label>
+                    <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4">{{ old('notes') }}</textarea>
+                    @if($errors->has('notes'))
+                        <div class="invalid-feedback">{{ $errors->first('notes') }}</div>
+                    @endif
+                </div>
             </div>
-            <div class="form-group">
-                <button class="btn btn-danger" type="submit">
-                    {{ trans('global.save') }}
-                </button>
+        </div>
+
+        <div class="shoot-builder__footer">
+            <div class="step-status">
+                Step <span data-step-indicator>1</span> of 3
             </div>
-        </form>
-    </div>
+            <div>
+                <button type="button" class="btn btn-outline-secondary" data-prev-step disabled>Back</button>
+                <button type="button" class="btn btn-primary" data-next-step>Next</button>
+                <button type="submit" class="btn btn-success d-none" data-submit-form>Save Shoot</button>
+            </div>
+        </div>
+    </form>
 </div>
-
-
-
 @endsection
 
 @section('scripts')
 <style>
+    .shoot-builder {
+        background: #fff;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+    .shoot-builder__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .shoot-steps {
+        position: relative;
+    }
+    .shoot-step {
+        display: none;
+        animation: fadeIn .25s ease;
+    }
+    .shoot-step.active {
+        display: block;
+    }
+    .grid {
+        display: grid;
+        grid-gap: 16px;
+    }
+    .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .shoot-builder__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 16px;
+        margin-top: 24px;
+    }
+    .step-status {
+        font-weight: 600;
+        color: #64748b;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
     .outfit-item {
         position: relative;
         border: 2px solid #e0e0e0;
@@ -318,5 +346,63 @@ Dropzone.options.referenceDropzone = {
          return _results
      }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const steps = Array.from(document.querySelectorAll('.shoot-step'));
+    const nextBtn = document.querySelector('[data-next-step]');
+    const prevBtn = document.querySelector('[data-prev-step]');
+    const submitBtn = document.querySelector('[data-submit-form]');
+    const indicator = document.querySelector('[data-step-indicator]');
+    const form = document.getElementById('shootWizard');
+
+    if (!steps.length || !nextBtn || !prevBtn || !indicator) {
+        return;
+    }
+
+    let currentStep = 0;
+
+    const showStep = (index) => {
+        steps.forEach((step, idx) => {
+            step.classList.toggle('active', idx === index);
+        });
+        indicator.textContent = index + 1;
+        prevBtn.disabled = index === 0;
+        nextBtn.classList.toggle('d-none', index === steps.length - 1);
+        submitBtn.classList.toggle('d-none', index !== steps.length - 1);
+    };
+
+    const isStepValid = (index) => {
+        const stepFields = steps[index].querySelectorAll('input, select, textarea');
+        let valid = true;
+        stepFields.forEach(field => {
+            if (field.required && !field.value) {
+                field.classList.add('is-invalid');
+                valid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        return valid;
+    };
+
+    nextBtn.addEventListener('click', function () {
+        if (!isStepValid(currentStep)) {
+            return;
+        }
+        currentStep = Math.min(currentStep + 1, steps.length - 1);
+        showStep(currentStep);
+    });
+
+    prevBtn.addEventListener('click', function () {
+        currentStep = Math.max(currentStep - 1, 0);
+        showStep(currentStep);
+    });
+
+    form.addEventListener('submit', function () {
+        form.insertAdjacentHTML('beforeend', '<input type="hidden" name="status" value="advertised">');
+    }, { once: true });
+
+    showStep(currentStep);
+});
 </script>
 @endsection

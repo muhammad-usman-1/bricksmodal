@@ -25,15 +25,14 @@
     }
 
     .logo-container {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        
     }
 
     .logo-container img {
-        height: 30px;
-        width: 130px;
+        height: 32px;
+        width: auto;
     }
 
     /* ===== Layout frame ===== */
@@ -41,7 +40,7 @@
         max-width: 1200px;
         margin: 0 auto;
         background: var(--white);
-        padding: clamp(16px, 3vw, 28px);
+
     }
 
     .ps-card {
@@ -136,13 +135,16 @@
         width: auto;
     }
 
-    /* >>> Ensure DoB is one full-width line and Gender is a separate line <<< */
-    .profile-setup .form-row.form-row--dob-gender {
-        grid-template-columns: 1fr;
-        /* override the 2-col default */
-        row-gap: 16px;
+    /* >>> Keep hips + DoB aligned; gender chips get their own row <<< */
+    .profile-setup .form-row.form-row--hips-dob {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 14px;
         margin-top: 6px;
         margin-bottom: 6px;
+    }
+
+    .form-group--gender {
+        margin-top: 6px;
     }
 
     /* Date with icon */
@@ -168,8 +170,8 @@
     /* Gender chip buttons (binds to existing select) */
     .ps-gender {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        /* one row, three equal chips */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        /* two equal chips spanning the row */
         gap: 14px;
         margin-top: 6px;
     }
@@ -236,6 +238,10 @@
             grid-template-columns: 1fr;
         }
 
+        .profile-setup .form-row.form-row--hips-dob {
+            grid-template-columns: 1fr;
+        }
+
         .ps-gender {
             grid-template-columns: 1fr;
         }
@@ -244,13 +250,11 @@
     }
 </style>
 
-<!-- Logo -->
-<div class="logo-container">
-    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
-</div>
-
 <div class="ps-wrap">
     <div class="ps-card profile-setup">
+        <div class="logo-container">
+            <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+        </div>
         <div class="ps-head">
             {{-- Back (uses browser history; replace href if you have a route) --}}
             <a href="javascript:history.back()" class="ps-back" aria-label="Go back">
@@ -344,6 +348,10 @@
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
+            </div>
+
+            {{-- Keep hips + DoB aligned --}}
+            <div class="form-row form-row--hips-dob">
                 <div class="form-group">
                     <label for="hips">{{ trans('cruds.talentProfile.fields.hips') }}</label>
                     <input type="number" class="form-control @error('hips') is-invalid @enderror" id="hips"
@@ -352,10 +360,6 @@
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
-            </div>
-
-            {{-- Date of Birth (one full-width line) then Gender (separate row) --}}
-            <div class="form-row form-row--dob-gender">
                 <div class="form-group">
                     <label for="date_of_birth">{{ trans('global.date_of_birth') }}</label>
                     <div class="ps-date-wrap">
@@ -374,32 +378,31 @@
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
+            </div>
 
-                {{-- Keep original select; visually replaced with chips in one row --}}
-                <div class="form-group">
-                    <label for="gender">{{ trans('global.gender') }}</label>
-                    <select class="form-control ps-gender-select @error('gender') is-invalid @enderror"
-                        id="gender" name="gender" required>
-                        <option value="" disabled {{ old('gender', $profile->gender) ? '' : 'selected' }}>
-                            {{ trans('global.pleaseSelect') }}</option>
-                        @foreach (['male' => trans('global.gender_male'), 'female' => trans('global.gender_female'), 'non_binary' => trans('global.gender_non_binary')] as $value => $label)
-                            <option value="{{ $value }}"
-                                {{ old('gender', $profile->gender) === $value ? 'selected' : '' }}>{{ $label }}
-                            </option>
-                        @endforeach
-                    </select>
+            {{-- Gender chips take half width each --}}
+            <div class="form-group form-group--gender">
+                <label for="gender">{{ trans('global.gender') }}</label>
+                <select class="form-control ps-gender-select @error('gender') is-invalid @enderror" id="gender"
+                    name="gender" required>
+                    <option value="" disabled {{ old('gender', $profile->gender) ? '' : 'selected' }}>
+                        {{ trans('global.pleaseSelect') }}</option>
+                    @foreach (['male' => trans('global.gender_male'), 'female' => trans('global.gender_female')] as $value => $label)
+                        <option value="{{ $value }}" {{ old('gender', $profile->gender) === $value ? 'selected' : '' }}>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
 
-                    <!-- Chip UI bound to the select above -->
-                    <div class="ps-gender" data-gender-chips>
-                        <div class="ps-chip" data-value="male">{{ trans('global.gender_male') }}</div>
-                        <div class="ps-chip" data-value="female">{{ trans('global.gender_female') }}</div>
-                        <div class="ps-chip" data-value="non_binary">{{ trans('global.gender_non_binary') }}</div>
-                    </div>
-
-                    @error('gender')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                <!-- Chip UI bound to the select above -->
+                <div class="ps-gender" data-gender-chips>
+                    <div class="ps-chip" data-value="male">{{ trans('global.gender_male') }}</div>
+                    <div class="ps-chip" data-value="female">{{ trans('global.gender_female') }}</div>
                 </div>
+
+                @error('gender')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                @enderror
             </div>
 
             <div class="form-group">

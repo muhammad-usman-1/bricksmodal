@@ -93,6 +93,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 19,
                 'title' => 'casting_application_manage',
             ],
+            [
+                'id'    => 38,
+                'title' => 'casting_application_access',
+            ],
 
             // Talent Management
             [

@@ -130,15 +130,15 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->roles()->whereIn('title', ['admin', 'superadmin'])->exists();
+        return $this->roles()->whereIn('title', ['admin', 'superadmin', 'creative'])->exists();
     }
 
     /**
-     * Check if user is creator
+     * Check if user is creative
      */
-    public function isCreator(): bool
+    public function isCreative(): bool
     {
-        return $this->roles()->where('title', 'creator')->exists();
+        return $this->roles()->where('title', 'creative')->exists();
     }
 
     /**

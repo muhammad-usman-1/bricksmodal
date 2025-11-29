@@ -43,20 +43,20 @@ class AdminUserSeeder extends Seeder
             $admin->roles()->sync([$adminRole->id]);
         }
 
-        // Create Creator
-        $creator = User::updateOrCreate(
-            ['email' => 'creator@example.com'],
+        // Create Creative
+        $creative = User::updateOrCreate(
+            ['email' => 'creative@example.com'],
             [
-                'name' => 'Content Creator',
+                'name' => 'Content Creative',
                 'password' => Hash::make('12345678'),
                 'type' => User::TYPE_ADMIN,
             ]
         );
 
-        // Assign creator role
-        $creatorRole = Role::where('title', 'creator')->first();
-        if ($creatorRole) {
-            $creator->roles()->sync([$creatorRole->id]);
+        // Assign creative role
+        $creativeRole = Role::where('title', 'creative')->first();
+        if ($creativeRole) {
+            $creative->roles()->sync([$creativeRole->id]);
         }
     }
 }

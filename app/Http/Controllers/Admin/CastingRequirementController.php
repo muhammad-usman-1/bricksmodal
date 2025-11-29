@@ -45,6 +45,7 @@ class CastingRequirementController extends Controller
     public function store(StoreCastingRequirementRequest $request)
     {
         $data = $request->all();
+        $data['status'] = 'advertised';
         $data['user_id'] = auth('admin')->id(); // Set the authenticated admin as the user
 
         $castingRequirement = CastingRequirement::create($data);

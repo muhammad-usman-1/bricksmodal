@@ -67,6 +67,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $impersonating = session('impersonate.original_admin_id'); @endphp
                     @foreach($users as $key => $user)
                         <tr data-entry-id="{{ $user->id }}">
                             <td>
@@ -128,13 +129,22 @@
                                 @endcan
 
                                 @can('user_delete')
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: inline-block;" data-swal-confirm="{{ trans('global.areYouSure') }}">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                         <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
                                     </form>
                                 @endcan
-
+                                @can('impersonate_user')
+                                    @if(!$impersonating)
+                                        <form action="{{ route('admin.impersonate.start', $user) }}" method="POST" style="display:inline-block;" data-swal-confirm="{{ trans('global.impersonate_confirm', ['name' => $user->name]) }}">
+                                            @csrf
+                                            <button type="submit" class="btn btn-xs btn-warning">
+                                                {{ trans('global.impersonate') }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
                             </td>
 
                         </tr>
@@ -193,7 +203,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 </script>

@@ -37,29 +37,13 @@
                         <th>
                             {{ trans('cruds.castingApplication.fields.rate') }}
                         </th>
-                        <th>
-                            {{ trans('cruds.castingApplication.fields.rate_offered') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingApplication.fields.talent_notes') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingApplication.fields.admin_notes') }}
-                        </th>
+
                         <th>
                             {{ trans('cruds.castingApplication.fields.status') }}
                         </th>
+
                         <th>
-                            {{ trans('cruds.castingApplication.fields.rating') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingApplication.fields.reviews') }}
-                        </th>
-                        <th>
-                            {{ trans('cruds.castingApplication.fields.payment_processed') }}
-                        </th>
-                        <th>
-                            &nbsp;
+                           Actions
                         </th>
                     </tr>
                 </thead>
@@ -84,27 +68,11 @@
                             <td>
                                 {{ $castingApplication->rate ?? '' }}
                             </td>
-                            <td>
-                                {{ $castingApplication->rate_offered ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingApplication->talent_notes ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingApplication->admin_notes ?? '' }}
-                            </td>
+
                             <td>
                                 {{ App\Models\CastingApplication::STATUS_SELECT[$castingApplication->status] ?? '' }}
                             </td>
-                            <td>
-                                {{ $castingApplication->rating ?? '' }}
-                            </td>
-                            <td>
-                                {{ $castingApplication->reviews ?? '' }}
-                            </td>
-                            <td>
-                                {{ App\Models\CastingApplication::PAYMENT_PROCESSED_SELECT[$castingApplication->payment_processed] ?? '' }}
-                            </td>
+
                             <td>
                                 @can('casting_application_show')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.casting-applications.show', $castingApplication->id) }}">
@@ -193,7 +161,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 $('#approveApplicationModal').on('show.bs.modal', function (event) {
