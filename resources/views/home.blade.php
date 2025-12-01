@@ -3,8 +3,8 @@
 <style>
     .verified-badge {
         display: inline-flex;
-        width: 20px;
-        height: 18px;
+        width: 16px;
+        height: 12px;
         margin-left: 6px;
     }
     .verified-badge svg {

@@ -58,8 +58,8 @@
                 <style>
                     .verified-badge {
                         display: inline-flex;
-                        width: 20px;
-                        height: 18px;
+                        width: 22px;
+                        height: 22px;
                         margin-left: 6px;
                     }
                     .verified-badge svg {
