@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
+
     public function showRegistrationForm()
     {
         return view('talent.auth.register');

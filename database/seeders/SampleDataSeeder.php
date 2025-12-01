@@ -82,8 +82,9 @@ class SampleDataSeeder extends Seeder
                         'location'        => $faker->city(),
                         'notes'           => $faker->sentences(3, true),
                         'rate_per_model'  => $faker->numberBetween(150, 600),
-                    'status'          => $faker->randomElement(['advertised', 'processing', 'completed']),
+                        'status'          => $faker->randomElement(['advertised', 'processing', 'completed']),
                         'shoot_date_time' => $faker->dateTimeBetween('+1 week', '+2 months')->format($panelDateTimeFormat),
+                        'duration'        => $faker->numberBetween(1, 8) . ' hours',
                         'gender'          => $faker->randomElement(['male', 'female', 'any']),
                         'count'           => $faker->numberBetween(1, 10),
                     ]

@@ -10,6 +10,22 @@
         <a href="{{ route('admin.projects.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to Shoots</a>
     </div>
 
+    @php
+        $shootDateValue = old('shoot_date');
+        $shootTimeValue = old('shoot_time');
+        $durationValue = old('duration');
+        $oldShootDateTimeValue = old('shoot_date_time');
+
+        if ((! $shootDateValue || ! $shootTimeValue) && $oldShootDateTimeValue) {
+            try {
+                $parsedDate = \Carbon\Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $oldShootDateTimeValue);
+                $shootDateValue = $shootDateValue ?: $parsedDate->format('Y-m-d');
+                $shootTimeValue = $shootTimeValue ?: $parsedDate->format('H:i');
+            } catch (\Exception $exception) {
+                report($exception);
+            }
+        }
+    @endphp
     <form method="POST" action="{{ route('admin.casting-requirements.store') }}" enctype="multipart/form-data" id="shootWizard">
         @csrf
 
@@ -28,18 +44,35 @@
                     </div>
                     <div class="form-group">
                         <label for="location">{{ trans('cruds.castingRequirement.fields.location') }}</label>
-                        <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}">
+                        <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}" autocomplete="off" placeholder="Search location">
                         @if($errors->has('location'))
                             <div class="invalid-feedback">{{ $errors->first('location') }}</div>
                         @endif
                     </div>
                     <div class="form-group">
-                        <label for="shoot_date_time">{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</label>
-                        <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time') }}">
-                        @if($errors->has('shoot_date_time'))
-                            <div class="invalid-feedback">{{ $errors->first('shoot_date_time') }}</div>
+                        <label for="shoot_date">{{ trans('cruds.castingRequirement.fields.shoot_date') }}</label>
+                        <input class="form-control {{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="date" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}">
+                        @if($errors->has('shoot_date'))
+                            <div class="invalid-feedback">{{ $errors->first('shoot_date') }}</div>
                         @endif
                     </div>
+                    <div class="form-group">
+                        <label for="shoot_time">{{ trans('cruds.castingRequirement.fields.shoot_time') }}</label>
+                        <input class="form-control {{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="time" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}">
+                        @if($errors->has('shoot_time'))
+                            <div class="invalid-feedback">{{ $errors->first('shoot_time') }}</div>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">{{ trans('cruds.castingRequirement.fields.duration') }}</label>
+                        <input class="form-control {{ $errors->has('duration') ? 'is-invalid' : '' }}" type="text" name="duration" id="duration" value="{{ $durationValue }}" placeholder="e.g. 3 hours">
+                        @if($errors->has('duration'))
+                            <div class="invalid-feedback">{{ $errors->first('duration') }}</div>
+                        @endif
+                    </div>
+                    @if($errors->has('shoot_date_time'))
+                        <div class="text-danger small">{{ $errors->first('shoot_date_time') }}</div>
+                    @endif
                     <div class="form-group">
                         <label for="hair_color">{{ trans('cruds.castingRequirement.fields.hair_color') }}</label>
                         <input class="form-control {{ $errors->has('hair_color') ? 'is-invalid' : '' }}" type="text" name="hair_color" id="hair_color" value="{{ old('hair_color', '') }}">
@@ -404,5 +437,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showStep(currentStep);
 });
+
+window.initShootLocationAutocomplete = function () {
+    var input = document.getElementById('location');
+    if (!input) {
+        return;
+    }
+
+    if (!window.google || !google.maps || !google.maps.places) {
+        console.warn('Google Places library not available. Ensure API script is loaded.');
+        return;
+    }
+
+    var autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: ['kw'] },
+        fields: ['formatted_address', 'name', 'geometry'],
+        types: ['geocode']
+    });
+
+    autocomplete.addListener('place_changed', function () {
+        var place = autocomplete.getPlace();
+        if (place && place.formatted_address) {
+            input.value = place.formatted_address;
+        } else if (place && place.name) {
+            input.value = place.name;
+        }
+    });
+};
+
+if (window.google && google.maps && google.maps.places) {
+    window.initShootLocationAutocomplete();
+}
 </script>
+@php
+    $googlePlacesKey = config('services.google.places_api_key');
+@endphp
+@if ($googlePlacesKey)
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googlePlacesKey }}&libraries=places&callback=initShootLocationAutocomplete" async defer></script>
+@else
+    <script>
+        console.warn('Google Places API key is not configured. Location autocomplete is disabled.');
+    </script>
+@endif
 @endsection

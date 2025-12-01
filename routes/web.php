@@ -21,6 +21,7 @@ use App\Http\Controllers\Talent\Auth\LoginController as TalentLoginController;
 use App\Http\Controllers\Talent\Auth\RegisterController as TalentRegisterController;
 use App\Http\Controllers\Talent\DashboardController as TalentDashboardController;
 use App\Http\Controllers\Talent\OnboardingController;
+use App\Http\Controllers\Talent\ProfileController as TalentPortalProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/talent/login');
@@ -164,6 +165,8 @@ Route::prefix('talent')->as('talent.')->group(function () {
         Route::middleware('talent.onboarded')->group(function () {
             Route::get('dashboard', TalentDashboardController::class)->name('dashboard');
             // Additional talent routes will live here.
+            Route::get('profile', [TalentPortalProfileController::class, 'show'])->name('profile.show');
+            Route::put('profile', [TalentPortalProfileController::class, 'update'])->name('profile.update');
             Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
             Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');

@@ -20,7 +20,8 @@
                 <h5>Basic Details</h5>
                 <div class="wizard-grid">
                     <div><strong>Location</strong><span>{{ $castingRequirement->location ?? trans('global.not_set') }}</span></div>
-                    <div><strong>Shoot Date</strong><span>{{ $castingRequirement->shoot_date_time ?? trans('global.not_set') }}</span></div>
+                    <div><strong>Shoot Date</strong><span>{{ $castingRequirement->shoot_date_display ?? trans('global.not_set') }}</span></div>
+                    <div><strong>Duration</strong><span>{{ $castingRequirement->duration ?? trans('global.not_set') }}</span></div>
                     <div><strong>Hair Color</strong><span>{{ $castingRequirement->hair_color ?? trans('global.not_set') }}</span></div>
                     <div><strong>Age Range</strong><span>{{ $castingRequirement->age_range ?? trans('global.not_set') }}</span></div>
                     <div><strong>Gender</strong><span>{{ App\Models\CastingRequirement::GENDER_SELECT[$castingRequirement->gender] ?? trans('global.not_set') }}</span></div>

@@ -19,9 +19,56 @@
             width: 100% !important;
         }
 
-        
+        /* Status tabs */
+        .status-tabs {
+            display: flex;
+            gap: 28px;
+            border-bottom: 1px solid #dcdfe4;
+            margin-bottom: 14px;
+        }
+
+        .status-tab {
+            position: relative;
+            padding-bottom: 12px;
+            font-weight: 600;
+            color: #1f2933;
+            text-decoration: none;
+            line-height: 1.2;
+        }
+
+        .status-tab::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 0;
+            height: 2px;
+            background: #0f172a;
+            transition: width 0.2s ease;
+        }
+
+        .status-tab.active {
+            color: #0f172a;
+        }
+
+        .status-tab.active::after {
+            width: 26px;
+        }
 
         /* Search: no shadow */
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0a4b8;
+            font-size: 0.9rem;
+        }
+
         .proj-search {
             width: 100%;
             border: 1px solid #e9d3d1;
@@ -31,13 +78,27 @@
             color: var(--text-900);
             outline: none;
             box-shadow: none !important;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%238a6561' stroke-width='1.6'/%3E%3Cpath d='M20 20l-3.2-3.2' stroke='%238a6561' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%238a6561' stroke-width='1.6'/%3E%3Cpath d='M20 20l-3.2-3.2' stroke='%238a6561' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: 12px 50%;
         }
 
         .proj-search::placeholder {
             color: #b49a97
+        }
+
+        .location-link {
+            color: var(--rose-700);
+            font-weight: 700;
+
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .location-link:hover {
+            text-decoration: none;
         }
 
         /* Cards: no shadow, clean borders, grid for stable button alignment */
@@ -93,18 +154,34 @@
             font-size: 12px;
         }
 
-        .rate {
-            font-weight: 900;
-            color: var(--text-900);
+        .chip-status {
+            background: #eef2ff;
+            border-color: #e0e7ff;
+            color: #4338ca;
         }
 
-        .rate .amount {
-            font-size: 20px;
-            color: #7b5a57;
+        .chip-status-applied {
+            background: #e0f2fe;
+            border-color: #bae6fd;
+            color: #0c4a6e;
         }
 
-        .rate small {
-            color: #8b7572
+        .chip-status-shortlisted {
+            background: #fef3c7;
+            border-color: #fde68a;
+            color: #92400e;
+        }
+
+        .chip-status-selected {
+            background: #ecfdf3;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .chip-status-rejected {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #b91c1c;
         }
 
         /* Right column: avatar on top, button under it (no shadow) */
@@ -184,20 +261,68 @@
     </style>
 
     <div class="projects-wrap">
+        @php
+            $filters = [
+                'all' => trans('global.talent_projects_filter_all'),
+                'applied' => trans('global.talent_projects_filter_applied'),
+                'shortlisted' => trans('global.talent_projects_filter_shortlisted'),
+                'selected' => trans('global.talent_projects_filter_selected'),
+                'rejected' => trans('global.talent_projects_filter_rejected'),
+            ];
+        @endphp
+
+        <div class="status-tabs mb-3">
+            @foreach ($filters as $value => $label)
+                @php
+                    $tabQuery = collect([
+                        'status' => $value === 'all' ? null : $value,
+                        'q' => request('q'),
+                    ])->filter(function ($val) {
+                        return !is_null($val) && $val !== '';
+                    })->toArray();
+                @endphp
+                <a href="{{ route('talent.projects.index', $tabQuery) }}"
+                    class="status-tab {{ $statusFilter === $value ? 'active' : '' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
+
         {{-- Search --}}
         <form method="GET" action="{{ route('talent.projects.index') }}" class="mb-3">
-            <input type="text" name="q" value="{{ request('q') }}" class="proj-search"
-                placeholder="{{ __('Search') }}">
+            @if ($statusFilter !== 'all')
+                <input type="hidden" name="status" value="{{ $statusFilter }}">
+            @endif
+            <div class="search-wrap">
+                <span class="search-icon">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text"
+                    name="q"
+                    value="{{ request('q') }}"
+                    class="proj-search"
+                    placeholder="{{ __('Search') }}">
+            </div>
         </form>
 
         {{-- Cards --}}
         @forelse($projects as $project)
             @php
                 $statusText = \App\Models\CastingRequirement::STATUS_SELECT[$project->status] ?? $project->status;
-                $when = $project->shoot_date_time
-                    ? \Illuminate\Support\Str::of($project->shoot_date_time)->limit(60)
-                    : null;
-                $dayRate = $project->daily_rate ?? ($project->rate ?? null);
+                $when = null;
+
+                if ($project->shoot_date_time) {
+                    try {
+                        $when = \Illuminate\Support\Carbon::parse($project->shoot_date_time)->format('d M Y | h:i A');
+                    } catch (\Throwable $e) {
+                        $when = $project->shoot_date_time;
+                    }
+                } elseif ($project->shoot_date_display) {
+                    $when = $project->shoot_date_display;
+                }
+
+                $locationQuery = $project->location ? $project->location . ', Kuwait' : null;
+
                 $avatar =
                     $project->avatar_url ??
                     'data:image/svg+xml;utf8,' .
@@ -216,13 +341,29 @@
                             <span>{{ $when }}</span>
                         @endif
                         @if ($project->location)
-                            &nbsp;·&nbsp; <span><i class="fas fa-map-marker-alt mr-1"></i>{{ $project->location }}</span>
+                            &nbsp;·&nbsp;
+                            <span>
+                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                <button type="button"
+                                    class="location-link"
+                                    data-map-toggle="project-map-{{ $project->id }}">
+                                    {{ $project->location }}
+                                </button>
+                            </span>
                         @endif
                     </div>
 
                     <div class="chips">
                         @if ($statusText)
                             <span class="chip">{{ $statusText }}</span>
+                        @endif
+                        @if ($applicationsByProject->has($project->id))
+                            @php
+                                $application = $applicationsByProject->get($project->id);
+                                $applicationStatusLabel = \App\Models\CastingApplication::STATUS_SELECT[$application->status] ?? ucfirst($application->status);
+                                $applicationStatusClass = 'chip-status-' . ($application->status ?? 'default');
+                            @endphp
+                            <span class="chip chip-status {{ $applicationStatusClass }}">{{ $applicationStatusLabel }}</span>
                         @endif
                         @if ($project->gender)
                             <span class="chip text-capitalize">{{ $project->gender }}</span>
@@ -231,18 +372,15 @@
                             <span class="chip">{{ $project->duration }}</span>
                         @endif
                     </div>
-
-                    <div class="rate">
-                        {{ __('Rate:') }} <span
-                            class="amount">{{ $dayRate ? $dayRate : __('N/A') }}</span><small>/day</small>
-                    </div>
                 </div>
 
                 <div class="job-aside">
                     <div class="avatar">
                         <img src="{{ $avatar }}" alt="project">
                     </div>
-                    <a href="{{ route('talent.projects.show', $project) }}" class="btn-pill">{{ __('View Details') }}</a>
+                    <button type="button" class="btn-pill" onclick="window.location.href='{{ route('talent.projects.show', $project) }}'">
+                        {{ __('View Details') }}
+                    </button>
                 </div>
             </div>
         @empty
@@ -254,4 +392,5 @@
             {{ $projects->withQueryString()->links() }}
         </div>
     </div>
+
 @endsection

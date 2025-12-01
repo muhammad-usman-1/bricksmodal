@@ -1,5 +1,18 @@
 @extends('layouts.admin')
 @section('content')
+<style>
+    .verified-badge {
+        display: inline-flex;
+        width: 20px;
+        height: 18px;
+        margin-left: 6px;
+    }
+    .verified-badge svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+</style>
 <div class="admin-dashboard container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
@@ -76,8 +89,11 @@
                                         <div>
                                             <div class="font-weight-bold">{{ $name }}
                                                 @if($talent->verification_status === 'approved')
-                                                    <span class="verified-badge" title="Verified">
-                                                        <i class="fas fa-check-circle text-primary"></i>
+                                                    <span class="verified-badge" title="Verified" aria-label="Verified">
+                                                        <svg viewBox="0 0 60 60" role="img" aria-hidden="true">
+                                                            <path fill="#1DA1F2" d="M32 2c-2 0-4 .7-5.6 2l-4.3 3.5-5.5-1.3A9 9 0 0 0 6.1 12l-1.1 5.6-5.2 2.9A9 9 0 0 0 0 30.6l2.2 5.2L0 41a9 9 0 0 0 1.9 10.1l5.2 2.9 1.1 5.6a9 9 0 0 0 10.5 6.9l5.5-1.3 4.3 3.5a9 9 0 0 0 11.2 0l4.3-3.5 5.5 1.3a9 9 0 0 0 10.5-6.9l1.1-5.6 5.2-2.9A9 9 0 0 0 64 41l-2.2-5.2L64 30.6a9 9 0 0 0-1.9-10l-5.2-3-1.1-5.6a9 9 0 0 0-10.5-6.9l-5.5 1.3-4.3-3.5A9 9 0 0 0 32 2Z"/>
+                                                            <polyline fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" points="20 34 29.5 43.5 46 23"/>
+                                                        </svg>
                                                     </span>
                                                 @endif
                                             </div>

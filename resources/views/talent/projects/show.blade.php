@@ -80,25 +80,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-
-        .avatar {
-            width: 72px;
-            height: 72px;
-            border-radius: 12px;
-            border: 1px solid var(--rose-200);
-            background: #f3e7e6;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            overflow: hidden;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover
         }
 
         .apply-pill {
@@ -142,37 +124,90 @@
             line-height: 1.55
         }
 
-        /* Requirements chips */
-        .req-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px
+        /* Timeline */
+        .timeline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
         }
 
-        .req-item {
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 80px;
+            flex: 1;
+        }
+
+        .timeline-node {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            border: 2px solid var(--rose-200);
+            color: var(--rose-200);
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px;
-            background: var(--rose-100);
-            border: 1px solid var(--rose-200);
-            border-radius: 10px;
+            background: var(--white);
+            transition: all .2s ease;
+        }
+
+        .timeline-step.completed .timeline-node,
+        .timeline-step.active .timeline-node {
+            background: var(--rose-700);
+            border-color: var(--rose-700);
+            color: #fff;
+        }
+
+        .timeline-label {
+            margin-top: 6px;
+            font-size: 12px;
             font-weight: 800;
-            color: var(--text-900)
+            color: var(--text-900);
+        }
+
+        .timeline-line {
+            flex: 1;
+            height: 2px;
+            background: var(--rose-200);
+        }
+
+        .timeline-line.active {
+            background: var(--rose-700);
+        }
+
+        .location-link {
+            color: var(--rose-700);
+            font-weight: 700;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .location-link:hover {
+            text-decoration: none;
+        }
+        .map-embed {
+            margin-top: 10px;
+            border: 1px solid #f0e3e1;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .map-embed iframe {
+            width: 100%;
+            height: 300px;
+            border: 0;
         }
 
         @media (max-width:900px) {
             .head-band {
-                grid-template-columns: 1fr
-            }
-
-            .req-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr))
-            }
-        }
-
-        @media (max-width:540px) {
-            .req-grid {
                 grid-template-columns: 1fr
             }
         }
@@ -271,6 +306,63 @@
     </style>
 
     <div class="page-wrap">
+        @php
+            $formattedShootDate = null;
+            if (!empty($castingRequirement->shoot_date_time)) {
+                try {
+                    $formattedShootDate = \Illuminate\Support\Carbon::parse($castingRequirement->shoot_date_time)->format('d M Y | h:i A');
+                } catch (\Throwable $e) {
+                    $formattedShootDate = $castingRequirement->shoot_date_time;
+                }
+            } elseif (!empty($castingRequirement->shoot_date_display)) {
+                $formattedShootDate = $castingRequirement->shoot_date_display;
+            }
+
+            $currentStage = 1;
+            if (isset($existingApplication) && $existingApplication) {
+                $currentStage = 2;
+
+                if (in_array($existingApplication->status, ['shortlisted', 'selected'])) {
+                    $currentStage = 3;
+                }
+
+                if ($existingApplication->status === 'selected') {
+                    $currentStage = 4;
+                }
+
+                if (in_array($existingApplication->payment_status, ['released', 'received'])) {
+                    $currentStage = 5;
+                }
+            }
+
+            $timelineStages = [
+                ['label' => __('Advertised')],
+                ['label' => __('Applied')],
+                ['label' => __('Short Listed')],
+                ['label' => __('Selected')],
+                ['label' => __('Done')],
+            ];
+
+            foreach ($timelineStages as $index => &$stage) {
+                $position = $index + 1;
+                if ($position < $currentStage) {
+                    $stage['state'] = 'completed';
+                } elseif ($position === $currentStage) {
+                    $stage['state'] = 'active';
+                } else {
+                    $stage['state'] = 'inactive';
+                }
+            }
+            unset($stage);
+
+            $locationQuery = $castingRequirement->location
+                ? $castingRequirement->location . ', Kuwait'
+                : null;
+
+            $mapSrc = $locationQuery
+                ? 'https://www.google.com/maps?q=' . rawurlencode($locationQuery) . '&t=&z=15&ie=UTF8&iwloc=B&output=embed'
+                : null;
+        @endphp
         <div class="mb-2">
             <a href="{{ route('talent.projects.index') }}" class="text-decoration-none" style="color:#8a6561;font-weight:800;">
                 <i class="fas fa-chevron-left mr-1"></i>{{ __('Back') }}
@@ -290,25 +382,40 @@
                 <h2 class="title">{{ $castingRequirement->project_name }}</h2>
                 <div class="sub">{{ __('Posted by') }} {{ $castingRequirement->posted_by ?? 'Admin' }}</div>
                 <div class="meta">
-                    @if ($castingRequirement->shoot_date_time)
-                        <span><i class="far fa-calendar mr-1"></i>{{ $castingRequirement->shoot_date_time }}</span>
+                    @if ($formattedShootDate)
+                        <span><i class="far fa-calendar mr-1"></i>{{ $formattedShootDate }}</span>
                     @endif
                     @if ($castingRequirement->location)
-                        <span><i class="fas fa-map-marker-alt mr-1"></i>{{ $castingRequirement->location }}</span>
+                        <span>
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            @if ($locationQuery)
+                                <button type="button"
+                                    class="location-link"
+                                    data-map-toggle="project-detail-map">
+                                    {{ $castingRequirement->location }}
+                                </button>
+                            @else
+                                {{ $castingRequirement->location }}
+                            @endif
+                        </span>
                     @endif
+                    @if ($castingRequirement->duration)
+                        <span><i class="far fa-clock mr-1"></i>{{ $castingRequirement->duration }}</span>
+                    @endif
+                </div>
+                <div class="timeline">
+                    @foreach ($timelineStages as $stage)
+                        <div class="timeline-step {{ $stage['state'] }}">
+                            <div class="timeline-node">{{ $loop->iteration }}</div>
+                            <span class="timeline-label">{{ $stage['label'] }}</span>
+                        </div>
+                        @if (! $loop->last)
+                            <div class="timeline-line {{ ($loop->index + 2) <= $currentStage ? 'active' : '' }}"></div>
+                        @endif
+                    @endforeach
                 </div>
             </div>
             <div class="head-right">
-                @php
-                    $avatar =
-                        $castingRequirement->avatar_url ??
-                        'data:image/svg+xml;utf8,' .
-                            rawurlencode(
-                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="12" fill="#eddcda"/><circle cx="48" cy="36" r="16" fill="#c8adab"/><rect x="20" y="58" width="56" height="22" rx="11" fill="#d8c1bf"/></svg>',
-                            );
-                @endphp
-                <div class="avatar"><img src="{{ $avatar }}" alt="avatar"></div>
-
                 @if (isset($existingApplication) && $existingApplication)
                     <button class="apply-pill" disabled>{{ __('Applied') }}</button>
                 @else
@@ -319,37 +426,23 @@
 
         {{-- Description --}}
         <div class="section">
-            <h6>{{ __('Job Description') }}</h6>
+            <h6>{{ __('Description') }}</h6>
             <div class="body">
                 {{ $castingRequirement->description ?? ($castingRequirement->notes ?? __('No description provided.')) }}
             </div>
-        </div>
-
-        {{-- Requirements --}}
-        @php
-            $chips = [];
-            if ($castingRequirement->gender) {
-                $chips[] = ucfirst($castingRequirement->gender);
-            }
-            if ($castingRequirement->age_range) {
-                $chips[] = $castingRequirement->age_range;
-            }
-            if ($castingRequirement->height) {
-                $chips[] = $castingRequirement->height;
-            }
-        @endphp
-        @if (count($chips))
-            <div class="section">
-                <h6>{{ __('Requirements') }}</h6>
-                <div class="body">
-                    <div class="req-grid">
-                        @foreach ($chips as $c)
-                            <div class="req-item">{{ $c }}</div>
-                        @endforeach
-                    </div>
+            @if ($mapSrc)
+                <div class="map-embed"
+                    id="project-detail-map"
+                    data-map-src="{{ $mapSrc }}"
+                    style="display: block;">
+                    <iframe
+                        src="{{ $mapSrc }}"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
 
         {{-- Outfit & Nails --}}
         @if (!empty($castingRequirement->outfit) || !empty($castingRequirement->nails))
@@ -472,5 +565,25 @@
                 open();
             @endif
         })();
+
+        document.addEventListener('click', function (event) {
+            const toggle = event.target.closest('[data-map-toggle]')
+            if (!toggle) {
+                return
+            }
+            const targetId = toggle.getAttribute('data-map-toggle')
+            const map = document.getElementById(targetId)
+            if (!map) {
+                return
+            }
+            const iframe = map.querySelector('iframe')
+            if (iframe && !iframe.getAttribute('src')) {
+                const mapSrc = map.getAttribute('data-map-src')
+                if (mapSrc) {
+                    iframe.setAttribute('src', mapSrc)
+                }
+            }
+            map.style.display = map.style.display === 'block' ? 'none' : 'block'
+        })
     </script>
 @endsection

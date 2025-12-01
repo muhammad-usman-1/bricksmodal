@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Services\KwtSmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 

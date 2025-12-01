@@ -15,7 +15,6 @@ class TalentsDashboardController extends Controller
 
         $talents = TalentProfile::with(['languages', 'user'])
             ->latest()
-            ->take(5)
             ->get();
 
         $stats = [

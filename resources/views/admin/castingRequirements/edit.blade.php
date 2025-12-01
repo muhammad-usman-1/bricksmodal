@@ -7,6 +7,22 @@
     </div>
 
     <div class="card-body">
+        @php
+            $rawShootDateTime = $castingRequirement->getRawOriginal('shoot_date_time');
+            $shootDateValue = old('shoot_date');
+            $shootTimeValue = old('shoot_time');
+            $durationValue = old('duration', $castingRequirement->duration);
+
+            if ((! $shootDateValue || ! $shootTimeValue) && $rawShootDateTime) {
+                try {
+                    $parsedDate = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $rawShootDateTime);
+                    $shootDateValue = $shootDateValue ?: $parsedDate->format('Y-m-d');
+                    $shootTimeValue = $shootTimeValue ?: $parsedDate->format('H:i');
+                } catch (\Exception $exception) {
+                    report($exception);
+                }
+            }
+        @endphp
         <form method="POST" action="{{ route("admin.casting-requirements.update", [$castingRequirement->id]) }}" enctype="multipart/form-data">
             @method('PUT')
             @csrf
@@ -30,16 +46,33 @@
                 @endif
                 <span class="help-block">{{ trans('cruds.castingRequirement.fields.location_helper') }}</span>
             </div>
-            <div class="form-group" style="width: 100%;">
-                <label for="shoot_date_time">{{ trans('cruds.castingRequirement.fields.shoot_date_time') }}</label>
-                <input class="form-control datetime {{ $errors->has('shoot_date_time') ? 'is-invalid' : '' }}" type="text" name="shoot_date_time" id="shoot_date_time" value="{{ old('shoot_date_time', $castingRequirement->shoot_date_time) }}" style="width: 100%;">
-                @if($errors->has('shoot_date_time'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('shoot_date_time') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.castingRequirement.fields.shoot_date_time_helper') }}</span>
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="shoot_date">{{ trans('cruds.castingRequirement.fields.shoot_date') }}</label>
+                    <input class="form-control {{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="date" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}">
+                    @if($errors->has('shoot_date'))
+                        <div class="invalid-feedback">{{ $errors->first('shoot_date') }}</div>
+                    @endif
+                </div>
+                <div class="form-group">
+                    <label for="shoot_time">{{ trans('cruds.castingRequirement.fields.shoot_time') }}</label>
+                    <input class="form-control {{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="time" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}">
+                    @if($errors->has('shoot_time'))
+                        <div class="invalid-feedback">{{ $errors->first('shoot_time') }}</div>
+                    @endif
+                </div>
+                <div class="form-group">
+                    <label for="duration">{{ trans('cruds.castingRequirement.fields.duration') }}</label>
+                    <input class="form-control {{ $errors->has('duration') ? 'is-invalid' : '' }}" type="text" name="duration" id="duration" value="{{ $durationValue }}" placeholder="e.g. 3 hours">
+                    @if($errors->has('duration'))
+                        <div class="invalid-feedback">{{ $errors->first('duration') }}</div>
+                    @endif
+                </div>
             </div>
+            @if($errors->has('shoot_date_time'))
+                <div class="text-danger small mb-3">{{ $errors->first('shoot_date_time') }}</div>
+            @endif
+            <span class="help-block">{{ trans('cruds.castingRequirement.fields.shoot_date_time_helper') }}</span>
             <div class="form-group">
                 <label for="hair_color">{{ trans('cruds.castingRequirement.fields.hair_color') }}</label>
                 <input class="form-control {{ $errors->has('hair_color') ? 'is-invalid' : '' }}" type="text" name="hair_color" id="hair_color" value="{{ old('hair_color', $castingRequirement->hair_color) }}">
@@ -191,6 +224,15 @@
 
 @section('scripts')
 <style>
+    .grid {
+        display: grid;
+        grid-gap: 16px;
+    }
+
+    .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
     .outfit-item {
         position: relative;
         border: 2px solid #e0e0e0;

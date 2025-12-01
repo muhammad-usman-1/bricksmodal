@@ -1,0 +1,60 @@
+[1mdiff --git a/resources/views/admin/castingRequirements/create.blade.php b/resources/views/admin/castingRequirements/create.blade.php[m
+[1mindex d56b121..240152b 100644[m
+[1m--- a/resources/views/admin/castingRequirements/create.blade.php[m
+[1m+++ b/resources/views/admin/castingRequirements/create.blade.php[m
+[36m@@ -28,7 +28,7 @@[m
+                     </div>[m
+                     <div class="form-group">[m
+                         <label for="location">{{ trans('cruds.castingRequirement.fields.location') }}</label>[m
+[31m-                        <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}">[m
+[32m+[m[32m                        <input class="form-control {{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', '') }}" autocomplete="off" placeholder="Start typing a Kuwait location">[m
+                         @if($errors->has('location'))[m
+                             <div class="invalid-feedback">{{ $errors->first('location') }}</div>[m
+                         @endif[m
+[36m@@ -404,5 +404,46 @@[m [mclass="outfit-checkbox"[m
+ [m
+     showStep(currentStep);[m
+ });[m
+[32m+[m
+[32m+[m[32mwindow.initShootLocationAutocomplete = function () {[m
+[32m+[m[32m    var input = document.getElementById('location');[m
+[32m+[m[32m    if (!input) {[m
+[32m+[m[32m        return;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    if (!window.google || !google.maps || !google.maps.places) {[m
+[32m+[m[32m        console.warn('Google Places library not available. Ensure API script is loaded.');[m
+[32m+[m[32m        return;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    var autocomplete = new google.maps.places.Autocomplete(input, {[m
+[32m+[m[32m        componentRestrictions: { country: ['kw'] },[m
+[32m+[m[32m        fields: ['formatted_address', 'name', 'geometry'],[m
+[32m+[m[32m        types: ['geocode'][m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    autocomplete.addListener('place_changed', function () {[m
+[32m+[m[32m        var place = autocomplete.getPlace();[m
+[32m+[m[32m        if (place && place.formatted_address) {[m
+[32m+[m[32m            input.value = place.formatted_address;[m
+[32m+[m[32m        } else if (place && place.name) {[m
+[32m+[m[32m            input.value = place.name;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    });[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32mif (window.google && google.maps && google.maps.places) {[m
+[32m+[m[32m    window.initShootLocationAutocomplete();[m
+[32m+[m[32m}[m
+ </script>[m
+[32m+[m[32m@php[m
+[32m+[m[32m    $googlePlacesKey = config('services.google.places_api_key');[m
+[32m+[m[32m@endphp[m
+[32m+[m[32m@if ($googlePlacesKey)[m
+[32m+[m[32m    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googlePlacesKey }}&libraries=places&callback=initShootLocationAutocomplete" async defer></script>[m
+[32m+[m[32m@else[m
+[32m+[m[32m    <script>[m
+[32m+[m[32m        console.warn('Google Places API key is not configured. Location autocomplete is disabled.');[m
+[32m+[m[32m    </script>[m
+[32m+[m[32m@endif[m
+ @endsection[m

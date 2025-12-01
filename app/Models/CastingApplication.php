@@ -62,6 +62,7 @@ class CastingApplication extends Model
 
     public const STATUS_SELECT = [
         'applied'      => 'Applied',
+        'shortlisted'  => 'Shortlisted',
         'rejected'     => 'Rejected',
         'selected'     => 'Selected',
         'did_not_show' => 'Didn\'t Show Up',

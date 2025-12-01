@@ -44,7 +44,8 @@ class CastingRequirementController extends Controller
 
     public function store(StoreCastingRequirementRequest $request)
     {
-        $data = $request->all();
+        $data = $request->validated();
+        unset($data['shoot_date'], $data['shoot_time']);
         $data['status'] = 'advertised';
         $data['user_id'] = auth('admin')->id(); // Set the authenticated admin as the user
 
@@ -83,7 +84,8 @@ class CastingRequirementController extends Controller
 
     public function update(UpdateCastingRequirementRequest $request, CastingRequirement $castingRequirement)
     {
-        $data = $request->all();
+        $data = $request->validated();
+        unset($data['shoot_date'], $data['shoot_time']);
         $data['user_id'] = $castingRequirement->user_id ?? auth('admin')->id(); // Keep existing user_id or set current admin
 
         $castingRequirement->update($data);
@@ -169,7 +171,7 @@ class CastingRequirementController extends Controller
                         'project_location' => $castingRequirement->location ?? trans('global.not_set'),
                         'project_notes'    => $castingRequirement->notes ?? '',
                         'project_url'      => route('talent.projects.show', $castingRequirement),
-                        'project_date'     => $castingRequirement->shoot_date_time ?? '',
+                        'project_date'     => $castingRequirement->shoot_date_display ?? ($castingRequirement->shoot_date_time ?? ''),
                     ], [
                         'casting_requirement_id' => $castingRequirement->id,
                         'type'                    => 'project_created',

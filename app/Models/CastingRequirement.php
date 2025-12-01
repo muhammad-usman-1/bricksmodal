@@ -17,12 +17,14 @@ class CastingRequirement extends Model implements HasMedia
 
     protected $appends = [
         'reference',
+        'shoot_date_display',
     ];
 
     public $table = 'casting_requirements';
 
     protected $dates = [
         'shoot_date_time',
+        'duration',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -90,6 +92,23 @@ class CastingRequirement extends Model implements HasMedia
     public function getReferenceAttribute()
     {
         return $this->getMedia('reference');
+    }
+
+    public function getShootDateDisplayAttribute(): ?string
+    {
+        $raw = $this->getRawOriginal('shoot_date_time');
+
+        if (! $raw) {
+            return null;
+        }
+
+        try {
+            return Carbon::createFromFormat('Y-m-d H:i:s', $raw)->format('d M Y | h:i A');
+        } catch (\Exception $exception) {
+            report($exception);
+
+            return $this->shoot_date_time;
+        }
     }
 
     public function user()

@@ -11,14 +11,61 @@ class ProjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = CastingRequirement::query()->whereIn('status', ['advertised', 'processing'])->latest();
+        $talent = $request->user('talent');
+        $profile = $talent?->talentProfile;
 
-        $projects = $query->paginate(12);
+        $statusFilter = $request->get('status', 'all');
+        $allowedFilters = ['all', 'applied', 'shortlisted', 'selected', 'rejected'];
+        if (! in_array($statusFilter, $allowedFilters, true)) {
+            $statusFilter = 'all';
+        }
 
-        $profile = $request->user('talent')->talentProfile;
-        $appliedIds = $profile?->castingApplications()->pluck('casting_requirement_id')->toArray() ?? [];
+        $search = $request->get('q');
 
-        return view('talent.projects.index', compact('projects', 'appliedIds'));
+        $applicationsByProject = collect();
+        $appliedIds = [];
+
+        if ($profile) {
+            $applicationsByProject = $profile->castingApplications()
+                ->select('id', 'casting_requirement_id', 'status')
+                ->get()
+                ->keyBy('casting_requirement_id');
+
+            $appliedIds = $applicationsByProject->keys()->toArray();
+        }
+
+        $query = CastingRequirement::query();
+
+        if ($statusFilter === 'all') {
+            $query->whereIn('status', ['advertised', 'processing']);
+        } else {
+            if ($profile) {
+                $query->whereHas('castingApplications', function ($q) use ($profile, $statusFilter) {
+                    $q->where('talent_profile_id', $profile->id)
+                        ->where('status', $statusFilter);
+                });
+            } else {
+                $query->whereRaw('0 = 1');
+            }
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('project_name', 'like', '%' . $search . '%')
+                    ->orWhere('client_name', 'like', '%' . $search . '%')
+                    ->orWhere('location', 'like', '%' . $search . '%');
+            });
+        }
+
+        $projects = $query->latest()->paginate(12)->withQueryString();
+
+        return view('talent.projects.index', compact(
+            'projects',
+            'appliedIds',
+            'statusFilter',
+            'applicationsByProject',
+            'search'
+        ));
     }
 
     public function show(Request $request, CastingRequirement $castingRequirement)
