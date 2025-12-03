@@ -27,7 +27,7 @@
     .logo-container {
         display: flex;
         justify-content: center;
-        
+
     }
 
     .logo-container img {
@@ -48,6 +48,49 @@
         border-radius: 20px;
 
         padding: clamp(16px, 4vw, 40px);
+    }
+
+    .ps-section {
+        margin-top: 32px;
+    }
+
+    .ps-section:first-of-type {
+        margin-top: 0;
+    }
+
+    .ps-section-head {
+        margin-bottom: 14px;
+    }
+
+    .ps-section-head h4 {
+        margin: 0;
+        font-weight: 800;
+        color: var(--text-900);
+    }
+
+    .ps-section-head p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .ps-section-body {
+        border: 1px solid #f0e3e1;
+        border-radius: 18px;
+        padding: 20px;
+        background: var(--rose-10);
+    }
+
+    .ps-section-body .form-row {
+        margin-bottom: 18px;
+    }
+
+    .ps-section-body .form-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-row--single {
+        grid-template-columns: 1fr;
     }
 
     /* ===== Header (back + title) ===== */
@@ -145,6 +188,8 @@
 
     .form-group--gender {
         margin-top: 6px;
+        display: flex;
+        flex-direction: column;
     }
 
     /* Date with icon */
@@ -173,7 +218,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         /* two equal chips spanning the row */
         gap: 14px;
-        margin-top: 6px;
+        
     }
 
     .ps-chip {
@@ -373,194 +418,210 @@
         <form method="POST" action="{{ route('talent.onboarding.store', 'profile') }}">
             @csrf
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="full_name">{{ trans('global.full_name') }}</label>
-                    <input type="text" class="form-control @error('full_name') is-invalid @enderror" id="full_name"
-                        name="full_name" value="{{ old('full_name', $profile->legal_name) }}" required>
-                    @error('full_name')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+            <div class="ps-section">
+                <div class="ps-section-head">
+                    <h4>{{ __('Personal Information') }}</h4>
+                    <p>{{ __('Start with the essentials so we know how to reach you.') }}</p>
                 </div>
+                <div class="ps-section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="full_name">{{ trans('global.full_name') }}</label>
+                            <input type="text" class="form-control @error('full_name') is-invalid @enderror" id="full_name"
+                                name="full_name" value="{{ old('full_name', $profile->legal_name) }}" required>
+                            @error('full_name')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
 
-                <div class="form-group">
-                    <label for="email">{{ trans('global.login_email') }}</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                        name="email" value="{{ old('email', auth('talent')->user()->email) }}" required>
-                    @error('email')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="height">{{ trans('cruds.talentProfile.fields.height') }} <small>(cm)</small></label>
-                    <input type="number" step="0.01" class="form-control @error('height') is-invalid @enderror"
-                        id="height" name="height" value="{{ old('height', $profile->height) }}"
-                        placeholder="{{ trans('global.height_placeholder') }}">
-                    @error('height')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="weight">{{ trans('cruds.talentProfile.fields.weight') }} <small>(kg)</small></label>
-                    <input type="number" class="form-control @error('weight') is-invalid @enderror" id="weight"
-                        name="weight" value="{{ old('weight', $profile->weight) }}" placeholder="kg">
-                    @error('weight')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="daily_rate">{{ trans('cruds.talentProfile.fields.daily_rate') }}</label>
-                    <input type="number" step="0.01" class="form-control @error('daily_rate') is-invalid @enderror"
-                        id="daily_rate" name="daily_rate" value="{{ old('daily_rate', $profile->daily_rate) }}"
-                        required>
-                    @error('daily_rate')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="hourly_rate">{{ trans('cruds.talentProfile.fields.hourly_rate') }}</label>
-                    <input type="number" step="0.01" class="form-control @error('hourly_rate') is-invalid @enderror"
-                        id="hourly_rate" name="hourly_rate" value="{{ old('hourly_rate', $profile->hourly_rate) }}">
-                    @error('hourly_rate')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="chest">{{ trans('cruds.talentProfile.fields.chest') }}</label>
-                    <input type="number" class="form-control @error('chest') is-invalid @enderror" id="chest"
-                        name="chest" value="{{ old('chest', $profile->chest) }}">
-                    @error('chest')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="waist">{{ trans('cruds.talentProfile.fields.waist') }}</label>
-                    <input type="number" class="form-control @error('waist') is-invalid @enderror" id="waist"
-                        name="waist" value="{{ old('waist', $profile->waist) }}">
-                    @error('waist')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-            </div>
-
-            {{-- Keep hips + DoB aligned --}}
-            <div class="form-row form-row--hips-dob">
-                <div class="form-group">
-                    <label for="hips">{{ trans('cruds.talentProfile.fields.hips') }}</label>
-                    <input type="number" class="form-control @error('hips') is-invalid @enderror" id="hips"
-                        name="hips" value="{{ old('hips', $profile->hips) }}">
-                    @error('hips')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="date_of_birth">{{ trans('global.date_of_birth') }}</label>
-                    <div class="ps-date-wrap">
-                        <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
-                            id="date_of_birth" name="date_of_birth"
-                            value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}"
-                            required>
-                        <svg class="ps-date-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path
-                                d="M7 2v3M17 2v3M3 10h18M5 6h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                        <div class="form-group">
+                            <label for="email">{{ trans('global.login_email') }}</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
+                                name="email" value="{{ old('email', auth('talent')->user()->email) }}" required>
+                            @error('email')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
                     </div>
-                    @error('date_of_birth')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date_of_birth">{{ trans('global.date_of_birth') }}</label>
+                            <div class="ps-date-wrap">
+                                <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
+                                    id="date_of_birth" name="date_of_birth"
+                                    value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}"
+                                    required>
+                                <svg class="ps-date-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path
+                                        d="M7 2v3M17 2v3M3 10h18M5 6h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"
+                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            @error('date_of_birth')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group form-group--gender">
+                            <label for="gender">{{ trans('global.gender') }}</label>
+                            <select class="form-control ps-gender-select @error('gender') is-invalid @enderror" id="gender"
+                                name="gender" required>
+                                <option value="" disabled {{ old('gender', $profile->gender) ? '' : 'selected' }}>
+                                    {{ trans('global.pleaseSelect') }}</option>
+                                @foreach (['male' => trans('global.gender_male'), 'female' => trans('global.gender_female')] as $value => $label)
+                                    <option value="{{ $value }}" {{ old('gender', $profile->gender) === $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <div class="ps-gender" data-gender-chips>
+                                <div class="ps-chip" data-value="male">{{ trans('global.gender_male') }}</div>
+                                <div class="ps-chip" data-value="female">{{ trans('global.gender_female') }}</div>
+                            </div>
+
+                            @error('gender')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="whatsapp_number">{{ trans('global.whatsapp_number') }}</label>
+                        <input type="text" class="form-control @error('whatsapp_number') is-invalid @enderror"
+                            id="whatsapp_number" name="whatsapp_number"
+                            value="{{ old('whatsapp_number', $profile->whatsapp_number ? '+' . $profile->whatsapp_number : '') }}"
+                            placeholder="{{ trans('global.whatsapp_number_placeholder') }}" required>
+                        @error('whatsapp_number')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                        <small class="form-text text-muted">{{ trans('global.whatsapp_number_helper') }}</small>
+                    </div>
                 </div>
             </div>
 
-            {{-- Gender chips take half width each --}}
-            <div class="form-group form-group--gender">
-                <label for="gender">{{ trans('global.gender') }}</label>
-                <select class="form-control ps-gender-select @error('gender') is-invalid @enderror" id="gender"
-                    name="gender" required>
-                    <option value="" disabled {{ old('gender', $profile->gender) ? '' : 'selected' }}>
-                        {{ trans('global.pleaseSelect') }}</option>
-                    @foreach (['male' => trans('global.gender_male'), 'female' => trans('global.gender_female')] as $value => $label)
-                        <option value="{{ $value }}" {{ old('gender', $profile->gender) === $value ? 'selected' : '' }}>
-                            {{ $label }}
-                        </option>
-                    @endforeach
-                </select>
-
-                <!-- Chip UI bound to the select above -->
-                <div class="ps-gender" data-gender-chips>
-                    <div class="ps-chip" data-value="male">{{ trans('global.gender_male') }}</div>
-                    <div class="ps-chip" data-value="female">{{ trans('global.gender_female') }}</div>
+            <div class="ps-section">
+                <div class="ps-section-head">
+                    <h4>{{ __('Rates & Measurements') }}</h4>
+                    <p>{{ __('Help casting directors understand your rates and sizing details.') }}</p>
                 </div>
+                <div class="ps-section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="daily_rate">{{ trans('cruds.talentProfile.fields.daily_rate') }}</label>
+                            <input type="number" step="0.01" class="form-control @error('daily_rate') is-invalid @enderror"
+                                id="daily_rate" name="daily_rate" value="{{ old('daily_rate', $profile->daily_rate) }}"
+                                required>
+                            @error('daily_rate')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="hourly_rate">{{ trans('cruds.talentProfile.fields.hourly_rate') }}</label>
+                            <input type="number" step="0.01" class="form-control @error('hourly_rate') is-invalid @enderror"
+                                id="hourly_rate" name="hourly_rate" value="{{ old('hourly_rate', $profile->hourly_rate) }}">
+                            @error('hourly_rate')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
 
-                @error('gender')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="height">{{ trans('cruds.talentProfile.fields.height') }} <small>(cm)</small></label>
+                            <input type="number" step="0.01" class="form-control @error('height') is-invalid @enderror"
+                                id="height" name="height" value="{{ old('height', $profile->height) }}"
+                                placeholder="{{ trans('global.height_placeholder') }}">
+                            @error('height')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">{{ trans('cruds.talentProfile.fields.weight') }} <small>(kg)</small></label>
+                            <input type="number" class="form-control @error('weight') is-invalid @enderror" id="weight"
+                                name="weight" value="{{ old('weight', $profile->weight) }}" placeholder="kg">
+                            @error('weight')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="whatsapp_number">{{ trans('global.whatsapp_number') }}</label>
-                <input type="text" class="form-control @error('whatsapp_number') is-invalid @enderror"
-                    id="whatsapp_number" name="whatsapp_number"
-                    value="{{ old('whatsapp_number', $profile->whatsapp_number ? '+' . $profile->whatsapp_number : '') }}"
-                    placeholder="{{ trans('global.whatsapp_number_placeholder') }}" required>
-                @error('whatsapp_number')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-                <small class="form-text text-muted">{{ trans('global.whatsapp_number_helper') }}</small>
-            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="chest">{{ trans('cruds.talentProfile.fields.chest') }}</label>
+                            <input type="number" class="form-control @error('chest') is-invalid @enderror" id="chest"
+                                name="chest" value="{{ old('chest', $profile->chest) }}">
+                            @error('chest')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="waist">{{ trans('cruds.talentProfile.fields.waist') }}</label>
+                            <input type="number" class="form-control @error('waist') is-invalid @enderror" id="waist"
+                                name="waist" value="{{ old('waist', $profile->waist) }}">
+                            @error('waist')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="skin_tone">{{ trans('cruds.talentProfile.fields.skin_tone') }}</label>
-                    <select class="form-control @error('skin_tone') is-invalid @enderror" id="skin_tone"
-                        name="skin_tone">
-                        <option value="">{{ trans('global.pleaseSelect') }}</option>
-                        @foreach (App\Models\TalentProfile::SKIN_TONE_SELECT as $key => $label)
-                            <option value="{{ $key }}"
-                                {{ old('skin_tone', $profile->skin_tone) === $key ? 'selected' : '' }}>
-                                {{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('skin_tone')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="hair_color">{{ trans('cruds.talentProfile.fields.hair_color') }}</label>
-                    <input type="text" class="form-control @error('hair_color') is-invalid @enderror"
-                        id="hair_color" name="hair_color" value="{{ old('hair_color', $profile->hair_color) }}">
-                    @error('hair_color')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hips">{{ trans('cruds.talentProfile.fields.hips') }}</label>
+                            <input type="number" class="form-control @error('hips') is-invalid @enderror" id="hips"
+                                name="hips" value="{{ old('hips', $profile->hips) }}">
+                            @error('hips')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="shoe_size">{{ trans('cruds.talentProfile.fields.shoe_size') }}</label>
+                            <input type="number" class="form-control @error('shoe_size') is-invalid @enderror"
+                                id="shoe_size" name="shoe_size" value="{{ old('shoe_size', $profile->shoe_size) }}">
+                            @error('shoe_size')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="eye_color">{{ trans('cruds.talentProfile.fields.eye_color') }}</label>
-                    <input type="text" class="form-control @error('eye_color') is-invalid @enderror"
-                        id="eye_color" name="eye_color" value="{{ old('eye_color', $profile->eye_color) }}">
-                    @error('eye_color')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="shoe_size">{{ trans('cruds.talentProfile.fields.shoe_size') }}</label>
-                    <input type="number" class="form-control @error('shoe_size') is-invalid @enderror"
-                        id="shoe_size" name="shoe_size" value="{{ old('shoe_size', $profile->shoe_size) }}">
-                    @error('shoe_size')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="skin_tone">{{ trans('cruds.talentProfile.fields.skin_tone') }}</label>
+                            <select class="form-control @error('skin_tone') is-invalid @enderror" id="skin_tone"
+                                name="skin_tone">
+                                <option value="">{{ trans('global.pleaseSelect') }}</option>
+                                @foreach (App\Models\TalentProfile::SKIN_TONE_SELECT as $key => $label)
+                                    <option value="{{ $key }}"
+                                        {{ old('skin_tone', $profile->skin_tone) === $key ? 'selected' : '' }}>
+                                        {{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('skin_tone')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="hair_color">{{ trans('cruds.talentProfile.fields.hair_color') }}</label>
+                            <input type="text" class="form-control @error('hair_color') is-invalid @enderror"
+                                id="hair_color" name="hair_color" value="{{ old('hair_color', $profile->hair_color) }}">
+                            @error('hair_color')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row--single">
+                        <div class="form-group">
+                            <label for="eye_color">{{ trans('cruds.talentProfile.fields.eye_color') }}</label>
+                            <input type="text" class="form-control @error('eye_color') is-invalid @enderror"
+                                id="eye_color" name="eye_color" value="{{ old('eye_color', $profile->eye_color) }}">
+                            @error('eye_color')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -568,45 +629,52 @@
                 @php
                     $selectedLabelIds = collect(old('labels', $profile->labels->pluck('id')->all()));
                 @endphp
-                <div class="form-group form-group--labels">
-                    <label for="profile_labels" class="mb-2">{{ __('Select Tag') }}</label>
-                    <div class="tag-picker-wrapper" data-label-picker>
-                        <div class="tag-picker-trigger" tabindex="0" data-picker-trigger>
-                            <div class="tag-picker-values" data-picker-values></div>
-                            <span class="tag-picker-placeholder" data-picker-placeholder>{{ __('Select labels') }}</span>
-                            <span class="tag-picker-caret"><i class="fas fa-chevron-down"></i></span>
-                        </div>
-                        <div class="tag-picker-dropdown" data-picker-dropdown>
-                            @foreach ($labels as $label)
-                                <label class="tag-picker-option">
-                                    <input
-                                        type="checkbox"
-                                        value="{{ $label->id }}"
-                                        data-label-option
-                                        data-label-name="{{ $label->name }}"
-                                        {{ $selectedLabelIds->contains($label->id) ? 'checked' : '' }}
-                                    >
-                                    <span>{{ $label->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                        <select name="labels[]" id="profile_labels" multiple class="d-none" data-picker-select>
-                            @foreach ($labels as $label)
-                                <option value="{{ $label->id }}" {{ $selectedLabelIds->contains($label->id) ? 'selected' : '' }}>
-                                    {{ $label->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="form-text text-muted">
-                            {{ __('Pick every label that applies. Use the dropdown to multi-select, click outside to close.') }}
-                        </small>
+                <div class="ps-section">
+                    <div class="ps-section-head">
+                        <h4>{{ __('Select Tag') }}</h4>
+                        <p>{{ __('Choose every label that describes your style or experience.') }}</p>
                     </div>
-                    @error('labels')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                    @error('labels.*')
-                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                    <div class="ps-section-body">
+                        <div class="form-group form-group--labels">
+                            <div class="tag-picker-wrapper" data-label-picker>
+                                <div class="tag-picker-trigger" tabindex="0" data-picker-trigger>
+                                    <div class="tag-picker-values" data-picker-values></div>
+                                    <span class="tag-picker-placeholder" data-picker-placeholder>{{ __('Select labels') }}</span>
+                                    <span class="tag-picker-caret"><i class="fas fa-chevron-down"></i></span>
+                                </div>
+                                <div class="tag-picker-dropdown" data-picker-dropdown>
+                                    @foreach ($labels as $label)
+                                        <label class="tag-picker-option">
+                                            <input
+                                                type="checkbox"
+                                                value="{{ $label->id }}"
+                                                data-label-option
+                                                data-label-name="{{ $label->name }}"
+                                                {{ $selectedLabelIds->contains($label->id) ? 'checked' : '' }}
+                                            >
+                                            <span>{{ $label->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <select name="labels[]" id="profile_labels" multiple class="d-none" data-picker-select>
+                                    @foreach ($labels as $label)
+                                        <option value="{{ $label->id }}" {{ $selectedLabelIds->contains($label->id) ? 'selected' : '' }}>
+                                            {{ $label->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">
+                                    {{ __('Pick every label that applies. Use the dropdown to multi-select, click outside to close.') }}
+                                </small>
+                            </div>
+                            @error('labels')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                            @error('labels.*')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
             @endif
 
