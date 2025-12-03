@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\TalentProfile;
+use App\Models\CastingRequirementModel;
 
 class CastingRequirement extends Model implements HasMedia
 {
@@ -128,5 +130,29 @@ class CastingRequirement extends Model implements HasMedia
         }
 
         return Outfit::whereIn('id', $this->outfit)->orderBy('sort_order')->get();
+    }
+
+    public function modelRequirements()
+    {
+        return $this->hasMany(CastingRequirementModel::class)->with('labels');
+    }
+
+    public function matchesTalentProfile(?TalentProfile $profile): bool
+    {
+        if (! $profile) {
+            return false;
+        }
+
+        $requirements = $this->relationLoaded('modelRequirements')
+            ? $this->modelRequirements
+            : $this->modelRequirements()->get();
+
+        if ($requirements->isEmpty()) {
+            return true;
+        }
+
+        return $requirements->contains(function (CastingRequirementModel $modelRequirement) use ($profile) {
+            return $modelRequirement->matchesTalentProfile($profile);
+        });
     }
 }

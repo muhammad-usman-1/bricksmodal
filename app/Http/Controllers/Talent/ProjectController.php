@@ -13,6 +13,9 @@ class ProjectController extends Controller
     {
         $talent = $request->user('talent');
         $profile = $talent?->talentProfile;
+        if ($profile) {
+            $profile->loadMissing('labels');
+        }
 
         $statusFilter = $request->get('status', 'all');
         $allowedFilters = ['all', 'applied', 'shortlisted', 'selected', 'rejected'];
@@ -34,7 +37,7 @@ class ProjectController extends Controller
             $appliedIds = $applicationsByProject->keys()->toArray();
         }
 
-        $query = CastingRequirement::query();
+        $query = CastingRequirement::with(['modelRequirements.labels']);
 
         if ($statusFilter === 'all') {
             $query->whereIn('status', ['advertised', 'processing']);
@@ -57,7 +60,22 @@ class ProjectController extends Controller
             });
         }
 
-        $projects = $query->latest()->paginate(12)->withQueryString();
+        $talentLabelIds = $profile ? $profile->labels->pluck('id')->all() : [];
+        $talentAge = $profile && $profile->date_of_birth ? $profile->date_of_birth->age : null;
+
+        if ($profile) {
+            $query->where(function ($builder) use ($profile, $talentLabelIds, $talentAge) {
+                $builder->whereDoesntHave('modelRequirements')
+                    ->orWhereHas('modelRequirements', function ($requirements) use ($profile, $talentLabelIds, $talentAge) {
+                        $requirements->matchesTalent($profile, $talentLabelIds, $talentAge);
+                    });
+            });
+        } else {
+            $query->whereDoesntHave('modelRequirements');
+        }
+
+        $projects = $query->latest()->paginate(12);
+        $projects->appends($request->query());
 
         return view('talent.projects.index', compact(
             'projects',
@@ -70,9 +88,15 @@ class ProjectController extends Controller
 
     public function show(Request $request, CastingRequirement $castingRequirement)
     {
-        abort_if(! in_array($castingRequirement->status, ['advertised', 'processing']), 404);
-
         $profile = $request->user('talent')->talentProfile;
+        if ($profile) {
+            $profile->loadMissing('labels');
+        }
+
+        abort_if(! in_array($castingRequirement->status, ['advertised', 'processing']), 404);
+        abort_if(! $castingRequirement->matchesTalentProfile($profile), 404);
+
+        $castingRequirement->load(['modelRequirements.labels']);
         $existingApplication = CastingApplication::where('casting_requirement_id', $castingRequirement->id)
             ->where('talent_profile_id', $profile->id)
             ->first();
@@ -85,6 +109,11 @@ class ProjectController extends Controller
         abort_if(! in_array($castingRequirement->status, ['advertised', 'processing']), 404);
 
         $profile = $request->user('talent')->talentProfile;
+        if ($profile) {
+            $profile->loadMissing('labels');
+        }
+
+        abort_if(! $castingRequirement->matchesTalentProfile($profile), 404);
 
         if (CastingApplication::where('casting_requirement_id', $castingRequirement->id)
             ->where('talent_profile_id', $profile->id)

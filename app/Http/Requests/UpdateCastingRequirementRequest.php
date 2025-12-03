@@ -3,10 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Models\CastingRequirement;
+use App\Models\CastingRequirementModel;
 use Carbon\Carbon;
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 
 class UpdateCastingRequirementRequest extends FormRequest
 {
@@ -66,16 +68,9 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'hair_color' => [
-                'string',
-                'nullable',
-            ],
-            'age_range' => [
-                'string',
-                'nullable',
-            ],
             'reference' => [
                 'array',
+                'nullable',
             ],
             'outfit' => [
                 'array',
@@ -85,18 +80,48 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'integer',
                 'exists:outfits,id',
             ],
-            'count' => [
-                'required',
-                'integer',
-                'min:-2147483648',
-                'max:2147483647',
-            ],
-            'rate_per_model' => [
-                'numeric',
-                'required',
+            'notes' => [
+                'nullable',
+                'string',
             ],
             'status' => [
                 'required',
+            ],
+            'models' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'models.*.title' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.quantity' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+            'models.*.gender' => [
+                'required',
+                Rule::in(array_keys(CastingRequirement::GENDER_SELECT)),
+            ],
+            'models.*.hair_color' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.age_range_key' => [
+                'required',
+                Rule::in(array_keys(CastingRequirementModel::AGE_RANGE_OPTIONS)),
+            ],
+            'models.*.labels' => [
+                'array',
+                'nullable',
+            ],
+            'models.*.labels.*' => [
+                'integer',
+                'exists:labels,id',
             ],
         ];
     }

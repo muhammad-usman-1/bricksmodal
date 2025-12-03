@@ -8,12 +8,15 @@ use App\Http\Requests\MassDestroyCastingRequirementRequest;
 use App\Http\Requests\StoreCastingRequirementRequest;
 use App\Http\Requests\UpdateCastingRequirementRequest;
 use App\Models\CastingRequirement;
+use App\Models\CastingRequirementModel;
 use App\Models\CastingApplication;
 use App\Models\TalentProfile;
 use App\Models\User;
 use App\Models\Outfit;
+use App\Models\Label;
 use App\Support\EmailTemplateManager;
-use Gate;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,23 +41,52 @@ class CastingRequirementController extends Controller
         $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         $outfits = Outfit::active()->orderBy('category')->orderBy('sort_order')->get()->groupBy('category');
+        $labels = Label::orderBy('name')->get();
+        $ageRanges = CastingRequirementModel::AGE_RANGE_OPTIONS;
 
-        return view('admin.castingRequirements.create', compact('users', 'outfits'));
+        return view('admin.castingRequirements.create', compact('users', 'outfits', 'labels', 'ageRanges'));
     }
 
     public function store(StoreCastingRequirementRequest $request)
     {
         $data = $request->validated();
-        unset($data['shoot_date'], $data['shoot_time']);
+        $models = $data['models'] ?? [];
+        unset($data['shoot_date'], $data['shoot_time'], $data['models']);
+        $data['hair_color'] = null;
+        $data['age_range'] = null;
+        $data['gender'] = null;
         $data['status'] = 'advertised';
         $data['user_id'] = auth('admin')->id(); // Set the authenticated admin as the user
 
+        $totalQuantity = collect($models)->sum(function ($model) {
+            return (int) ($model['quantity'] ?? 0);
+        });
+        $data['count'] = max($totalQuantity, 1);
+        $data['rate_per_model'] = 0;
+
         $castingRequirement = CastingRequirement::create($data);
+
+        foreach ($models as $index => $modelPayload) {
+            $ageOption = CastingRequirementModel::AGE_RANGE_OPTIONS[$modelPayload['age_range_key']] ?? ['min' => null, 'max' => null];
+
+            $model = $castingRequirement->modelRequirements()->create([
+                'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
+                'quantity' => $modelPayload['quantity'],
+                'rate' => null,
+                'gender' => $modelPayload['gender'] ?? null,
+                'hair_color' => $modelPayload['hair_color'] ?? null,
+                'age_range_key' => $modelPayload['age_range_key'] ?? null,
+                'min_age' => $ageOption['min'] ?? null,
+                'max_age' => $ageOption['max'] ?? null,
+            ]);
+
+            $model->labels()->sync($modelPayload['labels'] ?? []);
+        }
 
         foreach ($request->input('reference', []) as $file) {
             $path = storage_path('tmp/uploads/' . basename($file));
             if (! file_exists($path)) {
-                \Log::warning('Temporary upload missing for casting requirement reference', ['path' => $path]);
+                Log::warning('Temporary upload missing for casting requirement reference', ['path' => $path]);
                 continue;
             }
             $castingRequirement->addMedia($path)->toMediaCollection('reference');
@@ -63,6 +95,8 @@ class CastingRequirementController extends Controller
         if ($media = $request->input('ck-media', false)) {
             Media::whereIn('id', $media)->update(['model_id' => $castingRequirement->id]);
         }
+
+        $castingRequirement->load('modelRequirements.labels');
 
         $this->notifyApprovedTalents($castingRequirement);
 
@@ -76,19 +110,48 @@ class CastingRequirementController extends Controller
         $users = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         $outfits = Outfit::active()->orderBy('category')->orderBy('sort_order')->get()->groupBy('category');
+        $labels = Label::orderBy('name')->get();
+        $ageRanges = CastingRequirementModel::AGE_RANGE_OPTIONS;
 
-        $castingRequirement->load('user');
+        $castingRequirement->load(['user', 'modelRequirements.labels']);
 
-        return view('admin.castingRequirements.edit', compact('castingRequirement', 'users', 'outfits'));
+        return view('admin.castingRequirements.edit', compact('castingRequirement', 'users', 'outfits', 'labels', 'ageRanges'));
     }
 
     public function update(UpdateCastingRequirementRequest $request, CastingRequirement $castingRequirement)
     {
         $data = $request->validated();
-        unset($data['shoot_date'], $data['shoot_time']);
+        $models = $data['models'] ?? [];
+        unset($data['shoot_date'], $data['shoot_time'], $data['models']);
+        $data['hair_color'] = null;
+        $data['age_range'] = null;
+        $data['gender'] = null;
         $data['user_id'] = $castingRequirement->user_id ?? auth('admin')->id(); // Keep existing user_id or set current admin
 
+        $totalQuantity = collect($models)->sum(function ($model) {
+            return (int) ($model['quantity'] ?? 0);
+        });
+        $data['count'] = max($totalQuantity, 1);
+        $data['rate_per_model'] = 0;
+
         $castingRequirement->update($data);
+
+        $castingRequirement->modelRequirements()->delete();
+
+        foreach ($models as $index => $modelPayload) {
+            $ageOption = CastingRequirementModel::AGE_RANGE_OPTIONS[$modelPayload['age_range_key']] ?? ['min' => null, 'max' => null];
+            $model = $castingRequirement->modelRequirements()->create([
+                'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
+                'quantity' => $modelPayload['quantity'],
+                'rate' => null,
+                'gender' => $modelPayload['gender'] ?? null,
+                'hair_color' => $modelPayload['hair_color'] ?? null,
+                'age_range_key' => $modelPayload['age_range_key'] ?? null,
+                'min_age' => $ageOption['min'] ?? null,
+                'max_age' => $ageOption['max'] ?? null,
+            ]);
+            $model->labels()->sync($modelPayload['labels'] ?? []);
+        }
 
         if (count($castingRequirement->reference) > 0) {
             foreach ($castingRequirement->reference as $media) {
@@ -104,7 +167,7 @@ class CastingRequirementController extends Controller
                 $castingRequirement->addMedia($path)->toMediaCollection('reference');
             }
             if (! file_exists($path)) {
-                \Log::warning('Temporary upload missing for casting requirement reference (update)', ['path' => $path]);
+                Log::warning('Temporary upload missing for casting requirement reference (update)', ['path' => $path]);
             }
         }
 
@@ -157,12 +220,16 @@ class CastingRequirementController extends Controller
         $templateKey = 'project_created_notification';
 
         TalentProfile::where('verification_status', 'approved')
-            ->with('user')
+            ->with(['user', 'labels'])
             ->chunk(200, function ($profiles) use ($castingRequirement, $templateKey) {
                 foreach ($profiles as $profile) {
                     $user = $profile->user;
 
                     if (! $user) {
+                        continue;
+                    }
+
+                    if (! $castingRequirement->matchesTalentProfile($profile)) {
                         continue;
                     }
 

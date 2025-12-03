@@ -144,6 +144,36 @@
             line-height: 1.55
         }
 
+        .model-req-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .model-req-card {
+            border: 1px solid #f3e3e2;
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .label-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .label-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 2px 10px;
+            background: var(--rose-100);
+            color: var(--rose-700);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
         /* Timeline */
         .timeline {
             display: flex;
@@ -535,6 +565,40 @@
                 </div>
             @endif
         </div>
+
+        @if($castingRequirement->modelRequirements->isNotEmpty())
+            <div class="section">
+                <h6>{{ __('Model Requirements') }}</h6>
+                <div class="body model-req-list">
+                    @foreach($castingRequirement->modelRequirements as $modelRequirement)
+                        <div class="model-req-card">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong>{{ $modelRequirement->title ?? __('Model #:number', ['number' => $loop->iteration]) }}</strong>
+                                <span class="badge badge-pill badge-secondary">{{ $modelRequirement->quantity }} {{ __('slots') }}</span>
+                            </div>
+                            <ul class="list-unstyled small text-muted mb-2">
+                                <li><strong>{{ __('Rate') }}:</strong> {{ $modelRequirement->rate ? '$' . number_format($modelRequirement->rate, 2) : __('Not specified') }}</li>
+                                <li><strong>{{ __('Gender') }}:</strong> {{ \App\Models\CastingRequirement::GENDER_SELECT[$modelRequirement->gender] ?? __('Any') }}</li>
+                                <li><strong>{{ __('Age Range') }}:</strong>
+                                    @php $rangeOption = \App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$modelRequirement->age_range_key] ?? null; @endphp
+                                    {{ $rangeOption['label'] ?? __('Any age') }}
+                                </li>
+                                <li><strong>{{ __('Hair') }}:</strong> {{ $modelRequirement->hair_color ?: __('Any') }}</li>
+                            </ul>
+                            @if($modelRequirement->labels->isNotEmpty())
+                                <div class="label-pills">
+                                    @foreach($modelRequirement->labels as $label)
+                                        <span class="label-pill">{{ $label->name }}</span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-muted small">{{ __('No specific labels required') }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         {{-- Outfit & Nails --}}
         @if (!empty($castingRequirement->outfit) || !empty($castingRequirement->nails))
