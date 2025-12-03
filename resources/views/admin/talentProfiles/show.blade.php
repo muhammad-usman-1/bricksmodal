@@ -54,6 +54,16 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>{{ trans('cruds.talentProfile.fields.labels') }}</th>
+                                <td>
+                                    @forelse($talentProfile->labels as $label)
+                                        <span class="badge badge-secondary mr-1">{{ $label->name }}</span>
+                                    @empty
+                                        <span class="text-muted">{{ trans('global.not_set') }}</span>
+                                    @endforelse
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>{{ trans('cruds.talentProfile.fields.bio') }}</th>
                                 <td>{{ $talentProfile->bio ?: trans('global.not_set') }}</td>
                             </tr>

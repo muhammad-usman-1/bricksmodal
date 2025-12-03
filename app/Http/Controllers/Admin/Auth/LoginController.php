@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
 use App\Notifications\AdminAccountCreated;
 use App\Notifications\NewAdminGoogleLogin;
 use Illuminate\Http\Request;
@@ -61,9 +62,25 @@ class LoginController extends Controller
 
             $user = User::where('email', $googleUser->email)->where('type', User::TYPE_ADMIN)->first();
 
-            if (!$user) {
-                // Redirect to unauthorized page
-                return redirect()->route('admin.unauthorized');
+            if (! $user) {
+                $creativeRoleId = Role::where('title', 'creative')->value('id');
+
+                $user = User::create([
+                    'name' => $googleUser->name ?: Str::before($googleUser->email, '@'),
+                    'email' => $googleUser->email,
+                    'type' => User::TYPE_ADMIN,
+                    'password' => bcrypt(Str::random(16)),
+                ]);
+
+                if ($creativeRoleId) {
+                    $user->roles()->sync([$creativeRoleId]);
+                }
+
+                $user->notify(new AdminAccountCreated($user));
+            }
+
+            if ($user->isSuperAdmin()) {
+                $user->notify(new NewAdminGoogleLogin($user, now()));
             }
 
             Auth::guard('admin')->login($user);

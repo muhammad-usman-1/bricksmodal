@@ -78,7 +78,7 @@ class TalentProfileController extends Controller
     {
         abort_if(Gate::denies('talent_profile_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $talentProfile->load('languages', 'user');
+        $talentProfile->load('languages', 'user', 'labels');
 
         return view('admin.talentProfiles.show', compact('talentProfile'));
     }
@@ -188,6 +188,7 @@ class TalentProfileController extends Controller
             }
 
             $talentProfile->languages()->detach();
+            $talentProfile->labels()->detach();
             CastingApplication::where('talent_profile_id', $talentProfile->id)->delete();
             BankDetail::where('talent_profile_id', $talentProfile->id)->delete();
 

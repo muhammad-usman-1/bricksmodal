@@ -1,5 +1,170 @@
 @extends('layouts.talent')
 
+@section('styles')
+    <style>
+        .form-group--labels {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tag-picker-wrapper {
+            position: relative;
+        }
+
+        .tag-picker-trigger {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid #e9d3d1;
+            border-radius: 10px;
+            background: #f7efee;
+            padding: 10px 40px 10px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .tag-picker-trigger:focus {
+            border-color: #d9bebc;
+            box-shadow: 0 0 0 3px rgba(212, 169, 165, .18);
+            outline: none;
+        }
+
+        .tag-picker-values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag-picker-placeholder {
+            color: #a58885;
+            font-weight: 600;
+        }
+
+        .tag-picker-badge {
+            background: #f6e6e4;
+            color: #8a6561;
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .tag-picker-caret {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a6561;
+            pointer-events: none;
+        }
+
+        .tag-picker-dropdown {
+            position: absolute;
+            inset-inline-start: 0;
+            width: 100%;
+            margin-top: 6px;
+            background: #fff;
+            border: 1px solid #e9d3d1;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+            max-height: 220px;
+            overflow-y: auto;
+            display: none;
+            z-index: 30;
+        }
+
+        .tag-picker-dropdown.is-open {
+            display: block;
+        }
+
+        .tag-picker-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1e7e6;
+            font-weight: 600;
+            color: #6c5a58;
+        }
+
+        .tag-picker-option:last-child {
+            border-bottom: none;
+        }
+
+        .tag-picker-option:hover {
+            background: #fff9f8;
+        }
+    </style>
+@endsection
+
+@section('scripts')
+    <script>
+        (function () {
+            const pickers = document.querySelectorAll('[data-label-picker]');
+            if (!pickers.length) {
+                return;
+            }
+
+            pickers.forEach((picker) => {
+                const trigger = picker.querySelector('[data-picker-trigger]');
+                const dropdown = picker.querySelector('[data-picker-dropdown]');
+                const select = picker.querySelector('[data-picker-select]');
+                const valuesWrap = picker.querySelector('[data-picker-values]');
+                const placeholder = picker.querySelector('[data-picker-placeholder]');
+                const checkboxes = picker.querySelectorAll('[data-label-option]');
+
+                const closeDropdown = () => dropdown.classList.remove('is-open');
+
+                const refresh = () => {
+                    const selected = [];
+                    checkboxes.forEach((checkbox) => {
+                        const option = select.querySelector(`option[value="${checkbox.value}"]`);
+                        if (option) {
+                            option.selected = checkbox.checked;
+                        }
+                        if (checkbox.checked) {
+                            selected.push(checkbox.getAttribute('data-label-name') || checkbox.value);
+                        }
+                    });
+
+                    valuesWrap.innerHTML = '';
+                    if (!selected.length) {
+                        placeholder.style.display = 'inline';
+                    } else {
+                        placeholder.style.display = 'none';
+                        selected.forEach((label) => {
+                            const badge = document.createElement('span');
+                            badge.className = 'tag-picker-badge';
+                            badge.textContent = label;
+                            valuesWrap.appendChild(badge);
+                        });
+                    }
+                };
+
+                trigger.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    dropdown.classList.toggle('is-open');
+                });
+
+                checkboxes.forEach((checkbox) => {
+                    checkbox.addEventListener('change', refresh);
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!picker.contains(event.target)) {
+                        closeDropdown();
+                    }
+                });
+
+                refresh();
+            });
+        })();
+    </script>
+@endsection
+
 @section('content')
 <div class="content">
     <div class="row">
@@ -59,6 +224,16 @@
                                             <td>
                                                 @forelse($profile->languages as $language)
                                                     <span class="badge badge-info mr-1">{{ $language->title }}</span>
+                                                @empty
+                                                    <span class="text-muted">{{ trans('global.not_set') }}</span>
+                                                @endforelse
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ trans('cruds.talentProfile.fields.labels') }}</th>
+                                            <td>
+                                                @forelse($profile->labels as $label)
+                                                    <span class="badge badge-secondary mr-1">{{ $label->name }}</span>
                                                 @empty
                                                     <span class="text-muted">{{ trans('global.not_set') }}</span>
                                                 @endforelse
@@ -311,6 +486,50 @@
                                 </select>
                                 @error('languages') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 @error('languages.*') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="form-group form-group--labels">
+                                <label for="talent_labels" class="mb-2">{{ __('Select Tag') }}</label>
+                                @php $selectedLabelIds = collect(old('labels', $profile->labels->pluck('id')->all())); @endphp
+                                <div class="tag-picker-wrapper" data-label-picker>
+                                    <div class="tag-picker-trigger" tabindex="0" data-picker-trigger>
+                                        <div class="tag-picker-values" data-picker-values></div>
+                                        <span class="tag-picker-placeholder" data-picker-placeholder>{{ __('Select labels') }}</span>
+                                        <span class="tag-picker-caret"><i class="fas fa-chevron-down"></i></span>
+                                    </div>
+                                    <div class="tag-picker-dropdown" data-picker-dropdown>
+                                        @foreach($availableLabels as $label)
+                                            <label class="tag-picker-option">
+                                                <input
+                                                    type="checkbox"
+                                                    value="{{ $label->id }}"
+                                                    data-label-option
+                                                    data-label-name="{{ $label->name }}"
+                                                    {{ $selectedLabelIds->contains($label->id) ? 'checked' : '' }}
+                                                >
+                                                <span>{{ $label->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <select
+                                        id="talent_labels"
+                                        class="d-none"
+                                        name="labels[]"
+                                        multiple
+                                        data-picker-select
+                                    >
+                                        @foreach($availableLabels as $label)
+                                            <option value="{{ $label->id }}" {{ $selectedLabelIds->contains($label->id) ? 'selected' : '' }}>
+                                                {{ $label->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        {{ __('Use the input to open the dropdown, then tap labels to multi-select.') }}
+                                    </small>
+                                </div>
+                                @error('labels') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                @error('labels.*') <span class="invalid-feedback">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="row">

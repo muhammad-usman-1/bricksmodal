@@ -96,6 +96,16 @@
                 </a>
             </li>
         @endif
+        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasPermission('label_access')))
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.labels.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/labels*') ? 'c-active' : '' }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-tags">
+
+                    </i>
+                    {{ __('Labels') }}
+                </a>
+            </li>
+        @endif
         {{--  @can('user_management_access')
             <li class="c-sidebar-nav-dropdown {{ request()->is('admin/permissions*') ? 'c-show' : '' }} {{ request()->is('admin/roles*') ? 'c-show' : '' }} {{ request()->is('admin/users*') ? 'c-show' : '' }}">
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">

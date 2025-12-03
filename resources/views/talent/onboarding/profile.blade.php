@@ -232,6 +232,108 @@
         filter: brightness(.96);
     }
 
+    .form-group--labels {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tag-picker-wrapper {
+        position: relative;
+    }
+
+    .tag-picker-trigger {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--input-border);
+        border-radius: var(--radius);
+        background: var(--input-bg);
+        padding: 10px 40px 10px 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        cursor: pointer;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .tag-picker-trigger:focus {
+        border-color: var(--rose-300);
+        box-shadow: 0 0 0 4px rgba(212, 169, 165, .18);
+        outline: none;
+    }
+
+    .tag-picker-placeholder {
+        color: #a58885;
+        font-weight: 600;
+    }
+
+    .tag-picker-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .tag-picker-badge {
+        background: var(--rose-100);
+        color: var(--rose-700);
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .tag-picker-caret {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--rose-700);
+        pointer-events: none;
+    }
+
+    .tag-picker-dropdown {
+        position: absolute;
+        inset-inline-start: 0;
+        width: 100%;
+        margin-top: 6px;
+        background: #fff;
+        border: 1px solid var(--input-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        max-height: 220px;
+        overflow-y: auto;
+        display: none;
+        z-index: 25;
+    }
+
+    .tag-picker-dropdown.is-open {
+        display: block;
+    }
+
+    .tag-picker-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1e7e6;
+        font-weight: 600;
+        color: var(--text-700);
+    }
+
+    .tag-picker-option:last-child {
+        border-bottom: none;
+    }
+
+    .tag-picker-option:hover {
+        background: var(--rose-10);
+    }
+
+    .tag-picker-option input {
+        width: 16px;
+        height: 16px;
+    }
+
     /* Responsive tweaks */
     @media (max-width: 768px) {
         .profile-setup .form-row {
@@ -462,6 +564,52 @@
                 </div>
             </div>
 
+            @if(isset($labels))
+                @php
+                    $selectedLabelIds = collect(old('labels', $profile->labels->pluck('id')->all()));
+                @endphp
+                <div class="form-group form-group--labels">
+                    <label for="profile_labels" class="mb-2">{{ __('Select Tag') }}</label>
+                    <div class="tag-picker-wrapper" data-label-picker>
+                        <div class="tag-picker-trigger" tabindex="0" data-picker-trigger>
+                            <div class="tag-picker-values" data-picker-values></div>
+                            <span class="tag-picker-placeholder" data-picker-placeholder>{{ __('Select labels') }}</span>
+                            <span class="tag-picker-caret"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="tag-picker-dropdown" data-picker-dropdown>
+                            @foreach ($labels as $label)
+                                <label class="tag-picker-option">
+                                    <input
+                                        type="checkbox"
+                                        value="{{ $label->id }}"
+                                        data-label-option
+                                        data-label-name="{{ $label->name }}"
+                                        {{ $selectedLabelIds->contains($label->id) ? 'checked' : '' }}
+                                    >
+                                    <span>{{ $label->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <select name="labels[]" id="profile_labels" multiple class="d-none" data-picker-select>
+                            @foreach ($labels as $label)
+                                <option value="{{ $label->id }}" {{ $selectedLabelIds->contains($label->id) ? 'selected' : '' }}>
+                                    {{ $label->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">
+                            {{ __('Pick every label that applies. Use the dropdown to multi-select, click outside to close.') }}
+                        </small>
+                    </div>
+                    @error('labels')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                    @error('labels.*')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+            @endif
+
             <div class="ps-actions">
                 <button type="submit" class="ps-next">{{ trans('global.next_step') }}</button>
             </div>
@@ -487,5 +635,70 @@
         chips.forEach(chip => chip.addEventListener('click', () => activate(chip.dataset.value)));
         // initialize from old() / model
         activate(select?.value || '');
+    })();
+
+    (function () {
+        const pickers = document.querySelectorAll('[data-label-picker]');
+        if (!pickers.length) {
+            return;
+        }
+
+        pickers.forEach((picker) => {
+            const trigger = picker.querySelector('[data-picker-trigger]');
+            const dropdown = picker.querySelector('[data-picker-dropdown]');
+            const select = picker.querySelector('[data-picker-select]');
+            const valuesWrap = picker.querySelector('[data-picker-values]');
+            const placeholder = picker.querySelector('[data-picker-placeholder]');
+            const checkboxes = picker.querySelectorAll('[data-label-option]');
+
+            const closeDropdown = () => dropdown.classList.remove('is-open');
+            const openDropdown = () => dropdown.classList.add('is-open');
+
+            const refresh = () => {
+                const selected = [];
+                checkboxes.forEach((checkbox) => {
+                    const option = select.querySelector(`option[value="${checkbox.value}"]`);
+                    if (option) {
+                        option.selected = checkbox.checked;
+                    }
+                    if (checkbox.checked) {
+                        selected.push({
+                            value: checkbox.value,
+                            label: checkbox.getAttribute('data-label-name') || checkbox.value,
+                        });
+                    }
+                });
+
+                valuesWrap.innerHTML = '';
+                if (!selected.length) {
+                    placeholder.style.display = 'inline';
+                } else {
+                    placeholder.style.display = 'none';
+                    selected.forEach(({ label }) => {
+                        const badge = document.createElement('span');
+                        badge.className = 'tag-picker-badge';
+                        badge.textContent = label;
+                        valuesWrap.appendChild(badge);
+                    });
+                }
+            };
+
+            trigger.addEventListener('click', (event) => {
+                event.stopPropagation();
+                dropdown.classList.toggle('is-open');
+            });
+
+            checkboxes.forEach((checkbox) => {
+                checkbox.addEventListener('change', refresh);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!picker.contains(event.target)) {
+                    closeDropdown();
+                }
+            });
+
+            refresh();
+        });
     })();
 </script>

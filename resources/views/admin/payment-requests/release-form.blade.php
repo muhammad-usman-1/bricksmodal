@@ -55,6 +55,28 @@
                                     </p>
                                 </div>
                             </div>
+                            @if($application->rating || $application->reviews)
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <p class="mb-1">
+                                            <strong>Feedback from Admin:</strong>
+                                        </p>
+                                        @if($application->rating)
+                                            <p class="mb-1 text-warning">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="fas fa-star{{ $i <= $application->rating ? '' : '-o' }}"></i>
+                                                @endfor
+                                                <span class="text-muted small ml-1">{{ number_format($application->rating, 1) }}/5</span>
+                                            </p>
+                                        @endif
+                                        @if($application->reviews)
+                                            <p class="mb-0 text-muted">
+                                                “{{ $application->reviews }}”
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

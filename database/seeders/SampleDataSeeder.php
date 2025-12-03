@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\CastingApplication;
 use App\Models\CastingRequirement;
+use App\Models\Label;
 use App\Models\Role;
 use App\Models\TalentProfile;
 use App\Models\User;
@@ -18,6 +19,14 @@ class SampleDataSeeder extends Seeder
     {
         $faker = Factory::create();
         $panelDateTimeFormat = config('panel.date_format') . ' ' . config('panel.time_format');
+
+        $labelPool = collect();
+        for ($i = 0; $i < 8; $i++) {
+            $name = ucfirst($faker->unique()->words(2, true));
+            $labelPool->push(Label::firstOrCreate(['name' => $name]));
+        }
+        $faker->unique(true);
+        $labelIds = $labelPool->pluck('id')->all();
 
         // create talents
         $talentUsers = collect();
@@ -35,7 +44,7 @@ class SampleDataSeeder extends Seeder
             $hasCard = $faker->boolean(70);
             $cardNumber = $hasCard ? preg_replace('/\D/', '', $faker->creditCardNumber()) : null;
 
-            TalentProfile::updateOrCreate(
+            $talentProfile = TalentProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'legal_name'         => $user->name,
@@ -53,6 +62,14 @@ class SampleDataSeeder extends Seeder
                     'card_holder_name'   => $cardNumber ? $user->name : null,
                 ]
             );
+
+            if (!empty($labelIds)) {
+                $maxLabels = min(4, count($labelIds));
+                $labelCount = $maxLabels ? $faker->numberBetween(0, $maxLabels) : 0;
+                $talentProfile->labels()->sync($labelCount ? $faker->randomElements($labelIds, $labelCount) : []);
+            } else {
+                $talentProfile->labels()->sync([]);
+            }
         }
 
         // admin management sample users

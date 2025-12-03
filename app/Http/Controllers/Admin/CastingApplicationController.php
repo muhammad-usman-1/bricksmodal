@@ -103,9 +103,10 @@ class CastingApplicationController extends Controller
     {
         abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        // Validate that application is in 'applied' status
-        if ($castingApplication->status !== 'applied') {
-            return back()->withErrors(['error' => 'Only applications with "applied" status can be approved.']);
+        // Validate that application is in an approvable status
+        $approvableStatuses = ['applied', 'shortlisted'];
+        if (! in_array($castingApplication->status, $approvableStatuses, true)) {
+            return back()->withErrors(['error' => 'Only applications with "applied" or "shortlisted" status can be approved.']);
         }
 
         $data = $request->validate([
@@ -179,11 +180,21 @@ class CastingApplicationController extends Controller
     /**
      * Request payment approval from super admin (for regular admins)
      */
-    public function requestPayment(CastingApplication $castingApplication)
+    public function requestPayment(Request $request, CastingApplication $castingApplication)
     {
-        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
         $admin = auth('admin')->user();
+
+        if (! $admin) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
+        $canManage = $admin->isSuperAdmin()
+            || $admin->hasModulePermission('project_management')
+            || $admin->isCreative();
+
+        if (! $canManage) {
+            abort(Response::HTTP_FORBIDDEN, 'You do not have permission to request payments.');
+        }
 
         // Super admins don't need to request approval
         if ($admin->isSuperAdmin()) {
@@ -200,10 +211,17 @@ class CastingApplicationController extends Controller
             return back()->withErrors(['error' => 'Payment request already in progress or completed.']);
         }
 
+        $data = $request->validate([
+            'rating'  => ['required', 'integer', 'min:1', 'max:5'],
+            'reviews' => ['required', 'string', 'max:1000'],
+        ]);
+
         $castingApplication->update([
             'payment_status' => 'requested',
             'payment_requested_at' => now(),
             'payment_requested_by_admin_id' => $admin->id,
+            'rating' => $data['rating'],
+            'reviews' => $data['reviews'],
         ]);
 
         // Notify all super admins about payment request

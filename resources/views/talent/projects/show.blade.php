@@ -81,10 +81,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 10px;
+            width: 100%;
         }
 
         .apply-pill {
-            width: 100%;
+            margin:12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -92,14 +94,32 @@
             border-radius: 999px;
             background: var(--rose-700);
             color: #fff;
-            padding: 8px 12px;
+            padding: 8px 16px;
             font-weight: 800;
             text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .head-right .apply-pill {
+            width: 100%;
+        }
+
+        .apply-pill:hover {
+            color: #fff;
+            text-decoration: none;
+            opacity: .9;
         }
 
         .apply-pill[disabled] {
             opacity: .6;
             cursor: not-allowed
+        }
+
+        .title-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
         }
 
         /* ===== Sections ===== */
@@ -307,13 +327,44 @@
 
     <div class="page-wrap">
         @php
-            $formattedShootDate = null;
-            if (!empty($castingRequirement->shoot_date_time)) {
+            $timezone = config('app.timezone', 'UTC');
+            $shootStart = null;
+            $rawShootDates = array_filter([
+                $castingRequirement->shoot_date_time ?? null,
+                $castingRequirement->shoot_date_display ?? null,
+            ]);
+            $manualFormats = [
+                'd/m/Y H:i:s',
+                'd/m/Y H:i',
+                'd-m-Y H:i:s',
+                'd-m-Y H:i',
+                'Y-m-d H:i:s',
+                'Y-m-d\TH:i:sP',
+                'Y-m-d',
+            ];
+
+            foreach ($rawShootDates as $rawShootDate) {
                 try {
-                    $formattedShootDate = \Illuminate\Support\Carbon::parse($castingRequirement->shoot_date_time)->format('d M Y | h:i A');
+                    $shootStart = \Illuminate\Support\Carbon::parse($rawShootDate, $timezone);
                 } catch (\Throwable $e) {
-                    $formattedShootDate = $castingRequirement->shoot_date_time;
+                    foreach ($manualFormats as $format) {
+                        try {
+                            $shootStart = \Illuminate\Support\Carbon::createFromFormat($format, $rawShootDate, $timezone);
+                            break;
+                        } catch (\Throwable $inner) {
+                            continue;
+                        }
+                    }
                 }
+
+                if ($shootStart) {
+                    break;
+                }
+            }
+
+            $formattedShootDate = null;
+            if ($shootStart) {
+                $formattedShootDate = $shootStart->copy()->timezone($timezone)->format('d M Y | h:i A');
             } elseif (!empty($castingRequirement->shoot_date_display)) {
                 $formattedShootDate = $castingRequirement->shoot_date_display;
             }
@@ -362,6 +413,34 @@
             $mapSrc = $locationQuery
                 ? 'https://www.google.com/maps?q=' . rawurlencode($locationQuery) . '&t=&z=15&ie=UTF8&iwloc=B&output=embed'
                 : null;
+
+            $googleCalendarUrl = null;
+            if ($shootStart) {
+                try {
+                    $shootEnd = (clone $shootStart)->addHours(2);
+
+                    $startUtc = $shootStart->copy()->timezone('UTC')->format('Ymd\THis\Z');
+                    $endUtc = $shootEnd->copy()->timezone('UTC')->format('Ymd\THis\Z');
+
+                    $details = trim(implode("\n", array_filter([
+                        $castingRequirement->description ?? ($castingRequirement->notes ?? null),
+                        $castingRequirement->posted_by ? __('Posted by: :name', ['name' => $castingRequirement->posted_by]) : null,
+                        request()->fullUrl(),
+                    ])));
+
+                    $query = array_filter([
+                        'action' => 'TEMPLATE',
+                        'text' => $castingRequirement->project_name ?? __('Project Shoot'),
+                        'dates' => "{$startUtc}/{$endUtc}",
+                        'details' => $details ?: null,
+                        'location' => $castingRequirement->location ?? null,
+                    ]);
+
+                    $googleCalendarUrl = 'https://calendar.google.com/calendar/render?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+                } catch (\Throwable $e) {
+                    $googleCalendarUrl = null;
+                }
+            }
         @endphp
         <div class="mb-2">
             <a href="{{ route('talent.projects.index') }}" class="text-decoration-none" style="color:#8a6561;font-weight:800;">
@@ -379,7 +458,20 @@
                         <span class="chip">{{ $statusText }}</span>
                     @endif
                 </div>
-                <h2 class="title">{{ $castingRequirement->project_name }}</h2>
+                <div class="title-row">
+                    <h2 class="title">{{ $castingRequirement->project_name }}</h2>
+                    @if ($googleCalendarUrl)
+                        <a
+                            class="apply-pill"
+                            href="{{ $googleCalendarUrl }}"
+                            target="_blank"
+                            rel="noopener"
+                            title="{{ __('Add this shoot to your Google Calendar') }}"
+                        >
+                            <i class="far fa-calendar-plus mr-1"></i>{{ __('Add to Calendar') }}
+                        </a>
+                    @endif
+                </div>
                 <div class="sub">{{ __('Posted by') }} {{ $castingRequirement->posted_by ?? 'Admin' }}</div>
                 <div class="meta">
                     @if ($formattedShootDate)

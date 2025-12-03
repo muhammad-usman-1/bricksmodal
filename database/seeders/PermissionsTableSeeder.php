@@ -173,6 +173,24 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 36,
                 'title' => 'profile_manage',
             ],
+
+            // Label Management
+            [
+                'id'    => 39,
+                'title' => 'label_access',
+            ],
+            [
+                'id'    => 40,
+                'title' => 'label_create',
+            ],
+            [
+                'id'    => 41,
+                'title' => 'label_edit',
+            ],
+            [
+                'id'    => 42,
+                'title' => 'label_delete',
+            ],
         ];
 
         // Use idempotent creation so seeding is safe on existing DBs

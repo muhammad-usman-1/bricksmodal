@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CastingApplicationController;
 use App\Http\Controllers\Admin\CastingRequirementController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\LabelController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\PaymentDashboardController;
 use App\Http\Controllers\Admin\PaymentRequestController;
@@ -123,6 +124,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // Language
     Route::delete('languages/destroy', [LanguageController::class, 'massDestroy'])->name('languages.massDestroy');
     Route::resource('languages', LanguageController::class);
+
+    // Labels
+    Route::delete('labels/destroy', [LabelController::class, 'massDestroy'])->name('labels.massDestroy');
+    Route::resource('labels', LabelController::class);
 
     // Casting Application
     Route::delete('casting-applications/destroy', [CastingApplicationController::class, 'massDestroy'])->name('casting-applications.massDestroy');

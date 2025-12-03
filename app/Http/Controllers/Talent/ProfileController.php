@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Talent;
 
 use App\Http\Controllers\Controller;
+use App\Models\Label;
 use App\Models\Language;
 use App\Models\TalentProfile;
 use Illuminate\Http\RedirectResponse;
@@ -19,8 +20,9 @@ class ProfileController extends Controller
         $profile = $this->resolveProfile($user);
 
         return view('talent.profile.index', [
-            'profile'          => $profile->load('languages'),
+            'profile'          => $profile->load('languages', 'labels'),
             'languages'        => Language::orderBy('title')->get(),
+            'availableLabels'  => Label::orderBy('name')->get(),
             'skinToneOptions'  => TalentProfile::SKIN_TONE_SELECT,
             'statusOptions'    => TalentProfile::VERIFICATION_STATUS_SELECT,
         ]);
@@ -52,6 +54,8 @@ class ProfileController extends Controller
             'bio'              => ['nullable', 'string', 'max:1000'],
             'languages'        => ['nullable', 'array'],
             'languages.*'      => ['integer', 'exists:languages,id'],
+            'labels'           => ['required', 'array', 'min:1'],
+            'labels.*'         => ['integer', 'exists:labels,id'],
             'id_front'         => ['nullable', 'image', 'max:4096'],
             'id_back'          => ['nullable', 'image', 'max:4096'],
             'headshot_center'  => ['nullable', 'image', 'max:6144'],
@@ -89,6 +93,10 @@ class ProfileController extends Controller
 
         if (array_key_exists('languages', $data)) {
             $profile->languages()->sync($data['languages'] ?? []);
+        }
+
+        if (array_key_exists('labels', $data)) {
+            $profile->labels()->sync($data['labels'] ?? []);
         }
 
         $uploadMap = [

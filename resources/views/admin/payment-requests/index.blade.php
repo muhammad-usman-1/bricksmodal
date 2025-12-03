@@ -88,6 +88,7 @@
                             <th>Project</th>
                             <th>Talent</th>
                             <th>Requested By Admin</th>
+                            <th>Feedback</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Requested Date</th>
@@ -116,6 +117,27 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @php
+                                        $rating = $application->rating;
+                                        $review = $application->reviews;
+                                    @endphp
+                                    @if($rating)
+                                        <div class="text-warning mb-1">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="fas fa-star{{ $i <= $rating ? '' : '-o' }}"></i>
+                                            @endfor
+                                            <span class="text-muted small ml-1">{{ number_format($rating, 1) }}/5</span>
+                                        </div>
+                                    @else
+                                        <span class="text-muted d-block">{{ __('No rating submitted') }}</span>
+                                    @endif
+                                    @if($review)
+                                        <small class="text-muted d-block">
+                                            “{{ \Illuminate\Support\Str::limit($review, 80) }}”
+                                        </small>
+                                    @endif
+                                </td>
+                                <td>
                                     <strong class="text-success">${{ number_format($application->getPaymentAmount(), 2) }}</strong>
                                 </td>
                                 <td>
@@ -134,7 +156,7 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
                                     @if($application->payment_status === 'requested')
                                         <div class="btn-group btn-group-sm">
                                             <form action="{{ route('admin.payment-requests.approve', $application) }}" method="POST" class="d-inline">
@@ -198,6 +220,9 @@
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
+                                    <a href="{{ route('admin.payment-requests.show', $application) }}" class="btn btn-sm btn-outline-secondary ml-1">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
                                 </td>
                             </tr>
                         @empty

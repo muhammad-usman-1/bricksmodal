@@ -124,6 +124,11 @@ class TalentProfile extends Model
         return $this->belongsToMany(Language::class);
     }
 
+    public function labels()
+    {
+        return $this->belongsToMany(Label::class, 'label_talent_profile')->withTimestamps();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

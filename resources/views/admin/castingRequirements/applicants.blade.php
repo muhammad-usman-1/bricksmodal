@@ -170,6 +170,27 @@
                 .applicant-actions .btn {
                     font-size: 0.75rem;
                 }
+
+                .star-rating {
+                    display: inline-flex;
+                    flex-direction: row-reverse;
+                    gap: 6px;
+                }
+
+                .star-rating input {
+                    display: none;
+                }
+
+                .star-rating label {
+                    font-size: 1.6rem;
+                    color: #d9d3de;
+                    cursor: pointer;
+                    transition: color .15s ease;
+                }
+
+                .star-rating label.active {
+                    color: #f5a623;
+                }
             </style>
 
             <div class="applicant-grid">
@@ -215,6 +236,15 @@
                             $formatMetric($profile?->height, 'cm'),
                             $formatMetric($profile?->weight, 'kg'),
                         ]));
+
+                        $ratingValue = is_numeric($application->rating) ? (int) $application->rating : 5;
+                        if ($ratingValue < 1 || $ratingValue > 5) {
+                            $ratingValue = 5;
+                        }
+                        $reviewValue = $application->reviews;
+                        if (is_array($reviewValue)) {
+                            $reviewValue = implode(', ', array_filter($reviewValue, fn($item) => is_scalar($item)));
+                        }
                     @endphp
                     <div class="applicant-card">
                         <div class="applicant-photo">
@@ -288,18 +318,33 @@
                                 </button>
                             @endif
 
-                            @if($application->status === 'selected' && in_array($application->payment_status, ['pending', 'rejected']))
+                            @if($application->status === 'selected' && in_array($application->payment_status, ['pending', 'rejected', 'requested']))
+                                @php
+                                    $requestingAdmin = $application->requestedByAdmin;
+                                    $requestMessage = $requestingAdmin
+                                        ? __('Payment requested by :name', ['name' => $requestingAdmin->name])
+                                        : null;
+                                @endphp
                                 @if(auth('admin')->user()->isSuperAdmin())
-                                    <a href="{{ route('admin.payment-requests.index') }}" class="btn btn-sm btn-outline-primary">
-                                        {{ trans('global.manage') }} {{ trans('global.payments') }}
-                                    </a>
+                                    @if($application->payment_status === 'requested' && $requestMessage)
+                                        <span class="badge badge-info align-self-center">{{ $requestMessage }}</span>
+                                    @endif
                                 @else
-                                    <form method="POST" action="{{ route('admin.casting-applications.request-payment', $application) }}">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                            {{ trans('global.request') }} {{ trans('global.payment') }}
+                                    @if($application->payment_status === 'requested' && $requestMessage)
+                                        <span class="badge badge-info align-self-center">{{ $requestMessage }}</span>
+                                    @else
+                                        <button
+                                            class="btn btn-sm btn-outline-primary request-payment-btn"
+                                            data-toggle="modal"
+                                            data-target="#requestPaymentModal"
+                                            data-route="{{ route('admin.casting-applications.request-payment', $application) }}"
+                                            data-name="{{ $displayName }}"
+                                            data-rating="{{ $ratingValue }}"
+                                            data-review="{{ $reviewValue ?? '' }}"
+                                        >
+                                           Request for Payment.
                                         </button>
-                                    </form>
+                                    @endif
                                 @endif
                             @elseif($application->payment_status === 'requested')
                                 <span class="badge badge-info align-self-center">Payment Requested</span>
@@ -391,6 +436,37 @@
 
             var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message)
             window.open(url, '_blank')
+        })
+
+        const updateStarClasses = function(container, value) {
+            container.find('label').each(function () {
+                $(this).toggleClass('active', $(this).data('value') <= value)
+            })
+        }
+
+        $('#requestPaymentModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget)
+            const route = button.data('route')
+            const name = button.data('name') || ''
+            const rating = button.data('rating') || 5
+            const review = button.data('review') || ''
+            const modal = $(this)
+            const starContainer = modal.find('[data-star-rating]')
+
+            modal.find('form').attr('action', route)
+            modal.find('textarea[name="reviews"]').val(review)
+            starContainer.find('input').prop('checked', false)
+            starContainer.find(`input[value="${rating}"]`).prop('checked', true)
+            updateStarClasses(starContainer, rating)
+            modal.find('.modal-title').text(name ? `{{ __('Request Payment') }} — ${name}` : '{{ __('Request Payment') }}')
+        })
+
+        $(document).on('click', '[data-star-rating] label', function () {
+            const label = $(this)
+            const container = label.closest('[data-star-rating]')
+            const value = label.data('value')
+            container.find(`input[value="${value}"]`).prop('checked', true).trigger('change')
+            updateStarClasses(container, value)
         })
     </script>
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Talent;
 
 use App\Http\Controllers\Controller;
+use App\Models\Label;
 use App\Models\TalentProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,13 +61,20 @@ class OnboardingController extends Controller
             return $this->redirectToCurrentStep($profile);
         }
 
-        return view("talent.onboarding.{$step}", [
+        $viewData = [
             'profile'      => $profile,
             'currentStep'  => $step,
             'progress'     => $this->progress($step),
             'nextStep'     => $this->nextStep($step),
             'previousStep' => $this->previousStep($step),
-        ]);
+        ];
+
+        if ($step === 'profile') {
+            $profile->loadMissing('labels');
+            $viewData['labels'] = Label::orderBy('name')->get();
+        }
+
+        return view("talent.onboarding.{$step}", $viewData);
     }
 
     public function store(Request $request, string $step): RedirectResponse
@@ -98,6 +106,8 @@ class OnboardingController extends Controller
                     'hair_color'      => ['nullable', 'string', 'max:120'],
                     'eye_color'       => ['nullable', 'string', 'max:120'],
                     'shoe_size'       => ['nullable', 'integer', 'between:0,100'],
+                    'labels'          => ['required', 'array', 'min:1'],
+                    'labels.*'        => ['integer', 'exists:labels,id'],
                 ]);
 
                 $user = $request->user('talent');
@@ -125,6 +135,10 @@ class OnboardingController extends Controller
                     'whatsapp_number' => $this->sanitizePhoneNumber($data['whatsapp_number']),
                     'onboarding_step' => $this->nextStep($step),
                 ]);
+
+                if (array_key_exists('labels', $data)) {
+                    $profile->labels()->sync($data['labels'] ?? []);
+                }
                 break;
 
             case 'id-documents':
