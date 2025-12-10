@@ -55,6 +55,9 @@ class TalentProfile extends Model
     ];
 
     protected $fillable = [
+        'first_name',
+        'last_name',
+        'nationality',
         'legal_name',
         'display_name',
         'verification_status',
@@ -70,10 +73,15 @@ class TalentProfile extends Model
         'waist',
         'hips',
         'skin_tone',
+        'hijab_preference',
+        'has_visible_tattoos',
+        'has_piercings',
         'hair_color',
         'eye_color',
         'shoe_size',
         'whatsapp_number',
+        'country_code',
+        'mobile_number',
         'card_number',
         'card_holder_name',
         'user_id',

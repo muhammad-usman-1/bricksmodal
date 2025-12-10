@@ -25,7 +25,7 @@ use App\Http\Controllers\Talent\OnboardingController;
 use App\Http\Controllers\Talent\ProfileController as TalentPortalProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/talent/login');
+Route::view('/', 'landing')->name('landing');
 
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
@@ -163,6 +163,7 @@ Route::prefix('talent')->as('talent.')->group(function () {
 
     Route::middleware('auth:talent')->group(function () {
         Route::get('onboarding', [OnboardingController::class, 'start'])->name('onboarding.start');
+        Route::get('onboarding/intro', [OnboardingController::class, 'intro'])->name('onboarding.intro');
         Route::get('onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');

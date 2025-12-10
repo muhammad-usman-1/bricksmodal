@@ -15,14 +15,6 @@ class OnboardingController extends Controller
 {
     private const STEPS = [
         'profile',
-        'id-documents',
-        'headshot-center',
-        'headshot-left',
-        'headshot-right',
-        'full-body-front',
-        'full-body-right',
-        'full-body-back',
-        'review',
     ];
 
     public function start(Request $request): RedirectResponse
@@ -38,6 +30,28 @@ class OnboardingController extends Controller
         }
 
         return $this->redirectToCurrentStep($profile);
+    }
+
+    public function intro(Request $request): View|RedirectResponse
+    {
+        $profile = $this->profile($request);
+
+        if ($profile->hasCompletedOnboarding()) {
+            if ($profile->verification_status !== 'approved') {
+                return redirect()->route('talent.pending');
+            }
+
+            return redirect()->route('talent.dashboard');
+        }
+
+        if ($profile->onboarding_step && $profile->onboarding_step !== 'profile') {
+            return $this->redirectToCurrentStep($profile);
+        }
+
+        return view('talent.onboarding.intro', [
+            'profile'     => $profile,
+            'startRoute'  => route('talent.onboarding.show', 'profile'),
+        ]);
     }
 
     public function show(Request $request, string $step): View|RedirectResponse
@@ -87,113 +101,69 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
-        switch ($step) {
-            case 'profile':
-                $data = $request->validate([
-                    'full_name'       => ['required', 'string', 'max:150'],
-                    'email'           => ['required', 'email', 'max:255'],
-                    'height'          => ['nullable', 'numeric', 'between:0,300'],
-                    'weight'          => ['nullable', 'numeric', 'between:0,500'],
-                    'daily_rate'      => ['required', 'numeric', 'min:0'],
-                    'hourly_rate'     => ['nullable', 'numeric', 'min:0'],
-                    'chest'           => ['nullable', 'integer', 'between:0,300'],
-                    'waist'           => ['nullable', 'integer', 'between:0,300'],
-                    'hips'            => ['nullable', 'integer', 'between:0,300'],
-                    'date_of_birth'   => ['required', 'date'],
-                    'gender'          => ['required', 'string', 'max:20'],
-                    'whatsapp_number' => ['required', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
-                    'skin_tone'       => ['nullable', 'in:' . implode(',', array_keys(TalentProfile::SKIN_TONE_SELECT))],
-                    'hair_color'      => ['nullable', 'string', 'max:120'],
-                    'eye_color'       => ['nullable', 'string', 'max:120'],
-                    'shoe_size'       => ['nullable', 'integer', 'between:0,100'],
-                    'labels'          => ['required', 'array', 'min:1'],
-                    'labels.*'        => ['integer', 'exists:labels,id'],
-                ]);
+        $data = $request->validate([
+            'first_name'        => ['required', 'string', 'max:120'],
+            'last_name'         => ['required', 'string', 'max:120'],
+            'date_of_birth'     => ['required', 'date'],
+            'nationality'       => ['nullable', 'string', 'max:120'],
+            'country_code'      => ['required', 'string', 'max:10'],
+            'mobile_number'     => ['required', 'string', 'max:30'],
+            'whatsapp_number'   => ['nullable', 'string', 'max:30'],
+            'gender'            => ['required', 'string', 'max:20'],
+            'hijab_preference'  => ['nullable', 'string', 'max:50'],
+            'height'            => ['nullable', 'numeric', 'between:0,300'],
+            'weight'            => ['nullable', 'numeric', 'between:0,500'],
+            'hair_color'        => ['nullable', 'string', 'max:120'],
+            'eye_color'         => ['nullable', 'string', 'max:120'],
+            'skin_tone'         => ['nullable', 'string', 'max:60'],
+            'has_visible_tattoos' => ['required', 'in:0,1'],
+            'has_piercings'       => ['required', 'in:0,1'],
+            'chest'             => ['nullable', 'numeric', 'between:0,300'],
+            'waist'             => ['nullable', 'numeric', 'between:0,300'],
+            'hips'              => ['nullable', 'numeric', 'between:0,300'],
+            'shoe_size'         => ['nullable', 'numeric', 'between:0,100'],
+            'id_front'          => [$profile->id_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
+            'id_back'           => [$profile->id_back_path ? 'nullable' : 'required', 'image', 'max:4096'],
+        ]);
 
-                $user = $request->user('talent');
-                $user->update([
-                    'name'  => $data['full_name'],
-                    'email' => $data['email'],
-                ]);
+        $user = $request->user('talent');
+        $fullName = trim($data['first_name'] . ' ' . $data['last_name']);
 
-                $profile->update([
-                    'legal_name'  => $data['full_name'],
-                    'display_name'=> $data['full_name'],
-                    'height'      => Arr::get($data, 'height'),
-                    'weight'      => Arr::get($data, 'weight'),
-                    'daily_rate'  => Arr::get($data, 'daily_rate'),
-                    'hourly_rate' => Arr::get($data, 'hourly_rate'),
-                    'chest'       => Arr::get($data, 'chest'),
-                    'waist'       => Arr::get($data, 'waist'),
-                    'hips'        => Arr::get($data, 'hips'),
-                    'date_of_birth' => $data['date_of_birth'],
-                    'gender'        => $data['gender'],
-                    'skin_tone'     => Arr::get($data, 'skin_tone'),
-                    'hair_color'    => Arr::get($data, 'hair_color'),
-                    'eye_color'     => Arr::get($data, 'eye_color'),
-                    'shoe_size'     => Arr::get($data, 'shoe_size'),
-                    'whatsapp_number' => $this->sanitizePhoneNumber($data['whatsapp_number']),
-                    'onboarding_step' => $this->nextStep($step),
-                ]);
+        $user->update([
+            'name' => $fullName,
+        ]);
 
-                if (array_key_exists('labels', $data)) {
-                    $profile->labels()->sync($data['labels'] ?? []);
-                }
-                break;
+        $profile->update([
+            'first_name'        => $data['first_name'],
+            'last_name'         => $data['last_name'],
+            'legal_name'        => $fullName,
+            'display_name'      => $fullName,
+            'nationality'       => Arr::get($data, 'nationality'),
+            'country_code'      => $data['country_code'],
+            'mobile_number'     => $this->sanitizePhoneNumber($data['mobile_number']),
+            'whatsapp_number'   => $this->sanitizePhoneNumber(Arr::get($data, 'whatsapp_number')),
+            'date_of_birth'     => $data['date_of_birth'],
+            'gender'            => $data['gender'],
+            'hijab_preference'  => Arr::get($data, 'hijab_preference'),
+            'height'            => Arr::get($data, 'height'),
+            'weight'            => Arr::get($data, 'weight'),
+            'hair_color'        => Arr::get($data, 'hair_color'),
+            'eye_color'         => Arr::get($data, 'eye_color'),
+            'skin_tone'         => Arr::get($data, 'skin_tone'),
+            'has_visible_tattoos' => (bool) $data['has_visible_tattoos'],
+            'has_piercings'       => (bool) $data['has_piercings'],
+            'chest'             => Arr::get($data, 'chest'),
+            'waist'             => Arr::get($data, 'waist'),
+            'hips'              => Arr::get($data, 'hips'),
+            'shoe_size'         => Arr::get($data, 'shoe_size'),
+            'id_front_path'     => Arr::get($data, 'id_front') ? $this->storeTalentFile($profile, $data['id_front'], 'id/front') : $profile->id_front_path,
+            'id_back_path'      => Arr::get($data, 'id_back') ? $this->storeTalentFile($profile, $data['id_back'], 'id/back') : $profile->id_back_path,
+            'onboarding_step'   => 'pending-approval',
+            'onboarding_completed_at' => now(),
+            'verification_status'     => 'pending',
+        ]);
 
-            case 'id-documents':
-                $data = $request->validate([
-                    'id_front' => ['required', 'image', 'max:4096'],
-                    'id_back'  => ['required', 'image', 'max:4096'],
-                ]);
-
-                $profile->update([
-                    'id_front_path' => $this->storeTalentFile($profile, $data['id_front'], 'id/front'),
-                    'id_back_path'  => $this->storeTalentFile($profile, $data['id_back'], 'id/back'),
-                    'onboarding_step' => $this->nextStep($step),
-                ]);
-                break;
-
-            case 'headshot-center':
-            case 'headshot-left':
-            case 'headshot-right':
-            case 'full-body-front':
-            case 'full-body-right':
-            case 'full-body-back':
-                $data = $request->validate([
-                    'photo' => ['required', 'image', 'max:6144'],
-                ]);
-
-                $column = match ($step) {
-                    'headshot-center'   => 'headshot_center_path',
-                    'headshot-left'     => 'headshot_left_path',
-                    'headshot-right'    => 'headshot_right_path',
-                    'full-body-front'   => 'full_body_front_path',
-                    'full-body-right'   => 'full_body_right_path',
-                    'full-body-back'    => 'full_body_back_path',
-                };
-
-                $profile->update([
-                    $column => $this->storeTalentFile($profile, $data['photo'], $step),
-                    'onboarding_step' => $this->nextStep($step),
-                ]);
-                break;
-
-            case 'review':
-                $request->validate([
-                    'confirm' => ['accepted'],
-                ]);
-
-                $profile->update([
-                    'onboarding_step'         => 'pending-approval',
-                    'onboarding_completed_at' => now(),
-                    'verification_status'     => 'pending',
-                ]);
-
-                return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));
-        }
-
-        return $this->redirectToCurrentStep($profile);
+        return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));
     }
 
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string

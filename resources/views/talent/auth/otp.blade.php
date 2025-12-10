@@ -2,53 +2,55 @@
 
 @section('content')
     <style>
-        :root {
-            --border: #e1d0cd;
-            --shadow: 0 2px 0 rgba(0, 0, 0, .06);
-            --ink: #111;
-            --muted: #4a3f3d;
-            --btn: #8f6662;
-            /* mauve like mock */
-            --btn-h: #7d5956;
+        body {
+            background: #ffffff url('{{ asset('images/landing.jpg') }}') center center / cover no-repeat;
+            font-family: 'Arimo', sans-serif;
         }
 
-        .logo-container {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-
-        .logo-container img {
-        height: 30px;
-        width: 130px;
-    }
-
-        /* Page layout: plain white, centered stack */
-        .otp-page {
-            min-height: 80vh;
+        .auth-shell {
+            min-height: calc(100vh - 60px);
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
-            padding-top: 30vh;
+            padding: 20px;
+        }
 
-            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            color: var(--ink);
-        }
-         /* subtle zoom on desktop */
-        @media (min-width: 1200px) {
-            .otp-page {
-                transform: scale(1.2);
-            }
-        }
-        .otp-wrap {
+        .auth-card {
+            width: 100%;
+            max-width: 380px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.14);
+            padding: 32px 28px 24px;
             text-align: center;
         }
 
-        .otp-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 28px;
+        .logo {
+            width: 150px;
+            margin: 0 auto 6px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: #7b7b7b;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 30px;
+            margin: 0 0 10px;
+            color: #1a1a1a;
+        }
+
+        .lead {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #4f4f4f;
+            margin: 0 0 30px;
         }
 
         .otp-grid {
@@ -59,67 +61,90 @@
         }
 
         .otp-input {
-            width: 48px;
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: #fff;
+            width: 54px;
+            height: 48px;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            background: #1a1a1a;
             text-align: center;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
-            color: #222;
+            color: #ffffff;
             outline: none;
-            box-shadow: var(--shadow);
-            transition: border-color .15s, box-shadow .15s;
+            transition: border-color .15s, box-shadow .15s, background .15s;
         }
 
         .otp-input:focus {
-            border-color: #cdb3b0;
-            box-shadow: 0 0 0 3px rgba(177, 139, 134, .18);
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+            background: #1a1a1a;
         }
 
-        .otp-hint {
-            font-size: 12px;
-            color: var(--muted);
-            margin: 8px 0 28px;
-        }
-
-        .btn-verify {
-            display: inline-block;
-            min-width: 140px;
-            background: var(--btn);
-            color: #fff;
-            border: 0;
-            border-radius: 8px;
-            padding: 9px 18px;
-            font-size: 12px;
-            font-weight: 600;
+        .submit-btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background: #111111;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             cursor: pointer;
-            transition: .15s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-verify:hover {
-            background: var(--btn-h);
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+        }
+
+        .meta {
+            font-size: 12px;
+            color: #555;
+            margin-top: 12px;
+        }
+
+        .meta a,
+        .meta a:visited,
+        .meta a:hover,
+        .meta a:active {
+            color: #3f3f3f;
+            text-decoration: none;
+        }
+
+        .alt-link,
+        .alt-link:visited,
+        .alt-link:hover,
+        .alt-link:active {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 12px;
+            color: #3f3f3f;
+            text-decoration: none;
+        }
+
+        .alt-link span {
+            border-bottom: 1px solid #3f3f3f;
+            padding-bottom: 2px;
         }
     </style>
 
-    <div class="otp-page">
-        <div class="otp-wrap">
-            <!-- Logo -->
-            <div class="logo-container" style="position: static; margin-bottom: 20px;">
-                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
-            </div>
-
-            <div class="otp-title">OTP Code Verification</div>
+    <div class="auth-shell">
+        <div class="auth-card">
+            <img class="logo" src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+            <div class="eyebrow">Studio</div>
+            <h1>Verify Identity</h1>
+            <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
 
             <form id="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
                 @csrf
 
                 <div class="otp-grid">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-                        autocomplete="one-time-code">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
@@ -127,18 +152,21 @@
 
                 <input type="hidden" name="otp" id="otp-hidden" value="{{ old('otp') }}">
 
-                <div class="otp-hint">Send code again <span id="countdown">00:20</span></div>
+                <button type="submit" class="submit-btn">
+                    Verify & Login
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 17v-3" />
+                        <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                </button>
 
-                <button type="submit" class="btn-verify">Verify</button>
-
-                <div style="margin-top: 32px; font-size: 13px; color: var(--muted);">
-                    <div style="margin-bottom: 12px;">
-                        <a href="{{ route('talent.login.submit') }}" style="color: var(--muted); text-decoration: none;">Send code again</a>
-                    </div>
-                    <div>
-                        <a href="{{ route('talent.login') }}" style="color: var(--muted); text-decoration: none;">Change phone number</a>
-                    </div>
+                <div class="meta">
+                    <span id="countdown">55 secs left.</span>
+                    <a href="{{ route('talent.login.submit') }}">Resend code</a>
                 </div>
+
+                <a class="alt-link" href="{{ route('talent.login') }}"><span>Change Phone Number</span></a>
             </form>
         </div>
     </div>
@@ -146,7 +174,7 @@
 
 @section('scripts')
     <script>
-        // OTP auto-advance, digits only, paste support, hidden field combine + 20s timer
+        // OTP auto-advance, digits only, paste support, hidden field combine + 55s timer
         (function() {
             const inputs = Array.from(document.querySelectorAll('.otp-input'));
             const hidden = document.getElementById('otp-hidden');
@@ -170,8 +198,7 @@
                         e.preventDefault();
                         inputs[i + 1].focus();
                     }
-                    if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft',
-                            'ArrowRight'].includes(e.key)) {
+                    if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
                         e.preventDefault();
                     }
                 });
@@ -182,10 +209,9 @@
                 });
             });
 
-            // paste whole code (e.g. "123456")
+            // paste whole code (e.g. "1234")
             grid.addEventListener('paste', e => {
-                const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(
-                    0, inputs.length);
+                const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, inputs.length);
                 if (!txt) return;
                 e.preventDefault();
                 inputs.forEach((el, idx) => el.value = txt[idx] || '');
@@ -196,11 +222,11 @@
             // focus first on load
             inputs[0]?.focus();
 
-            // countdown 00:20
-            let s = 20,
-                el = document.getElementById('countdown');
+            // countdown 55s
+            let s = 55;
+            const el = document.getElementById('countdown');
             const tick = () => {
-                el.textContent = '00:' + String(s).padStart(2, '0');
+                el.textContent = `${s} secs left.`;
                 if (s-- <= 0) clearInterval(iv);
             };
             const iv = setInterval(tick, 1000);

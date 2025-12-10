@@ -35,8 +35,8 @@ class LoginController extends Controller
             'email' => null,
         ]);
 
-        // Generate a random 6-digit OTP
-        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Generate a random 4-digit OTP
+        $otp = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
         $user->otp = $otp;
         $user->otp_expires_at = Carbon::now()->addMinutes(5);
         $user->otp_consumed = false;
@@ -88,7 +88,7 @@ class LoginController extends Controller
     public function verifyOtp(Request $request)
     {
         $data = $request->validate([
-            'otp' => ['required', 'string', 'size:6'],
+            'otp' => ['required', 'string', 'size:4'],
         ]);
 
         $phone = $request->session()->get('talent_phone');
@@ -133,7 +133,14 @@ class LoginController extends Controller
 
         // Redirect depending on onboarding state. OnboardingController will create a profile if missing.
         $profile = $user->talentProfile;
+
         if (! $profile || ! $profile->hasCompletedOnboarding()) {
+            $step = $profile?->onboarding_step;
+
+            if (! $profile || ! $step || $step === 'profile') {
+                return redirect()->route('talent.onboarding.intro');
+            }
+
             return redirect()->route('talent.onboarding.start');
         }
 

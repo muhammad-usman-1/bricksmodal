@@ -2,215 +2,313 @@
 
 @section('styles')
     <style>
-        /* ===== Soft rose / mauve theme (same as other screens) ===== */
         :root {
-            --rose-10: #fff9f8;
-            --rose-100: #f6e6e4;
-            --rose-200: #e9d3d1;
-            --rose-300: #d9bebc;
-            --rose-500: #b48b87;
-            --rose-700: #8a6561;
-            --text-900: #5b4a48;
-            --muted: #8c7b79;
-            --white: #ffffff;
-            --shadow: 0 12px 32px rgba(116, 84, 81, .12);
-            --radius: 20px;
+            --bg: #f6f7fb;
+            --card: #f9fafc;
+            --ink-900: #0f1524;
+            --ink-800: #1c2435;
+            --ink-700: #3b4150;
+            --ink-600: #4b5563;
+            --ink-500: #6b7280;
+            --border: #e5e8ef;
+            --primary: #0f0f0f;
+            --muted: #6b7280;
+            --success: #111827;
+            --radius: 18px;
+            --shadow: 0 26px 60px rgba(6, 19, 46, 0.16);
         }
 
-        .logo-container {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
+        body {
+            background: #ffffff url('{{ asset('images/landing.jpg') }}') center center / cover no-repeat;
+            font-family: 'Arimo', sans-serif;
         }
-.logo-container img {
-        height: 25px;
-        width: 100px;
-    }
 
-        /* Page frame */
-        .pending-wrap {
-            min-height: 86vh;
+        .pending-shell {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: clamp(16px, 3vw, 28px);
-
+            padding: 30px 16px;
         }
 
-        /* Card */
-        .pending-card {
-            width: 100%;
-            max-width: 560px;
-            border: 1px solid #f0e6e5;
-            border-radius: var(--radius);
-            background: #fff;
+        .modal-card {
+            width: min(520px, 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%);
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            overflow: hidden;
+            border: 1px solid #e4e8f0;
+            padding: 18px 18px 16px;
         }
 
-        .pending-head {
+        .modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 4px 4px 12px;
+        }
+
+        .head-copy {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            padding: 26px 24px 10px;
+            gap: 4px;
         }
 
-        .pending-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--rose-10);
-            border: 1px solid var(--rose-200);
-            box-shadow: 0 6px 16px rgba(116, 84, 81, .10);
-            color: var(--rose-700);
-        }
-
-        .pending-title {
+        .eyebrow {
             margin: 0;
-            color: var(--text-900);
-            font-weight: 800;
-            letter-spacing: .2px;
-            font-size: clamp(20px, 2.4vw, 22px);
+            color: var(--ink-900);
+            font-weight: 700;
+            font-size: 14px;
         }
 
-        .pending-sub {
-            color: var(--muted);
-            font-weight: 600;
-            margin: 0 0 6px;
-            text-align: center;
+        .timestamp {
+            margin: 0;
+            color: var(--ink-500);
+            font-size: 12px;
         }
 
-        .pending-body {
-            padding: 8px 24px 24px;
-            text-align: center;
+        .icon-btn {
+            border: none;
+            background: transparent;
+            color: var(--ink-500);
+            padding: 6px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s ease;
         }
 
-        /* Status pill */
-        .pending-status {
+        .icon-btn:hover {
+            background: #f0f2f6;
+        }
+
+        .modal-body {
+            text-align: left;
+            padding: 0 6px 0;
+        }
+
+        .thank-card {
+            background: #f4f6fb;
+            border: 1px solid #e6e9f0;
+            border-radius: 12px;
+            padding: 16px 16px 14px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .status-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            font-weight: 800;
-            background: #f6e6e4;
-            color: var(--text-900);
-            border: 1px solid var(--rose-200);
-        }
-
-        .pending-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: var(--rose-700);
-            box-shadow: 0 0 0 3px #f1d9d7 inset;
-        }
-
-        /* Notes box (optional) */
-        .pending-notes {
-            margin-top: 14px;
-            text-align: left;
-            background: #fff9f8;
-            border: 1px solid var(--rose-200);
-            border-radius: 14px;
-            padding: 12px 14px;
-        }
-
-        .pending-notes h5 {
-            color: var(--text-900);
-            font-weight: 800;
-            margin: 0 0 6px;
-        }
-
-        .pending-notes p {
-            color: #6e5c5a;
-            margin: 0;
-        }
-
-        /* Button */
-        .pending-actions {
-            display: flex;
             justify-content: center;
-            margin-top: 18px;
+            background: #f1f4f8;
+            color: #0f172a;
+            margin-top: 4px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
         }
 
-        .btn-refresh {
-            border: none;
-            background: var(--rose-700);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 12px;
+        .thank-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .title {
+            margin: 0 0 8px;
+            color: var(--ink-900);
             font-weight: 800;
-            letter-spacing: .2px;
-            box-shadow: var(--shadow);
+            font-size: 20px;
         }
 
-        .btn-refresh:hover {
-            filter: brightness(.97);
+        .lede {
+
+            color: var(--ink-600);
+            font-size: 14px;
+            
+            max-width: 360px;
+        }
+
+        .notice-card {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            gap: 12px;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #e5e8ef;
+            border-radius: 10px;
+            padding: 12px 14px;
+
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .notice-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #e8eef7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #2f3750;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        .notice-title {
+            font-weight: 800;
+            color: var(--ink-900);
+            margin: 0 0 2px;
+            font-size: 14px;
+        }
+
+        .notice-text {
+            margin: 0;
+            color: var(--ink-700);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .steps-card {
+            background: #eef3ff;
+            border: 1px solid #dbe6ff;
+            border-radius: 12px;
+            padding: 14px 16px 14px;
+            text-align: left;
+            margin-top: 12px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .steps-title {
+            margin: 0 0 10px;
+            color: var(--ink-900);
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .steps-list li {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 10px;
+            align-items: center;
+            color: var(--ink-700);
+            font-size: 14px;
+        }
+
+        .steps-list .num {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: #111827;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .actions {
+            margin-top: 18px;
+            padding: 0 6px;
+        }
+
+        .primary-btn {
+            width: 100%;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 520px) {
+            .modal-card {
+                border-radius: 14px;
+            }
         }
     </style>
 @endsection
 
-<!-- Logo -->
-<div class="logo-container">
-    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo" width="100" height="25">
-</div>
-
-<div class="pending-wrap">
-    <div class="pending-card">
-        <div class="pending-head">
-            <div class="pending-icon" aria-hidden="true">
-                {{-- clock/check style icon --}}
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
-                    <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </div>
-            <h2 class="pending-title">{{ trans('global.pending_request_title') }}</h2>
-            <p class="pending-sub">{{ trans('global.pending_request_body') }}</p>
-        </div>
-
-        <div class="pending-body">
-            <div class="pending-status">
-                <span class="pending-dot"></span>
-                <span>
-                    {{ trans('global.pending_request_status') }}:
-                    {{ \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT[$profile->verification_status] ?? trans('global.pending_request_waiting') }}
-                </span>
-            </div>
-
-            @if ($profile->verification_notes)
-                <div class="pending-notes">
-                    <h5>{{ trans('cruds.talentProfile.fields.verification_notes') }}</h5>
-                    <p>{{ $profile->verification_notes }}</p>
+@section('content')
+    <div class="pending-shell">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="head-copy">
+                    <p class="eyebrow">Application Submitted</p>
+                    <p class="timestamp">Just now</p>
                 </div>
-            @endif
+                <button type="button" class="icon-btn" aria-label="Close" onclick="window.location='{{ route('talent.pending') }}'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
 
-            <div class="pending-actions">
+            <div class="modal-body">
+                <div class="thank-card">
+                    <div class="status-icon" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="9 12 11 14 15 10" />
+                        </svg>
+                    </div>
 
-                <form method="POST" action="{{ route('talent.logout') }}" style="display: inline;">
-                    @csrf
-                    
-                    <button type="submit" class="btn btn-secondary" style="margin-left: 10px; background: #6c757d; border: none; color: #fff; padding: 10px 22px; border-radius: 12px; font-weight: 800; letter-spacing: .2px; box-shadow: var(--shadow);">
-                        {{ trans('global.logout') }}
-                    </button>
-                </form>
+                    <div class="thank-copy">
+                        <h3 class="title">Thank you for your application!</h3>
+                        <p class="lede">Your profile has been successfully submitted and is now under review. Our team will carefully verify all the information you provided.</p>
+
+                        <div class="notice-card">
+                            <div class="notice-icon" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="12" />
+                                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="notice-title">Important Notice</div>
+                                <p class="notice-text">Profile verification will take up to <strong>1-2 business days</strong><br>You'll receive a notification once your profile is approved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="steps-card">
+                    <div class="steps-title">What happens next?</div>
+                    <ol class="steps-list">
+                        <li><span class="num">1</span> <span>Our team reviews your profile and documents</span></li>
+                        <li><span class="num">2</span> <span>You receive an email notification about your approval</span></li>
+                        <li><span class="num">3</span> <span>Access your dashboard and start browsing casting calls</span></li>
+                    </ol>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="primary-btn" onclick="window.location='{{ route('talent.pending') }}'">Got It Thanks!</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-@section('scripts')
-<script>
-    document.getElementById('refresh-btn').addEventListener('click', function() {
-        this.textContent = ' Refreshing';
-        this.disabled = true;
-    });
-</script>
 @endsection
