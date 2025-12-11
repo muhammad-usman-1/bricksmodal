@@ -102,7 +102,7 @@
                             <label for="instagram_url">Instagram url (Brand link)</label>
                             <div class="dark-input has-pill">
                                 <input type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://www.instagram.com/lowclub.studio/">
-                                <span class="input-pill">M</span>
+                               
                             </div>
                         </div>
                     </div>
