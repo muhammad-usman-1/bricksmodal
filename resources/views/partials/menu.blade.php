@@ -1,17 +1,63 @@
-<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show">
+<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show" style="background:#f9fafb; border-right:1px solid #edf0f3; box-shadow: 6px 0 18px rgba(15,23,42,0.05);">
 
-     <div class="c-sidebar-brand d-md-down-none">
-        <a class="c-sidebar-brand-full h4" href="{{ route('talent.dashboard') }}">
-            <img src="{{ asset('images/bricks_logo.png') }}" alt="Logo" style="height: 27px; width: auto;">
-        </a>
-    </div>
+    <style>
+        .bm-sidebar {
+            padding: 18px 14px;
+            background: #f9fafb;
+        }
+        .bm-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0 14px;
+            border-bottom: 1px solid #e8ebef;
+            margin-bottom: 12px;
+        }
+        .bm-brand img { height: 36px; width: auto; }
+        .bm-nav { list-style: none; padding: 0; margin: 0; }
+        .bm-item { margin-bottom: 6px; }
+        .bm-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .bm-link:hover { background: #eef1f6; color: #0f172a;   text-decoration: none;}
+        .bm-link i { color: #374151; width: 16px; text-align: center; }
+        .bm-link.c-active {
+            background: #11141a;
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+        .bm-link.c-active i { color: #fff; }
+        .c-sidebar-nav-item{
+            margin-top:10px;
+        }
+    </style>
 
-    <ul class="c-sidebar-nav">
+    <div class="bm-sidebar">
+        <div class="bm-brand">
+            <a href="{{ route('talent.dashboard') }}" style="text-align:center; display:block;">
+                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Studio">
+                <div style="color: #6A7282;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: 30px; /* 142.857% */
+letter-spacing: 1.4px;">STUDIO</div>
+            </a>
+        </div>
+
+        <ul class="bm-nav">
         <li class="c-sidebar-nav-item">
-            <a href="{{ route('admin.home') }}" class="c-sidebar-nav-link {{ request()->is('admin') ? 'c-active' : '' }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-tachometer-alt">
-
-                </i>
+            <a href="{{ route('admin.home') }}" class="bm-link {{ request()->is('admin') ? 'c-active' : '' }}">
+                <i class="fas fa-fw fa-th-large"></i>
                 {{ trans('global.admin_dashboard') }}
             </a>
         </li>
@@ -32,76 +78,60 @@
         @endphp
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.projects.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-project-diagram">
-
-                    </i>
+                <a href="{{ route('admin.projects.dashboard') }}" class="bm-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-camera"></i>
                    Shoots
                 </a>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.talents.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-user-friends">
-
-                    </i>
+                <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-users"></i>
                     {{ trans('global.talents_dashboard') }}
                 </a>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.payments.dashboard') }}" class="c-sidebar-nav-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-wallet">
-
-                    </i>
+                <a href="{{ route('admin.payments.dashboard') }}" class="bm-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-credit-card"></i>
                     {{ trans('global.payment_dashboard') }}
                 </a>
             </li>
         @endif
         @if($adminUser && $adminUser->isSuperAdmin())
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.payment-requests.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/payment-requests*') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-hand-holding-usd">
-
-                    </i>
+                <a href="{{ route('admin.payment-requests.index') }}" class="bm-link {{ request()->is('admin/payment-requests*') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-hand-holding-usd"></i>
                     Payment Requests
                 </a>
             </li>
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.admin-management.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-user-shield">
-
-                    </i>
+                <a href="{{ route('admin.admin-management.index') }}" class="bm-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-user-shield"></i>
                     User Management
                 </a>
             </li>
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.role-permissions.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-key">
-
-                    </i>
+                <a href="{{ route('admin.role-permissions.index') }}" class="bm-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-key"></i>
                     Role Permissions
                 </a>
             </li>
         @endif
         @if($adminUser && $adminUser->isSuperAdmin())
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.settings.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-cog">
-
-                    </i>
+                <a href="{{ route('admin.settings.index') }}" class="bm-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-cog"></i>
                     {{ trans('global.settings') }}
                 </a>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasPermission('label_access')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.labels.index') }}" class="c-sidebar-nav-link {{ request()->is('admin/labels*') ? 'c-active' : '' }}">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-tags">
-
-                    </i>
+                <a href="{{ route('admin.labels.index') }}" class="bm-link {{ request()->is('admin/labels*') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-tags"></i>
                     {{ __('Labels') }}
                 </a>
             </li>
@@ -210,13 +240,12 @@
             @endcan
         @endif  --}}
         <li class="c-sidebar-nav-item">
-            <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-sign-out-alt">
-
-                </i>
+            <a href="#" class="bm-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
+                <i class="fas fa-fw fa-sign-out-alt"></i>
                 {{ trans('global.logout') }}
             </a>
         </li>
-    </ul>
+        </ul>
+    </div>
 
 </div>

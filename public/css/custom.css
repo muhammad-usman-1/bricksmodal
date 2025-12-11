@@ -126,12 +126,12 @@ body {
 }
 
 .c-sidebar {
-    background-color: #f2f3f5 !important;
+    background-color: white !important;
     color: #111 !important;
 }
 
 .c-sidebar .c-sidebar-brand{
-    background-color: #f2f3f5 !important;
+    background-color: white !important;
 }
 .c-sidebar .c-sidebar-nav-link,
 .c-sidebar .c-sidebar-nav-dropdown-toggle {
@@ -144,16 +144,16 @@ body {
 
 .c-sidebar .c-sidebar-nav-link:hover {
     background-color: #e0e1e5  ;
-    color: #000 !important;
+   color: white !important;
 }
 .c-sidebar .c-sidebar-nav-dropdown-toggle:hover {
     background-color: #e0e1e5 !important;
-    color: #000 !important;
+    color: white !important;
 }
 
 .c-sidebar .c-active {
-    background-color: #d5d6da !important;
-    color: #000 !important;
+    background-color: black!important;
+    color: white !important;
 }
 
 .c-sidebar .c-active .c-sidebar-nav-icon {

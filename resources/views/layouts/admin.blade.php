@@ -22,82 +22,150 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.0/css/perfect-scrollbar.min.css" rel="stylesheet" />
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
+    <style>
+        .admin-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #edf0f2;
+            box-shadow: none;
+        }
+
+        .admin-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .admin-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f7f9fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 8px 12px;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .admin-search i {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .admin-search input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .admin-icons {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .icon-btn {
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 16px;
+            padding: 0;
+            position: relative;
+        }
+
+        .icon-btn:focus {
+            outline: none;
+        }
+
+        .icon-badge {
+            position: absolute;
+            top: -3px;
+            right: -4px;
+            width: 8px;
+            height: 8px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 767px) {
+            .admin-topbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .admin-icons {
+                justify-content: flex-end;
+            }
+        }
+    </style>
     @yield('styles')
 </head>
 
 <body class="c-app">
     @include('partials.menu')
     <div class="c-wrapper">
-        {{--  <header class="c-header c-header-fixed px-3">
-            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
-                <i class="fas fa-fw fa-bars"></i>
-            </button>
-
-            <a class="c-header-brand d-lg-none" href="#">{{ trans('panel.site_title') }}</a>
-
-            <button class="c-header-toggler mfs-3 d-md-down-none" type="button" responsive="true">
-                <i class="fas fa-fw fa-bars"></i>
-            </button>
-
-            <ul class="c-header-nav ml-auto">
-                <li class="c-header-nav-item dropdown">
-                    <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-bell"></i>
-                        @if(auth()->user()->unreadNotifications->count() > 0)
-                            <span class="badge badge-danger">{{ auth()->user()->unreadNotifications->count() }}</span>
-                        @endif
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
-                        <div class="dropdown-header bg-light py-2">
-                            <strong>Notifications</strong>
-                            @if(auth()->user()->unreadNotifications->count() > 0)
-                                <a href="{{ route('admin.notifications.mark-all-read') }}" class="float-right text-muted" style="font-size: 0.8em;">
-                                    Mark all as read
-                                </a>
-                            @endif
-                        </div>
-                        @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
-                            <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
-                               href="{{ route('admin.notifications.show', $notification->id) }}">
-                                @if($notification->data['type'] === 'talent_profile')
-                                    <i class="fas fa-user text-info"></i>
-                                @else
-                                    <i class="fas fa-video text-warning"></i>
+        <header class="c-header c-header-fixed px-3 admin-header">
+            <div class="admin-topbar">
+                <div class="admin-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
+                </div>
+                <div class="admin-icons">
+                    <button class="icon-btn" type="button" aria-label="Add">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="icon-btn" type="button" aria-label="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div class="dropdown">
+                        <a class="icon-btn dropdown-toggle p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="icon-badge {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'd-none' }}"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
+                            <div class="dropdown-header bg-light py-2">
+                                <strong>Notifications</strong>
+                                @if(auth()->user()->unreadNotifications->count() > 0)
+                                    <a href="{{ route('admin.notifications.mark-all-read') }}" class="float-right text-muted" style="font-size: 0.8em;">
+                                        Mark all as read
+                                    </a>
                                 @endif
-                                {{ $notification->data['title'] }}
-                                <div class="small text-muted">{{ $notification->data['message'] }}</div>
-                                <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
-                            </a>
-                        @empty
-                            <div class="dropdown-item text-center text-muted">
-                                No notifications
                             </div>
-                        @endforelse
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">
-                            View all notifications
-                        </a>
-                    </div>
-                </li>
-                @if(count(config('panel.available_languages', [])) > 1)
-                    <li class="c-header-nav-item dropdown d-md-down-none">
-                        <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                            {{ strtoupper(app()->getLocale()) }}
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            @foreach(config('panel.available_languages') as $langLocale => $langName)
-                                <a class="dropdown-item" href="{{ url()->current() }}?change_language={{ $langLocale }}">{{ strtoupper($langLocale) }} ({{ $langName }})</a>
-                            @endforeach
+                            @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
+                                <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
+                                   href="{{ route('admin.notifications.show', $notification->id) }}">
+                                    @if($notification->data['type'] === 'talent_profile')
+                                        <i class="fas fa-user text-info"></i>
+                                    @else
+                                        <i class="fas fa-video text-warning"></i>
+                                    @endif
+                                    {{ $notification->data['title'] }}
+                                    <div class="small text-muted">{{ $notification->data['message'] }}</div>
+                                    <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="dropdown-item text-center text-muted">
+                                    No notifications
+                                </div>
+                            @endforelse
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">
+                                View all notifications
+                            </a>
                         </div>
-                    </li>
-                @endif
-
-
-            </ul>
-        </header>  --}}
+                    </div>
+                </div>
+            </div>
+        </header>
 
         <div class="c-body">
-            <main class="c-main">
+            <main class="c-main"  style="background: #F9FAFB;">
 
 
                 <div class="container-fluid">
