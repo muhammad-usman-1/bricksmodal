@@ -9,20 +9,18 @@ class UsersTableSeeder extends Seeder
 {
     public function run()
     {
-        $users = [
+        User::updateOrCreate(
+            ['email' => 'admin@admin.com'],
             [
-                'id'                 => 1,
-                'name'               => 'Admin',
-                'email'              => 'admin@admin.com',
-                'password'           => bcrypt('password'),
-                'remember_token'     => null,
+                'name' => 'Admin',
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'password' => bcrypt('password'),
                 'phone_country_code' => '',
-                'phone_number'       => '',
-                'otp'                => '',
-                'type'               => User::TYPE_ADMIN,
-            ],
-        ];
-
-        User::insert($users);
+                'phone_number' => '',
+                'otp' => '',
+                'type' => User::TYPE_ADMIN,
+            ]
+        );
     }
 }

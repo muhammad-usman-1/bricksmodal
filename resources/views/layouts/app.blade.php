@@ -25,11 +25,11 @@
 </head>
 
 <body class="header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden login-page">
-   
+
         <div class="container">
             @yield("content")
          </div>
-     
+
     @yield('scripts')
 </body>
 

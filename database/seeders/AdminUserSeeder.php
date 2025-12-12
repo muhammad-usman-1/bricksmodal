@@ -13,11 +13,23 @@ class AdminUserSeeder extends Seeder
     {
         // Create Super Admin
         $superAdmin = User::updateOrCreate(
-            ['email' => 'superadmin@example.com'],
+            ['email' => 'superadmin@gmail.com'],
             [
-                'name' => 'Super Admin',
+                'name' => 'Admin User',
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'email' => 'superadmin@gmail.com',
                 'password' => Hash::make('12345678'),
+                'phone_country_code' => '+971',
+                'phone_number' => '1231234567',
+                'location' => 'Dubai, UAE',
+                'website' => 'bricks.studio',
+                'bio' => 'Experienced studio manager with a passion for creating exceptional visual content. Managing talent and shoots at Bricks Studio.',
+                'role_title' => 'Studio Manager',
+                'member_since' => 'January 2024',
+                'profile_photo_path' => null,
                 'type' => User::TYPE_ADMIN,
+                'is_super_admin' => true,
             ]
         );
 
@@ -32,6 +44,8 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Regular Admin',
+                'first_name' => 'Regular',
+                'last_name' => 'Admin',
                 'password' => Hash::make('12345678'),
                 'type' => User::TYPE_ADMIN,
             ]
@@ -48,6 +62,8 @@ class AdminUserSeeder extends Seeder
             ['email' => 'creative@example.com'],
             [
                 'name' => 'Content Creative',
+                'first_name' => 'Content',
+                'last_name' => 'Creative',
                 'password' => Hash::make('12345678'),
                 'type' => User::TYPE_ADMIN,
             ]

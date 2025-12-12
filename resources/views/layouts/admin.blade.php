@@ -63,19 +63,21 @@
             color: #6b7280;
         }
 
-        .admin-icons {
+        .admin-header .admin-icons {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 10px !important;
         }
 
         .icon-btn {
-            border: none;
-            background: transparent;
+            border: none !important;
+            background: transparent !important;
             color: #6b7280;
             font-size: 16px;
             padding: 0;
             position: relative;
+            box-shadow: none;
+            border-radius: 0;
         }
 
         .icon-btn:focus {
@@ -120,9 +122,9 @@
                     <button class="icon-btn" type="button" aria-label="Add">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <button class="icon-btn" type="button" aria-label="Settings">
+                    <a class="icon-btn" href="{{ route('admin.settings.index') }}" aria-label="Settings">
                         <i class="fas fa-cog"></i>
-                    </button>
+                    </a>
                     <div class="dropdown">
                         <a class="icon-btn dropdown-toggle p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
                             <i class="fas fa-bell"></i>

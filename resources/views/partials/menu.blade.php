@@ -84,6 +84,14 @@ letter-spacing: 1.4px;">STUDIO</div>
                 </a>
             </li>
         @endif
+        @if($adminUser)
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.profile.show') }}" class="bm-link {{ request()->is('admin/my-profile') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-user"></i>
+                    My Profile
+                </a>
+            </li>
+        @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
@@ -117,14 +125,6 @@ letter-spacing: 1.4px;">STUDIO</div>
                 <a href="{{ route('admin.role-permissions.index') }}" class="bm-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-key"></i>
                     Role Permissions
-                </a>
-            </li>
-        @endif
-        @if($adminUser && $adminUser->isSuperAdmin())
-            <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.settings.index') }}" class="bm-link {{ request()->is('admin/settings') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-cog"></i>
-                    {{ trans('global.settings') }}
                 </a>
             </li>
         @endif

@@ -91,6 +91,12 @@ line-height: 32px; /* 133.333% */ }
                                 <div class="actions">
                                     <a class="action-icon" href="{{ route('admin.admin-management.show', $admin) }}" title="View"><i class="far fa-eye"></i></a>
                                     <a class="action-icon" href="{{ route('admin.admin-management.edit', $admin) }}" title="Edit"><i class="far fa-edit"></i></a>
+                                    <form action="{{ route('admin.impersonate.start', $admin) }}" method="POST" style="display:inline-block;">
+                                        @csrf
+                                        <button type="submit" class="action-icon" title="Impersonate" style="border:none; background:none; padding:0;">
+                                            <i class="fas fa-user-ninja"></i>
+                                        </button>
+                                    </form>
                                     <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Are you sure you want to delete this admin?">
                                         @csrf
                                         @method('DELETE')

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\PaymentDashboardController;
 use App\Http\Controllers\Admin\PaymentRequestController;
 use App\Http\Controllers\Admin\PermissionsController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ProjectsDashboardController;
 use App\Http\Controllers\Admin\RolesController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -77,7 +78,12 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::get('payments', [PaymentDashboardController::class, 'index'])->name('payments.dashboard');
         });
 
+        // Profile
+        Route::get('my-profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::put('my-profile', [ProfileController::class, 'update'])->name('profile.update');
+
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class)->only(['index', 'edit', 'update']);
 
         // Admin Management (Super Admin Only)
