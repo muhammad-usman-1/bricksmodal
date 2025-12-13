@@ -134,7 +134,25 @@
             @endforeach
         </div>
     </div>
-
+ <div class="section-card">
+        <div class="section-title">Full-Body Shots</div>
+        <div class="upload-grid">
+            @foreach($fullBody as $field => $label)
+                @php $img = $talentProfile->{$field} ?: null; @endphp
+                <div class="upload-tile">
+                    @if($img)
+                        <img src="{{ $img }}" alt="{{ $label }}">
+                    @else
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div style="font-size:12px;">Drop files here to upload</div>
+                            <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
     <div class="section-card">
         <div class="section-title">ID Documents</div>
         <div class="upload-grid">
@@ -155,25 +173,7 @@
         </div>
     </div>
 
-    <div class="section-card">
-        <div class="section-title">Full-Body Shots</div>
-        <div class="upload-grid">
-            @foreach($fullBody as $field => $label)
-                @php $img = $talentProfile->{$field} ?: null; @endphp
-                <div class="upload-tile">
-                    @if($img)
-                        <img src="{{ $img }}" alt="{{ $label }}">
-                    @else
-                        <div class="upload-placeholder">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <div style="font-size:12px;">Drop files here to upload</div>
-                            <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
-                        </div>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
+
 
     <div class="info-grid">
         <div class="section-card">
