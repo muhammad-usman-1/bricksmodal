@@ -128,14 +128,7 @@
                             <p class="warning-text">Enable 2FA to protect your account from unauthorized access.</p>
                             <div class="warning-actions">
                                 <button type="button" class="btn-enable-2fa" onclick="show2FASetup()">Enable Two-Factor Authentication</button>
-                                <div class="auth-app-logo">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.6;">
-                                        <circle cx="12" cy="12" r="10" fill="#4285F4"/>
-                                        <circle cx="18" cy="8" r="6" fill="#34A853"/>
-                                        <rect x="6" y="6" width="12" height="12" rx="2" fill="white"/>
-                                        <text x="12" y="16" font-family="Arial" font-size="10" font-weight="bold" fill="#34A853" text-anchor="middle">M</text>
-                                    </svg>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
