@@ -151,12 +151,7 @@ letter-spacing: 1.4px;">STUDIO</div>
             </li>
         @endif
         @if($adminUser && $adminUser->isSuperAdmin())
-            <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.payment-requests.index') }}" class="bm-link {{ request()->is('admin/payment-requests*') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-hand-holding-usd"></i>
-                    Payment Requests
-                </a>
-            </li>
+           
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.admin-management.index') }}" class="bm-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-user-shield"></i>
