@@ -30,6 +30,20 @@ class LoginController extends Controller
         $credentials['type'] = User::TYPE_ADMIN;
 
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::guard('admin')->user();
+            
+            // Check if 2FA is enabled
+            if ($user->hasTwoFactorEnabled()) {
+                // Store user ID and intended URL in session, then logout
+                $request->session()->put('login.id', $user->id);
+                $request->session()->put('login.remember', $request->boolean('remember'));
+                $request->session()->put('url.intended', $request->session()->pull('url.intended', route('admin.home')));
+                
+                Auth::guard('admin')->logout();
+                
+                return redirect()->route('admin.login.2fa');
+            }
+            
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.home'));
@@ -38,6 +52,60 @@ class LoginController extends Controller
         throw ValidationException::withMessages([
             'email' => [trans('auth.failed')],
         ]);
+    }
+
+    /**
+     * Show the 2FA verification form
+     */
+    public function show2FAForm()
+    {
+        if (!session('login.id')) {
+            return redirect()->route('admin.login');
+        }
+
+        return view('admin.auth.2fa');
+    }
+
+    /**
+     * Verify 2FA code and complete login
+     */
+    public function verify2FA(Request $request)
+    {
+        $request->validate([
+            'code' => ['required', 'string', 'max:25'],
+        ]);
+
+        $userId = session('login.id');
+        
+        if (!$userId) {
+            return redirect()->route('admin.login')->withErrors(['code' => 'Session expired. Please login again.']);
+        }
+
+        $user = User::find($userId);
+        
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            session()->forget(['login.id', 'login.remember', 'url.intended']);
+            return redirect()->route('admin.login')->withErrors(['code' => 'Invalid session. Please login again.']);
+        }
+
+        // Keep the code as-is, let verifyTwoFactorCode handle the formatting
+        $code = trim($request->code);
+
+        // Verify the 2FA code (handles both TOTP codes and recovery codes)
+        if (!$user->verifyTwoFactorCode($code)) {
+            return back()->withErrors(['code' => 'Invalid verification code. Please try again.']);
+        }
+
+        // Code is valid, complete the login
+        $remember = session('login.remember', false);
+        $intended = session('url.intended', route('admin.home'));
+        
+        session()->forget(['login.id', 'login.remember', 'url.intended']);
+        
+        Auth::guard('admin')->login($user, $remember);
+        $request->session()->regenerate();
+
+        return redirect()->intended($intended);
     }
 
     public function logout(Request $request)
@@ -81,6 +149,16 @@ class LoginController extends Controller
 
             if ($user->isSuperAdmin()) {
                 $user->notify(new NewAdminGoogleLogin($user, now()));
+            }
+
+            // Check if 2FA is enabled for Google login
+            if ($user->hasTwoFactorEnabled()) {
+                // Store user ID and intended URL in session, then redirect to 2FA
+                session()->put('login.id', $user->id);
+                session()->put('login.remember', false);
+                session()->put('url.intended', route('admin.home'));
+                
+                return redirect()->route('admin.login.2fa');
             }
 
             Auth::guard('admin')->login($user);

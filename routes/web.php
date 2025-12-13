@@ -32,6 +32,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [AdminLoginController::class, 'login'])->name('login.submit');
+        Route::get('login/2fa', [AdminLoginController::class, 'show2FAForm'])->name('login.2fa');
+        Route::post('login/2fa', [AdminLoginController::class, 'verify2FA'])->name('login.2fa.verify');
         Route::get('login/google', [AdminLoginController::class, 'redirectToGoogle'])->name('login.google');
         Route::get('login/google/callback', [AdminLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
         Route::get('unauthorized', [AdminLoginController::class, 'showUnauthorized'])->name('unauthorized');
@@ -81,6 +83,12 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Profile
         Route::get('my-profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::put('my-profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Two-Factor Authentication
+        Route::post('two-factor/enable', [\App\Http\Controllers\Admin\TwoFactorController::class, 'enable'])->name('two-factor.enable');
+        Route::post('two-factor/disable', [\App\Http\Controllers\Admin\TwoFactorController::class, 'disable'])->name('two-factor.disable');
+        Route::get('two-factor/recovery-codes', [\App\Http\Controllers\Admin\TwoFactorController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
+        Route::post('two-factor/recovery-codes', [\App\Http\Controllers\Admin\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('two-factor.regenerate-recovery-codes');
 
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');

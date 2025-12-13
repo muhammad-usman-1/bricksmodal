@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
+use PragmaRX\Google2FA\Google2FA;
+use Illuminate\Support\Collection;
 
 class User extends Authenticatable
 {
@@ -52,6 +54,9 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'phone_country_code',
         'phone_number',
         'otp',
@@ -76,6 +81,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'is_super_admin' => 'boolean',
+        'two_factor_confirmed_at' => 'datetime',
     ];
 
     protected function serializeDate(DateTimeInterface $date)
@@ -239,5 +245,109 @@ class User extends Authenticatable
         }
     }
 
+    /**
+     * Determine if two factor authentication is enabled.
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
+    }
+
+    /**
+     * Get the two factor recovery codes for the user.
+     */
+    public function recoveryCodes(): array
+    {
+        if (is_null($this->two_factor_recovery_codes)) {
+            return [];
+        }
+
+        return json_decode(decrypt($this->two_factor_recovery_codes), true);
+    }
+
+    /**
+     * Replace the given recovery code with a new one in the user's stored codes.
+     */
+    public function replaceRecoveryCode(string $code): void
+    {
+        $codes = $this->recoveryCodes();
+        $this->two_factor_recovery_codes = encrypt(json_encode(array_values(array_diff($codes, [$code]))));
+        $this->save();
+    }
+
+    /**
+     * Generate new recovery codes for the user.
+     */
+    public function generateRecoveryCodes(): array
+    {
+        $codes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $codes[] = $this->generateRecoveryCode();
+        }
+
+        $this->two_factor_recovery_codes = encrypt(json_encode($codes));
+        $this->save();
+
+        return $codes;
+    }
+
+    /**
+     * Generate a single recovery code.
+     */
+    protected function generateRecoveryCode(): string
+    {
+        return sprintf('%s-%s-%s-%s',
+            str()->random(4),
+            str()->random(4),
+            str()->random(4),
+            str()->random(4)
+        );
+    }
+
+    /**
+     * Verify the two-factor authentication code.
+     */
+    public function verifyTwoFactorCode(string $code): bool
+    {
+        if (is_null($this->two_factor_secret)) {
+            return false;
+        }
+
+        $google2fa = new Google2FA();
+        $secret = decrypt($this->two_factor_secret);
+
+        // Check if it's a recovery code first (recovery codes contain dashes or are longer)
+        $recoveryCodes = $this->recoveryCodes();
+        if (!empty($recoveryCodes)) {
+            // Check exact match first
+            if (in_array($code, $recoveryCodes)) {
+                $this->replaceRecoveryCode($code);
+                return true;
+            }
+            // Also check without dashes/spaces
+            $codeNormalized = preg_replace('/[\s-]/', '', $code);
+            foreach ($recoveryCodes as $recoveryCode) {
+                if (preg_replace('/[\s-]/', '', $recoveryCode) === $codeNormalized) {
+                    $this->replaceRecoveryCode($recoveryCode);
+                    return true;
+                }
+            }
+        }
+
+        // For TOTP codes, ensure we have only digits
+        $totpCode = preg_replace('/\D/', '', $code);
+        
+        // TOTP codes are typically 6 digits, but some apps might show 5-8 digits
+        // Pad with leading zeros if less than 6 digits, or use as-is if 6+ digits
+        if (strlen($totpCode) < 6) {
+            $totpCode = str_pad($totpCode, 6, '0', STR_PAD_LEFT);
+        } elseif (strlen($totpCode) > 6) {
+            // If longer than 6, take the last 6 digits (some apps show 7-8 digits)
+            $totpCode = substr($totpCode, -6);
+        }
+
+        // Verify TOTP code
+        return $google2fa->verifyKey($secret, $totpCode, 2); // 2 = 2 time windows tolerance
+    }
 
 }

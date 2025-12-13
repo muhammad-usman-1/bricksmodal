@@ -1,4 +1,4 @@
-<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show" style="background:#f9fafb; border-right:1px solid #edf0f3; box-shadow: 6px 0 18px rgba(15,23,42,0.05);">
+<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show" style="background:#f9fafb; border-right:1px solid #edf0f3; box-shadow: 6px 0 18px rgba(15,23,42,0.05); transition: background 0.3s ease, border-color 0.3s ease;">
 
     <style>
         .bm-sidebar {
@@ -38,6 +38,48 @@
         .bm-link.c-active i { color: #fff; }
         .c-sidebar-nav-item{
             margin-top:10px;
+        }
+
+        /* Dark theme styles for sidebar */
+        html[data-theme="dark"] #sidebar {
+            background: #1a1d23 !important;
+            border-right-color: #2d3138 !important;
+        }
+
+        html[data-theme="dark"] .bm-sidebar {
+            background: #1a1d23;
+        }
+
+        html[data-theme="dark"] .bm-brand {
+            border-bottom-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .bm-brand div {
+            color: #9ca3af;
+        }
+
+        html[data-theme="dark"] .bm-link {
+            color: #d1d5db;
+        }
+
+        html[data-theme="dark"] .bm-link:hover {
+            background: #252932;
+            color: #f3f4f6;
+            text-decoration: none;
+        }
+
+        html[data-theme="dark"] .bm-link i {
+            color: #9ca3af;
+        }
+
+        html[data-theme="dark"] .bm-link.c-active {
+            background: #3b82f6;
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(59, 130, 246, 0.3);
+        }
+
+        html[data-theme="dark"] .bm-link.c-active i {
+            color: #fff;
         }
     </style>
 

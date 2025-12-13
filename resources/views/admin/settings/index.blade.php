@@ -48,6 +48,71 @@
     @media (max-width: 640px) {
         .settings-top { flex-direction: column; align-items: flex-start; gap: 10px; }
     }
+
+    /* Dark theme styles for settings page */
+    html[data-theme="dark"] .settings-shell {
+        background: #0f1114;
+    }
+
+    html[data-theme="dark"] .back-btn {
+        color: #d1d5db;
+    }
+
+    html[data-theme="dark"] .back-btn:hover {
+        color: #f3f4f6;
+    }
+
+    html[data-theme="dark"] .primary-btn {
+        background: #3b82f6;
+        box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
+    }
+
+    html[data-theme="dark"] .primary-btn:hover {
+        background: #2563eb;
+    }
+
+    html[data-theme="dark"] .card-block {
+        background: #1a1d23;
+        border-color: #2d3138;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+    }
+
+    html[data-theme="dark"] .card-head .icon-circle {
+        background: #252932;
+        color: #3b82f6;
+    }
+
+    html[data-theme="dark"] .toggle-row {
+        border-top-color: #2d3138;
+    }
+
+    html[data-theme="dark"] .appearance-card {
+        background: #1a1d23;
+        border-color: #2d3138;
+    }
+
+    html[data-theme="dark"] .appearance-card:hover {
+        border-color: #3b82f6;
+    }
+
+    html[data-theme="dark"] .appearance-card.active {
+        border-color: #3b82f6;
+        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.3);
+    }
+
+    html[data-theme="dark"] .appearance-card .icon-wrap {
+        background: #252932;
+        color: #9ca3af;
+    }
+
+    html[data-theme="dark"] .appearance-card.active .icon-wrap {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    html[data-theme="dark"] .appearance-card span {
+        color: #e5e7eb;
+    }
 </style>
 
 <div class="settings-shell">

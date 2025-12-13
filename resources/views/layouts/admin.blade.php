@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html>
+@php
+    $adminSettings = \App\Models\AdminSetting::singleton();
+    $appearance = $adminSettings->appearance ?? 'light';
+@endphp
+<html data-theme-preference="{{ $appearance }}">
 
 <head>
     <meta charset="UTF-8">
@@ -104,6 +108,170 @@
             .admin-icons {
                 justify-content: flex-end;
             }
+        }
+
+        /* ===== Dark Theme Styles ===== */
+        html[data-theme="dark"],
+        html[data-theme="dark"] body {
+            color-scheme: dark;
+        }
+
+        html[data-theme="dark"] .admin-header {
+            background-color: #1a1d23;
+            border-bottom-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .admin-search {
+            background: #252932;
+            border-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .admin-search input {
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .admin-search input::placeholder {
+            color: #9ca3af;
+        }
+
+        html[data-theme="dark"] .admin-search i {
+            color: #9ca3af;
+        }
+
+        html[data-theme="dark"] .icon-btn {
+            color: #d1d5db;
+        }
+
+        html[data-theme="dark"] .icon-btn:hover {
+            color: #f3f4f6;
+        }
+
+        html[data-theme="dark"] .c-main {
+            background: #0f1114 !important;
+        }
+
+        html[data-theme="dark"] .c-body {
+            background: #0f1114;
+        }
+
+        html[data-theme="dark"] .container-fluid {
+            background: #0f1114;
+        }
+
+        html[data-theme="dark"] .card,
+        html[data-theme="dark"] .card-block {
+            background: #1a1d23;
+            border-color: #2d3138;
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .card-title,
+        html[data-theme="dark"] .settings-title {
+            color: #f3f4f6;
+        }
+
+        html[data-theme="dark"] .card-sub,
+        html[data-theme="dark"] .settings-sub,
+        html[data-theme="dark"] .toggle-hint {
+            color: #9ca3af;
+        }
+
+        html[data-theme="dark"] .toggle-label {
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .alert {
+            background-color: #1a1d23;
+            border-color: #2d3138;
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .alert-success {
+            background-color: #064e3b;
+            border-color: #065f46;
+            color: #d1fae5;
+        }
+
+        html[data-theme="dark"] .alert-danger {
+            background-color: #7f1d1d;
+            border-color: #991b1b;
+            color: #fecaca;
+        }
+
+        html[data-theme="dark"] .alert-warning {
+            background-color: #78350f;
+            border-color: #92400e;
+            color: #fde68a;
+        }
+
+        html[data-theme="dark"] .dropdown-menu {
+            background-color: #1a1d23;
+            border-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .dropdown-item {
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .dropdown-item:hover {
+            background-color: #252932;
+            color: #f3f4f6;
+        }
+
+        html[data-theme="dark"] .dropdown-header {
+            background-color: #252932 !important;
+            color: #9ca3af;
+            border-bottom-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .table {
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .table thead th {
+            border-bottom-color: #2d3138;
+            color: #f3f4f6;
+        }
+
+        html[data-theme="dark"] .table tbody td {
+            border-top-color: #2d3138;
+        }
+
+        html[data-theme="dark"] .form-control,
+        html[data-theme="dark"] .select-lite select {
+            background-color: #252932;
+            border-color: #2d3138;
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .form-control:focus,
+        html[data-theme="dark"] .select-lite select:focus {
+            background-color: #252932;
+            border-color: #3b82f6;
+            color: #e5e7eb;
+        }
+
+        html[data-theme="dark"] .btn-primary {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        html[data-theme="dark"] .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        html[data-theme="dark"] .btn-dark {
+            background-color: #374151;
+            border-color: #374151;
+        }
+
+        html[data-theme="dark"] .text-muted {
+            color: #9ca3af !important;
+        }
+
+        html[data-theme="dark"] .bg-light {
+            background-color: #252932 !important;
         }
     </style>
     @yield('styles')
@@ -237,6 +405,40 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
+        // Theme Management - Apply theme based on preference
+        (function() {
+            const html = document.documentElement;
+            const themePreference = html.getAttribute('data-theme-preference') || 'light';
+
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+            }
+
+            function getSystemTheme() {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+
+            // Apply theme based on preference
+            if (themePreference === 'system') {
+                // Apply system theme
+                applyTheme(getSystemTheme());
+
+                // Listen for system theme changes
+                if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    mediaQuery.addEventListener('change', function(e) {
+                        applyTheme(e.matches ? 'dark' : 'light');
+                    });
+                }
+            } else {
+                // Apply explicit theme (light or dark)
+                applyTheme(themePreference);
+            }
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
             const attachSwal = function () {
                 document.querySelectorAll('form[data-swal-confirm]').forEach(function (form) {

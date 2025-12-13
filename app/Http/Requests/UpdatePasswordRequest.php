@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -16,7 +15,12 @@ class UpdatePasswordRequest extends FormRequest
      */
     public function authorize()
     {
-        abort_if(Gate::denies('profile_password_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $user = auth('admin')->user();
+        
+        // Allow all admin users (admin, creative, superadmin) to change password
+        if (!$user || !$user->isAdmin()) {
+            abort(Response::HTTP_FORBIDDEN, '403 Forbidden');
+        }
 
         return true;
     }

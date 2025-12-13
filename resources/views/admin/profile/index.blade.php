@@ -10,7 +10,8 @@
     .profile-actions { display: flex; align-items: center; gap: 8px; }
     .profile-action { background: #0f172a; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; box-shadow: 0 8px 18px rgba(0,0,0,0.14); }
     .back-btn { border: 1px solid #e5e7eb; background: #fff; color: #111827; border-radius: 8px; padding: 10px 14px; font-size: 12px; }
-    .privacy-btn { border: 1px solid #e5e7eb; background: #fff; color: #111827; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+    .privacy-btn { background: #0f172a; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 8px 18px rgba(0,0,0,0.14); text-decoration: none; }
+    .privacy-btn:hover { background: #0f172a; color: #fff; text-decoration: none; opacity: 0.9; }
 
     .profile-card { background: #fff; border: 1px solid #edf0f3; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 10px 22px rgba(15,23,42,0.06); }
     .profile-card + .profile-card { margin-top: 6px; }
