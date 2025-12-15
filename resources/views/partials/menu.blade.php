@@ -4,17 +4,22 @@
         .bm-sidebar {
             padding: 18px 14px;
             background: #f9fafb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .bm-brand {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 10px 0 14px;
             border-bottom: 1px solid #e8ebef;
             margin-bottom: 12px;
+            gap: 4px;
         }
         .bm-brand img { height: 36px; width: auto; }
-        .bm-nav { list-style: none; padding: 0; margin: 0; }
+        .bm-nav { list-style: none; padding: 0; margin: 0; flex: 1; }
         .bm-item { margin-bottom: 6px; }
         .bm-link {
             display: flex;
@@ -38,6 +43,115 @@
         .bm-link.c-active i { color: #fff; }
         .c-sidebar-nav-item{
             margin-top:10px;
+        }
+
+        .bm-footer {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid #e8ebef;
+        }
+
+        .bm-footer-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid #edf0f3;
+            border-radius: 12px;
+            padding: 10px 12px;
+            box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+        }
+
+        .bm-footer-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bm-footer-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #0f0f11;
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .bm-footer-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .bm-footer-name {
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .bm-footer-role {
+            color: #6b7280;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .bm-footer-arrow {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            display: grid;
+            place-items: center;
+            color: #4b5563;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .bm-footer-dropdown {
+            position: absolute;
+            right: 10px;
+            bottom: 70px;
+            width: 180px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 18px 32px rgba(15,23,42,0.12);
+            padding: 8px 0;
+            display: none;
+            z-index: 20;
+        }
+
+        .bm-footer-dropdown.show { display: block; }
+
+        .bm-footer-dropdown a,
+        .bm-footer-dropdown button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #111827;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .bm-footer-dropdown a:hover,
+        .bm-footer-dropdown button:hover {
+            background: #f3f4f6;
+            text-decoration: none;
+        }
+
+        .bm-footer-dropdown i {
+            width: 16px;
+            text-align: center;
+            color: #6b7280;
         }
 
         /* Dark theme styles for sidebar */
@@ -87,20 +201,21 @@
         <div class="bm-brand">
             <a href="{{ route('talent.dashboard') }}" style="text-align:center; display:block;">
                 <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Studio">
-                <div style="color: #6A7282;
+            </a>
+            <div style="color: #6A7282;
+            margin-top: 10px;
 font-size: 14px;
 font-style: normal;
 font-weight: 400;
-line-height: 30px; /* 142.857% */
+line-height: 18px;
 letter-spacing: 1.4px;">STUDIO</div>
-            </a>
         </div>
 
         <ul class="bm-nav">
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.home') }}" class="bm-link {{ request()->is('admin') ? 'c-active' : '' }}">
                 <i class="fas fa-fw fa-th-large"></i>
-                {{ trans('global.admin_dashboard') }}
+                Dashboard
             </a>
         </li>
         {{--  <li class="c-sidebar-nav-item">
@@ -126,14 +241,14 @@ letter-spacing: 1.4px;">STUDIO</div>
                 </a>
             </li>
         @endif
-        @if($adminUser)
+        {{--  @if($adminUser)
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.profile.show') }}" class="bm-link {{ request()->is('admin/my-profile') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-user"></i>
                     My Profile
                 </a>
             </li>
-        @endif
+        @endif  --}}
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
@@ -151,28 +266,28 @@ letter-spacing: 1.4px;">STUDIO</div>
             </li>
         @endif
         @if($adminUser && $adminUser->isSuperAdmin())
-           
+
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.admin-management.index') }}" class="bm-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-user-shield"></i>
                     User Management
                 </a>
             </li>
-            <li class="c-sidebar-nav-item">
+            {{--  <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.role-permissions.index') }}" class="bm-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-key"></i>
                     Role Permissions
                 </a>
-            </li>
+            </li>  --}}
         @endif
-        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasPermission('label_access')))
+        {{--  @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasPermission('label_access')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.labels.index') }}" class="bm-link {{ request()->is('admin/labels*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-tags"></i>
                     {{ __('Labels') }}
                 </a>
             </li>
-        @endif
+        @endif  --}}
         {{--  @can('user_management_access')
             <li class="c-sidebar-nav-dropdown {{ request()->is('admin/permissions*') ? 'c-show' : '' }} {{ request()->is('admin/roles*') ? 'c-show' : '' }} {{ request()->is('admin/users*') ? 'c-show' : '' }}">
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">
@@ -276,13 +391,79 @@ letter-spacing: 1.4px;">STUDIO</div>
                 </li>
             @endcan
         @endif  --}}
-        <li class="c-sidebar-nav-item">
+        {{--  <li class="c-sidebar-nav-item">
             <a href="#" class="bm-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
                 <i class="fas fa-fw fa-sign-out-alt"></i>
                 {{ trans('global.logout') }}
             </a>
-        </li>
+        </li>  --}}
         </ul>
+
+        @if($adminUser)
+            @php
+                $name = $adminUser->name ?? 'Admin User';
+                $roleLabel = $adminUser->roles->first()->title ?? 'Admin';
+                $initials = collect(explode(' ', $name))->map(fn($p) => substr($p,0,1))->implode('');
+            @endphp
+            <div class="bm-footer" style="position: relative;">
+                <div class="bm-footer-card">
+                    <div class="bm-footer-user">
+                        <div class="bm-footer-avatar">{{ $initials }}</div>
+                        <div class="bm-footer-meta">
+                            <p class="bm-footer-name">{{ $name }}</p>
+                            <p class="bm-footer-role">{{ ucfirst($roleLabel) }}</p>
+                        </div>
+                    </div>
+                    <button type="button" class="bm-footer-arrow" id="bm-footer-toggle">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <div class="bm-footer-dropdown" id="bm-footer-dropdown">
+                    <a href="{{ route('admin.profile.show') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ route('admin.settings.index') }}"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="{{ route('profile.password.edit') }}"><i class="fas fa-shield-alt"></i> Privacy Control</a>
+                    <button type="button" onclick="event.preventDefault(); document.getElementById('logoutform').submit();"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+        @endif
     </div>
 
 </div>
+
+<script>
+    (function() {
+        const toggle = document.getElementById('bm-footer-toggle');
+        const dropdown = document.getElementById('bm-footer-dropdown');
+        if (!toggle || !dropdown) return;
+
+        const close = () => {
+            dropdown.classList.remove('show');
+            toggle.style.transform = 'rotate(0deg)';
+        };
+
+        const open = () => {
+            dropdown.classList.add('show');
+            toggle.style.transform = 'rotate(180deg)';
+        };
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (dropdown.classList.contains('show')) {
+                close();
+            } else {
+                open();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+                close();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+        });
+    })();
+</script>

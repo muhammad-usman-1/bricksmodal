@@ -287,12 +287,6 @@
                     <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
                 </div>
                 <div class="admin-icons">
-                    <button class="icon-btn" type="button" aria-label="Add">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <a class="icon-btn" href="{{ route('admin.settings.index') }}" aria-label="Settings">
-                        <i class="fas fa-cog"></i>
-                    </a>
                     <div class="dropdown">
                         <a class="icon-btn dropdown-toggle p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
                             <i class="fas fa-bell"></i>

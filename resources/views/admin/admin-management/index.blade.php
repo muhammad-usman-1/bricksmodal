@@ -25,8 +25,8 @@ font-style: normal;
 font-weight: 400;
 line-height: 32px; /* 133.333% */ }
     .admin-sub { margin: 2px 0 0; color: var(--ink-500); font-size: 13px; }
-    .add-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
-    .add-btn:hover { color: #fff; opacity: 0.9; }
+    .add-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); cursor: pointer; }
+    .add-btn:hover, .add-btn:focus { color: #fff; opacity: 0.9; text-decoration: none; }
 
     .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
     .table-wrap { overflow-x: auto; }
@@ -39,8 +39,12 @@ line-height: 32px; /* 133.333% */ }
     .pill-green { background: var(--pill-green); color: var(--pill-green-text); border-color: #c7e8d7; }
     .pill-gray { background: #eef1f5; color: #6b7280; border-color: #e1e3e6; }
     .actions { display: inline-flex; gap: 12px; align-items: center; }
-    .action-icon { color: #9ca3af; font-size: 14px; text-decoration: none; }
-    .action-icon:hover { color: #111827; }
+    .action-icon { font-size: 14px; text-decoration: none; transition: opacity 0.15s ease, filter 0.15s ease; }
+    .action-icon.view { color: #2563eb; }
+    .action-icon.edit { color: #f59e0b; }
+    .action-icon.impersonate { color: #8b5cf6; }
+    .action-icon.delete { color: #dc2626; }
+    .action-icon:hover { opacity: 0.85; filter: saturate(1.05); text-decoration: none; }
 
     @media (max-width: 768px) {
         .admin-head { flex-direction: column; align-items: flex-start; }
@@ -57,7 +61,7 @@ line-height: 32px; /* 133.333% */ }
             <h5 class="admin-title">Admin Management</h5>
             <div class="admin-sub">Manage admin users and their permissions.</div>
         </div>
-        <a href="{{ route('admin.admin-management.create') }}" class="add-btn"><i class="fas fa-plus"></i> Add New User</a>
+        <button type="button" class="add-btn" onclick="window.location='{{ route('admin.admin-management.create') }}'"><i class="fas fa-plus"></i> Add New User</button>
     </div>
 
     <div class="admin-card">
@@ -89,18 +93,20 @@ line-height: 32px; /* 133.333% */ }
                             <td data-label="Permissions">{{ $permissionCount }} permissions</td>
                             <td data-label="Actions" style="text-align:right;">
                                 <div class="actions">
-                                    <a class="action-icon" href="{{ route('admin.admin-management.show', $admin) }}" title="View"><i class="far fa-eye"></i></a>
-                                    <a class="action-icon" href="{{ route('admin.admin-management.edit', $admin) }}" title="Edit"><i class="far fa-edit"></i></a>
-                                    <form action="{{ route('admin.impersonate.start', $admin) }}" method="POST" style="display:inline-block;">
+
+                                    <button type="button" class="action-icon edit" title="Edit" style="border:none; background:none; padding:0; cursor:pointer;" onclick="window.location='{{ route('admin.admin-management.edit', $admin) }}'">
+                                        <i class="far fa-edit"></i>
+                                    </button>
+                                    <form action="{{ route('admin.impersonate.start', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Start impersonating this user? You will switch to their account view.">
                                         @csrf
-                                        <button type="submit" class="action-icon" title="Impersonate" style="border:none; background:none; padding:0;">
+                                        <button type="submit" class="action-icon impersonate" title="Impersonate" style="border:none; background:none; padding:0; cursor:pointer;">
                                             <i class="fas fa-user-ninja"></i>
                                         </button>
                                     </form>
                                     <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Are you sure you want to delete this admin?">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="action-icon" title="Delete" style="border:none; background:none; padding:0;">
+                                        <button type="submit" class="action-icon delete" title="Delete" style="border:none; background:none; padding:0; cursor:pointer;">
                                             <i class="far fa-trash-alt"></i>
                                         </button>
                                     </form>

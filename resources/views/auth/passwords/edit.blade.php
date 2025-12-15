@@ -128,7 +128,7 @@
                             <p class="warning-text">Enable 2FA to protect your account from unauthorized access.</p>
                             <div class="warning-actions">
                                 <button type="button" class="btn-enable-2fa" onclick="show2FASetup()">Enable Two-Factor Authentication</button>
-                                
+
                             </div>
                         </div>
                     </div>
