@@ -80,7 +80,12 @@ class TalentProfileController extends Controller
 
         $talentProfile->load('languages', 'user', 'labels');
 
-        return view('admin.talentProfiles.show', compact('talentProfile'));
+        $reviews = CastingApplication::with('casting_requirement')
+            ->where('talent_profile_id', $talentProfile->id)
+            ->latest()
+            ->get();
+
+        return view('admin.talentProfiles.show', compact('talentProfile', 'reviews'));
     }
 
     public function destroy(TalentProfile $talentProfile)
