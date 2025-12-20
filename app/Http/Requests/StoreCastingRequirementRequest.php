@@ -72,14 +72,6 @@ class StoreCastingRequirementRequest extends FormRequest
                 'array',
                 'nullable',
             ],
-            'outfit' => [
-                'array',
-                'nullable',
-            ],
-            'outfit.*' => [
-                'integer',
-                'exists:outfits,id',
-            ],
             'notes' => [
                 'nullable',
                 'string',
@@ -119,6 +111,61 @@ class StoreCastingRequirementRequest extends FormRequest
             'models.*.labels.*' => [
                 'integer',
                 'exists:labels,id',
+            ],
+            'models.*.height_range' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.weight_range' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.skin_color' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.eye_color' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'models.*.male_top_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.male_bottom_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.male_traditional_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.female_top_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.female_bottom_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.child_top_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
+            ],
+            'models.*.child_bottom_id' => [
+                'nullable',
+                'integer',
+                'exists:outfits,id',
             ],
         ];
     }

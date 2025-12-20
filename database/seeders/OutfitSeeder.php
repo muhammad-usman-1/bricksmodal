@@ -14,28 +14,25 @@ class OutfitSeeder extends Seeder
     {
         $outfits = [
             // Male outfits
-            ['name' => 'Formal Suit', 'category' => 'male', 'sort_order' => 1, 'image' => 'images/outfits/male-formal-suit.svg'],
-            ['name' => 'Casual Shirt & Jeans', 'category' => 'male', 'sort_order' => 2, 'image' => 'images/outfits/male-casual-shirt-jeans.svg'],
-            ['name' => 'T-Shirt & Shorts', 'category' => 'male', 'sort_order' => 3, 'image' => 'images/outfits/male-tshirt-shorts.svg'],
-            ['name' => 'Traditional Thobe', 'category' => 'male', 'sort_order' => 4, 'image' => 'images/outfits/male-traditional-thobe.svg'],
-            ['name' => 'Sports Wear', 'category' => 'male', 'sort_order' => 5, 'image' => 'images/outfits/male-sports-wear.svg'],
-            ['name' => 'Business Casual', 'category' => 'male', 'sort_order' => 6, 'image' => 'images/outfits/male-business-casual.svg'],
+            ['name' => 'White Formal Shirt', 'category' => 'male', 'sub_category' => 'top', 'sort_order' => 1, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Black Polo', 'category' => 'male', 'sub_category' => 'top', 'sort_order' => 2, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Blue Denim Jeans', 'category' => 'male', 'sub_category' => 'bottom', 'sort_order' => 3, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'Khaki Chinos', 'category' => 'male', 'sub_category' => 'bottom', 'sort_order' => 4, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'Traditional Thobe', 'category' => 'male', 'sub_category' => 'traditional', 'sort_order' => 5, 'image' => '/images/outfit-icons/traditional_male.png'],
 
             // Female outfits
-            ['name' => 'Formal Dress', 'category' => 'female', 'sort_order' => 1, 'image' => 'images/outfits/female-formal-dress.svg'],
-            ['name' => 'Casual Jeans & Top', 'category' => 'female', 'sort_order' => 2, 'image' => 'images/outfits/female-casual-jeans-top.svg'],
-            ['name' => 'Frock/Dress', 'category' => 'female', 'sort_order' => 3, 'image' => 'images/outfits/female-frock-dress.svg'],
-            ['name' => 'Traditional Abaya', 'category' => 'female', 'sort_order' => 4, 'image' => 'images/outfits/female-traditional-abaya.svg'],
-            ['name' => 'Sports Wear', 'category' => 'female', 'sort_order' => 5, 'image' => 'images/outfits/female-sports-wear.svg'],
-            ['name' => 'Business Suit', 'category' => 'female', 'sort_order' => 6, 'image' => 'images/outfits/female-business-suit.svg'],
+            ['name' => 'Silk Blouse', 'category' => 'female', 'sub_category' => 'top', 'sort_order' => 1, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Cropped Top', 'category' => 'female', 'sub_category' => 'top', 'sort_order' => 2, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Black Pencil Skirt', 'category' => 'female', 'sub_category' => 'bottom', 'sort_order' => 3, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'High-Waist Trousers', 'category' => 'female', 'sub_category' => 'bottom', 'sort_order' => 4, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'Traditional Abaya', 'category' => 'female', 'sub_category' => 'traditional', 'sort_order' => 5, 'image' => '/images/outfit-icons/traditional_female.png'],
 
             // Child outfits
-            ['name' => 'School Uniform', 'category' => 'child', 'sort_order' => 1, 'image' => 'images/outfits/child-school-uniform.svg'],
-            ['name' => 'Casual T-Shirt & Jeans', 'category' => 'child', 'sort_order' => 2, 'image' => 'images/outfits/child-casual-tshirt-jeans.svg'],
-            ['name' => 'Party Dress/Suit', 'category' => 'child', 'sort_order' => 3, 'image' => 'images/outfits/child-party-dress-suit.svg'],
-            ['name' => 'Traditional Outfit', 'category' => 'child', 'sort_order' => 4, 'image' => 'images/outfits/child-traditional-outfit.svg'],
-            ['name' => 'Sports Wear', 'category' => 'child', 'sort_order' => 5, 'image' => 'images/outfits/child-sports-wear.svg'],
-            ['name' => 'Casual Shorts & T-Shirt', 'category' => 'child', 'sort_order' => 6, 'image' => 'images/outfits/child-casual-shorts-tshirt.svg'],
+            ['name' => 'Super Hero T-Shirt', 'category' => 'child', 'sub_category' => 'top', 'sort_order' => 1, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Cotton Hoodie', 'category' => 'child', 'sub_category' => 'top', 'sort_order' => 2, 'image' => '/images/avatars/3d/shirt.png'],
+            ['name' => 'Cargo Shorts', 'category' => 'child', 'sub_category' => 'bottom', 'sort_order' => 3, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'Track Pants', 'category' => 'child', 'sub_category' => 'bottom', 'sort_order' => 4, 'image' => '/images/avatars/3d/jeans.png'],
+            ['name' => 'Kids Dishdasha', 'category' => 'child', 'sub_category' => 'traditional', 'sort_order' => 5, 'image' => '/images/outfit-icons/traditional_male.png'],
         ];
 
         // First, truncate the table to avoid duplicates

@@ -4,19 +4,20 @@
 <style>
     .shoot-page { background: #f7f8fc; padding: 10px 0 22px; }
     .shoot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .shoot-title { color: #101828; font-size: 16px; font-weight: 600; line-height: 1.4; }
+    .shoot-title { color: #101828; font-size: 16px; font-weight: 600; line-height: 1.4; font-size: 25px; }
     .shoot-subtitle { color: #6c7280; font-size: 12px; margin-top: 2px; }
-    .shoot-back { border: 1px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 8px; padding: 8px 14px; font-size: 12px; text-decoration: none; }
+    .shoot-back { border: 1px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; display: inline-flex; align-items: center; }
+    .shoot-back:hover { background: #f8f9fa; color: #3b4150; border-color: #c0c4cc; text-decoration: none !important; }
 
-    .shoot-stepper { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .stepper-node { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d2d5dc; background: #f9f9fb; color: #9aa0ac; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
-    .stepper-node.active { background: #0f1014; border-color: #0f1014; color: #fff; box-shadow: 0 10px 18px rgba(0,0,0,0.12); }
-    .stepper-node.done { background: #e5e7eb; color: #4b5563; border-color: #d2d5dc; position: relative; }
+    .shoot-stepper { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; padding: 10px 0; }
+    .stepper-node { width: 44px; height: 44px; border-radius: 50%; border: 2.5px solid #2C2C2E; background: #2C2C2E; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; position: relative; transition: all 0.3s ease; }
+    .stepper-node.done { background: #2C2C2E; border-color: #2C2C2E; color: #fff; }
     .stepper-node.done span { display: none; }
-    .stepper-node.done::after { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; font-size: 12px; color: #0f1014; }
-    .stepper-line { flex: 1; height: 1px; background: #d9dde5; }
-    .stepper-line.active { background: #0f1014; }
-    .stepper-line.done { background: #d2d5dc; }
+    .stepper-node.done::after { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; font-size: 18px; color: #fff; }
+    .stepper-node.active { background: #2C2C2E; border-color: #2C2C2E; color: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+    .stepper-node:not(.active):not(.done) { background: #2C2C2E; border-color: #2C2C2E; color: #fff; opacity: 0.9; }
+    .stepper-line { width: 100px; height: 2.5px; background: #2C2C2E; flex: none; border-radius: 4px; }
+    .stepper-line:not(.active):not(.done) { opacity: 0.8; }
 
     .shoot-builder { background: transparent; padding: 0; border-radius: 0; box-shadow: none; }
     .shoot-steps { position: relative; }
@@ -67,8 +68,10 @@
 
     .model-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); }
 
-    .shoot-builder__footer { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; }
-    .footer-back { background: none; border: none; color: #6d7280; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; cursor: pointer; }
+    .shoot-builder__footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }
+    .footer-back { border: 1.5px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; }
+    .footer-back:hover:not(:disabled) { background: #f8f9fa; border-color: #c0c4cc; }
+    .footer-back:disabled { opacity: 0.5; cursor: not-allowed; }
     .footer-actions { display: inline-flex; align-items: center; gap: 10px; }
     .step-status { font-weight: 600; color: #9aa0ac; font-size: 12px; }
     .footer-next, .footer-submit { background: #0f1014; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; }
@@ -236,6 +239,37 @@
 
     .label-multiselect__option:hover {
         background: #f4f4f5;
+    }
+    /* Outfit Selection UI enhancements */
+    .outfit-section-container { margin-top: 24px; padding-top: 20px; border-top: 1px solid #EAECF0; }
+    .outfit-section-title { font-size: 15px; font-weight: 600; color: #101828; margin-bottom: 2px; }
+    .outfit-section-subtitle { font-size: 13px; color: #667085; margin-bottom: 18px; }
+
+    .outfit-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    .outfit-type-card { background: #fff; border: 1px solid #EAECF0; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05); }
+
+    .outfit-type-header { display: flex; align-items: center; gap: 10px; color: #344054; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+    .outfit-type-header i { color: #475467; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #F9FAFB; border-radius: 6px; border: 1px solid #EAECF0; }
+
+    .traditional-dress-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #EAECF0; border-radius: 8px; color: #475467; font-size: 13px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
+    .traditional-dress-btn:hover { background: #F9FAFB; border-color: #D0D5DD; }
+
+    .outfit-item-group { display: flex; flex-direction: column; gap: 10px; }
+    .outfit-sub-item { display: flex; align-items: flex-start; gap: 14px; background: #F9FAFB; padding: 14px; border-radius: 12px; border: 1px solid #F2F4F7; }
+
+    .item-image-box { width: 110px; height: 110px; background: #F2F4F7; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #667085; text-align: center; padding: 10px; flex-shrink: 0; line-height: 1.4; }
+    .item-image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+    .item-details { flex: 1; display: flex; flex-direction: column; gap: 10px; align-self: center; }
+    .item-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #475467; text-transform: uppercase; letter-spacing: 0.8px; }
+    .item-label i { font-size: 13px; color: #98A2B3; }
+
+    .item-select { width: 100%; background: #fff; border: 1px solid #D0D5DD; border-radius: 8px; padding: 10px 32px 10px 14px; font-size: 13px; color: #101828; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path fill="%23667085" d="M5 6L0 0h10z"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px 6px; }
+    .item-select:focus { border-color: #98A2B3; outline: none; }
+
+    @media (max-width: 992px) {
+        .outfit-selection-grid { grid-template-columns: 1fr; }
     }
 </style>
 <script>
@@ -407,6 +441,36 @@ const initModelCard = (scope) => {
             }
         });
     });
+
+    // Initialize outfit image previews
+    function updateOutfitImage(selectElement) {
+        const outfitId = $(selectElement).val();
+        const container = $(selectElement).closest('.outfit-sub-item');
+        const target = container.find('[data-image-target]');
+        const isTop = container.find('.item-label').text().includes('TOP');
+
+        if (outfitId && window.OUTFIT_IMAGE_MAP && window.OUTFIT_IMAGE_MAP[outfitId]) {
+            const imageUrl = window.OUTFIT_IMAGE_MAP[outfitId];
+            target.html(`<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: contain;" alt="Outfit">`);
+        } else {
+            target.html(isTop ? 'Image for tops' : 'Image for bottoms');
+        }
+    }
+
+    $(scope).find('[data-outfit-select]').each(function() {
+        if ($(this).val()) {
+            updateOutfitImage(this);
+        }
+    });
+
+    $(scope).on('change', '[data-outfit-select]', function() {
+        updateOutfitImage(this);
+    });
+
+    // Initialize custom label multiselects if the init function is available
+    if (window.__initLabelMultiselect) {
+        window.__initLabelMultiselect(scope);
+    }
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -458,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const sourceCard = duplicateTrigger.closest('[data-model-card]');
         const newIndex = nextIndex;
         const card = createModelCard(newIndex);
-        const sourceInputs = sourceCard.querySelectorAll('select, input[type="text"], input[type="hidden"]');
+        const sourceInputs = sourceCard.querySelectorAll('select, input[type="text"], input[type="hidden"], input[type="file"]');
         sourceInputs.forEach((input) => {
             const name = input.getAttribute('name');
             if (!name) return;
@@ -466,14 +530,23 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!match) return;
             const field = match[2];
             const selector = `[name="models[${newIndex}][${field}]"]`;
-            const target = card.querySelector(selector);
-            if (target) {
-                target.value = input.value;
-                if (target.tagName === 'SELECT') {
-                    // ensure the correct option stays selected
-                    Array.from(target.options).forEach(option => {
-                        option.selected = option.value === input.value;
+            const targets = card.querySelectorAll(selector);
+            
+            if (targets.length > 0) {
+                if (input.tagName === 'SELECT' && input.multiple) {
+                    const selectedValues = Array.from(input.selectedOptions).map(opt => opt.value);
+                    const targetSelect = targets[0];
+                    Array.from(targetSelect.options).forEach(option => {
+                        option.selected = selectedValues.includes(option.value);
                     });
+                } else if (targets.length === 1) {
+                    const target = targets[0];
+                    target.value = input.value;
+                    if (target.tagName === 'SELECT') {
+                        Array.from(target.options).forEach(option => {
+                            option.selected = option.value === input.value;
+                        });
+                    }
                 }
             }
         });

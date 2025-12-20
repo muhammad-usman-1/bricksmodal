@@ -78,9 +78,27 @@ class CastingRequirementController extends Controller
                 'age_range_key' => $modelPayload['age_range_key'] ?? null,
                 'min_age' => $ageOption['min'] ?? null,
                 'max_age' => $ageOption['max'] ?? null,
+                'height_range' => $modelPayload['height_range'] ?? null,
+                'weight_range' => $modelPayload['weight_range'] ?? null,
+                'skin_color' => $modelPayload['skin_color'] ?? null,
+                'eye_color' => $modelPayload['eye_color'] ?? null,
+                'male_top_id' => $modelPayload['male_top_id'] ?? null,
+                'male_bottom_id' => $modelPayload['male_bottom_id'] ?? null,
+                'male_traditional_id' => $modelPayload['male_traditional_id'] ?? null,
+                'female_top_id' => $modelPayload['female_top_id'] ?? null,
+                'female_bottom_id' => $modelPayload['female_bottom_id'] ?? null,
+                'child_top_id' => $modelPayload['child_top_id'] ?? null,
+                'child_bottom_id' => $modelPayload['child_bottom_id'] ?? null,
             ]);
 
             $model->labels()->sync($modelPayload['labels'] ?? []);
+
+            // Handle model-specific reference photos (direct file upload)
+            if ($request->hasFile("models.{$index}.reference_photo")) {
+                foreach ($request->file("models.{$index}.reference_photo") as $file) {
+                    $model->addMedia($file)->toMediaCollection('reference_photo');
+                }
+            }
         }
 
         foreach ($request->input('reference', []) as $file) {
@@ -123,16 +141,12 @@ class CastingRequirementController extends Controller
         $data = $request->validated();
         $models = $data['models'] ?? [];
         unset($data['shoot_date'], $data['shoot_time'], $data['models']);
-        $data['hair_color'] = null;
-        $data['age_range'] = null;
-        $data['gender'] = null;
         $data['user_id'] = $castingRequirement->user_id ?? auth('admin')->id(); // Keep existing user_id or set current admin
 
         $totalQuantity = collect($models)->sum(function ($model) {
             return (int) ($model['quantity'] ?? 0);
         });
         $data['count'] = max($totalQuantity, 1);
-        $data['rate_per_model'] = 0;
 
         $castingRequirement->update($data);
 
@@ -149,8 +163,26 @@ class CastingRequirementController extends Controller
                 'age_range_key' => $modelPayload['age_range_key'] ?? null,
                 'min_age' => $ageOption['min'] ?? null,
                 'max_age' => $ageOption['max'] ?? null,
+                'height_range' => $modelPayload['height_range'] ?? null,
+                'weight_range' => $modelPayload['weight_range'] ?? null,
+                'skin_color' => $modelPayload['skin_color'] ?? null,
+                'eye_color' => $modelPayload['eye_color'] ?? null,
+                'male_top_id' => $modelPayload['male_top_id'] ?? null,
+                'male_bottom_id' => $modelPayload['male_bottom_id'] ?? null,
+                'male_traditional_id' => $modelPayload['male_traditional_id'] ?? null,
+                'female_top_id' => $modelPayload['female_top_id'] ?? null,
+                'female_bottom_id' => $modelPayload['female_bottom_id'] ?? null,
+                'child_top_id' => $modelPayload['child_top_id'] ?? null,
+                'child_bottom_id' => $modelPayload['child_bottom_id'] ?? null,
             ]);
             $model->labels()->sync($modelPayload['labels'] ?? []);
+
+            // Handle model-specific reference photos (direct file upload)
+            if ($request->hasFile("models.{$index}.reference_photo")) {
+                foreach ($request->file("models.{$index}.reference_photo") as $file) {
+                    $model->addMedia($file)->toMediaCollection('reference_photo');
+                }
+            }
         }
 
         if (count($castingRequirement->reference) > 0) {

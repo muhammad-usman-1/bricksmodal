@@ -28,18 +28,49 @@ line-height: 36px; /* 150% */}
     .pill-btn { border: 1px solid var(--border); background: #fff; color: var(--ink-700); border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; transition: all .15s ease; }
     .pill-btn.active { background: #0f1524; color: #fff; border-color: #0f1524; }
 
-    .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-    .talent-card { position: relative; background: #f5f6f8; border-radius: 12px; overflow: hidden; height: 310px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; }
+    .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .talent-card { position: relative; background: #f0f1f3; border-radius: 16px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; }
+    .talent-card:hover { transform: translateY(-4px); }
     .talent-img { width: 100%; height: 100%; object-fit: cover; }
-    .badge-active { position: absolute; top: 10px; left: 12px; background: var(--pill-green); color: var(--pill-green-text); border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 700; border: 1px solid #c8e0ce; }
-    .card-ellipsis { position: absolute; top: 8px; right: 10px; color: #9ca3af; font-size: 16px; cursor: default; }
-    .card-overlay { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; padding: 12px 14px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%); color: #f8fafc; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; }
-    .overlay-top { display: flex; gap: 8px; align-items: center; font-size: 11px; letter-spacing: 0.2px; text-transform: uppercase; }
-    .flag { width: 22px; height: 16px; border-radius: 3px; overflow: hidden; background: #e2e8f0; display: grid; place-items: center; font-size: 10px; }
-    .talent-name { font-weight: 700; font-size: 14px; margin: 0; }
-    .overlay-meta { font-size: 11px; color: #d1d5db; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .view-link { color: #d1d5db; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
-    .view-link:hover { color: #fff; text-decoration: none; }
+    
+    .badge-active { 
+        position: absolute; top: 15px; left: 15px; 
+        background: #e6f7ed; color: #15803d; 
+        border-radius: 20px; padding: 4px 12px; 
+        font-size: 11px; font-weight: 700; 
+        display: inline-flex; align-items: center; gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .badge-active::before {
+        content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+    }
+
+    .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 10; opacity: 0.6; }
+    
+    .card-overlay { 
+        position: absolute; left: 0; right: 0; bottom: 0; 
+        padding: 20px 18px 15px; 
+        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.8) 100%); 
+        color: #fff; 
+        display: flex; flex-direction: column; 
+    }
+
+    .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
+    .overlay-flag { position: absolute; left: 0; top: 0; width: 24px; height: 16px; border-radius: 2px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+    .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; }
+    
+    .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; }
+    
+    .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; }
+    
+    .overlay-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .joined-info { display: flex; flex-direction: column; gap: 2px; }
+    .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; }
+    .joined-date { font-size: 12px; font-weight: 500; color: #fff; }
+
+    .view-link { color: #fff; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: opacity 0.2s; }
+    .view-link:hover { opacity: 0.8; text-decoration: none; color: #fff; }
 
     @media (max-width: 640px) {
         .talent-card { height: 280px; }
@@ -86,7 +117,7 @@ line-height: 36px; /* 150% */}
                     $isVerified = $status === 'approved';
                     $dob = optional($talent->date_of_birth);
                     $age = $dob ? $dob->age : null;
-                    $ageText = $age ? "+ $age years" : '';
+                    $ageText = $age ? "• $age YEARS" : '';
                     $joinedAt = optional($talent->created_at)->format('d M Y') ?? '--';
                     $flagCode = $talent->country_code ?? $talent->country ?? null;
                     $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/24x18/' . strtolower($flagCode) . '.png' : null;
@@ -118,19 +149,25 @@ line-height: 36px; /* 150% */}
                     <span class="card-ellipsis"><i class="fas fa-ellipsis-v"></i></span>
                     <div class="card-overlay">
                         <div class="overlay-top">
-                            <span class="flag">
+                            <div class="overlay-flag">
                                 @if($flagUrl)
                                     <img src="{{ $flagUrl }}" alt="{{ $flagCode }}" style="width:100%; height:100%; object-fit: cover;">
                                 @else
-                                    {{ strtoupper(substr($flagCode ?? 'NA',0,2)) }}
+                                    <div style="background:#444; color:#fff; font-size:8px; width:100%; height:100%; display:grid; place-items:center;">{{ strtoupper(substr($flagCode ?? '??',0,2)) }}</div>
                                 @endif
-                            </span>
-                            <span>{{ strtoupper($gender ?: 'N/A') }} {{ $ageText }}</span>
+                            </div>
+                            <span class="overlay-meta-info">{{ strtoupper($gender ?: 'N/A') }} {{ $ageText }}</span>
                         </div>
                         <p class="talent-name">{{ $displayName }}</p>
-                        <div class="overlay-meta">
-                            <span>Joined {{ $joinedAt }}</span>
-                            <a class="view-link" href="{{ route('admin.talent-profiles.show', $talent->id) }}">View details <i class="fas fa-chevron-right" style="font-size:10px;"></i></a>
+                        <div class="card-divider"></div>
+                        <div class="overlay-bottom">
+                            <div class="joined-info">
+                                <span class="joined-label">Joined</span>
+                                <span class="joined-date">{{ $joinedAt }}</span>
+                            </div>
+                            <a class="view-link" href="{{ route('admin.talent-profiles.show', $talent->id) }}">
+                                View details <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

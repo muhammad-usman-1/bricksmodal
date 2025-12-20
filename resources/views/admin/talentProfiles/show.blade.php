@@ -14,9 +14,39 @@
     body { background: var(--bg); }
 
     .talent-shell { padding: 8px 0 22px; }
-    .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .back-link { color: var(--ink-700); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .edit-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+    .top-actions { 
+        display: grid; 
+        grid-template-columns: 1fr auto 1fr; 
+        align-items: center; 
+        margin-bottom: 12px; 
+        position: relative;
+    }
+    .top-actions-left { justify-self: start; }
+    .top-actions-center { justify-self: center; }
+    .top-actions-right { justify-self: end; display: flex; gap: 10px; }
+
+    .back-link { 
+        color: var(--ink-700); 
+        font-size: 13px; 
+        text-decoration: none; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px; 
+        background: #fff; 
+        border: 1px solid var(--border); 
+        border-radius: 8px; 
+        padding: 8px 16px; 
+        font-weight: 600; 
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .back-link:hover { 
+        background: #f9fafb; 
+        color: var(--ink-900); 
+        text-decoration: none; 
+        border-color: #cbd5e1;
+    }
+    .edit-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); cursor: pointer; font-weight: 600; }
 
     .tabs { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
     .tab-link { font-size: 13px; color: var(--ink-700); padding: 6px 0; text-decoration: none; position: relative; cursor: pointer; }
@@ -27,8 +57,40 @@
     .section-title { font-weight: 600; color: var(--ink-900); font-size: 14px; margin-bottom: 12px; }
 
     .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-    .upload-tile { background: #f9fafb; border: 1px dashed #cbd5e1; border-radius: 12px; height: 220px; display: grid; place-items: center; color: var(--ink-500); text-align: center; padding: 12px; position: relative; overflow: hidden; }
+    .upload-tile { 
+        background: #f9fafb; 
+        border: 1px dashed #cbd5e1; 
+        border-radius: 12px; 
+        height: 220px; 
+        display: grid; 
+        place-items: center; 
+        color: var(--ink-500); 
+        text-align: center; 
+        padding: 12px; 
+        position: relative; 
+        overflow: hidden; 
+        transition: all 0.2s ease;
+    }
+    .upload-tile.is-editable:hover { border-color: #0f172a; background: #f1f5f9; cursor: pointer; }
     .upload-tile img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    
+    .upload-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        color: #fff;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        backdrop-filter: blur(2px);
+    }
+    .is-editing .upload-tile.is-editable .upload-overlay { display: flex; }
+    .upload-tile.is-editable input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
+
     .upload-placeholder { display: grid; place-items: center; gap: 8px; }
     .upload-placeholder i { font-size: 22px; color: #9ca3af; }
     .upload-support { font-size: 10px; color: #9ca3af; }
@@ -111,8 +173,27 @@
     .badge-paid { background: #ecfdf3; color: #15803d; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
     .billing-amount { text-align: right; color: #0f172a; font-weight: 700; font-size: 14px; align-self: center; }
 
+    .edit-mode-only { display: none; }
+    .is-editing .edit-mode-only { display: block; }
+    .is-editing .display-mode-only { display: none; }
+
+    .inline-edit-input { 
+        width: 100%; 
+        border: 1px solid #cbd5e1; 
+        border-radius: 6px; 
+        padding: 4px 8px; 
+        font-size: 12px; 
+        color: var(--ink-700); 
+        background: #fff;
+    }
+    .inline-edit-input:focus { border-color: #0f172a; outline: none; box-shadow: 0 0 0 2px rgba(15,23,42,0.1); }
+
+    .save-btn { background: #10B981; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .cancel-btn { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
     @media (max-width: 640px) {
-        .top-actions { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .top-actions { display: flex; flex-direction: column; gap: 12px; }
+        .top-actions-left, .top-actions-center, .top-actions-right { justify-self: stretch; width: 100%; display: flex; justify-content: center; }
         .tabs { flex-wrap: wrap; }
         .info-grid { grid-template-columns: 1fr; }
     }
@@ -138,46 +219,43 @@
         'id_back_path'  => 'ID Back',
     ];
 
-    $profileInfo = [
-        'Legal name'    => $talentProfile->legal_name ?? $notSet,
-        'Display name'  => $talentProfile->display_name ?? $notSet,
-        'First name'    => $talentProfile->first_name ?? $notSet,
-        'Last name'     => $talentProfile->last_name ?? $notSet,
-        'Nationality'   => $talentProfile->nationality ?? $notSet,
-        'Date of birth' => optional($talentProfile->date_of_birth)->format('Y-m-d') ?? $notSet,
-        'Languages'     => $talentProfile->languages->pluck('title')->filter()->implode(', ') ?: $notSet,
-        'Labels'        => $talentProfile->labels->pluck('name')->filter()->implode(', ') ?: $notSet,
-        'Bio'           => $talentProfile->bio ?? $notSet,
+    // Field configurations for easy rendering
+    $profileFields = [
+        ['label' => 'Legal name', 'name' => 'legal_name', 'value' => $talentProfile->legal_name, 'type' => 'text', 'required' => true],
+        ['label' => 'Display name', 'name' => 'display_name', 'value' => $talentProfile->display_name, 'type' => 'text'],
+        ['label' => 'First name', 'name' => 'first_name', 'value' => $talentProfile->first_name, 'type' => 'text'],
+        ['label' => 'Last name', 'name' => 'last_name', 'value' => $talentProfile->last_name, 'type' => 'text'],
+        ['label' => 'Nationality', 'name' => 'nationality', 'value' => $talentProfile->nationality, 'type' => 'text'],
+        ['label' => 'Date of birth', 'name' => 'date_of_birth', 'value' => optional($talentProfile->date_of_birth)->format('Y-m-d'), 'type' => 'date'],
     ];
 
-    $accountInfo = [
-        'WhatsApp number'      => $talentProfile->whatsapp_number ?? $notSet,
-        'Country code'         => $talentProfile->country_code ?? $notSet,
-        'Mobile number'        => $talentProfile->mobile_number ?? $notSet,
-        'Daily rate'           => $talentProfile->daily_rate ?? $notSet,
-        'Hourly rate'          => $talentProfile->hourly_rate ?? $notSet,
-        'Verification status'  => \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT[$talentProfile->verification_status] ?? $notSet,
-        'Verification notes'   => $talentProfile->verification_notes ?? $notSet,
-        'Card holder name'     => $talentProfile->card_holder_name ?? $notSet,
-        'Card on file'         => $talentProfile->getMaskedCardNumber() ?? $notSet,
+    $accountFields = [
+        ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
+        ['label' => 'Country code', 'name' => 'country_code', 'value' => $talentProfile->country_code, 'type' => 'text'],
+        ['label' => 'Mobile number', 'name' => 'mobile_number', 'value' => $talentProfile->mobile_number, 'type' => 'text'],
+        ['label' => 'Daily rate', 'name' => 'daily_rate', 'value' => $talentProfile->daily_rate, 'type' => 'number', 'required' => true],
+        ['label' => 'Hourly rate', 'name' => 'hourly_rate', 'value' => $talentProfile->hourly_rate, 'type' => 'number'],
+        ['label' => 'Verification status', 'name' => 'verification_status', 'value' => $talentProfile->verification_status, 'type' => 'select', 'options' => \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT],
+        ['label' => 'Verification notes', 'name' => 'verification_notes', 'value' => $talentProfile->verification_notes, 'type' => 'textarea'],
+        ['label' => 'Card holder name', 'name' => 'card_holder_name', 'value' => $talentProfile->card_holder_name, 'type' => 'text'],
     ];
 
-    $measurements = [
-        'Height'    => $talentProfile->height ?? $notSet,
-        'Weight'    => $talentProfile->weight ?? $notSet,
-        'Chest'     => $talentProfile->chest ?? $notSet,
-        'Waist'     => $talentProfile->waist ?? $notSet,
-        'Hips'      => $talentProfile->hips ?? $notSet,
-        'Shoe size' => $talentProfile->shoe_size ?? $notSet,
+    $measurementFields = [
+        ['label' => 'Height', 'name' => 'height', 'value' => $talentProfile->height, 'type' => 'number'],
+        ['label' => 'Weight', 'name' => 'weight', 'value' => $talentProfile->weight, 'type' => 'number'],
+        ['label' => 'Chest', 'name' => 'chest', 'value' => $talentProfile->chest, 'type' => 'number'],
+        ['label' => 'Waist', 'name' => 'waist', 'value' => $talentProfile->waist, 'type' => 'number'],
+        ['label' => 'Hips', 'name' => 'hips', 'value' => $talentProfile->hips, 'type' => 'number'],
+        ['label' => 'Shoe size', 'name' => 'shoe_size', 'value' => $talentProfile->shoe_size, 'type' => 'number'],
     ];
 
-    $appearance = [
-        'Skin tone'        => \App\Models\TalentProfile::SKIN_TONE_SELECT[$talentProfile->skin_tone] ?? $notSet,
-        'Hair color'       => $talentProfile->hair_color ?? $notSet,
-        'Eye color'        => $talentProfile->eye_color ?? $notSet,
-        'Hijab preference' => $talentProfile->hijab_preference ?? $notSet,
-        'Visible tattoos'  => is_null($talentProfile->has_visible_tattoos) ? $notSet : ($talentProfile->has_visible_tattoos ? 'Yes' : 'No'),
-        'Piercings'        => is_null($talentProfile->has_piercings) ? $notSet : ($talentProfile->has_piercings ? 'Yes' : 'No'),
+    $appearanceFields = [
+        ['label' => 'Skin tone', 'name' => 'skin_tone', 'value' => $talentProfile->skin_tone, 'type' => 'select', 'options' => \App\Models\TalentProfile::SKIN_TONE_SELECT],
+        ['label' => 'Hair color', 'name' => 'hair_color', 'value' => $talentProfile->hair_color, 'type' => 'text'],
+        ['label' => 'Eye color', 'name' => 'eye_color', 'value' => $talentProfile->eye_color, 'type' => 'text'],
+        ['label' => 'Hijab preference', 'name' => 'hijab_preference', 'value' => $talentProfile->hijab_preference, 'type' => 'text'],
+        ['label' => 'Visible tattoos', 'name' => 'has_visible_tattoos', 'value' => $talentProfile->has_visible_tattoos, 'type' => 'boolean'],
+        ['label' => 'Piercings', 'name' => 'has_piercings', 'value' => $talentProfile->has_piercings, 'type' => 'boolean'],
     ];
 
     $shoots = $reviews;
@@ -204,11 +282,27 @@
     });
 @endphp
 
-<div class="talent-shell container-fluid">
-    <div class="top-actions">
-        <a class="back-link" href="{{ route('admin.talents.dashboard') }}"><i class="fas fa-arrow-left"></i> Back to list</a>
-        <a class="edit-btn" href="{{ route('admin.talent-profiles.edit', $talentProfile) }}">Edit profile</a>
-    </div>
+    <form action="{{ route('admin.talent-profiles.update', $talentProfile) }}" method="POST" id="talentEditForm" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="user_id" value="{{ $talentProfile->user_id }}">
+        
+        <div class="top-actions">
+            <div class="top-actions-left">
+                <a class="back-link" href="{{ route('admin.talents.dashboard') }}"><i class="fas fa-arrow-left"></i> Back to list</a>
+            </div>
+            <div class="top-actions-center">
+            </div>
+            <div class="top-actions-right">
+                <div class="display-mode-only">
+                    <button type="button" class="edit-btn" id="startEditBtn">Edit profile</button>
+                </div>
+                <div class="edit-mode-only">
+                    <button type="button" class="cancel-btn" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
 
     <div class="tabs">
         <a class="tab-link active" data-tab="profile">Profile</a>
@@ -222,9 +316,9 @@
             <div class="upload-grid">
                 @foreach($headshots as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile">
+                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
                         @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}">
+                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -232,6 +326,11 @@
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
+                        <div class="upload-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>{{ $img ? 'Change Photo' : 'Upload Photo' }}</span>
+                        </div>
+                        <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
                     </div>
                 @endforeach
             </div>
@@ -242,9 +341,9 @@
             <div class="upload-grid">
                 @foreach($fullBody as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile">
+                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
                         @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}">
+                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -252,6 +351,11 @@
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
+                        <div class="upload-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>{{ $img ? 'Change Photo' : 'Upload Photo' }}</span>
+                        </div>
+                        <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
                     </div>
                 @endforeach
             </div>
@@ -262,9 +366,9 @@
             <div class="upload-grid">
                 @foreach($idDocs as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile">
+                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
                         @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}">
+                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -272,73 +376,106 @@
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
+                        <div class="upload-overlay">
+                            <i class="fas fa-file-upload"></i>
+                            <span>{{ $img ? 'Update Document' : 'Upload Document' }}</span>
+                        </div>
+                        <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
                     </div>
                 @endforeach
             </div>
         </div>
 
         <div class="info-grid">
-            <div class="section-card">
-                <div class="section-title">Profile information</div>
-                <table class="info-table">
-                    @foreach($profileInfo as $key => $val)
-                        <tr>
-                            <td>{{ $key }}</td>
-                            <td class="{{ $val === $notSet ? 'not-set' : '' }}">{{ $val }}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
-            <div class="section-card">
-                <div class="section-title">Account information</div>
-                <table class="info-table">
-                    @foreach($accountInfo as $key => $val)
-                        <tr>
-                            <td>{{ $key }}</td>
-                            <td class="{{ $val === $notSet ? 'not-set' : '' }}">{{ $val }}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
-            <div class="section-card">
-                <div class="section-title">Measurements</div>
-                <table class="info-table">
-                    @foreach($measurements as $key => $val)
-                        <tr>
-                            <td>{{ $key }}</td>
-                            <td class="{{ $val === $notSet ? 'not-set' : '' }}">{{ $val }}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
-            <div class="section-card">
-                <div class="section-title">Appearance details</div>
-                <table class="info-table">
-                    @foreach($appearance as $key => $val)
-                        <tr>
-                            <td>{{ $key }}</td>
-                            <td class="{{ $val === $notSet ? 'not-set' : '' }}">{{ $val }}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
-        </div>
+            @php
+                $sections = [
+                    ['title' => 'Profile information', 'fields' => $profileFields],
+                    ['title' => 'Account information', 'fields' => $accountFields],
+                    ['title' => 'Measurements', 'fields' => $measurementFields],
+                    ['title' => 'Appearance details', 'fields' => $appearanceFields],
+                ];
+            @endphp
 
-        <div class="action-bar">
-            <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;">
+            @foreach($sections as $section)
+                <div class="section-card">
+                    <div class="section-title">{{ $section['title'] }}</div>
+                    <table class="info-table">
+                        @foreach($section['fields'] as $f)
+                            <tr>
+                                <td>{{ $f['label'] }}</td>
+                                <td>
+                                    <div class="display-mode-only {{ is_null($f['value']) || $f['value'] === '' ? 'not-set' : '' }}">
+                                        @if($f['type'] === 'select' && isset($f['options']))
+                                            {{ $f['options'][$f['value']] ?? $notSet }}
+                                        @elseif($f['type'] === 'boolean')
+                                            {{ is_null($f['value']) ? $notSet : ($f['value'] ? 'Yes' : 'No') }}
+                                        @else
+                                            {{ $f['value'] ?? $notSet }}
+                                        @endif
+                                    </div>
+                                    <div class="edit-mode-only">
+                                        @if($f['type'] === 'textarea')
+                                            <textarea name="{{ $f['name'] }}" class="inline-edit-input" rows="3">{{ $f['value'] }}</textarea>
+                                        @elseif($f['type'] === 'select')
+                                            <select name="{{ $f['name'] }}" class="inline-edit-input">
+                                                <option value="">Select {{ $f['label'] }}</option>
+                                                @foreach($f['options'] as $key => $label)
+                                                    <option value="{{ $key }}" {{ (string)$f['value'] === (string)$key ? 'selected' : '' }}>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        @elseif($f['type'] === 'boolean')
+                                            <select name="{{ $f['name'] }}" class="inline-edit-input">
+                                                <option value="1" {{ $f['value'] == 1 ? 'selected' : '' }}>Yes</option>
+                                                <option value="0" {{ $f['value'] == 0 ? 'selected' : '' }}>No</option>
+                                            </select>
+                                        @else
+                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}" class="inline-edit-input" {{ ($f['required'] ?? false) ? 'required' : '' }}>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        @if($section['title'] === 'Profile information')
+                            <tr>
+                                <td>Labels</td>
+                                <td>
+                                    <div class="display-mode-only">
+                                        {{ $talentProfile->labels->pluck('name')->filter()->implode(', ') ?: $notSet }}
+                                    </div>
+                                    <div class="edit-mode-only">
+                                        <select name="labels[]" class="inline-edit-input" multiple style="height: 100px;">
+                                            @foreach($labels as $label)
+                                                <option value="{{ $label->id }}" {{ in_array($label->id, $talentProfile->labels->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                                    {{ $label->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                    </table>
+                </div>
+            @endforeach
+        </div> {{-- end info-grid --}}
+    </form> {{-- end talentEditForm --}}
+
+    <div class="action-bar">
+        <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;">
+            @csrf
+            <button type="submit" class="btn-reject">Reject</button>
+        </form>
+        @if(($talentProfile->verification_status ?? '') !== 'approved')
+            <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
                 @csrf
-                <button type="submit" class="btn-reject">Reject</button>
+                <button type="submit" class="btn-approve">Accept</button>
             </form>
-            @if(($talentProfile->verification_status ?? '') !== 'approved')
-                <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
-                    @csrf
-                    <button type="submit" class="btn-approve">Accept</button>
-                </form>
-            @endif
-        </div>
+        @endif
     </div>
+</div> {{-- end tab-profile --}}
 
-    <div id="tab-reviews" class="tab-panel">
+<div id="tab-reviews" class="tab-panel">
         <div class="reviews-wrap">
             <div class="reviews-card">
                 <div class="overview-card">
@@ -389,9 +526,10 @@
                         </div>
                     @endforelse
                 </div>
-            </div>
         </div>
     </div>
+</div>
+
 
     <div id="tab-shoots" class="tab-panel">
         <div class="shoots-card">
@@ -505,9 +643,31 @@
         </div>
     </div>
 </div>
-
 <script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            const tile = input.closest('.upload-tile');
+            const preview = tile.querySelector('.preview-img');
+            const placeholder = tile.querySelector('.upload-placeholder');
+
+            reader.onload = function(e) {
+                if (preview) {
+                    preview.src = e.target.result;
+                } else if (placeholder) {
+                    placeholder.style.display = 'none';
+                    const newImg = document.createElement('img');
+                    newImg.src = e.target.result;
+                    newImg.classList.add('preview-img');
+                    tile.prepend(newImg);
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching logic
         const tabs = document.querySelectorAll('.tab-link');
         const panels = document.querySelectorAll('.tab-panel');
 
@@ -525,6 +685,24 @@
         });
 
         setActive('profile');
+
+        // Inline edit toggle logic
+        const form = document.getElementById('talentEditForm');
+        const startEditBtn = document.getElementById('startEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+        if (startEditBtn && form) {
+            startEditBtn.addEventListener('click', () => {
+                form.classList.add('is-editing');
+            });
+        }
+
+        if (cancelEditBtn && form) {
+            cancelEditBtn.addEventListener('click', () => {
+                // To properly cancel, we just reload the page to discard unsaved state
+                window.location.reload();
+            });
+        }
     });
 </script>
 @endsection

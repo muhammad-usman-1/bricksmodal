@@ -79,9 +79,9 @@
     }
 
     .overview h5 {
-     
+
         color: #101828;
- 
+
 font-size: 24px;
 font-style: normal;
 font-weight: 400;
@@ -166,8 +166,8 @@ line-height: 36px;
     .panel-title {
         margin: 0;
         color: var(--ink-900);
-        font-weight: 800;
-        font-size: 14px;
+        font-weight: 400;
+        font-size: 20px;
     }
 
     .panel-body {
@@ -188,6 +188,11 @@ line-height: 36px;
 
     .table-wrap {
         overflow-x: auto;
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .table-wrap::-webkit-scrollbar {
+        display: none;
     }
 
     table.talent-table {
@@ -276,7 +281,50 @@ line-height: 36px;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
+    .actions-btn:hover { background: #f3f5f9; border-color: #cbd5e1; }
+
+    .actions-dropdown-container { position: relative; display: inline-block; }
+    .actions-dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 8px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 100;
+        min-width: 140px;
+        display: none;
+        overflow: hidden;
+    }
+    .actions-dropdown-menu.active { display: block; animation: dropdownFade 0.2s ease; }
+    
+    @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .actions-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--ink-700);
+        text-decoration: none;
+        transition: background 0.12s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+    .actions-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); }
+    .actions-dropdown-item.text-danger { color: #dc2626; }
+    .actions-dropdown-item.text-danger:hover { background: #fef2f2; }
 
     @media (max-width: 720px) {
         .topbar { flex-wrap: wrap; }
@@ -426,9 +474,25 @@ line-height: 36px;
                                     @endif
                                 </td>
                                 <td style="text-align:right;">
-                                    <button class="actions-btn" aria-label="More actions">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                                    </button>
+                                    <div class="actions-dropdown-container">
+                                        <button type="button" class="actions-btn dropdown-toggle-btn" aria-label="More actions">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                                            </svg>
+                                        </button>
+                                        <div class="actions-dropdown-menu">
+                                            <a href="{{ route('admin.talent-profiles.show', $talent) }}" class="actions-dropdown-item">
+                                                <i class="far fa-eye"></i> View Profile
+                                            </a>
+                                            <form action="{{ route('admin.talent-profiles.destroy', $talent) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this talent?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="actions-dropdown-item text-danger">
+                                                    <i class="far fa-trash-alt"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -442,4 +506,29 @@ line-height: 36px;
         </div>
     </div>
 </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownBtns = document.querySelectorAll('.dropdown-toggle-btn');
+            
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    
+                    // Close other menus
+                    document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
+                        if (m !== menu) m.classList.remove('active');
+                    });
+                    
+                    menu.classList.toggle('active');
+                });
+            });
+            
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+            });
+        });
+    </script>
 @endsection

@@ -94,7 +94,8 @@ line-height: 36px; /* 150% */
         background: var(--card);
         border-radius: 10px;
         box-shadow: var(--shadow);
-        overflow: hidden;
+        /* overflow: hidden; -- Removed to allow dropdowns to pop out */
+        position: relative;
     }
 
     .shoot-table {
@@ -111,6 +112,9 @@ line-height: 36px; /* 150% */
         border: none;
         white-space: nowrap;
     }
+    
+    .shoot-table thead th:first-child { border-top-left-radius: 10px; }
+    .shoot-table thead th:last-child { border-top-right-radius: 10px; }
 
     .shoot-table tbody td {
         padding: 14px;
@@ -166,10 +170,19 @@ line-height: 36px; /* 150% */
         border-radius: 8px;
         padding: 8px 12px;
         font-size: 12px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        text-decoration: none;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+    }
+
+    .applicants-btn:hover {
+        background: #f8f9fc;
+        color: var(--ink-900);
+        border-color: var(--muted);
+        text-decoration: none !important;
     }
 
     .applicants-count {
@@ -199,12 +212,15 @@ line-height: 36px; /* 150% */
     }
 
     .table-foot {
-        padding: 10px 14px;
+        padding: 12px 14px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         color: var(--muted);
         font-size: 12px;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        background: #fff;
     }
 
     .pager {
@@ -237,45 +253,87 @@ line-height: 36px; /* 150% */
     }
 
     .action-toggle {
-        border: 1px solid var(--border);
+        border: 1.5px solid var(--border);
         background: #fff;
-        border-radius: 8px;
-        width: 32px;
-        height: 32px;
+        border-radius: 10px;
+        width: 38px;
+        height: 38px;
         display: grid;
         place-items: center;
         color: var(--ink-700);
         cursor: pointer;
         margin-left: auto;
+        transition: all 0.2s ease;
+    }
+
+    .action-toggle:hover {
+        background: #fdfdfd;
+        border-color: var(--ink-900);
+        color: var(--ink-900);
     }
 
     .action-list {
         position: absolute;
         right: 0;
-        top: 36px;
-        min-width: 140px;
+        top: calc(100% + 8px);
+        min-width: 170px;
         background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        box-shadow: var(--shadow);
-        padding: 8px 0;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 14px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
+        padding: 8px;
         display: none;
-        z-index: 10;
+        z-index: 1000; /* Ensure it stays above everything */
+        transform-origin: top right;
+        animation: dropFade 0.2s ease-out;
+    }
+
+    @keyframes dropFade {
+        from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .action-list.show { display: block; }
 
     .action-item {
-        padding: 8px 14px;
+        padding: 10px 12px;
         font-size: 13px;
+        font-weight: 500;
         color: var(--ink-700);
-        text-decoration: none;
-        display: flex;
+        text-decoration: none !important;
+        display: flex !important;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        border-radius: 8px;
+        transition: all 0.15s ease;
+        border: none !important;
     }
 
-    .action-item:hover { background: #f5f6f8; color: var(--ink-900); }
+    .action-item:hover { 
+        background: #f8f9fc; 
+        color: #000; 
+        transform: translateX(2px);
+    }
+
+    .action-item i {
+        width: 18px;
+        font-size: 14px;
+        color: var(--ink-500);
+        text-align: center;
+    }
+
+    .action-item:hover i {
+        color: #000;
+    }
+
+    .action-item.delete-item:hover {
+        background: #fff1f1;
+        color: #e11d48;
+    }
+
+    .action-item.delete-item:hover i {
+        color: #e11d48;
+    }
 
     .actions-cell {
         text-align: right;
@@ -385,28 +443,36 @@ line-height: 36px; /* 150% */
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="action-list">
-                                    <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">Shoot</a>
+                                    <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
+                                        <i class="fas fa-bullseye"></i> Shoot
+                                    </a>
                                     @can('casting_requirement_show')
-                                        <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">View</a>
+                                        <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
                                     @endcan
                                     @can('casting_requirement_edit')
-                                        <a class="action-item" href="{{ route('admin.casting-requirements.edit', $castingRequirement->id) }}">Edit</a>
+                                        <a class="action-item" href="{{ route('admin.casting-requirements.edit', $castingRequirement->id) }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
                                     @endcan
                                     @can('casting_requirement_delete')
-                                        <form action="{{ route('admin.casting-requirements.destroy', $castingRequirement->id) }}" method="POST" class="action-item p-0" data-swal-confirm="{{ trans('global.areYouSure') }}">
+                                        <form action="{{ route('admin.casting-requirements.destroy', $castingRequirement->id) }}" method="POST" class="w-100" data-swal-confirm="{{ trans('global.areYouSure') }}">
                                             @method('DELETE')
                                             @csrf
-                                            <button type="submit" style="border:none; background:none; padding:0; text-align:left; width:100%; color:inherit;">Delete</button>
+                                            <button type="submit" class="action-item delete-item w-100">
+                                                <i class="fas fa-trash-alt"></i> Delete
+                                            </button>
                                         </form>
                                     @endcan
-                                    <button class="action-item share-project-btn" type="button"
+                                    <button class="action-item share-project-btn w-100" type="button"
                                         data-toggle="modal"
                                         data-target="#shareProjectModal"
-                                        data-name="{{ $castingRequirement->project_name }}"
+                                        data-name="{{ $projectName }}"
                                         data-location="{{ $location }}"
                                         data-date="{{ $dateText }}"
                                         data-url="{{ route('talent.projects.show', $castingRequirement) }}">
-                                        Share
+                                        <i class="fas fa-share-alt"></i> Share
                                     </button>
                                 </div>
                             </div>

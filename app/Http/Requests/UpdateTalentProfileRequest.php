@@ -27,18 +27,7 @@ class UpdateTalentProfileRequest extends FormRequest
                 'max:100',
                 'nullable',
             ],
-            'languages.*' => [
-                'integer',
-            ],
-            'languages' => [
-                'required',
-                'array',
-            ],
             'verification_notes' => [
-                'string',
-                'nullable',
-            ],
-            'bio' => [
                 'string',
                 'nullable',
             ],
@@ -96,6 +85,109 @@ class UpdateTalentProfileRequest extends FormRequest
             'whatsapp_number' => [
                 'required',
                 'regex:/^\+?[0-9\s\-()]{7,20}$/',
+            ],
+            'first_name' => [
+                'string',
+                'nullable',
+            ],
+            'last_name' => [
+                'string',
+                'nullable',
+            ],
+            'nationality' => [
+                'string',
+                'nullable',
+            ],
+            'date_of_birth' => [
+                'date',
+                'nullable',
+            ],
+            'country_code' => [
+                'string',
+                'nullable',
+            ],
+            'mobile_number' => [
+                'string',
+                'nullable',
+            ],
+            'verification_status' => [
+                'string',
+                'nullable',
+            ],
+            'card_holder_name' => [
+                'string',
+                'nullable',
+            ],
+            'skin_tone' => [
+                'string',
+                'nullable',
+            ],
+            'hijab_preference' => [
+                'string',
+                'nullable',
+            ],
+            'has_visible_tattoos' => [
+                'boolean',
+                'nullable',
+            ],
+            'has_piercings' => [
+                'boolean',
+                'nullable',
+            ],
+            'labels.*' => [
+                'integer',
+            ],
+            'labels' => [
+                'array',
+                'nullable',
+            ],
+            'headshot_center_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'headshot_left_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'headshot_right_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'full_body_front_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'full_body_right_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'full_body_back_path' => [
+                'nullable',
+                'file',
+                'image',
+                'max:10240',
+            ],
+            'id_front_path' => [
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:10240',
+            ],
+            'id_back_path' => [
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:10240',
             ],
             'user_id' => [
                 'required',

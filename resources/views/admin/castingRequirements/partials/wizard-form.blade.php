@@ -27,6 +27,13 @@
         'age_range_key' => array_key_first($ageRanges),
         'hair_color' => '',
         'labels' => [],
+        'male_top_id' => null,
+        'male_bottom_id' => null,
+        'male_traditional_id' => null,
+        'female_top_id' => null,
+        'female_bottom_id' => null,
+        'child_top_id' => null,
+        'child_bottom_id' => null,
     ];
 
     $modelInputs = old('models');
@@ -40,6 +47,17 @@
                     'age_range_key' => $model->age_range_key ?? array_key_first($ageRanges),
                     'hair_color' => $model->hair_color,
                     'labels' => $model->labels->pluck('id')->all(),
+                    'male_top_id' => $model->male_top_id,
+                    'male_bottom_id' => $model->male_bottom_id,
+                    'male_traditional_id' => $model->male_traditional_id,
+                    'female_top_id' => $model->female_top_id,
+                    'female_bottom_id' => $model->female_bottom_id,
+                    'child_top_id' => $model->child_top_id,
+                    'child_bottom_id' => $model->child_bottom_id,
+                    'height_range' => $model->height_range,
+                    'weight_range' => $model->weight_range,
+                    'skin_color' => $model->skin_color,
+                    'eye_color' => $model->eye_color,
                 ];
             })->toArray();
         }
@@ -48,7 +66,18 @@
             $modelInputs = [$defaultModel];
         }
     }
+
+    $outfitImageMap = [];
+    foreach($outfits as $cat => $items) {
+        foreach($items as $item) {
+            $outfitImageMap[$item->id] = $item->image;
+        }
+    }
 @endphp
+
+<script>
+    window.OUTFIT_IMAGE_MAP = @json($outfitImageMap);
+</script>
 
 <div class="shoot-page">
     <div class="shoot-header">
@@ -199,11 +228,11 @@
                                 <div class="field-block">
                                     <label>Height Range</label>
                                     <select name="models[{{ $index }}][height_range]" class="pill-select">
-                                        <option value="" selected>Choose height range</option>
-                                        <option value="150-160">150 - 160 cm</option>
-                                        <option value="161-170">161 - 170 cm</option>
-                                        <option value="171-180">171 - 180 cm</option>
-                                        <option value="180+">180+ cm</option>
+                                        <option value="" {{ ($model['height_range'] ?? '') === '' ? 'selected' : '' }}>Choose height range</option>
+                                        <option value="150-160" {{ ($model['height_range'] ?? '') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
+                                        <option value="161-170" {{ ($model['height_range'] ?? '') === '161-170' ? 'selected' : '' }}>161 - 170 cm</option>
+                                        <option value="171-180" {{ ($model['height_range'] ?? '') === '171-180' ? 'selected' : '' }}>171 - 180 cm</option>
+                                        <option value="180+" {{ ($model['height_range'] ?? '') === '180+' ? 'selected' : '' }}>180+ cm</option>
                                     </select>
                                 </div>
                             </div>
@@ -212,11 +241,11 @@
                                 <div class="field-block">
                                     <label>Weight Range</label>
                                     <select name="models[{{ $index }}][weight_range]" class="pill-select">
-                                        <option value="" selected>Choose weight range</option>
-                                        <option value="40-50">40 - 50 kg</option>
-                                        <option value="51-60">51 - 60 kg</option>
-                                        <option value="61-70">61 - 70 kg</option>
-                                        <option value="71+">71+ kg</option>
+                                        <option value="" {{ ($model['weight_range'] ?? '') === '' ? 'selected' : '' }}>Choose weight range</option>
+                                        <option value="40-50" {{ ($model['weight_range'] ?? '') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
+                                        <option value="51-60" {{ ($model['weight_range'] ?? '') === '51-60' ? 'selected' : '' }}>51 - 60 kg</option>
+                                        <option value="61-70" {{ ($model['weight_range'] ?? '') === '61-70' ? 'selected' : '' }}>61 - 70 kg</option>
+                                        <option value="71+" {{ ($model['weight_range'] ?? '') === '71+' ? 'selected' : '' }}>71+ kg</option>
                                     </select>
                                 </div>
 
@@ -265,6 +294,128 @@
                                         <div class="drop-sub">Drag and drop or click to browse</div>
                                     </div>
                                 </label>
+                            </div>
+
+                            <div class="outfit-selection-container">
+                                <div class="outfit-section-title">Outfit Selection</div>
+                                <div class="outfit-section-subtitle">Select one or multiple outfits</div>
+
+                                <div class="outfit-selection-grid">
+                                    <!-- Male Outfits -->
+                                    <div class="outfit-type-card">
+                                        <div class="outfit-type-header">
+                                            <i class="fas fa-shopping-bag"></i>
+                                            <span>Male Outfits</span>
+                                        </div>
+                                        <div class="outfit-item-group">
+                                            <button type="button" class="traditional-dress-btn">Traditional dress</button>
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for tops</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                    <select name="models[{{ $index }}][male_top_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['male'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'top')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['male_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                    <select name="models[{{ $index }}][male_bottom_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['male'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'bottom')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['male_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Female Outfits -->
+                                    <div class="outfit-type-card">
+                                        <div class="outfit-type-header">
+                                            <i class="fas fa-shopping-bag"></i>
+                                            <span>Female Outfits</span>
+                                        </div>
+                                        <div class="outfit-item-group">
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for tops</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                    <select name="models[{{ $index }}][female_top_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['female'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'top')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['female_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                    <select name="models[{{ $index }}][female_bottom_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['female'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'bottom')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['female_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Child Outfits -->
+                                    <div class="outfit-type-card">
+                                        <div class="outfit-type-header">
+                                            <i class="fas fa-shopping-bag"></i>
+                                            <span>Child Outfits</span>
+                                        </div>
+                                        <div class="outfit-item-group">
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for tops</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                    <select name="models[{{ $index }}][child_top_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['child'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'top')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['child_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                    <select name="models[{{ $index }}][child_bottom_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['child'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'bottom')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['child_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -365,6 +516,128 @@
                             </div>
                         </label>
                     </div>
+
+                    <div class="outfit-selection-container">
+                        <div class="outfit-section-title">Outfit Selection</div>
+                        <div class="outfit-section-subtitle">Select one or multiple outfits</div>
+
+                        <div class="outfit-selection-grid">
+                            <!-- Male Outfits -->
+                            <div class="outfit-type-card">
+                                <div class="outfit-type-header">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>Male Outfits</span>
+                                </div>
+                                    <div class="outfit-item-group">
+                                        <button type="button" class="traditional-dress-btn">Traditional dress</button>
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for tops</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                <select name="models[__INDEX__][male_top_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['male'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'top')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                <select name="models[__INDEX__][male_bottom_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['male'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'bottom')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Female Outfits -->
+                                <div class="outfit-type-card">
+                                    <div class="outfit-type-header">
+                                        <i class="fas fa-shopping-bag"></i>
+                                        <span>Female Outfits</span>
+                                    </div>
+                                    <div class="outfit-item-group">
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for tops</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                <select name="models[__INDEX__][female_top_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['female'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'top')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                <select name="models[__INDEX__][female_bottom_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['female'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'bottom')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Child Outfits -->
+                                <div class="outfit-type-card">
+                                    <div class="outfit-type-header">
+                                        <i class="fas fa-shopping-bag"></i>
+                                        <span>Child Outfits</span>
+                                    </div>
+                                    <div class="outfit-item-group">
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for tops</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                <select name="models[__INDEX__][child_top_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['child'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'top')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for bottoms</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                <select name="models[__INDEX__][child_bottom_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['child'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'bottom')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
                 </div>
             </template>
 
@@ -372,47 +645,9 @@
                 <h4>Stage 3 · Notes & References</h4>
                 <p class="text-muted mb-4">Share outfits, references, and any important instructions.</p>
 
-                <div class="form-group">
+                <div class="form-group d-none">
                     <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
                     <p class="text-muted small">Select one or multiple outfits</p>
-
-                    @php
-                        $selectedOutfits = old('outfit', $castingRequirement->outfit ?? []);
-                    @endphp
-
-                    @foreach($outfits as $category => $categoryOutfits)
-                        <div class="outfit-category mb-4">
-                            <h6 class="text-capitalize font-weight-bold mb-3">{{ ucfirst($category) }} Outfits</h6>
-                            <div class="row">
-                                @foreach($categoryOutfits as $outfit)
-                                    <div class="col-md-2 col-sm-4 col-6 mb-3">
-                                        <div class="outfit-item">
-                                            <input type="checkbox"
-                                                   name="outfit[]"
-                                                   value="{{ $outfit->id }}"
-                                                   id="outfit_{{ $outfit->id }}"
-                                                   class="outfit-checkbox"
-                                                   {{ in_array($outfit->id, $selectedOutfits) ? 'checked' : '' }}>
-                                            <label for="outfit_{{ $outfit->id }}" class="outfit-label">
-                                                @if($outfit->image)
-                                                    <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="outfit-image">
-                                                @else
-                                                    <div class="outfit-placeholder">
-                                                        <i class="fas fa-tshirt fa-3x"></i>
-                                                    </div>
-                                                @endif
-                                                <div class="outfit-name">{{ $outfit->name }}</div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endforeach
-
-                    @if($errors->has('outfit'))
-                        <div class="text-danger">{{ $errors->first('outfit') }}</div>
-                    @endif
                 </div>
 
                 <div class="form-group">
@@ -449,7 +684,7 @@
         </div>
 
         <div class="shoot-builder__footer">
-            <button type="button" class="footer-back" data-prev-step disabled><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="footer-back" data-prev-step disabled>Back</button>
             <div class="footer-actions">
                 <span class="step-status">Step <span data-step-indicator>1</span> of 3</span>
                 <button type="button" class="footer-next" data-next-step>Next Step <i class="fas fa-arrow-right"></i></button>

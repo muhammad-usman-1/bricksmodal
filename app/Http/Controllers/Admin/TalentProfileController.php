@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\MassDestroyTalentProfileRequest;
 use App\Http\Requests\StoreTalentProfileRequest;
 use App\Http\Requests\UpdateTalentProfileRequest;
@@ -65,13 +66,42 @@ class TalentProfileController extends Controller
 
     public function update(UpdateTalentProfileRequest $request, TalentProfile $talentProfile)
     {
-        $data = $request->all();
+        $data = $request->except([
+            'headshot_center_path', 'headshot_left_path', 'headshot_right_path',
+            'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
+            'id_front_path', 'id_back_path'
+        ]);
+        
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
 
-        $talentProfile->update($data);
-        $talentProfile->languages()->sync($request->input('languages', []));
+        // Handle file uploads
+        $fileFields = [
+            'headshot_center_path' => 'headshot-center',
+            'headshot_left_path'   => 'headshot-left',
+            'headshot_right_path'  => 'headshot-right',
+            'full_body_front_path' => 'full-body-front',
+            'full_body_right_path' => 'full-body-right',
+            'full_body_back_path'  => 'full-body-back',
+            'id_front_path'        => 'id/front',
+            'id_back_path'         => 'id/back',
+        ];
 
-        return redirect()->route('admin.talent-profiles.index');
+        foreach ($fileFields as $field => $folder) {
+            if ($request->hasFile($field)) {
+                $data[$field] = $this->storeTalentFile($talentProfile, $request->file($field), $folder);
+            }
+        }
+
+        $talentProfile->update($data);
+        $talentProfile->labels()->sync($request->input('labels', []));
+
+        return redirect()->route('admin.talent-profiles.show', $talentProfile)->with('message', trans('global.update_success'));
+    }
+
+    private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
+    {
+        $path = $file->store("talent/{$profile->id}/{$folder}", 'public');
+        return Storage::url($path);
     }
 
     public function show(TalentProfile $talentProfile)
@@ -85,7 +115,10 @@ class TalentProfileController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.talentProfiles.show', compact('talentProfile', 'reviews'));
+        $languages = \App\Models\Language::all();
+        $labels = \App\Models\Label::all();
+
+        return view('admin.talentProfiles.show', compact('talentProfile', 'reviews', 'languages', 'labels'));
     }
 
     public function destroy(TalentProfile $talentProfile)

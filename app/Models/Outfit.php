@@ -12,6 +12,7 @@ class Outfit extends Model
     protected $fillable = [
         'name',
         'category',
+        'sub_category',
         'image',
         'is_active',
         'sort_order',

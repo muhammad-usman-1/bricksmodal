@@ -49,14 +49,10 @@ class CastingRequirement extends Model implements HasMedia
         'client_name',
         'location',
         'shoot_date_time',
-        'hair_color',
-        'age_range',
-        'gender',
-        'outfit',
+        'duration',
         'count',
         'notes',
         'user_id',
-        'rate_per_model',
         'status',
         'created_at',
         'updated_at',
@@ -64,7 +60,6 @@ class CastingRequirement extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'outfit' => 'array',
     ];
 
     protected function serializeDate(DateTimeInterface $date)
