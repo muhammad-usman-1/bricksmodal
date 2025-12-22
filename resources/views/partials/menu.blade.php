@@ -41,6 +41,9 @@
             box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
         .bm-link.c-active i { color: #fff; }
+        .bm-link.c-active img {
+            filter: brightness(0) invert(1);
+        }
         .c-sidebar-nav-item{
             margin-top:10px;
         }
