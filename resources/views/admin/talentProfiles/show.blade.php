@@ -14,36 +14,32 @@
     body { background: var(--bg); }
 
     .talent-shell { padding: 8px 0 22px; }
-    .top-actions { 
-        display: grid; 
-        grid-template-columns: 1fr auto 1fr; 
-        align-items: center; 
-        margin-bottom: 12px; 
+    .top-actions {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        margin-bottom: 12px;
         position: relative;
     }
     .top-actions-left { justify-self: start; }
     .top-actions-center { justify-self: center; }
     .top-actions-right { justify-self: end; display: flex; gap: 10px; }
 
-    .back-link { 
-        color: var(--ink-700); 
-        font-size: 13px; 
-        text-decoration: none; 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 8px; 
-        background: #fff; 
-        border: 1px solid var(--border); 
-        border-radius: 8px; 
-        padding: 8px 16px; 
-        font-weight: 600; 
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    .back-link {
+        color: var(--ink-700);
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+
     }
-    .back-link:hover { 
-        background: #f9fafb; 
-        color: var(--ink-900); 
-        text-decoration: none; 
+    .back-link:hover {
+        background: #f9fafb;
+        color: var(--ink-900);
+        text-decoration: none;
         border-color: #cbd5e1;
     }
     .edit-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); cursor: pointer; font-weight: 600; }
@@ -57,23 +53,23 @@
     .section-title { font-weight: 600; color: var(--ink-900); font-size: 14px; margin-bottom: 12px; }
 
     .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-    .upload-tile { 
-        background: #f9fafb; 
-        border: 1px dashed #cbd5e1; 
-        border-radius: 12px; 
-        height: 220px; 
-        display: grid; 
-        place-items: center; 
-        color: var(--ink-500); 
-        text-align: center; 
-        padding: 12px; 
-        position: relative; 
-        overflow: hidden; 
+    .upload-tile {
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        height: 220px;
+        display: grid;
+        place-items: center;
+        color: var(--ink-500);
+        text-align: center;
+        padding: 12px;
+        position: relative;
+        overflow: hidden;
         transition: all 0.2s ease;
     }
     .upload-tile.is-editable:hover { border-color: #0f172a; background: #f1f5f9; cursor: pointer; }
     .upload-tile img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-    
+
     .upload-overlay {
         position: absolute;
         inset: 0;
@@ -100,7 +96,7 @@
     .info-table td { padding: 6px 0; }
     .info-table td:first-child { color: var(--ink-500); width: 46%; }
     .info-table td:last-child { color: var(--ink-700); }
-    .info-table .not-set { color: #9ca3af; }
+    .info-table .not-set { color: #3b82f6; }
 
     .action-bar { margin-top: 12px; display: flex; justify-content: flex-end; gap: 10px; }
     .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 8px 12px; font-size: 12px; }
@@ -110,58 +106,60 @@
     .tab-panel.active { display: block; }
     .reviews-wrap { margin: 12px 0 18px; }
     .reviews-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 28px rgba(15,23,42,0.08); padding: 14px 16px; }
-    .overview-card { display: flex; align-items: center; gap: 10px; background: #f9fafb; border: 1px solid #edf0f3; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
-    .overview-icon { width: 36px; height: 36px; border-radius: 12px; background: #0f1724; display: grid; place-items: center; color: #fff; }
-    .overview-title { margin: 0; font-weight: 700; color: #0f172a; font-size: 14px; }
+    .overview-card { display: flex; align-items: center; gap: 10px; background: #f9fafb; border: 1px solid #edf0f3; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
+    .overview-icon { width: 36px; height: 36px; border-radius: 8px; background: #2C2C2E; display: grid; place-items: center; color: #fff; font-size: 14px; }
+    .overview-title { margin: 0; font-weight: 600; color: #0f172a; font-size: 14px; }
     .overview-sub { margin: 0; color: #6b7280; font-size: 12px; }
-    .review-list { display: flex; flex-direction: column; gap: 10px; }
-    .review-item { border: 1px solid #edf0f3; border-radius: 12px; padding: 12px 14px; background: #fff; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .review-text { display: flex; flex-direction: column; gap: 6px; }
-    .review-title { margin: 0; color: #0f172a; font-weight: 700; font-size: 14px; }
-    .star-row { display: flex; gap: 2px; }
-    .star { color: #d1d5db; font-size: 14px; }
-    .star.filled { color: #f59e0b; }
-    .review-meta { display: flex; align-items: center; gap: 10px; color: #6b7280; font-size: 12px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-    .status-reviewed { background: #ecfdf3; color: #15803d; }
-    .status-reviewed .status-dot { background: #16a34a; }
-    .status-pending { background: #fff7ed; color: #f97316; }
-    .status-pending .status-dot { background: #fb923c; }
-    .review-action { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #d1d5db; background: #fff; border-radius: 8px; padding: 8px 14px; font-size: 12px; color: #0f172a; text-decoration: none; min-width: 96px; }
-    .review-action:hover { text-decoration: none; background: #f3f4f6; }
+    .review-list { display: flex; flex-direction: column; gap: 12px; }
+    .review-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .review-text { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .review-title { margin: 0; color: #0f172a; font-weight: 600; font-size: 14px; }
+    .star-row { display: flex; gap: 2px; margin: 2px 0; }
+    .star { color: #d1d5db; font-size: 13px; }
+    .star.filled { color: #000; }
+    .review-meta { display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 12px; flex-wrap: wrap; }
+    .review-meta span { display: inline-flex; align-items: center; }
+    .meta-separator { color: #d1d5db; margin: 0 2px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .status-reviewed { background: #d1fae5; color: #065f46; }
+    .status-pending { background: #fed7aa; color: #c2410c; }
+    .review-action { display: inline-flex; align-items: center; justify-content: center; background: #2C2C2E; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; text-decoration: none; min-width: 110px; white-space: nowrap; }
+    .review-action:hover { text-decoration: none; background: #1a1a1c; color: #fff; }
 
     /* Shoot & billing */
-    .shoots-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 10px 24px rgba(15,23,42,0.06); padding: 14px 16px; margin-bottom: 16px; }
-    .shoot-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .shoot-title { display: flex; align-items: center; gap: 10px; color: #0f172a; font-weight: 700; font-size: 14px; margin: 0; }
-    .shoot-title i { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: #0f1724; color: #fff; }
+    .shoots-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 28px rgba(15,23,42,0.08); padding: 14px 16px; margin-bottom: 16px; }
+    .shoot-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .shoot-title { display: flex; align-items: center; gap: 10px; color: #0f172a; font-weight: 600; font-size: 14px; margin: 0; }
+    .shoot-title i { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; background: #2C2C2E; color: #fff; font-size: 14px; }
     .shoot-sub { color: #6b7280; font-size: 12px; margin: 0; }
     .count-box { text-align: right; }
     .count-label { color: #9ca3af; font-size: 11px; margin: 0; }
-    .count-value { color: #0f172a; font-weight: 700; font-size: 16px; margin: 0; }
-    .shoot-list { display: flex; flex-direction: column; gap: 10px; }
-    .shoot-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; background: #fff; }
-    .shoot-main { display: flex; flex-direction: column; gap: 6px; }
-    .shoot-top { display: flex; align-items: center; gap: 8px; }
-    .shoot-name { margin: 0; color: #0f172a; font-weight: 700; font-size: 14px; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-    .pill-success { background: #ecfdf3; color: #15803d; }
-    .pill-warning { background: #fff7ed; color: #f97316; }
+    .count-value { color: #0f172a; font-weight: 600; font-size: 16px; margin: 0; }
+    .shoot-list { display: flex; flex-direction: column; gap: 12px; }
+    .shoot-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; display: grid; grid-template-columns: 1fr auto; gap: 16px; background: #fff; }
+    .shoot-main { display: flex; flex-direction: column; gap: 4px; }
+    .shoot-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .shoot-name { margin: 0; color: #0f172a; font-weight: 600; font-size: 14px; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .pill-success { background: #d1fae5; color: #065f46; }
+    .pill-warning { background: #fed7aa; color: #c2410c; }
     .pill-muted { background: #f3f4f6; color: #6b7280; }
-    .shoot-meta { display: flex; flex-wrap: wrap; gap: 10px; color: #6b7280; font-size: 12px; }
-    .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: #d1d5db; display: inline-block; }
-    .shoot-role { color: #6b7280; font-size: 12px; }
-    .shoot-rating { display: inline-flex; align-items: center; gap: 4px; color: #f59e0b; font-size: 12px; }
-    .shoot-amount { text-align: right; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
-    .amount-value { margin: 0; color: #0f172a; font-weight: 700; font-size: 14px; }
-    .amount-role { margin: 0; color: #6b7280; font-size: 12px; text-align: right; }
+    .shoot-meta { display: flex; flex-wrap: wrap; gap: 6px; color: #6b7280; font-size: 12px; align-items: center; }
+    .shoot-meta-item { display: inline-flex; align-items: center; gap: 4px; }
+    .shoot-meta-item i { font-size: 11px; }
+    .meta-separator { color: #d1d5db; margin: 0 2px; }
+    .shoot-role { color: #6b7280; font-size: 12px; margin: 4px 0 0 0; }
+    .shoot-rating { display: inline-flex; align-items: center; gap: 4px; color: #000; font-size: 12px; font-weight: 600; }
+    .shoot-rating i { color: #f59e0b; font-size: 12px; }
+    .shoot-amount { text-align: right; display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+    .amount-value { margin: 0; color: #0f172a; font-weight: 600; font-size: 16px; }
+    .amount-role { margin: 0; color: #6b7280; font-size: 11px; text-align: right; }
 
     .billing-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 10px 24px rgba(15,23,42,0.06); padding: 14px 16px; }
     .billing-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
     .billing-title { display: flex; align-items: center; gap: 8px; margin: 0; color: #0f172a; font-weight: 700; font-size: 14px; }
-    .billing-title i { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: #0f1724; color: #fff; font-size: 12px; }
-    .badge-blue { background: #e0e7ff; color: #1d4ed8; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+    .billing-title i { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: #3b82f6; color: #fff; font-size: 12px; }
+    .badge-blue { background: #3b82f6; color: #fff; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
     .billing-total { text-align: right; }
     .billing-label { color: #9ca3af; font-size: 11px; margin: 0; }
     .billing-value { color: #0f172a; font-weight: 700; font-size: 16px; margin: 0; }
@@ -177,13 +175,13 @@
     .is-editing .edit-mode-only { display: block; }
     .is-editing .display-mode-only { display: none; }
 
-    .inline-edit-input { 
-        width: 100%; 
-        border: 1px solid #cbd5e1; 
-        border-radius: 6px; 
-        padding: 4px 8px; 
-        font-size: 12px; 
-        color: var(--ink-700); 
+    .inline-edit-input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 12px;
+        color: var(--ink-700);
         background: #fff;
     }
     .inline-edit-input:focus { border-color: #0f172a; outline: none; box-shadow: 0 0 0 2px rgba(15,23,42,0.1); }
@@ -286,7 +284,7 @@
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $talentProfile->user_id }}">
-        
+
         <div class="top-actions">
             <div class="top-actions-left">
                 <a class="back-link" href="{{ route('admin.talents.dashboard') }}"><i class="fas fa-arrow-left"></i> Back to list</a>
@@ -321,13 +319,13 @@
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
                                 <div style="font-size:12px;">Drop files here to upload</div>
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
                         <div class="upload-overlay">
-                            <i class="fas fa-camera"></i>
+                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                             <span>{{ $img ? 'Change Photo' : 'Upload Photo' }}</span>
                         </div>
                         <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
@@ -346,13 +344,13 @@
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
                                 <div style="font-size:12px;">Drop files here to upload</div>
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
                         <div class="upload-overlay">
-                            <i class="fas fa-camera"></i>
+                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                             <span>{{ $img ? 'Change Photo' : 'Upload Photo' }}</span>
                         </div>
                         <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
@@ -371,13 +369,13 @@
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
                         @else
                             <div class="upload-placeholder">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
                                 <div style="font-size:12px;">Drop files here to upload</div>
                                 <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                             </div>
                         @endif
                         <div class="upload-overlay">
-                            <i class="fas fa-file-upload"></i>
+                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                             <span>{{ $img ? 'Update Document' : 'Upload Document' }}</span>
                         </div>
                         <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
@@ -509,10 +507,11 @@
                                 <div class="review-meta">
                                     <span>{{ $client }}</span>
                                     @if($date)
-                                        <span>&bull;</span>
+                                        <span class="meta-separator">•</span>
                                         <span>{{ $date }}</span>
                                     @endif
-                                    <span class="status-pill {{ $statusClass }}"><span class="status-dot"></span>{{ $statusLabel }}</span>
+                                    <span class="meta-separator">•</span>
+                                    <span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
                                 </div>
                             </div>
                             <a class="review-action" href="{{ route('admin.casting-applications.show', $application) }}">{{ $actionLabel }}</a>
@@ -564,29 +563,24 @@
                                 <p class="shoot-name">{{ $project }}</p>
                                 <span class="pill {{ $pill['class'] }}">{{ $pill['label'] }}</span>
                             </div>
+                            <p class="shoot-role">{{ $client }}</p>
                             <div class="shoot-meta">
-                                @if($client)
-                                    <span>{{ $client }}</span>
-                                @endif
                                 @if($date)
-                                    <span class="meta-dot"></span>
-                                    <span>{{ $date }}</span>
+                                    <span class="shoot-meta-item"><i class="far fa-calendar"></i> {{ $date }}</span>
                                 @endif
-                                <span class="meta-dot"></span>
-                                <span>{{ $projectNumber }}</span>
-                                @if(!is_null($ratingValue))
-                                    <span class="meta-dot"></span>
-                                    <span class="shoot-rating"><i class="fas fa-star"></i>{{ number_format($ratingValue, 1) }}</span>
+                                @if($date && $projectNumber)
+                                    <span class="meta-separator">•</span>
+                                @endif
+                                @if($projectNumber)
+                                    <span class="shoot-meta-item">Project # {{ $projectNumber }}</span>
                                 @endif
                             </div>
-                            <p class="shoot-role">{{ $role }}</p>
                         </div>
                         <div class="shoot-amount">
                             <p class="amount-value">${{ number_format($amount, 0) }}</p>
-                            @if($ratingValue === null)
-                                <p class="amount-role">&nbsp;</p>
-                            @else
-                                <p class="amount-role">{{ $pill['label'] }}</p>
+                            <p class="amount-role">{{ $role }}</p>
+                            @if(!is_null($ratingValue))
+                                <span class="shoot-rating"><i class="fas fa-star"></i>{{ number_format($ratingValue, 1) }}</span>
                             @endif
                         </div>
                     </div>

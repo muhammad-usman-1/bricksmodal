@@ -38,6 +38,7 @@ font-size: 24px;
 font-style: normal;
 font-weight: 400;
 line-height: 36px; /* 150% */
+margin-bottom: 0;
     }
 
     .title-block .sub {
@@ -46,18 +47,34 @@ line-height: 36px; /* 150% */
         font-size: 13px;
     }
 
-    .filters {
+    .filters-row {
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .filter-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .filter-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--ink-500);
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 1;
     }
 
     .filter-select {
         border: 1px solid var(--border);
         background: #fff;
         border-radius: 6px;
-        padding: 8px 12px;
+        padding: 8px 12px 8px 36px;
         font-size: 13px;
         color: var(--ink-700);
         min-width: 160px;
@@ -112,7 +129,7 @@ line-height: 36px; /* 150% */
         border: none;
         white-space: nowrap;
     }
-    
+
     .shoot-table thead th:first-child { border-top-left-radius: 10px; }
     .shoot-table thead th:last-child { border-top-right-radius: 10px; }
 
@@ -309,9 +326,9 @@ line-height: 36px; /* 150% */
         border: none !important;
     }
 
-    .action-item:hover { 
-        background: #f8f9fc; 
-        color: #000; 
+    .action-item:hover {
+        background: #f8f9fc;
+        color: #000;
         transform: translateX(2px);
     }
 
@@ -344,7 +361,7 @@ line-height: 36px; /* 150% */
 
     @media (max-width: 768px) {
         .top-row { flex-direction: column; align-items: flex-start; }
-        .filters { width: 100%; }
+        .filters-row { width: 100%; }
         .shoot-table thead { display: none; }
         .shoot-table tbody tr { display: block; margin-bottom: 14px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
         .shoot-table tbody td { display: flex; justify-content: space-between; border: none; padding: 8px 0; }
@@ -362,22 +379,29 @@ line-height: 36px; /* 150% */
             <h5>Casting Requirement List</h5>
             <div class="sub">Manage all shoots from here.</div>
         </div>
-        <div class="filters">
+        @can('casting_requirement_create')
+            <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
+        @endcan
+    </div>
+
+    <div class="filters-row">
+        <div class="filter-wrapper">
+            <i class="fas fa-filter filter-icon"></i>
             <select class="filter-select" id="statusFilter" aria-label="Filter by status">
                 <option value="">Status</option>
                 @foreach($statusOptions as $statusOption)
                     <option value="{{ $statusOption }}">{{ App\Models\CastingRequirement::STATUS_SELECT[$statusOption] ?? ucfirst($statusOption) }}</option>
                 @endforeach
             </select>
+        </div>
+        <div class="filter-wrapper">
+            <i class="fas fa-map-marker-alt filter-icon"></i>
             <select class="filter-select" id="locationFilter" aria-label="Filter by location">
                 <option value="">Location</option>
                 @foreach($locationOptions as $locationOption)
                     <option value="{{ $locationOption }}">{{ $locationOption }}</option>
                 @endforeach
             </select>
-            @can('casting_requirement_create')
-                <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
-            @endcan
         </div>
     </div>
 
@@ -389,8 +413,9 @@ line-height: 36px; /* 150% */
                     <th>Location</th>
                     <th>Shoot Date-Time <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
                     <th>Status <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
-                    <th>Applicants <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
+
                     <th>Required</th>
+                     <th>Applicants <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
                     <th></th>
                 </tr>
             </thead>
@@ -430,13 +455,14 @@ line-height: 36px; /* 150% */
                         <td data-label="Status">
                             <span class="status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
                         </td>
+                         <td data-label="Required">
+                            <span class="required-pill"><span class="icon"><i class="fas fa-users"></i></span>{{ $requiredCount }}</span>
+                        </td>
                         <td data-label="Applicants">
                             <a class="applicants-btn" href="{{ route('admin.casting-requirements.applicants', $castingRequirement->id) }}">View Applicants</a>
                             <span class="applicants-count">{{ $applicantsCount }} applied</span>
                         </td>
-                        <td data-label="Required">
-                            <span class="required-pill"><span class="icon"><i class="fas fa-users"></i></span>{{ $requiredCount }}</span>
-                        </td>
+
                         <td data-label="Actions" class="actions-cell">
                             <div class="action-menu">
                                 <button class="action-toggle" type="button" aria-label="Actions">

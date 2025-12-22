@@ -214,7 +214,7 @@ letter-spacing: 1.4px;">STUDIO</div>
         <ul class="bm-nav">
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.home') }}" class="bm-link {{ request()->is('admin') ? 'c-active' : '' }}">
-                <i class="fas fa-fw fa-th-large"></i>
+                <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard" style="width: 16px; height: 16px; object-fit: contain;">
                 Dashboard
             </a>
         </li>
@@ -233,14 +233,7 @@ letter-spacing: 1.4px;">STUDIO</div>
                 $adminUser->load('roles.permissions');
             }
         @endphp
-        @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
-            <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.projects.dashboard') }}" class="bm-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-camera"></i>
-                   Shoots
-                </a>
-            </li>
-        @endif
+
         {{--  @if($adminUser)
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.profile.show') }}" class="bm-link {{ request()->is('admin/my-profile') ? 'c-active' : '' }}">
@@ -252,16 +245,24 @@ letter-spacing: 1.4px;">STUDIO</div>
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-users"></i>
+                    <img src="{{ asset('images/talent.png') }}" alt="Talents" style="width: 16px; height: 16px; object-fit: contain;">
                     {{ trans('global.talents_dashboard') }}
+                </a>
+            </li>
+        @endif
+             @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.projects.dashboard') }}" class="bm-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
+                    <img src="{{ asset('images/camera.png') }}" alt="Shoots" style="width: 16px; height: 16px; object-fit: contain;">
+                   Shoots
                 </a>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.payments.dashboard') }}" class="bm-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-credit-card"></i>
-                    {{ trans('global.payment_dashboard') }}
+                    <img src="{{ asset('images/payment.png') }}" alt="Payments" style="width: 16px; height: 16px; object-fit: contain;">
+                    Payments
                 </a>
             </li>
         @endif
@@ -269,7 +270,7 @@ letter-spacing: 1.4px;">STUDIO</div>
 
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.admin-management.index') }}" class="bm-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-user-shield"></i>
+                    <img src="{{ asset('images/user.png') }}" alt="User Management" style="width: 16px; height: 16px; object-fit: contain;">
                     User Management
                 </a>
             </li>

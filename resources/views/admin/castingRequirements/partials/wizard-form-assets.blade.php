@@ -23,7 +23,7 @@
     .shoot-steps { position: relative; }
     .shoot-step { display: none; animation: fadeIn .25s ease; }
     .shoot-step.active { display: block; }
-    .shoot-step-card { background: #fff; border: 1px solid #e4e7ed; border-radius: 12px; box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06); padding: 14px 16px 16px; }
+    .shoot-step-card { background: #fff; border: 1px solid #e4e7ed; border-radius: 12px;  padding: 14px 16px 16px; margin: 0 40px; }
 
     .grid { display: grid; grid-gap: 16px; }
     .grid-2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -31,8 +31,9 @@
     .grid-span-2 { grid-column: span 2; }
     .condensed { grid-gap: 12px; }
 
-    .field-block { display: flex; flex-direction: column; gap: 6px; }
-    .field-block label { font-size: 12px; color: #6d7280; margin: 0; }
+    .field-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field-block label { font-size: 12px; color: #101828; font-weight: 700; margin: 0; }
+    .shoot-page label { font-weight: 700; }
     .dark-input { background: #0f0f11; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
     .dark-input input { background: transparent; border: none; color: #f7f7f7; width: 100%; font-size: 12px; padding: 4px 0; outline: none; }
     .dark-input input::placeholder { color: #a8adb5; }
@@ -41,6 +42,13 @@
     .input-pill { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 999px; background: #0f9f4f; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
     .dark-input.has-suffix { padding-right: 48px; }
     .input-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #a8adb5; font-size: 11px; }
+
+    .duration-input { display: inline-flex; align-items: center; gap: 10px;  border-radius: 10px; width: 100%; }
+    .duration-value { width: 70px; text-align: center; color: #f7f7f7; background: #0f0f11; border: 1px solid #1a1a1c; border-radius: 8px; font-weight: 700; font-size: 14px; padding: 9px 0; -moz-appearance: textfield; }
+    .duration-value::-webkit-outer-spin-button,
+    .duration-value::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .duration-value.is-invalid { border-color: #dc3545; box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.25); }
+    .duration-unit { color: #a8adb5; font-size: 12px; font-weight: 600; }
 
     .step2-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .add-model-btn { background: #0f1014; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
@@ -70,7 +78,7 @@
 
     .shoot-builder__footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }
     .footer-back { border: 1.5px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; }
-    .footer-back:hover:not(:disabled) { background: #f8f9fa; border-color: #c0c4cc; }
+    .footer-back:hover:not(:disabled) { background: #fff; border-color: #d6d8de; color: #3b4150; }
     .footer-back:disabled { opacity: 0.5; cursor: not-allowed; }
     .footer-actions { display: inline-flex; align-items: center; gap: 10px; }
     .step-status { font-weight: 600; color: #9aa0ac; font-size: 12px; }
@@ -271,6 +279,104 @@
     @media (max-width: 992px) {
         .outfit-selection-grid { grid-template-columns: 1fr; }
     }
+    /* Custom Picker Dropdown */
+    .field-block { position: relative; }
+    .custom-picker-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        margin-top: 8px;
+        display: none;
+        width: 320px;
+        padding: 16px;
+        border: 1px solid #eee;
+    }
+    .custom-picker-dropdown.show { display: block; }
+
+    /* Picker Top Header */
+    .picker-top-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    .picker-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+    .btn-close-picker {
+        background: none;
+        border: none;
+        color: #999;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+    }
+    .btn-close-picker:hover {
+        color: #333;
+    }
+
+    /* Calendar Styles */
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .calendar-header .month-year-label { font-weight: 600; color: #101828; font-size: 14px; }
+    .calendar-header button { background: none; border: none; color: #667085; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s; }
+    .calendar-header button:hover { background: #f9fafb; color: #101828; }
+
+    .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 8px; }
+    .calendar-weekdays span { font-size: 12px; color: #667085; font-weight: 500; }
+
+    .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+    .calendar-day {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: #475467;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s;
+        margin: 2px;
+    }
+    .calendar-day:hover:not(.out-of-month) { background: #f4f4f5; }
+    .calendar-day.selected { background: #1a1a1a; color: #fff; font-weight: 600; }
+    .calendar-day.today { color: #101828; font-weight: 700; border: 1px solid #eee; }
+    .calendar-day.out-of-month { color: #d0d5dd; cursor: default; }
+
+    .calendar-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; }
+    .btn-clear-date { background: #f2f2f2; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #333; cursor: pointer; }
+    .btn-clear-date:hover { background: #e8e8e8; }
+
+    /* Time Picker Styles */
+    #timeDropdown { width: 280px; padding: 16px 0; overflow: hidden; }
+    #timeDropdown .picker-top-header { padding: 0 16px 12px 20px; }
+    .time-list-container {
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+    }
+    .time-list-container::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+    .time-item { padding: 12px 20px; font-size: 15px; color: #344054; cursor: pointer; transition: all 0.2s; }
+    .time-item:hover { background: #f4f4f5; }
+    .time-item.selected { background: #f4f4f5; font-weight: 600; }
+
+    .dark-input.has-picker { cursor: pointer; }
+    .dark-input.has-picker input { cursor: pointer; }
+    .picker-icon { color: #a8adb5; font-size: 14px; }
 </style>
 <script>
     var uploadedReferenceMap = {}
@@ -335,10 +441,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitBtn = document.querySelector('[data-submit-form]');
     const indicator = document.querySelector('[data-step-indicator]');
     const form = document.getElementById('shootWizard');
+        const durationInput = document.getElementById('duration');
 
     if (!steps.length || !nextBtn || !prevBtn || !indicator) {
         return;
     }
+
+        if (durationInput) {
+            durationInput.addEventListener('input', () => {
+                const cleaned = durationInput.value.replace(/[^0-9]/g, '');
+                if (cleaned !== durationInput.value) {
+                    durationInput.value = cleaned;
+                }
+            });
+        }
 
     let currentStep = 0;
 
@@ -531,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const field = match[2];
             const selector = `[name="models[${newIndex}][${field}]"]`;
             const targets = card.querySelectorAll(selector);
-            
+
             if (targets.length > 0) {
                 if (input.tagName === 'SELECT' && input.multiple) {
                     const selectedValues = Array.from(input.selectedOptions).map(opt => opt.value);
@@ -665,6 +781,180 @@ if (window.google && google.maps && google.maps.places) {
     window.__initLabelMultiselect = init;
     document.addEventListener('DOMContentLoaded', () => init());
 })();
+
+// --- Custom Date & Time Pickers ---
+document.addEventListener('DOMContentLoaded', function() {
+    const dateTrigger = document.getElementById('datePickerTrigger');
+    const calendarDropdown = document.getElementById('calendarDropdown');
+    const shootDateInput = document.getElementById('shoot_date');
+    const calendarDays = document.getElementById('calendarDays');
+    const monthYearLabel = calendarDropdown?.querySelector('.month-year-label');
+    const btnPrevMonth = calendarDropdown?.querySelector('.btn-prev-month');
+    const btnNextMonth = calendarDropdown?.querySelector('.btn-next-month');
+    const btnClearDate = calendarDropdown?.querySelector('.btn-clear-date');
+
+    const timeTrigger = document.getElementById('timePickerTrigger');
+    const timeDropdown = document.getElementById('timeDropdown');
+    const shootTimeInput = document.getElementById('shoot_time');
+    const timeList = document.getElementById('timeList');
+
+    let currentCalDate = new Date();
+    let selectedDate = shootDateInput?.value ? new Date(shootDateInput.value) : null;
+
+    const renderCalendar = () => {
+        if (!calendarDays || !monthYearLabel) return;
+
+        calendarDays.innerHTML = '';
+        const year = currentCalDate.getFullYear();
+        const month = currentCalDate.getMonth();
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const prevDaysInMonth = new Date(year, month, 0).getDate();
+
+        // Prev month days
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day out-of-month';
+            dayDiv.textContent = prevDaysInMonth - i;
+            calendarDays.appendChild(dayDiv);
+        }
+
+        // Current month days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            dayDiv.textContent = i;
+
+            const thisDate = new Date(year, month, i);
+            if (selectedDate && thisDate.toDateString() === selectedDate.toDateString()) {
+                dayDiv.classList.add('selected');
+            }
+            if (thisDate.toDateString() === new Date().toDateString()) {
+                dayDiv.classList.add('today');
+            }
+
+            dayDiv.addEventListener('click', () => {
+                selectedDate = thisDate;
+                const yyyy = selectedDate.getFullYear();
+                const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(selectedDate.getDate()).padStart(2, '0');
+                shootDateInput.value = `${yyyy}-${mm}-${dd}`;
+                calendarDropdown.classList.remove('show');
+                renderCalendar();
+            });
+
+            calendarDays.appendChild(dayDiv);
+        }
+
+        // Next month days
+        const totalCells = 42;
+        const currentCells = firstDay + daysInMonth;
+        for (let i = 1; i <= totalCells - currentCells; i++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day out-of-month';
+            dayDiv.textContent = i;
+            calendarDays.appendChild(dayDiv);
+        }
+    };
+
+    const renderTimeList = () => {
+        if (!timeList) return;
+        timeList.innerHTML = '';
+        const times = [];
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const h12 = h % 12 || 12;
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const timeStr = `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+                const valueStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                times.push({ label: timeStr, value: valueStr });
+            }
+        }
+
+        times.forEach(t => {
+            const item = document.createElement('div');
+            item.className = 'time-item';
+            if (shootTimeInput.value === t.value) {
+                item.classList.add('selected');
+                const headerText = document.getElementById('selectedTimeHeader');
+                if (headerText) headerText.textContent = t.label;
+            }
+            item.textContent = t.label;
+            item.addEventListener('click', () => {
+                shootTimeInput.value = t.value;
+                const headerText = document.getElementById('selectedTimeHeader');
+                if (headerText) headerText.textContent = t.label;
+                timeDropdown.classList.remove('show');
+                renderTimeList();
+            });
+            timeList.appendChild(item);
+        });
+    };
+
+    // Close buttons logic
+    document.querySelectorAll('.btn-close-picker').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            calendarDropdown?.classList.remove('show');
+            timeDropdown?.classList.remove('show');
+        });
+    });
+
+    dateTrigger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        timeDropdown?.classList.remove('show');
+        calendarDropdown?.classList.toggle('show');
+        if (calendarDropdown?.classList.contains('show')) {
+            renderCalendar();
+        }
+    });
+
+    timeTrigger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calendarDropdown?.classList.remove('show');
+        timeDropdown?.classList.toggle('show');
+        if (timeDropdown?.classList.contains('show')) {
+            renderTimeList();
+        }
+    });
+
+    btnPrevMonth?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    btnNextMonth?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    btnClearDate?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedDate = null;
+        shootDateInput.value = '';
+        calendarDropdown.classList.remove('show');
+        renderCalendar();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (calendarDropdown && !calendarDropdown.contains(e.target) && !dateTrigger.contains(e.target)) {
+            calendarDropdown.classList.remove('show');
+        }
+        if (timeDropdown && !timeDropdown.contains(e.target) && !timeTrigger.contains(e.target)) {
+            timeDropdown.classList.remove('show');
+        }
+    });
+
+    // Initial render
+    renderCalendar();
+    renderTimeList();
+});
 </script>
 @php
     $googlePlacesKey = config('services.google.places_api_key');

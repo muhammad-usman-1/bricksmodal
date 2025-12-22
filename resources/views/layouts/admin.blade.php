@@ -287,9 +287,15 @@
                     <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
                 </div>
                 <div class="admin-icons">
+                    <a href="#" class="icon-btn p-0" aria-label="Add New">
+                        <img src="{{ asset('images/plus.png') }}" alt="Add" style="width: 20px; height: 20px;">
+                    </a>
+                    <a href="{{ route('admin.settings.index') }}" class="icon-btn p-0" aria-label="Settings">
+                        <img src="{{ asset('images/setting.png') }}" alt="Settings" style="width: 20px; height: 20px;">
+                    </a>
                     <div class="dropdown">
-                        <a class="icon-btn dropdown-toggle p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
-                            <i class="fas fa-bell"></i>
+                        <a class="icon-btn p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+                            <img src="{{ asset('images/noti.png') }}" alt="Notifications" style="width: 20px; height: 20px;">
                             <span class="icon-badge {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'd-none' }}"></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">

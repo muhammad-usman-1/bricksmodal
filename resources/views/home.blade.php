@@ -128,9 +128,9 @@ line-height: 36px;
     }
 
     .stat-pill {
-        color: #10b981;
+
         font-size: 11px;
-        background: #e9f7f1;
+        
         border-radius: 999px;
         padding: 4px 8px;
         display: inline-block;
@@ -301,7 +301,7 @@ line-height: 36px;
         overflow: hidden;
     }
     .actions-dropdown-menu.active { display: block; animation: dropdownFade 0.2s ease; }
-    
+
     @keyframes dropdownFade {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -374,7 +374,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% vs last month</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+                <img src="{{ asset('images/talent.png') }}" alt="Total Talents" style="width: 20px; height: 20px;">
             </div>
         </div>
         <div class="stat-card">
@@ -384,7 +384,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% new requests</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <img src="{{ asset('images/pending.png') }}" alt="Pending Verification" style="width: 20px; height: 20px;">
             </div>
         </div>
         <div class="stat-card">
@@ -394,7 +394,7 @@ line-height: 36px;
                 <span class="stat-pill">+32% ongoing now</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <img src="{{ asset('images/camera.png') }}" alt="Active Shoots" style="width: 20px; height: 20px;">
             </div>
         </div>
         <div class="stat-card">
@@ -404,7 +404,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% this week</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6"/><circle cx="10" cy="10" r="7"/></svg>
+                <img src="{{ asset('images/recent.png') }}" alt="Recent Sign-ups" style="width: 20px; height: 20px;">
             </div>
         </div>
     </div>
@@ -509,21 +509,21 @@ line-height: 36px;
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dropdownBtns = document.querySelectorAll('.dropdown-toggle-btn');
-            
+
             dropdownBtns.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const menu = this.nextElementSibling;
-                    
+
                     // Close other menus
                     document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
                         if (m !== menu) m.classList.remove('active');
                     });
-                    
+
                     menu.classList.toggle('active');
                 });
             });
-            
+
             document.addEventListener('click', function() {
                 document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
                     menu.classList.remove('active');

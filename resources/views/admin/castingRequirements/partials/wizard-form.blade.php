@@ -131,7 +131,7 @@
                             <label for="instagram_url">Instagram url (Brand link)</label>
                             <div class="dark-input has-pill">
                                 <input type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://www.instagram.com/lowclub.studio/">
-                               
+
                             </div>
                         </div>
                     </div>
@@ -139,8 +139,27 @@
                     <div class="grid grid-3 condensed">
                         <div class="field-block">
                             <label for="shoot_date">Date</label>
-                            <div class="dark-input">
-                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="date" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}">
+                            <div class="dark-input has-picker" id="datePickerTrigger">
+                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="Select Date">
+                                <span class="picker-icon"><i class="fas fa-calendar-alt"></i></span>
+                            </div>
+                            <div class="custom-picker-dropdown" id="calendarDropdown">
+                                <div class="picker-top-header">
+                                    <span class="picker-title">Select Date</span>
+                                    <button type="button" class="btn-close-picker"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="calendar-header">
+                                    <button type="button" class="btn-prev-month"><i class="fas fa-chevron-left"></i></button>
+                                    <div class="month-year-label">December 2025</div>
+                                    <button type="button" class="btn-next-month"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                                </div>
+                                <div class="calendar-days" id="calendarDays"></div>
+                                <div class="calendar-footer">
+                                    <button type="button" class="btn-clear-date">Clear</button>
+                                </div>
                             </div>
                             @if($errors->has('shoot_date'))
                                 <div class="invalid-feedback d-block">{{ $errors->first('shoot_date') }}</div>
@@ -149,8 +168,18 @@
 
                         <div class="field-block">
                             <label for="shoot_time">Start Time</label>
-                            <div class="dark-input">
-                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="time" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}">
+                            <div class="dark-input has-picker" id="timePickerTrigger">
+                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="Select Time">
+                                <span class="picker-icon"><i class="fas fa-clock"></i></span>
+                            </div>
+                            <div class="custom-picker-dropdown" id="timeDropdown">
+                                <div class="picker-top-header">
+                                    <span class="picker-title" id="selectedTimeHeader">Select Time</span>
+                                    <button type="button" class="btn-close-picker"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="time-list-container" id="timeList">
+                                    <!-- Times injected via JS -->
+                                </div>
                             </div>
                             @if($errors->has('shoot_time'))
                                 <div class="invalid-feedback d-block">{{ $errors->first('shoot_time') }}</div>
@@ -159,9 +188,20 @@
 
                         <div class="field-block">
                             <label for="duration">Duration</label>
-                            <div class="dark-input has-suffix">
-                                <input class="{{ $errors->has('duration') ? 'is-invalid' : '' }}" type="text" name="duration" id="duration" value="{{ $durationValue }}" placeholder="2">
-                                <span class="input-suffix">hours</span>
+                            <div class="duration-input">
+                                <input
+                                    class="duration-value {{ $errors->has('duration') ? 'is-invalid' : '' }}"
+                                    type="number"
+                                    name="duration"
+                                    id="duration"
+                                    value="{{ $durationValue }}"
+                                    placeholder="2"
+                                    min="0"
+                                    step="1"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                >
+                                <span class="duration-unit">hours</span>
                             </div>
                             @if($errors->has('duration'))
                                 <div class="invalid-feedback d-block">{{ $errors->first('duration') }}</div>
@@ -204,7 +244,9 @@
                                     <label class="required">Gender</label>
                                     <select name="models[{{ $index }}][gender]" class="pill-select @error('models.' . $index . '.gender') is-invalid @enderror" required>
                                         @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
-                                            <option value="{{ $key }}" {{ ($model['gender'] ?? 'any') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            @if($key !== 'any')
+                                                <option value="{{ $key }}" {{ ($model['gender'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     @error('models.' . $index . '.gender')
@@ -440,7 +482,9 @@
                             <label class="required">Gender</label>
                             <select name="models[__INDEX__][gender]" class="pill-select" required>
                                 @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
+                                    @if($key !== 'any')
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
