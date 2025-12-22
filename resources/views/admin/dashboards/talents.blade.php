@@ -50,10 +50,12 @@ line-height: 36px; /* 150% */}
     
     .card-overlay { 
         position: absolute; left: 0; right: 0; bottom: 0; 
+        height: 50%;
         padding: 20px 18px 15px; 
-        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.8) 100%); 
+        background: linear-gradient(182deg, rgba(34,34,34,0) 0%, rgba(34,34,34,0.85) 45%, #171719 100%); 
         color: #fff; 
         display: flex; flex-direction: column; 
+        justify-content: flex-end;
     }
 
     .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
