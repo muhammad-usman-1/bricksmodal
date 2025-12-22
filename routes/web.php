@@ -26,7 +26,8 @@ use App\Http\Controllers\Talent\OnboardingController;
 use App\Http\Controllers\Talent\ProfileController as TalentPortalProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'landing')->name('landing');
+Route::redirect('/', '/talent/login');
+Route::view('/welcome', 'landing')->name('landing');
 
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
