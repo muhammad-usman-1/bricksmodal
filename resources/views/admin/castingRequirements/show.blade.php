@@ -22,7 +22,8 @@
                     <div><strong>Client / Brand</strong><span>{{ $castingRequirement->client_name ?? trans('global.not_set') }}</span></div>
                     <div><strong>Location</strong><span>{{ $castingRequirement->location ?? trans('global.not_set') }}</span></div>
                     <div><strong>Shoot Date</strong><span>{{ $castingRequirement->shoot_date_display ?? trans('global.not_set') }}</span></div>
-                    <div><strong>Duration</strong><span>{{ $castingRequirement->duration ?? trans('global.not_set') }}</span></div>
+                    <div><strong>Duration</strong><span>@if($castingRequirement->duration){{ preg_replace('/[^0-9]/', '', $castingRequirement->duration) }} Hours @else {{ trans('global.not_set') }} @endif</span></div>
+                    <div><strong>Instagram Brand Link</strong><span>@if($castingRequirement->instagram_url)<a href="{{ $castingRequirement->instagram_url }}" target="_blank">View Profile</a>@else{{ trans('global.not_set') }}@endif</span></div>
                     <div><strong>Status</strong><span>{{ App\Models\CastingRequirement::STATUS_SELECT[$castingRequirement->status] ?? trans('global.not_set') }}</span></div>
                     <div><strong>Total Talents</strong><span>{{ $castingRequirement->count }}</span></div>
                 </div>
@@ -59,8 +60,18 @@
                                             <span class="badge badge-outline-secondary">{{ $label->name }}</span>
                                         @endforeach
                                     </div>
-                                @else
-                                    <span class="text-muted small">{{ __('No specific labels required') }}</span>
+                                @endif
+
+                                @php $modelRefs = $model->getMedia('reference_photo'); @endphp
+                                @if($modelRefs->isNotEmpty())
+                                    <div class="mt-2">
+                                        <strong class="d-block small">{{ __('Reference Photos') }}:</strong>
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            @foreach($modelRefs as $media)
+                                                <a href="{{ $media->getUrl() }}" target="_blank" class="badge badge-info">{{ __('View') }}</a>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach

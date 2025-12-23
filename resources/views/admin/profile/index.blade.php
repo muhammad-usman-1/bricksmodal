@@ -57,11 +57,6 @@
                     <p class="profile-sub">Manage your personal information</p>
                 </div>
                 <div class="profile-actions">
-                        <a href="{{ route('profile.password.edit') }}" class="privacy-btn" title="Privacy &amp; Security">
-                            <i class="fas fa-shield-alt"></i>
-                            Privacy Setup
-                        </a>
-                    <button type="button" class="back-btn" onclick="window.history.back();">Back</button>
                     <button type="submit" class="profile-action">Save</button>
                 </div>
             </div>

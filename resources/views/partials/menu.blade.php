@@ -302,7 +302,7 @@ letter-spacing: 1.4px;">STUDIO</div>
         @endif  --}}
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('talent_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ request()->is('admin/talents') ? 'c-active' : '' }}">
+                <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ (request()->is('admin/talents*') || request()->is('admin/talent-profiles*') || request()->routeIs('admin.talents.*') || request()->routeIs('admin.talent-profiles.*')) ? 'c-active' : '' }}">
                     <img src="{{ asset('images/talent.png') }}" alt="Talents" style="width: 16px; height: 16px; object-fit: contain;">
                     {{ trans('global.talents_dashboard') }}
                 </a>
@@ -310,8 +310,8 @@ letter-spacing: 1.4px;">STUDIO</div>
         @endif
              @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
             <li class="c-sidebar-nav-item">
-                <div class="bm-nav-dropdown {{ request()->is('admin/projects*') ? 'show' : '' }}">
-                    <a href="{{ route('admin.projects.dashboard') }}" class="bm-link-dropdown-toggle {{ request()->is('admin/projects*') ? 'c-active' : '' }}" style="text-decoration:none;">
+                <div class="bm-nav-dropdown {{ (request()->is('admin/projects*') || request()->is('admin/casting-requirements*') || request()->routeIs('admin.projects.*') || request()->routeIs('admin.casting-requirements.*')) ? 'show' : '' }}">
+                    <a href="{{ route('admin.projects.dashboard') }}" class="bm-link-dropdown-toggle {{ (request()->is('admin/projects*') || request()->is('admin/casting-requirements*') || request()->routeIs('admin.projects.*') || request()->routeIs('admin.casting-requirements.*')) ? 'c-active' : '' }}" style="text-decoration:none;">
                         <span style="display:flex; align-items:center; gap:10px;">
                             <img src="{{ asset('images/camera.png') }}" alt="Shoots" style="width: 16px; height: 16px; object-fit: contain;">
                             Shoots
@@ -330,7 +330,7 @@ letter-spacing: 1.4px;">STUDIO</div>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.payments.dashboard') }}" class="bm-link {{ request()->is('admin/payments') ? 'c-active' : '' }}">
+                <a href="{{ route('admin.payments.dashboard') }}" class="bm-link {{ (request()->is('admin/payments*') || request()->is('admin/payment-requests*') || request()->routeIs('admin.payments.*') || request()->routeIs('admin.payment-requests.*')) ? 'c-active' : '' }}">
                     <img src="{{ asset('images/payment.png') }}" alt="Payments" style="width: 16px; height: 16px; object-fit: contain;">
                     Payments
                 </a>

@@ -657,6 +657,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const match = name.match(/models\[(\d+)\]\[(.+)]/);
             if (!match) return;
             const field = match[2];
+            if (field === 'id') return; // Skip ID when duplicating
             const selector = `[name="models[${newIndex}][${field}]"]`;
             const targets = card.querySelectorAll(selector);
 

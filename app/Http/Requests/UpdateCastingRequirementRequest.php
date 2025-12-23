@@ -51,6 +51,10 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'string',
                 'nullable',
             ],
+            'instagram_url' => [
+                'url',
+                'nullable',
+            ],
             'shoot_date_time' => [
                 'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
                 'nullable',
@@ -83,6 +87,11 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'required',
                 'array',
                 'min:1',
+            ],
+            'models.*.id' => [
+                'nullable',
+                'integer',
+                'exists:casting_requirement_models,id',
             ],
             'models.*.title' => [
                 'nullable',
@@ -169,6 +178,15 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'nullable',
                 'integer',
                 'exists:outfits,id',
+            ],
+            'models.*.reference_photo' => [
+                'array',
+                'nullable',
+            ],
+            'models.*.reference_photo.*' => [
+                'file',
+                'image',
+                'max:10240',
             ],
         ];
     }

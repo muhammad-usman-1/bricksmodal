@@ -41,6 +41,7 @@
         if ($isEdit && $castingRequirement) {
             $modelInputs = $castingRequirement->modelRequirements->map(function ($model) use ($ageRanges) {
                 return [
+                    'id' => $model->id,
                     'title' => $model->title,
                     'quantity' => $model->quantity,
                     'gender' => $model->gender ?? 'any',
@@ -104,7 +105,7 @@
         <div class="stepper-node" data-stepper-node="3"><span>3</span></div>
     </div>
 
-    <form method="POST" action="{{ $formAction }}" enctype="multipart/form-data" id="shootWizard" data-default-status="{{ $isEdit ? '' : 'advertised' }}">
+    <form method="POST" action="{{ $formAction }}" enctype="multipart/form-data" id="shootWizard" data-default-status="{{ $isEdit ? '' : 'advertised' }}" novalidate>
         @csrf
         @if($isEdit)
             @method('PUT')
@@ -138,7 +139,7 @@
                         <div class="field-block">
                             <label for="instagram_url">Instagram url (Brand link)</label>
                             <div class="dark-input has-pill">
-                                <input type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://www.instagram.com/lowclub.studio/">
+                                <input type="text" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://www.instagram.com/lowclub.studio/">
 
                             </div>
                         </div>
@@ -247,6 +248,7 @@
                                 </div>
                             </div>
 
+                            <input type="hidden" name="models[{{ $index }}][id]" value="{{ $model['id'] ?? '' }}">
                             <input type="hidden" name="models[{{ $index }}][title]" value="{{ $modelLabel }}">
                             <input type="hidden" name="models[{{ $index }}][quantity]" value="{{ $model['quantity'] ?? 1 }}">
 
@@ -361,7 +363,20 @@
                                             <span>Male Outfits</span>
                                         </div>
                                         <div class="outfit-item-group">
-                                            <button type="button" class="traditional-dress-btn">Traditional dress</button>
+                                            <div class="outfit-sub-item">
+                                                <div class="item-image-box" data-image-target>Image for traditional</div>
+                                                <div class="item-details">
+                                                    <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
+                                                    <select name="models[{{ $index }}][male_traditional_id]" class="item-select" data-outfit-select>
+                                                        <option value="">Chose any</option>
+                                                        @foreach($outfits['male'] ?? [] as $outfit)
+                                                            @if($outfit->sub_category === 'traditional')
+                                                                <option value="{{ $outfit->id }}" {{ ($model['male_traditional_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <div class="outfit-sub-item">
                                                 <div class="item-image-box" data-image-target>Image for tops</div>
                                                 <div class="item-details">
@@ -485,6 +500,7 @@
                         </div>
                     </div>
 
+                    <input type="hidden" name="models[__INDEX__][id]" value="">
                     <input type="hidden" name="models[__INDEX__][title]" value="Model __INDEX_DISPLAY__">
                     <input type="hidden" name="models[__INDEX__][quantity]" value="1">
 
@@ -584,7 +600,20 @@
                                     <span>Male Outfits</span>
                                 </div>
                                     <div class="outfit-item-group">
-                                        <button type="button" class="traditional-dress-btn">Traditional dress</button>
+                                        <div class="outfit-sub-item">
+                                            <div class="item-image-box" data-image-target>Image for traditional</div>
+                                            <div class="item-details">
+                                                <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
+                                                <select name="models[__INDEX__][male_traditional_id]" class="item-select" data-outfit-select>
+                                                    <option value="">Chose any</option>
+                                                    @foreach($outfits['male'] ?? [] as $outfit)
+                                                        @if($outfit->sub_category === 'traditional')
+                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                         <div class="outfit-sub-item">
                                             <div class="item-image-box" data-image-target>Image for tops</div>
                                             <div class="item-details">

@@ -363,7 +363,8 @@
         $client = $project->client_name ?? ($project->user->name ?? 'Unknown Client');
         $location = $project->location ?? 'Location Pending';
         $rawDate = $project->getRawOriginal('shoot_date_time');
-        $duration = $project->duration ?? '';
+        $durationRaw = $project->duration ?? '';
+        $duration = preg_replace('/[^0-9]/', '', $durationRaw);
         
         $dateDisplay = '-';
         $timeDisplay = '-';

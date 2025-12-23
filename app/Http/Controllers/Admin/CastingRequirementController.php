@@ -68,9 +68,6 @@ class CastingRequirementController extends Controller
         $data = $request->validated();
         $models = $data['models'] ?? [];
         unset($data['shoot_date'], $data['shoot_time'], $data['models']);
-        $data['hair_color'] = null;
-        $data['age_range'] = null;
-        $data['gender'] = null;
         $data['status'] = 'advertised';
         $data['user_id'] = auth('admin')->id(); // Set the authenticated admin as the user
 
@@ -78,7 +75,6 @@ class CastingRequirementController extends Controller
             return (int) ($model['quantity'] ?? 0);
         });
         $data['count'] = max($totalQuantity, 1);
-        $data['rate_per_model'] = 0;
 
         $castingRequirement = CastingRequirement::create($data);
 
@@ -166,11 +162,19 @@ class CastingRequirementController extends Controller
 
         $castingRequirement->update($data);
 
-        $castingRequirement->modelRequirements()->delete();
+        $existingModelIds = $castingRequirement->modelRequirements->pluck('id')->toArray();
+        $payloadModelIds = collect($models)->pluck('id')->filter()->toArray();
+        
+        // Delete models that are not in the payload
+        $modelsToDelete = array_diff($existingModelIds, $payloadModelIds);
+        if (!empty($modelsToDelete)) {
+            CastingRequirementModel::whereIn('id', $modelsToDelete)->delete();
+        }
 
         foreach ($models as $index => $modelPayload) {
             $ageOption = CastingRequirementModel::AGE_RANGE_OPTIONS[$modelPayload['age_range_key']] ?? ['min' => null, 'max' => null];
-            $model = $castingRequirement->modelRequirements()->create([
+            
+            $modelData = [
                 'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
                 'quantity' => $modelPayload['quantity'],
                 'rate' => null,
@@ -190,13 +194,25 @@ class CastingRequirementController extends Controller
                 'female_bottom_id' => $modelPayload['female_bottom_id'] ?? null,
                 'child_top_id' => $modelPayload['child_top_id'] ?? null,
                 'child_bottom_id' => $modelPayload['child_bottom_id'] ?? null,
-            ]);
-            $model->labels()->sync($modelPayload['labels'] ?? []);
+            ];
 
-            // Handle model-specific reference photos (direct file upload)
-            if ($request->hasFile("models.{$index}.reference_photo")) {
-                foreach ($request->file("models.{$index}.reference_photo") as $file) {
-                    $model->addMedia($file)->toMediaCollection('reference_photo');
+            if (!empty($modelPayload['id'])) {
+                $model = CastingRequirementModel::find($modelPayload['id']);
+                if ($model) {
+                    $model->update($modelData);
+                }
+            } else {
+                $model = $castingRequirement->modelRequirements()->create($modelData);
+            }
+
+            if ($model) {
+                $model->labels()->sync($modelPayload['labels'] ?? []);
+
+                // Handle model-specific reference photos (direct file upload)
+                if ($request->hasFile("models.{$index}.reference_photo")) {
+                    foreach ($request->file("models.{$index}.reference_photo") as $file) {
+                        $model->addMedia($file)->toMediaCollection('reference_photo');
+                    }
                 }
             }
         }

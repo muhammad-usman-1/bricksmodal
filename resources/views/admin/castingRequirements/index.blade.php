@@ -436,12 +436,7 @@ margin-bottom: 0;
                             ?? optional($castingRequirement->applications)->count()
                             ?? optional($castingRequirement->castingApplications)->count()
                             ?? 0;
-                        $requiredCount = $castingRequirement->required_talent_count
-                            ?? $castingRequirement->required_talents
-                            ?? $castingRequirement->talents_needed
-                            ?? $castingRequirement->required
-                            ?? $castingRequirement->number_of_talents
-                            ?? 0;
+                        $requiredCount = $castingRequirement->count ?? 0;
                     @endphp
                     <tr data-status="{{ $statusKey }}" data-location="{{ $location }}">
                         <td data-label="Shoot Name">
@@ -451,7 +446,7 @@ margin-bottom: 0;
                             </div>
                         </td>
                         <td data-label="Location" class="location-cell">{{ $location }}</td>
-                        <td data-label="Shoot Date-Time" class="date-cell">{{ $dateText }}@if($duration)<small>{{ $duration }}</small>@endif</td>
+                        <td data-label="Shoot Date-Time" class="date-cell">{{ $dateText }}@if($duration)<small>{{ preg_replace('/[^0-9]/', '', $duration) }} Hours</small>@endif</td>
                         <td data-label="Status">
                             <span class="status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
                         </td>
