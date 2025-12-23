@@ -96,6 +96,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class)->only(['index', 'edit', 'update']);
 
+        // Outfit Management
+        Route::resource('outfits', \App\Http\Controllers\Admin\OutfitController::class);
+
         // Admin Management (Super Admin Only)
         Route::middleware('super.admin')->group(function () {
             Route::resource('admin-management', \App\Http\Controllers\Admin\AdminManagementController::class)->parameters([

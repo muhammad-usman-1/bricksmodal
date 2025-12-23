@@ -287,7 +287,7 @@
                     <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
                 </div>
                 <div class="admin-icons">
-                    <a href="#" class="icon-btn p-0" aria-label="Add New">
+                    <a href="{{ route('admin.outfits.index') }}" class="icon-btn p-0" aria-label="Add New">
                         <img src="{{ asset('images/plus.png') }}" alt="Add" style="width: 20px; height: 20px;">
                     </a>
                     <a href="{{ route('admin.settings.index') }}" class="icon-btn p-0" aria-label="Settings">
