@@ -51,6 +51,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Projects Dashboard (requires project_management permission)
         Route::middleware('admin.module:project_management')->group(function () {
             Route::get('projects', [CastingRequirementController::class, 'index'])->name('projects.dashboard');
+            Route::get('projects/progress', [CastingRequirementController::class, 'progress'])->name('projects.progress');
 
             // Casting Requirement
             Route::delete('casting-requirements/destroy', [CastingRequirementController::class, 'massDestroy'])->name('casting-requirements.massDestroy');

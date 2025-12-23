@@ -225,7 +225,7 @@ margin-bottom: 0;
         height: 14px;
         display: grid;
         place-items: center;
-        color: var(--ink-500);
+        color: #000;
     }
 
     .table-foot {

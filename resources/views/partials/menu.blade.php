@@ -198,6 +198,61 @@
         html[data-theme="dark"] .bm-link.c-active i {
             color: #fff;
         }
+
+        /* Shoots Dropdown Styles */
+        .bm-link-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            width: 100%;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .bm-link-dropdown-toggle:hover { background: #eef1f6; color: #0f172a; }
+        
+        .bm-link-dropdown-toggle.c-active {
+            background: #11141a;
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+        .bm-link-dropdown-toggle.c-active img { filter: brightness(0) invert(1); }
+        .bm-link-dropdown-toggle.c-active:hover { background: #11141a; color: #fff; }
+
+        .bm-dropdown-arrow { transition: transform 0.2s; font-size: 10px; }
+        .bm-nav-dropdown.show .bm-dropdown-arrow { transform: rotate(180deg); }
+
+        .bm-dropdown-items {
+            display: none;
+            list-style: none;
+            padding: 5px;
+            margin: 8px 0 0 0;
+            background: #fff;
+            border: 1px solid #eef0f3;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .bm-nav-dropdown.show .bm-dropdown-items { display: block; }
+        
+        .bm-sub-link {
+            display: block;
+            padding: 8px 12px;
+            color: #111827;
+            font-size: 13px;
+            text-decoration: underline;
+            text-decoration-color: #d1d5db;
+            text-underline-offset: 4px;
+            font-weight: 500;
+        }
+        .bm-sub-link:hover { color: #000; text-decoration-color: #000; }
+
     </style>
 
     <div class="bm-sidebar">
@@ -255,10 +310,22 @@ letter-spacing: 1.4px;">STUDIO</div>
         @endif
              @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('project_management')))
             <li class="c-sidebar-nav-item">
-                <a href="{{ route('admin.projects.dashboard') }}" class="bm-link {{ request()->is('admin/projects') ? 'c-active' : '' }}">
-                    <img src="{{ asset('images/camera.png') }}" alt="Shoots" style="width: 16px; height: 16px; object-fit: contain;">
-                   Shoots
-                </a>
+                <div class="bm-nav-dropdown {{ request()->is('admin/projects*') ? 'show' : '' }}">
+                    <a href="{{ route('admin.projects.dashboard') }}" class="bm-link-dropdown-toggle {{ request()->is('admin/projects*') ? 'c-active' : '' }}" style="text-decoration:none;">
+                        <span style="display:flex; align-items:center; gap:10px;">
+                            <img src="{{ asset('images/camera.png') }}" alt="Shoots" style="width: 16px; height: 16px; object-fit: contain;">
+                            Shoots
+                        </span>
+                        <i class="fas fa-chevron-down bm-dropdown-arrow" onclick="event.preventDefault(); this.closest('.bm-nav-dropdown').classList.toggle('show');" style="cursor:pointer; padding:6px;"></i>
+                    </a>
+                    <ul class="bm-dropdown-items">
+                        <li>
+                            <a href="{{ route('admin.projects.progress') }}" class="bm-sub-link {{ request()->routeIs('admin.projects.progress') ? 'active-sub' : '' }}">
+                                Shoots Progress
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
@@ -470,4 +537,11 @@ letter-spacing: 1.4px;">STUDIO</div>
             if (e.key === 'Escape') close();
         });
     })();
+
+    function toggleBmDropdown(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.toggle('show');
+        }
+    }
 </script>

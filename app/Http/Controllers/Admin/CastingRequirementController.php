@@ -34,6 +34,22 @@ class CastingRequirementController extends Controller
         return view('admin.castingRequirements.index', compact('castingRequirements'));
     }
 
+    public function progress()
+    {
+        abort_if(Gate::denies('project_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        // Find strictly today's shoot
+        $project = CastingRequirement::where('status', '!=', 'completed')
+            ->whereDate('shoot_date_time', now()->toDateString())
+            ->orderBy('shoot_date_time', 'asc')
+            ->with(['user', 'media'])
+            ->first();
+
+        $castingRequirements = CastingRequirement::with(['user', 'media'])->get();
+
+        return view('admin.castingRequirements.progress', compact('castingRequirements', 'project'));
+    }
+
     public function create()
     {
         abort_if(Gate::denies('casting_requirement_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
