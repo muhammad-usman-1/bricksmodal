@@ -66,6 +66,14 @@
             $modelInputs = [$defaultModel];
         }
     }
+    
+    if (!function_exists('numberToWord')) {
+        function numberToWord($num) {
+            $words = [0 => 'Zero', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six', 7 => 'Seven', 8 => 'Eight', 9 => 'Nine', 10 => 'Ten'];
+            return $words[$num] ?? $num;
+        }
+    }
+
 
     $outfitImageMap = [];
     foreach($outfits as $cat => $items) {
@@ -82,7 +90,7 @@
 <div class="shoot-page">
     <div class="shoot-header">
         <div>
-            <div class="shoot-title">Create New Shoot</div>
+            <div class="shoot-title1">Create New Shoot</div>
             <div class="shoot-subtitle">Configure details and model requirements.</div>
         </div>
         <a href="{{ route('admin.projects.dashboard') }}" class="shoot-back">Back to Shoots</a>
@@ -226,7 +234,10 @@
 
                 <div data-model-requirements data-next-index="{{ count($modelInputs) }}">
                     @foreach($modelInputs as $index => $model)
-                        @php $modelLabel = $model['title'] ?? 'Model ' . ($loop->iteration); @endphp
+                        @php 
+                            $wordIndex = numberToWord($loop->iteration);
+                            $modelLabel = $model['title'] ?: 'Model ' . $wordIndex; 
+                        @endphp
                         <div class="model-spec-card" data-model-card>
                             <div class="model-card-head">
                                 <div class="model-name">{{ $modelLabel }}</div>
@@ -467,7 +478,7 @@
             <template id="modelRequirementTemplate">
                 <div class="model-spec-card" data-model-card>
                     <div class="model-card-head">
-                        <div class="model-name">New Model</div>
+                        <div class="model-name">Model __INDEX_DISPLAY__</div>
                         <div class="model-actions">
                             <button type="button" class="icon-btn" data-duplicate-model title="Duplicate"><i class="fas fa-copy"></i></button>
                             <button type="button" class="icon-btn danger" data-remove-model title="Remove"><i class="fas fa-trash"></i></button>

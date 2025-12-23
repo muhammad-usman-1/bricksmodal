@@ -4,20 +4,21 @@
 <style>
     .shoot-page { background: #f7f8fc; padding: 10px 0 22px; }
     .shoot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .shoot-title { color: #101828; font-size: 16px; font-weight: 600; line-height: 1.4; font-size: 25px; }
+    .shoot-title1 { color: #101828; font-size: 24px; font-weight: 400; line-height: 30px; }
+    .shoot-title { color: #101828; font-size: 20px; font-weight: 400; line-height: 30px; }
     .shoot-subtitle { color: #6c7280; font-size: 12px; margin-top: 2px; }
     .shoot-back { border: 1px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; display: inline-flex; align-items: center; }
     .shoot-back:hover { background: #f8f9fa; color: #3b4150; border-color: #c0c4cc; text-decoration: none !important; }
 
     .shoot-stepper { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; padding: 10px 0; }
-    .stepper-node { width: 44px; height: 44px; border-radius: 50%; border: 2.5px solid #2C2C2E; background: #2C2C2E; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; position: relative; transition: all 0.3s ease; }
-    .stepper-node.done { background: #2C2C2E; border-color: #2C2C2E; color: #fff; }
+    .stepper-node { width: 44px; height: 44px; border-radius: 50%; border: 2.5px solid #e9ecef; background: #e9ecef; color: #495057; display: grid; place-items: center; font-weight: 700; font-size: 15px; position: relative; transition: all 0.3s ease; }
+    .stepper-node.done { background: #0f1014; border-color: #0f1014; color: #fff; }
     .stepper-node.done span { display: none; }
     .stepper-node.done::after { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; font-size: 18px; color: #fff; }
-    .stepper-node.active { background: #2C2C2E; border-color: #2C2C2E; color: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
-    .stepper-node:not(.active):not(.done) { background: #2C2C2E; border-color: #2C2C2E; color: #fff; opacity: 0.9; }
-    .stepper-line { width: 100px; height: 2.5px; background: #2C2C2E; flex: none; border-radius: 4px; }
-    .stepper-line:not(.active):not(.done) { opacity: 0.8; }
+    .stepper-node.active { background: #0f1014; border-color: #0f1014; color: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+    .stepper-node:not(.active):not(.done) { background: #e9ecef; border-color: #e9ecef; color: #495057; opacity: 1; }
+    .stepper-line { width: 100px; height: 2.5px; background: #e9ecef; flex: none; border-radius: 4px; }
+    .stepper-line.active, .stepper-line.done { background: #0f1014; }
 
     .shoot-builder { background: transparent; padding: 0; border-radius: 0; box-shadow: none; }
     .shoot-steps { position: relative; }
@@ -50,13 +51,12 @@
     .duration-value.is-invalid { border-color: #dc3545; box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.25); }
     .duration-unit { color: #a8adb5; font-size: 12px; font-weight: 600; }
 
-    .step2-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .step2-head { margin-left: 40px;display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .add-model-btn { background: #0f1014; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
 
-    .model-spec-card { background: #fff; border: 1px solid #e4e7ed; border-radius: 12px; padding: 14px 16px; box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06); margin-bottom: 12px; }
-    .model-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .model-name { font-weight: 600; color: #0f1524; font-size: 13px; }
-    .model-actions { display: inline-flex; align-items: center; gap: 8px; }
+    .model-spec-card {margin-left: 40px; margin-right: 40px; background: #fff; border: 1px solid #e4e7ed; border-left: 4px solid #000; border-radius: 12px; padding: 14px 16px; box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06); margin-bottom: 12px; position: relative; }
+    .model-name { margin-bottom: 15px; font-weight: 600; color: #0f1524; font-size: 13px; text-transform: capitalize; }
+    .model-actions { position: absolute; top: 14px; right: 16px; display: inline-flex; align-items: center; gap: 8px; }
     .icon-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #e1e3e8; background: #fff; color: #5f6470; display: grid; place-items: center; font-size: 12px; padding: 0; }
     .icon-btn.danger { color: #c53030; }
     .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -74,7 +74,7 @@
     .drop-title { font-size: 12px; color: #3b4150; font-weight: 600; }
     .drop-sub { font-size: 11px; color: #8a8f9b; }
 
-    .model-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); }
+    .model-card {  border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); }
 
     .shoot-builder__footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }
     .footer-back { border: 1.5px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; }
@@ -600,13 +600,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let nextIndex = parseInt(modelsContainer.getAttribute('data-next-index'), 10) || modelsContainer.querySelectorAll('[data-model-card]').length;
 
+    const numberToWord = (num) => {
+        const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+        return words[num] || num;
+    };
+
     const createModelCard = (index) => {
         const wrapper = document.createElement('div');
         const displayIndex = index + 1;
-        wrapper.innerHTML = template.innerHTML
+        const displayWord = numberToWord(displayIndex);
+        
+        // Use regex to replace Model __INDEX_DISPLAY__ with Model One/Two etc
+        let html = template.innerHTML
             .replace(/__INDEX__/g, index)
-            .replace(/__INDEX_DISPLAY__/g, displayIndex)
+            .replace(/Model __INDEX_DISPLAY__/g, `Model ${displayWord}`)
+            // Fallback for strict numbers if needed elsewhere
+            .replace(/__INDEX_DISPLAY__/g, displayIndex) 
             .trim();
+            
+        wrapper.innerHTML = html;
         return wrapper.firstElementChild;
     };
 
