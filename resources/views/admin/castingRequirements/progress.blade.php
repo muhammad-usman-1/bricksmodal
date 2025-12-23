@@ -120,30 +120,43 @@
     .sh-map-container {
         flex: 0 0 450px;
         background: #f1f5f9;
-        border-radius: 16px;
+        border-radius: 20px;
         position: relative;
         overflow: hidden;
         min-height: 200px;
+        border: 1px solid var(--border);
     }
-    /* Placeholder map styling to match image look */
-    .sh-map-bg {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.8;
+    .sh-map-container iframe {
+        filter: grayscale(0.5) contrast(1.1) brightness(1.05);
+        transition: filter 0.3s ease;
+    }
+    .sh-map-container:hover iframe {
+        filter: grayscale(0);
     }
     .sh-map-btn {
         position: absolute;
         bottom: 16px;
         right: 16px;
-        background: #0f172a;
+        background: #1e1e1e;
         color: #fff;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
         border: none;
         cursor: pointer;
+        text-decoration: none !important;
+        z-index: 10;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+    .sh-map-btn:hover {
+        background: #000;
+        transform: translateY(-1px);
+        color: #fff !important;
     }
 
     /* Progress Stepper Card */
@@ -429,6 +442,9 @@
                     src="https://maps.google.com/maps?q={{ urlencode($location) }}&t=&z=13&ie=UTF8&iwloc=&output=embed"
                     allowfullscreen>
                 </iframe>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($location) }}" target="_blank" class="sh-map-btn">
+                    Open Google Maps
+                </a>
                 @else
                 <div style="display:grid; place-items:center; height:100%; background:#f1f5f9; color:#94a3b8;">
                     No Location Set
