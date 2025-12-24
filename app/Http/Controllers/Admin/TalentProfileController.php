@@ -45,6 +45,11 @@ class TalentProfileController extends Controller
         $data = $request->all();
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
 
+        // Safeguard: Ensure daily_rate travels with a value if missing from form
+        if (!isset($data['daily_rate']) || is_null($data['daily_rate'])) {
+            $data['daily_rate'] = 0;
+        }
+
         if ($request->boolean('skip_setup')) {
             $data['verification_status'] = 'approved';
             $data['onboarding_step'] = 'completed';
@@ -54,7 +59,7 @@ class TalentProfileController extends Controller
         $talentProfile = TalentProfile::create($data);
         $talentProfile->languages()->sync($request->input('languages', []));
 
-        return redirect()->route('admin.talent-profiles.index');
+        return redirect()->route('admin.talents.dashboard');
     }
 
     public function edit(TalentProfile $talentProfile)
