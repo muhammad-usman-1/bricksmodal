@@ -10,7 +10,7 @@ class KwtSmsService
     protected $username;
     protected $password;
     protected $sender;
-    protected $apiUrl = 'https://www.kwtsms.com/API/send/';
+    protected $apiUrl = 'https://kwtsms.com/API/send/';
 
     public function __construct()
     {
@@ -35,7 +35,7 @@ class KwtSmsService
         $message = "Dear Bricks Community User, Here is your OTP: {$otp}. DO NOT DISCLOSE THIS OTP to anyone!  {$timestamp}";
         try {
             // Send GET request with query parameters
-            $response = Http::timeout(10)->get($this->apiUrl, [
+            $response = Http::timeout(30)->withoutVerifying()->get($this->apiUrl, [
                 'username' => $this->username,
                 'password' => $this->password,
                 'sender' => $this->sender,
