@@ -13,7 +13,7 @@
         }
 
         .pay-shell {
-            padding: 24px 0;
+            padding: 22px 0;
             font-family: 'Outfit', sans-serif;
         }
 

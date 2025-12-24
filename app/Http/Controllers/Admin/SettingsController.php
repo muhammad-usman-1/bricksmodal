@@ -12,7 +12,7 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('system_settings_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $settings = AdminSetting::singleton();
 
@@ -21,7 +21,7 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
-        abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('system_settings_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $validated = $request->validate([
             'email_notifications' => ['sometimes', 'boolean'],

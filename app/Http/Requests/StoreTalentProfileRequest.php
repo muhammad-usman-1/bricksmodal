@@ -31,7 +31,7 @@ class StoreTalentProfileRequest extends FormRequest
                 'integer',
             ],
             'languages' => [
-                'required',
+                'nullable',
                 'array',
             ],
             'verification_notes' => [
@@ -44,7 +44,7 @@ class StoreTalentProfileRequest extends FormRequest
             ],
             'daily_rate' => [
                 'numeric',
-                'required',
+                'nullable',
             ],
             'hourly_rate' => [
                 'numeric',
@@ -98,8 +98,12 @@ class StoreTalentProfileRequest extends FormRequest
                 'regex:/^\\+?[0-9\\s\\-()]{7,20}$/',
             ],
             'user_id' => [
-                'required',
+                'nullable',
                 'integer',
+            ],
+            'skip_setup' => [
+                'boolean',
+                'nullable',
             ],
         ];
     }

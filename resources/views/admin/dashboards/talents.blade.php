@@ -78,6 +78,39 @@ line-height: 36px; /* 150% */}
         .talent-card { height: 280px; }
         .card-overlay { height: 110px; }
     }
+
+    .talents-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-bottom: 10px;
+    }
+
+    .add-talent-btn {
+        background: #0f172a;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 10px 20px rgba(15,23,42,0.15);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .add-talent-btn:hover {
+        background: #1e293b;
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .add-talent-btn i {
+        font-size: 16px;
+    }
 </style>
 
 @php
@@ -176,6 +209,13 @@ line-height: 36px; /* 150% */}
             @endforeach
         </div>
     @endif
+
+    <div class="talents-footer">
+        <a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn">
+            <i class="fas fa-plus"></i>
+            Add Talent
+        </a>
+    </div>
 </div>
 
 <script>

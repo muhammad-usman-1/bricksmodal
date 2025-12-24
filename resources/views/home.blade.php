@@ -154,6 +154,7 @@ line-height: 36px;
         border-radius: 16px;
         box-shadow: var(--shadow);
         overflow: hidden;
+        margin-bottom: 8px;
     }
 
     .panel-head {

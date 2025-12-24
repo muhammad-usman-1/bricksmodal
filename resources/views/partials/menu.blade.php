@@ -253,6 +253,22 @@
         }
         .bm-sub-link:hover { color: #000; text-decoration-color: #000; }
 
+        /* Sidebar Width Reduction */
+        #sidebar.c-sidebar {
+            width: 220px !important;
+            flex: 0 0 220px !important;
+        }
+
+        .c-sidebar-fixed.c-sidebar-lg-show:not(.c-sidebar-minimized) ~ .c-wrapper {
+            margin-left: 220px !important;
+        }
+
+        /* Adjust brand and footer to new width */
+        .bm-sidebar {
+            width: 100%;
+            padding: 18px 10px; /* Reduced side padding slightly */
+        }
+
     </style>
 
     <div class="bm-sidebar">

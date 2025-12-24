@@ -12,7 +12,7 @@ class EmailTemplateController extends Controller
 {
     public function index()
     {
-        abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('email_template_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $templates = EmailTemplate::all();
 
@@ -21,14 +21,14 @@ class EmailTemplateController extends Controller
 
     public function edit(EmailTemplate $emailTemplate)
     {
-        abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('email_template_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.settings.email-templates.edit', compact('emailTemplate'));
     }
 
     public function update(Request $request, EmailTemplate $emailTemplate)
     {
-        abort_if(Gate::denies('user_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('email_template_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $data = $request->validate([
             'subject' => ['required', 'string', 'max:255'],

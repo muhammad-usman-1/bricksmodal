@@ -2,7 +2,7 @@
 @section('content')
 <style>
     .privacy-shell { padding: 16px 8px 28px; background: #f7f9fb; }
-    .privacy-frame { max-width: 720px; margin: 0 auto; }
+    .privacy-frame { max-width: 880px; margin: 0 auto; }
     .privacy-card { background: #fff; border: 1px solid #e8ebef; border-radius: 14px; box-shadow: 0 12px 28px rgba(15,23,42,0.08); padding: 16px 18px 18px; }
     .privacy-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .privacy-title { font-weight: 700; color: #111827; margin: 0; font-size: 15px; }
@@ -20,12 +20,14 @@
     .input-wrap .eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 12px; }
     .helper { font-size: 11px; color: #9ca3af; margin-top: -4px; }
     .btn-update { width: 100%; border: none; border-radius: 8px; padding: 11px; font-size: 12px; font-weight: 600; color: #fff; background: linear-gradient(90deg, #0d0d0f, #1c1d21); box-shadow: 0 10px 22px rgba(0,0,0,0.16); margin-top: 6px; }
-    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #4b5563; font-size: 12px; text-decoration: none; margin-bottom: 10px; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: #0f172a; font-size: 13px; text-decoration: none !important; margin-bottom: 12px; font-weight: 500; cursor: pointer; transition: none; }
+    .back-link:hover { color: #0f172a !important; text-decoration: none !important; }
+    .back-link i { font-size: 11px; }
 </style>
 
 <div class="privacy-shell">
     <div class="privacy-frame">
-        <a href="{{ url()->previous() }}" class="back-link"><i class="fas fa-arrow-left"></i> Privacy & Security</a>
+        <a onclick="window.history.back()" class="back-link"><i class="fas fa-chevron-left"></i> Privacy & Security</a>
         <div class="privacy-card">
             <div class="section-row">
                 <div class="section-icon"><i class="fas fa-key"></i></div>

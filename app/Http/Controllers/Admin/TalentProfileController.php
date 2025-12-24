@@ -45,6 +45,12 @@ class TalentProfileController extends Controller
         $data = $request->all();
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
 
+        if ($request->boolean('skip_setup')) {
+            $data['verification_status'] = 'approved';
+            $data['onboarding_step'] = 'completed';
+            $data['onboarding_completed_at'] = now();
+        }
+
         $talentProfile = TalentProfile::create($data);
         $talentProfile->languages()->sync($request->input('languages', []));
 
