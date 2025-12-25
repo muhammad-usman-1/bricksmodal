@@ -26,14 +26,24 @@ class LoginController extends Controller
         ]);
 
         // Find or create talent user by phone
-        $user = User::firstOrCreate([
-            'phone_country_code' => $data['phone_country_code'],
-            'phone_number'       => $data['phone_number'],
-            'type'               => User::TYPE_TALENT,
-        ], [
-            'name'  => null,
-            'email' => null,
-        ]);
+        // Since phone_number has a unique constraint, we check by phone_number first
+        $user = User::where('phone_number', $data['phone_number'])->first();
+
+        if ($user) {
+            // User exists - update country code and type, but preserve name/email
+            $user->phone_country_code = $data['phone_country_code'];
+            $user->type = User::TYPE_TALENT;
+            $user->save();
+        } else {
+            // User doesn't exist - create new talent user
+            $user = User::create([
+                'phone_country_code' => $data['phone_country_code'],
+                'phone_number'       => $data['phone_number'],
+                'type'               => User::TYPE_TALENT,
+                'name'               => null,
+                'email'              => null,
+            ]);
+        }
 
         // Generate a random 4-digit OTP
         $otp = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
