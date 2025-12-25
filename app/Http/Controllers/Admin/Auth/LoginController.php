@@ -9,6 +9,7 @@ use App\Notifications\AdminAccountCreated;
 use App\Notifications\NewAdminGoogleLogin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
@@ -27,30 +28,64 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        // First, check if user exists with admin type
+        $user = User::where('email', $credentials['email'])
+            ->where('type', User::TYPE_ADMIN)
+            ->first();
+
+        if (!$user) {
+            // User doesn't exist or is not an admin - clear any existing session
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => ['These credentials do not exist in our records.'],
+            ]);
+        }
+
+        // Verify password manually before attempting authentication
+        if (!Hash::check($credentials['password'], $user->password)) {
+            // Invalid password - clear any existing session
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => ['Invalid credentials. Please check your email and password.'],
+            ]);
+        }
+
+        // Password is correct, now attempt authentication with type constraint
         $credentials['type'] = User::TYPE_ADMIN;
 
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::guard('admin')->user();
-            
+
             // Check if 2FA is enabled
             if ($user->hasTwoFactorEnabled()) {
                 // Store user ID and intended URL in session, then logout
                 $request->session()->put('login.id', $user->id);
                 $request->session()->put('login.remember', $request->boolean('remember'));
                 $request->session()->put('url.intended', $request->session()->pull('url.intended', route('admin.home')));
-                
+
                 Auth::guard('admin')->logout();
-                
+
                 return redirect()->route('admin.login.2fa');
             }
-            
+
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.home'));
         }
 
+        // Fallback error (should not reach here, but just in case)
+        Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         throw ValidationException::withMessages([
-            'email' => [trans('auth.failed')],
+            'email' => ['Invalid credentials. Please check your email and password.'],
         ]);
     }
 
@@ -76,13 +111,13 @@ class LoginController extends Controller
         ]);
 
         $userId = session('login.id');
-        
+
         if (!$userId) {
             return redirect()->route('admin.login')->withErrors(['code' => 'Session expired. Please login again.']);
         }
 
         $user = User::find($userId);
-        
+
         if (!$user || !$user->hasTwoFactorEnabled()) {
             session()->forget(['login.id', 'login.remember', 'url.intended']);
             return redirect()->route('admin.login')->withErrors(['code' => 'Invalid session. Please login again.']);
@@ -99,9 +134,9 @@ class LoginController extends Controller
         // Code is valid, complete the login
         $remember = session('login.remember', false);
         $intended = session('url.intended', route('admin.home'));
-        
+
         session()->forget(['login.id', 'login.remember', 'url.intended']);
-        
+
         Auth::guard('admin')->login($user, $remember);
         $request->session()->regenerate();
 
@@ -157,7 +192,7 @@ class LoginController extends Controller
                 session()->put('login.id', $user->id);
                 session()->put('login.remember', false);
                 session()->put('url.intended', route('admin.home'));
-                
+
                 return redirect()->route('admin.login.2fa');
             }
 
