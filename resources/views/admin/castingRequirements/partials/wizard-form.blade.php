@@ -67,7 +67,7 @@
             $modelInputs = [$defaultModel];
         }
     }
-    
+
     if (!function_exists('numberToWord')) {
         function numberToWord($num) {
             $words = [0 => 'Zero', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six', 7 => 'Seven', 8 => 'Eight', 9 => 'Nine', 10 => 'Ten'];
@@ -137,11 +137,13 @@
                         </div>
 
                         <div class="field-block">
-                            <label for="instagram_url">Instagram url (Brand link)</label>
-                            <div class="dark-input has-pill">
-                                <input type="text" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://www.instagram.com/lowclub.studio/">
-
+                            <label for="description">Description</label>
+                            <div class="dark-input">
+                                <input class="{{ $errors->has('description') ? 'is-invalid' : '' }}" type="text" name="description" id="description" value="{{ old('description', $castingRequirement->description ?? '') }}" placeholder="Enter description...">
                             </div>
+                            @if($errors->has('description'))
+                                <div class="invalid-feedback d-block">{{ $errors->first('description') }}</div>
+                            @endif
                         </div>
                     </div>
 
@@ -235,9 +237,9 @@
 
                 <div data-model-requirements data-next-index="{{ count($modelInputs) }}">
                     @foreach($modelInputs as $index => $model)
-                        @php 
+                        @php
                             $wordIndex = numberToWord($loop->iteration);
-                            $modelLabel = $model['title'] ?: 'Model ' . $wordIndex; 
+                            $modelLabel = $model['title'] ?: 'Model ' . $wordIndex;
                         @endphp
                         <div class="model-spec-card" data-model-card>
                             <div class="model-card-head">

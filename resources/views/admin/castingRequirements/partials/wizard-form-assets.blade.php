@@ -36,8 +36,11 @@
     .field-block label { font-size: 12px; color: #101828; font-weight: 700; margin: 0; }
     .shoot-page label { font-weight: 700; }
     .dark-input { background: #0f0f11; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
+    .dark-input.has-textarea { align-items: flex-start; padding: 10px; }
     .dark-input input { background: transparent; border: none; color: #f7f7f7; width: 100%; font-size: 12px; padding: 4px 0; outline: none; }
     .dark-input input::placeholder { color: #a8adb5; }
+    .dark-input textarea { background: transparent; border: none; color: #f7f7f7; width: 100%; font-size: 12px; padding: 0; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
+    .dark-input textarea::placeholder { color: #a8adb5; }
     .dark-input.has-icon .input-icon { color: #a8adb5; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .dark-input.has-pill { padding-right: 42px; }
     .input-pill { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 999px; background: #0f9f4f; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
@@ -168,6 +171,7 @@
     .dark-input input:-webkit-autofill,
     .dark-input input:-webkit-autofill:hover,
     .dark-input input:-webkit-autofill:focus { background: transparent !important; -webkit-text-fill-color: #f7f7f7; box-shadow: 0 0 0px 1000px #0f0f11 inset !important; caret-color: #f7f7f7; }
+    .dark-input textarea { caret-color: #f7f7f7; }
 
     .label-multiselect {
         position: relative;
