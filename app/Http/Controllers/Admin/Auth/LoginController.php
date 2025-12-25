@@ -23,70 +23,102 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // Clear any existing session before starting login process
+        Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // First, check if user exists with admin type
-        $user = User::where('email', $credentials['email'])
-            ->where('type', User::TYPE_ADMIN)
-            ->first();
+        // First, check if user exists
+        $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
-            // User doesn't exist or is not an admin - clear any existing session
-            Auth::guard('admin')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
+            // User doesn't exist - ensure no session is created
             throw ValidationException::withMessages([
                 'email' => ['These credentials do not exist in our records.'],
             ]);
         }
 
+        // Check if user is admin (by type or by role)
+        // If type is missing but user has admin role, restore the type
+        if (!$user->type || $user->type !== User::TYPE_ADMIN) {
+            // Check if user has admin role
+            if ($user->isAdmin() || $user->isSuperAdmin()) {
+                // Restore the type field if user has admin role
+                $user->type = User::TYPE_ADMIN;
+                $user->save();
+            } else {
+                // User doesn't have admin role - ensure no session is created
+                throw ValidationException::withMessages([
+                    'email' => ['These credentials do not exist in our records.'],
+                ]);
+            }
+        }
+
         // Verify password manually before attempting authentication
         if (!Hash::check($credentials['password'], $user->password)) {
-            // Invalid password - clear any existing session
-            Auth::guard('admin')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
+            // Invalid password - ensure no session is created
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials. Please check your email and password.'],
             ]);
         }
 
-        // Password is correct, now attempt authentication with type constraint
-        $credentials['type'] = User::TYPE_ADMIN;
+        // All validations passed - now attempt authentication
+        // Only create session if authentication succeeds
+        try {
+            // Use login() method directly instead of attempt() to have more control
+            // This ensures we only create session when we explicitly call login()
+            Auth::guard('admin')->login($user, $request->boolean('remember'));
 
-        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
-            $user = Auth::guard('admin')->user();
+            // Verify the authenticated user (double check)
+            $authenticatedUser = Auth::guard('admin')->user();
 
-            // Check if 2FA is enabled
-            if ($user->hasTwoFactorEnabled()) {
-                // Store user ID and intended URL in session, then logout
-                $request->session()->put('login.id', $user->id);
-                $request->session()->put('login.remember', $request->boolean('remember'));
-                $request->session()->put('url.intended', $request->session()->pull('url.intended', route('admin.home')));
-
+            if (!$authenticatedUser || $authenticatedUser->id !== $user->id) {
+                // Something went wrong - clear any partial session
                 Auth::guard('admin')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-                return redirect()->route('admin.login.2fa');
+                throw ValidationException::withMessages([
+                    'email' => ['Authentication failed. Please try again.'],
+                ]);
+            }
+        } catch (\Exception $e) {
+            // If anything goes wrong during login, ensure no session is left
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // Re-throw the exception if it's a ValidationException, otherwise throw a generic one
+            if ($e instanceof ValidationException) {
+                throw $e;
             }
 
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('admin.home'));
+            throw ValidationException::withMessages([
+                'email' => ['Authentication failed. Please try again.'],
+            ]);
         }
 
-        // Fallback error (should not reach here, but just in case)
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Check if 2FA is enabled
+        if ($authenticatedUser->hasTwoFactorEnabled()) {
+            // Store user ID and intended URL in session, then logout
+            $request->session()->put('login.id', $authenticatedUser->id);
+            $request->session()->put('login.remember', $request->boolean('remember'));
+            $request->session()->put('url.intended', $request->session()->pull('url.intended', route('admin.home')));
 
-        throw ValidationException::withMessages([
-            'email' => ['Invalid credentials. Please check your email and password.'],
-        ]);
+            Auth::guard('admin')->logout();
+
+            return redirect()->route('admin.login.2fa');
+        }
+
+        // Success - regenerate session for security
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('admin.home'));
     }
 
     /**
@@ -163,7 +195,7 @@ class LoginController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            $user = User::where('email', $googleUser->email)->where('type', User::TYPE_ADMIN)->first();
+            $user = User::where('email', $googleUser->email)->first();
 
             if (! $user) {
                 $creativeRoleId = Role::where('title', 'creative')->value('id');
@@ -180,6 +212,16 @@ class LoginController extends Controller
                 }
 
                 $user->notify(new AdminAccountCreated($user));
+            } else {
+                // Ensure user has admin type if they have admin role
+                if (!$user->type || $user->type !== User::TYPE_ADMIN) {
+                    if ($user->isAdmin() || $user->isSuperAdmin()) {
+                        $user->type = User::TYPE_ADMIN;
+                        $user->save();
+                    } else {
+                        return redirect()->route('admin.login')->withErrors(['google' => 'This account does not have admin access.']);
+                    }
+                }
             }
 
             if ($user->isSuperAdmin()) {

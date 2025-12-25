@@ -145,13 +145,17 @@
                     @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
                         <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
                            href="{{ route('admin.notifications.show', $notification->id) }}">
-                            @if($notification->data['type'] === 'talent_profile')
+                            @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
                                 <i class="fas fa-user text-info"></i>
-                            @else
+                            @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
                                 <i class="fas fa-video text-warning"></i>
+                            @else
+                                <i class="fas fa-bell text-secondary"></i>
                             @endif
-                            {{ $notification->data['title'] }}
-                            <div class="small text-muted">{{ $notification->data['message'] }}</div>
+                            {{ $notification->data['title'] ?? 'Notification' }}
+                            @if(isset($notification->data['message']))
+                                <div class="small text-muted">{{ $notification->data['message'] }}</div>
+                            @endif
                             <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
                         </a>
                     @empty

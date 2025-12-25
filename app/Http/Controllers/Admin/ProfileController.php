@@ -20,6 +20,10 @@ class ProfileController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
+        if (!$admin) {
+            return back()->withErrors(['error' => 'User not authenticated.']);
+        }
+
         $data = $request->validate([
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
@@ -36,6 +40,15 @@ class ProfileController extends Controller
 
         // Keep legacy name column in sync for initials and other uses
         $data['name'] = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')) ?: $admin->name;
+
+        // Preserve critical fields that should not be changed during profile update
+        if (!$admin->type) {
+            $data['type'] = \App\Models\User::TYPE_ADMIN;
+        }
+        // Preserve is_super_admin status
+        if ($admin->is_super_admin) {
+            $data['is_super_admin'] = true;
+        }
 
         if ($request->hasFile('profile_photo')) {
             if ($admin->profile_photo_path) {

@@ -27,14 +27,18 @@
                     @forelse($notifications as $notification)
                         <tr class="{{ $notification->read_at ? '' : 'table-info' }}">
                             <td>
-                                @if($notification->data['type'] === 'talent_profile')
+                                @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
                                     <i class="fas fa-user text-info"></i> Talent Profile
-                                @else
+                                @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
                                     <i class="fas fa-video text-warning"></i> Casting Application
+                                @elseif(isset($notification->data['type']) && $notification->data['type'] === 'payment_requested')
+                                    <i class="fas fa-dollar-sign text-success"></i> Payment Request
+                                @else
+                                    <i class="fas fa-bell text-secondary"></i> Notification
                                 @endif
                             </td>
-                            <td>{{ $notification->data['title'] }}</td>
-                            <td>{{ $notification->data['message'] }}</td>
+                            <td>{{ $notification->data['title'] ?? 'Notification' }}</td>
+                            <td>{{ $notification->data['message'] ?? '-' }}</td>
                             <td>{{ $notification->created_at->diffForHumans() }}</td>
                             <td>
                                 @if($notification->read_at)
