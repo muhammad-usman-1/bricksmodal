@@ -30,63 +30,153 @@ class KwtSmsService
     {
         // Clean mobile number - remove spaces, dashes, plus signs
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
+
+        // Validate mobile number format
+        if (empty($mobile) || strlen($mobile) < 8) {
+            Log::error('KWT SMS Invalid Mobile Number', [
+                'mobile' => $mobile,
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Invalid mobile number format',
+                'response' => null,
+            ];
+        }
+
         $timestamp = now()->format('Y-m-d H:i:s');
         // Build the message
         $message = "Dear Bricks Community User, Here is your OTP: {$otp}. DO NOT DISCLOSE THIS OTP to anyone!  {$timestamp}";
-        try {
-            // Send GET request with query parameters
-            $response = Http::timeout(30)->withoutVerifying()->get($this->apiUrl, [
-                'username' => $this->username,
-                'password' => $this->password,
-                'sender' => $this->sender,
-                'mobile' => $mobile,
-                'lang' => '1', // 1 for English, 2 for Arabic
-                'message' => $message,
-            ]);
 
-            $responseBody = $response->body();
-            $statusCode = $response->status();
+        // For Kuwait numbers (starting with 965), try full format first (works for KWT SMS API)
+        $formatsToTry = [];
+        if (strlen($mobile) >= 11 && substr($mobile, 0, 3) === '965') {
+            // Kuwait number: try full format first (with country code) - this works for KWT SMS API
+            $formatsToTry[] = ['format' => $mobile, 'type' => 'full (with country code)'];
+            // Fallback: try local format (without country code) if full format fails
+            $localNumber = substr($mobile, 3);
+            // Remove leading zero if present (Kuwait numbers sometimes have leading 0)
+            if (substr($localNumber, 0, 1) === '0') {
+                $localNumber = substr($localNumber, 1);
+            }
+            $formatsToTry[] = ['format' => $localNumber, 'type' => 'local (without country code)'];
+        } else {
+            // For other numbers, try as-is first
+            $formatsToTry[] = ['format' => $mobile, 'type' => 'original'];
+        }
 
-            Log::info('KWT SMS API Response', [
-                'mobile' => $mobile,
-                'status' => $statusCode,
-                'response' => $responseBody,
-            ]);
+        $lastError = null;
+        foreach ($formatsToTry as $formatInfo) {
+            $mobileToTry = $formatInfo['format'];
 
-            // Check if request was successful
-            if ($response->successful()) {
-                // KWT SMS typically returns success messages
-                // You may need to adjust this based on actual API response format
-                return [
-                    'success' => true,
-                    'message' => 'OTP sent successfully',
-                    'response' => $responseBody,
-                ];
-            } else {
-                Log::error('KWT SMS API Error', [
-                    'mobile' => $mobile,
+            try {
+                // Send GET request with query parameters
+                $response = Http::timeout(30)->withoutVerifying()->get($this->apiUrl, [
+                    'username' => $this->username,
+                    'password' => $this->password,
+                    'sender' => $this->sender,
+                    'mobile' => $mobileToTry,
+                    'lang' => '1', // 1 for English, 2 for Arabic
+                    'message' => $message,
+                ]);
+
+                $responseBody = trim($response->body());
+                $statusCode = $response->status();
+
+                Log::info('KWT SMS API Response', [
+                    'mobile' => $mobileToTry,
+                    'format_type' => $formatInfo['type'],
                     'status' => $statusCode,
                     'response' => $responseBody,
                 ]);
 
-                return [
-                    'success' => false,
-                    'message' => 'Failed to send OTP',
-                    'response' => $responseBody,
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::error('KWT SMS Exception', [
-                'mobile' => $mobile,
-                'error' => $e->getMessage(),
-            ]);
+                // Check response body for error messages (API may return 200 with error in body)
+                $isError = false;
+                $isAccountError = false; // Account/balance errors that won't be fixed by trying different formats
 
-            return [
-                'success' => false,
-                'message' => 'Error sending OTP: ' . $e->getMessage(),
-                'response' => null,
-            ];
+                if (stripos($responseBody, 'ERR') !== false ||
+                    stripos($responseBody, 'error') !== false ||
+                    stripos($responseBody, 'invalid') !== false ||
+                    stripos($responseBody, 'failed') !== false ||
+                    stripos($responseBody, 'No valid numbers') !== false) {
+                    $isError = true;
+                }
+
+                // Check for account/balance errors - these won't be fixed by trying different formats
+                if (stripos($responseBody, 'ERR010') !== false ||
+                    stripos($responseBody, 'no balance') !== false ||
+                    stripos($responseBody, 'insufficient') !== false ||
+                    stripos($responseBody, 'account') !== false && stripos($responseBody, 'balance') !== false) {
+                    $isAccountError = true;
+                    $isError = true;
+                }
+
+                // Check if request was successful (HTTP 200-299 and no error in body)
+                if ($response->successful() && !$isError) {
+                    Log::info('KWT SMS Success', [
+                        'mobile' => $mobileToTry,
+                        'format_type' => $formatInfo['type'],
+                        'response' => $responseBody,
+                    ]);
+                    return [
+                        'success' => true,
+                        'message' => 'OTP sent successfully',
+                        'response' => $responseBody,
+                    ];
+                } else {
+                    // Store error
+                    $lastError = [
+                        'mobile' => $mobileToTry,
+                        'format_type' => $formatInfo['type'],
+                        'status' => $statusCode,
+                        'response' => $responseBody,
+                    ];
+
+                    // If it's an account/balance error, stop trying other formats (won't help)
+                    if ($isAccountError) {
+                        Log::error('KWT SMS Account/Balance Error - Stopping format attempts', $lastError);
+                        break; // Exit the loop, no point trying other formats
+                    } else {
+                        // Format error - continue to next format
+                        Log::warning('KWT SMS Format failed, trying next format', $lastError);
+                    }
+                }
+            } catch (\Exception $e) {
+                $lastError = [
+                    'mobile' => $mobileToTry,
+                    'format_type' => $formatInfo['type'],
+                    'error' => $e->getMessage(),
+                ];
+                Log::warning('KWT SMS Exception, trying next format', $lastError);
+            }
         }
+
+        // All formats failed or account error occurred
+        $errorResponse = $lastError['response'] ?? $lastError['error'] ?? 'Unknown error';
+        $isAccountError = isset($lastError['response']) && (
+            stripos($lastError['response'], 'ERR010') !== false ||
+            stripos($lastError['response'], 'no balance') !== false ||
+            stripos($lastError['response'], 'insufficient') !== false
+        );
+
+        if ($isAccountError) {
+            Log::error('KWT SMS API Error - Account/Balance Issue', [
+                'original_mobile' => $mobile,
+                'last_error' => $lastError,
+            ]);
+            $errorMessage = 'SMS service temporarily unavailable. Please contact support or try again later.';
+        } else {
+            Log::error('KWT SMS API Error - All formats failed', [
+                'original_mobile' => $mobile,
+                'last_error' => $lastError,
+            ]);
+            $errorMessage = 'Failed to send OTP: ' . $errorResponse;
+        }
+
+        return [
+            'success' => false,
+            'message' => $errorMessage,
+            'response' => $errorResponse,
+        ];
     }
 
     /**
@@ -105,6 +195,7 @@ class KwtSmsService
         return $countryCode . $phoneNumber;
     }
 }
+
 
 
 

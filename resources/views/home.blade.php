@@ -236,6 +236,12 @@ line-height: 36px;
         font-weight: 700;
         color: var(--ink-900);
         margin: 0;
+        display: inline-block;
+        transition: color 0.2s ease;
+    }
+    .talent-name:hover {
+        color: #3b82f6;
+        text-decoration: underline;
     }
 
     .talent-email {
@@ -331,6 +337,14 @@ line-height: 36px;
         .topbar { flex-wrap: wrap; }
         .icon-row { width: 100%; justify-content: flex-end; }
         table.talent-table th, table.talent-table td { white-space: nowrap; }
+    }
+
+    /* Dark theme support */
+    html[data-theme="dark"] .talent-name {
+        color: #f3f4f6;
+    }
+    html[data-theme="dark"] .talent-name:hover {
+        color: #60a5fa;
     }
 </style>
 
@@ -435,7 +449,17 @@ line-height: 36px;
                         @forelse($talentRows as $talent)
                             @php
                                 $name = optional($talent->user)->name ?? ($talent->display_name ?? $talent->legal_name ?? '—');
-                                $email = optional($talent->user)->email ?? '';
+                                $user = $talent->user ?? null;
+                                $phoneNumber = '';
+                                if ($user) {
+                                    $countryCode = $user->phone_country_code ?? '';
+                                    $phone = $user->phone_number ?? '';
+                                    if ($countryCode && $phone) {
+                                        $phoneNumber = $countryCode . ' ' . $phone;
+                                    } elseif ($phone) {
+                                        $phoneNumber = $phone;
+                                    }
+                                }
                                 $avatar = null;
                                 if (!empty($talent->headshot_center_path)) {
                                     $publicPath = public_path('storage/' . ltrim($talent->headshot_center_path, '/'));
@@ -455,8 +479,8 @@ line-height: 36px;
                                     <div class="talent-cell">
                                         <img class="avatar" src="{{ $avatar }}" alt="{{ $name }}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=eff2f7&color=0f1524&rounded=true&size=64'">
                                         <div>
-                                            <p class="talent-name">{{ $name }}</p>
-                                            <p class="talent-email">{{ $email }}</p>
+                                            <a href="{{ route('admin.talent-profiles.show', $talent) }}" class="talent-name" style="text-decoration: none; color: var(--ink-900); font-weight: 700;">{{ $name }}</a>
+                                            <p class="talent-email">{{ $phoneNumber ?: '—' }}</p>
                                         </div>
                                     </div>
                                 </td>

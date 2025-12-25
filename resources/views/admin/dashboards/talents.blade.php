@@ -32,12 +32,12 @@ line-height: 36px; /* 150% */}
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img { width: 100%; height: 100%; object-fit: cover; }
-    
-    .badge-active { 
-        position: absolute; top: 15px; left: 15px; 
-        background: #e6f7ed; color: #15803d; 
-        border-radius: 20px; padding: 4px 12px; 
-        font-size: 11px; font-weight: 700; 
+
+    .badge-active {
+        position: absolute; top: 15px; left: 15px;
+        background: #e6f7ed; color: #15803d;
+        border-radius: 20px; padding: 4px 12px;
+        font-size: 11px; font-weight: 700;
         display: inline-flex; align-items: center; gap: 6px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -47,25 +47,25 @@ line-height: 36px; /* 150% */}
     }
 
     .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 10; opacity: 0.6; }
-    
-    .card-overlay { 
-        position: absolute; left: 0; right: 0; bottom: 0; 
+
+    .card-overlay {
+        position: absolute; left: 0; right: 0; bottom: 0;
         height: 50%;
-        padding: 20px 18px 15px; 
-        background: linear-gradient(182deg, rgba(34,34,34,0) 0%, rgba(34,34,34,0.85) 45%, #171719 100%); 
-        color: #fff; 
-        display: flex; flex-direction: column; 
+        padding: 20px 18px 15px;
+        background: linear-gradient(182deg, rgba(34,34,34,0) 0%, rgba(34,34,34,0.85) 45%, #171719 100%);
+        color: #fff;
+        display: flex; flex-direction: column;
         justify-content: flex-end;
     }
 
     .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
     .overlay-flag { position: absolute; left: 0; top: 0; width: 24px; height: 16px; border-radius: 2px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
     .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; }
-    
+
     .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; }
-    
+
     .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; }
-    
+
     .overlay-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
     .joined-info { display: flex; flex-direction: column; gap: 2px; }
     .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; }
@@ -80,6 +80,7 @@ line-height: 36px; /* 150% */}
     }
 
     .talents-footer {
+        margin-top: 20px;
         display: flex;
         justify-content: flex-end;
         padding-bottom: 10px;

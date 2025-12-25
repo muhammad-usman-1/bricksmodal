@@ -67,11 +67,41 @@
         }
 
         .phone-wrapper {
-            position: relative;
+            display: flex;
+            gap: 8px;
             margin-bottom: 18px;
         }
 
-        .phone-wrapper svg {
+        .country-code-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 46px;
+            padding: 0 12px;
+            border: 1px solid #e1e5eb;
+            border-radius: 10px;
+            background: #f8f9fa;
+            font-size: 14px;
+            color: #1f1f1f;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .country-flag {
+            width: 24px;
+            height: 18px;
+            display: inline-block;
+            border-radius: 2px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .phone-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .phone-input-wrapper svg {
             position: absolute;
             left: 14px;
             top: 50%;
@@ -168,10 +198,16 @@
 
                 <label class="field-label" for="phone">Phone Number</label>
                 <div class="phone-wrapper">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2L8.09 9.91a16 16 0 0 0 6 6l1.34-1.34a2 2 0 0 1 2-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
-                    <input id="phone" type="tel" placeholder="+1 (555) 000-0000" required>
+                    <div class="country-code-display">
+                        <img src="https://flagcdn.com/w20/kw.png" alt="Kuwait" class="country-flag" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2218%22%3E%3Crect width=%2224%22 height=%226%22 fill=%22%23007A3D%22/%3E%3Crect y=%226%22 width=%2224%22 height=%226%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2212%22 width=%2224%22 height=%226%22 fill=%22%23CE1126%22/%3E%3Cpath d=%22M0 0 L8 9 L0 18 Z%22 fill=%22%23000000%22/%3E%3C/svg%3E';">
+                        <span>+965</span>
+                    </div>
+                    <div class="phone-input-wrapper">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2L8.09 9.91a16 16 0 0 0 6 6l1.34-1.34a2 2 0 0 1 2-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        <input id="phone" type="tel" placeholder="00000000" required>
+                    </div>
                 </div>
 
                 <input type="hidden" name="phone_country_code" id="phone_country_code">
@@ -195,24 +231,22 @@
             const phoneInput = document.querySelector('#phone');
             const form = document.getElementById('auth-form');
 
+            // Only allow digits in phone input
+            phoneInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+
             form.addEventListener('submit', function(e) {
                 const inputValue = phoneInput.value.trim();
-                const cleaned = inputValue.replace(/[^\d+]/g, '');
-                let countryCode = '+1';
-                let national = '';
+                // Remove all non-digit characters
+                const phoneNumber = inputValue.replace(/\D/g, '');
 
-                if (cleaned.startsWith('+')) {
-                    const digits = cleaned.slice(1).replace(/\D/g, '');
-                    const codeDigits = digits.slice(0, 3) || '1';
-                    countryCode = '+' + codeDigits;
-                    national = digits.slice(codeDigits.length);
-                } else {
-                    const digits = cleaned.replace(/\D/g, '');
-                    national = digits;
-                }
+                // Kuwait country code is always +965
+                const countryCode = '+965';
 
+                // Set the hidden fields
                 document.getElementById('phone_country_code').value = countryCode;
-                document.getElementById('phone_number').value = national;
+                document.getElementById('phone_number').value = phoneNumber;
             });
         });
     </script>
