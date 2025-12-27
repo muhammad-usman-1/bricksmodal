@@ -1129,6 +1129,43 @@
                             </label>
                         </div>
 
+                        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                            <div class="step-title" style="font-size: 15px; margin-bottom: 8px;">Profile Photos</div>
+                            <p class="step-sub" style="margin-bottom: 14px;">Upload your headshot and full-body photo for your profile.</p>
+
+                            <div class="upload-grid">
+                                <label class="upload-card" for="upload_headshot" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <input id="upload_headshot" name="headshot" type="file" accept="image/*" style="display:none;" {{ $profile->headshot_center_path ? '' : 'required' }}>
+                                    <div class="upload-inner">
+                                        <div class="upload-icon">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="upload-label">Headshot (Centered)</div>
+                                        <div data-file-label="headshot">Click to upload Headshot</div>
+                                    </div>
+                                </label>
+
+                                <label class="upload-card" for="upload_fullbody">
+                                    <input id="upload_fullbody" name="fullbody" type="file" accept="image/*" style="display:none;" {{ $profile->full_body_front_path ? '' : 'required' }}>
+                                    <div class="upload-inner">
+                                        <div class="upload-icon">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="upload-label">Full-Body Front Image</div>
+                                        <div data-file-label="fullbody">Click to upload Full-Body Photo</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="action-group" style="margin-top: 10px;">
                             <button type="button" class="btn-secondary" data-prev>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1539,6 +1576,12 @@
             const frontLabel = document.querySelector('[data-file-label="front"]');
             const backLabel = document.querySelector('[data-file-label="back"]');
 
+            // file label update for profile photo uploads
+            const headshotInput = document.getElementById('upload_headshot');
+            const fullbodyInput = document.getElementById('upload_fullbody');
+            const headshotLabel = document.querySelector('[data-file-label="headshot"]');
+            const fullbodyLabel = document.querySelector('[data-file-label="fullbody"]');
+
             function updateLabel(input, label) {
                 if (!input || !label) return;
                 input.addEventListener('change', () => {
@@ -1549,9 +1592,13 @@
 
             if (frontLabel) frontLabel.dataset.defaultText = frontLabel.textContent;
             if (backLabel) backLabel.dataset.defaultText = backLabel.textContent;
+            if (headshotLabel) headshotLabel.dataset.defaultText = headshotLabel.textContent;
+            if (fullbodyLabel) fullbodyLabel.dataset.defaultText = fullbodyLabel.textContent;
 
             updateLabel(frontInput, frontLabel);
             updateLabel(backInput, backLabel);
+            updateLabel(headshotInput, headshotLabel);
+            updateLabel(fullbodyInput, fullbodyLabel);
 
             if (stepInput) {
                 const form = document.getElementById('profile-wizard');

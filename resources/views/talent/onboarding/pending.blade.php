@@ -130,7 +130,7 @@
 
             color: var(--ink-600);
             font-size: 14px;
-            
+
             max-width: 360px;
         }
 
@@ -306,7 +306,10 @@
                 </div>
 
                 <div class="actions">
-                    <button type="button" class="primary-btn" onclick="window.location='{{ route('talent.pending') }}'">Got It Thanks!</button>
+                    <form method="POST" action="{{ route('talent.logout') }}">
+                        @csrf
+                        <button type="submit" class="primary-btn">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>

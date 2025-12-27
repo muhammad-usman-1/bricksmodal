@@ -20,19 +20,180 @@
         }
         .bm-brand img { height: 36px; width: auto; transition: opacity 0.3s ease; }
         
-        /* Collapsed state - completely hide sidebar */
+        /* Collapsed state - show only icons */
         #sidebar.collapsed {
+            width: 70px !important;
+            transition: width 0.3s ease;
+        }
+        
+        #sidebar.collapsed .bm-sidebar {
+            padding: 18px 8px;
+            align-items: center;
+        }
+        
+        /* Hide brand/logo section completely */
+        #sidebar.collapsed .bm-brand {
+            display: none !important;
+        }
+        
+        /* Hide footer completely */
+        #sidebar.collapsed .bm-footer {
+            display: none !important;
+        }
+        
+        /* Style regular links - show only icons */
+        #sidebar.collapsed .bm-link {
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 10px !important;
+            position: relative;
+            gap: 0 !important;
+            min-width: 54px !important;
+            width: 54px !important;
+            font-size: 0 !important;
+            line-height: 0 !important;
+            margin: 0 auto !important;
+            display: flex !important;
+        }
+        
+        /* Hide all text and non-icon elements in links */
+        #sidebar.collapsed .bm-link > *:not(img):not(i) {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
             width: 0 !important;
+            height: 0 !important;
             overflow: hidden !important;
-            border-right: none !important;
-            transition: width 0.3s ease, border 0.3s ease;
+            font-size: 0 !important;
+        }
+        
+        /* Restore font size for icons */
+        #sidebar.collapsed .bm-link img,
+        #sidebar.collapsed .bm-link i {
+            font-size: initial;
+        }
+        
+        /* Show and style icons/images */
+        #sidebar.collapsed .bm-link img,
+        #sidebar.collapsed .bm-link i {
+            margin: 0 !important;
+            flex-shrink: 0;
+            display: block !important;
+        }
+        
+        #sidebar.collapsed .bm-link img {
+            width: 20px !important;
+            height: 20px !important;
+            object-fit: contain;
+        }
+        
+        #sidebar.collapsed .bm-link i {
+            font-size: 18px !important;
+        }
+        
+        /* Style dropdown toggles - show only icons */
+        #sidebar.collapsed .bm-link-dropdown-toggle {
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 10px !important;
+            gap: 0 !important;
+            min-width: 54px !important;
+            width: 54px !important;
+            font-size: 0 !important;
+            line-height: 0 !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Hide dropdown arrow and other non-icon elements */
+        #sidebar.collapsed .bm-link-dropdown-toggle > *:not(span) {
+            display: none !important;
+        }
+        
+        #sidebar.collapsed .bm-link-dropdown-toggle > span {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Hide text in span, show only image */
+        #sidebar.collapsed .bm-link-dropdown-toggle > span > *:not(img) {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Restore font size and style for icons in dropdown */
+        #sidebar.collapsed .bm-link-dropdown-toggle > span > img {
+            margin: 0 !important;
+            width: 20px !important;
+            height: 20px !important;
+            object-fit: contain !important;
+            display: block !important;
+            flex-shrink: 0 !important;
+            font-size: initial !important;
+        }
+        
+        /* Hide dropdown arrow */
+        #sidebar.collapsed .bm-dropdown-arrow {
+            display: none !important;
+        }
+        
+        /* Hide dropdown items */
+        #sidebar.collapsed .bm-dropdown-items {
+            display: none !important;
+        }
+        
+        /* Hide sub-links */
+        #sidebar.collapsed .bm-sub-link {
+            display: none !important;
+        }
+        
+        /* Center nav items */
+        #sidebar.collapsed .c-sidebar-nav-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+        }
+        
+        /* Ensure nav list is centered */
+        #sidebar.collapsed .bm-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        /* Align dropdown container */
+        #sidebar.collapsed .bm-nav-dropdown {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Ensure all links have consistent alignment */
+        #sidebar.collapsed .bm-link,
+        #sidebar.collapsed .bm-link-dropdown-toggle {
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Adjust main content when sidebar is collapsed */
         @media (min-width: 992px) {
             body:has(#sidebar.collapsed) .c-wrapper,
             #sidebar.collapsed ~ .c-wrapper {
-                margin-left: 0 !important;
+                margin-left: 70px !important;
             }
         }
         .bm-nav { list-style: none; padding: 0; margin: 0; flex: 1; }

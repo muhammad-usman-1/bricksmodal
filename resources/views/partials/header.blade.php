@@ -78,6 +78,17 @@
         background: #f3f4f6 !important;
     }
 
+    /* Collapse button with border */
+    #sidebarCollapseBtn {
+        border: 1px solid #e5e7eb !important;
+        background: #ffffff !important;
+    }
+
+    #sidebarCollapseBtn:hover {
+        background: #f9fafb !important;
+        border-color: #d1d5db !important;
+    }
+
     .header-icon-link img {
         width: 20px !important;
         height: 20px !important;
@@ -118,7 +129,7 @@
 <header class="c-header c-header-fixed admin-header" id="admin-main-header">
     <div id="admin-topbar-container">
         <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
-            <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
+            <i class="fas fa-angle-right" style="font-size: 18px; color: #374151;"></i>
         </button>
         <div id="admin-search-box">
             <i class="fas fa-search"></i>
@@ -190,7 +201,7 @@
         const adjustMainContent = (collapsed) => {
             if (wrapper) {
                 if (collapsed) {
-                    wrapper.style.marginLeft = '0';
+                    wrapper.style.marginLeft = '70px';
                 } else {
                     wrapper.style.marginLeft = '';
                 }
@@ -204,8 +215,8 @@
             adjustMainContent(true);
             // Set initial icon state
             if (collapseIcon) {
-                collapseIcon.classList.remove('fa-bars');
-                collapseIcon.classList.add('fa-chevron-right');
+                collapseIcon.classList.remove('fa-angle-right');
+                collapseIcon.classList.add('fa-bars');
             }
         }
 
@@ -225,11 +236,11 @@
             // Update icon
             if (collapseIcon) {
                 if (collapsed) {
-                    collapseIcon.classList.remove('fa-bars');
-                    collapseIcon.classList.add('fa-chevron-right');
-                } else {
-                    collapseIcon.classList.remove('fa-chevron-right');
+                    collapseIcon.classList.remove('fa-angle-right');
                     collapseIcon.classList.add('fa-bars');
+                } else {
+                    collapseIcon.classList.remove('fa-bars');
+                    collapseIcon.classList.add('fa-angle-right');
                 }
             }
 

@@ -125,6 +125,8 @@ class OnboardingController extends Controller
             'civil_id_number'   => ['required', 'string', 'max:50'],
             'id_front'          => [$profile->id_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
             'id_back'           => [$profile->id_back_path ? 'nullable' : 'required', 'image', 'max:4096'],
+            'headshot'          => [$profile->headshot_center_path ? 'nullable' : 'required', 'image', 'max:4096'],
+            'fullbody'          => [$profile->full_body_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
         ]);
 
         $user = $request->user('talent');
@@ -160,6 +162,8 @@ class OnboardingController extends Controller
             'civil_id_number'   => Arr::get($data, 'civil_id_number'),
             'id_front_path'     => Arr::get($data, 'id_front') ? $this->storeTalentFile($profile, $data['id_front'], 'id/front') : $profile->id_front_path,
             'id_back_path'      => Arr::get($data, 'id_back') ? $this->storeTalentFile($profile, $data['id_back'], 'id/back') : $profile->id_back_path,
+            'headshot_center_path' => Arr::get($data, 'headshot') ? $this->storeTalentFile($profile, $data['headshot'], 'photos/headshot') : $profile->headshot_center_path,
+            'full_body_front_path' => Arr::get($data, 'fullbody') ? $this->storeTalentFile($profile, $data['fullbody'], 'photos/fullbody') : $profile->full_body_front_path,
             'onboarding_step'   => 'pending-approval',
             'onboarding_completed_at' => now(),
             'verification_status'     => 'pending',

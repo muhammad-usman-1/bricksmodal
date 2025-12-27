@@ -181,7 +181,7 @@ line-height: 36px; /* 150% */}
                 @endphp
                 <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}">
                     <img class="talent-img" src="{{ $avatar }}" alt="{{ $displayName }}">
-                    <span class="badge-active">Active</span>
+                    <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
                     <span class="card-ellipsis"><i class="fas fa-ellipsis-v"></i></span>
                     <div class="card-overlay">
                         <div class="overlay-top">
