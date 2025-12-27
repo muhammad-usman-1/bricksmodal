@@ -242,7 +242,11 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('casting_requirement_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $castingRequirement->load('user');
+        $castingRequirement->load([
+            'user',
+            'modelRequirements.labels',
+            'modelRequirements.media'
+        ]);
 
         return view('admin.castingRequirements.show', compact('castingRequirement'));
     }

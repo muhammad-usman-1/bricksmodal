@@ -28,6 +28,12 @@ class Outfit extends Model
         'child' => 'Child',
     ];
 
+    public const SUB_CATEGORY_SELECT = [
+        'top' => 'Top',
+        'bottom' => 'Bottom',
+        'traditional' => 'Traditional',
+    ];
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

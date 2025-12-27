@@ -59,7 +59,7 @@ line-height: 36px; /* 150% */}
     }
 
     .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
-    .overlay-flag { position: absolute; left: 0; top: 0; width: 24px; height: 16px; border-radius: 2px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+    .overlay-flag { position: absolute; left: 0; top: 0; width: 29px; height: 22px;  overflow: hidden; }
     .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; }
 
     .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; }
@@ -155,8 +155,8 @@ line-height: 36px; /* 150% */}
                     $age = $dob ? $dob->age : null;
                     $ageText = $age ? "• $age YEARS" : '';
                     $joinedAt = optional($talent->created_at)->format('d M Y') ?? '--';
-                    $flagCode = $talent->country_code ?? $talent->country ?? null;
-                    $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/24x18/' . strtolower($flagCode) . '.png' : null;
+                    $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
+                    $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/w40/' . strtolower($flagCode) . '.png' : null;
                     $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
                     if (is_array($avatarCandidate)) {
                         $avatarCandidate = $avatarCandidate['url'] ?? ($avatarCandidate['path'] ?? ($avatarCandidate[0] ?? null));
@@ -189,7 +189,7 @@ line-height: 36px; /* 150% */}
                                 @if($flagUrl)
                                     <img src="{{ $flagUrl }}" alt="{{ $flagCode }}" style="width:100%; height:100%; object-fit: cover;">
                                 @else
-                                    <div style="background:#444; color:#fff; font-size:8px; width:100%; height:100%; display:grid; place-items:center;">{{ strtoupper(substr($flagCode ?? '??',0,2)) }}</div>
+                                    <div style="background:#444; color:#fff; font-size:8px; width:50%; height:50%; display:grid; place-items:center;">{{ strtoupper(substr($flagCode ?? '??',0,2)) }}</div>
                                 @endif
                             </div>
                             <span class="overlay-meta-info">{{ strtoupper($gender ?: 'N/A') }} {{ $ageText }}</span>

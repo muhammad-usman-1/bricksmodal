@@ -23,7 +23,7 @@
     $defaultModel = [
         'title' => '',
         'quantity' => 1,
-        'gender' => 'any',
+        'gender' => 'male',
         'age_range_key' => array_key_first($ageRanges),
         'hair_color' => '',
         'labels' => [],
@@ -257,7 +257,7 @@
                             <div class="grid grid-3 condensed">
                                 <div class="field-block">
                                     <label class="required">Gender</label>
-                                    <select name="models[{{ $index }}][gender]" class="pill-select @error('models.' . $index . '.gender') is-invalid @enderror" required>
+                                    <select name="models[{{ $index }}][gender]" class="pill-select @error('models.' . $index . '.gender') is-invalid @enderror" data-gender-select required>
                                         @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
                                             @if($key !== 'any')
                                                 <option value="{{ $key }}" {{ ($model['gender'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -359,7 +359,7 @@
 
                                 <div class="outfit-selection-grid">
                                     <!-- Male Outfits -->
-                                    <div class="outfit-type-card">
+                                    <div class="outfit-type-card" data-outfit-gender="male">
                                         <div class="outfit-type-header">
                                             <i class="fas fa-shopping-bag"></i>
                                             <span>Male Outfits</span>
@@ -411,7 +411,7 @@
                                     </div>
 
                                     <!-- Female Outfits -->
-                                    <div class="outfit-type-card">
+                                    <div class="outfit-type-card" data-outfit-gender="female">
                                         <div class="outfit-type-header">
                                             <i class="fas fa-shopping-bag"></i>
                                             <span>Female Outfits</span>
@@ -447,44 +447,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Child Outfits -->
-                                    <div class="outfit-type-card">
-                                        <div class="outfit-type-header">
-                                            <i class="fas fa-shopping-bag"></i>
-                                            <span>Child Outfits</span>
-                                        </div>
-                                        <div class="outfit-item-group">
-                                            <div class="outfit-sub-item">
-                                                <div class="item-image-box" data-image-target>Image for tops</div>
-                                                <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
-                                                    <select name="models[{{ $index }}][child_top_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
-                                                        @foreach($outfits['child'] ?? [] as $outfit)
-                                                            @if($outfit->sub_category === 'top')
-                                                                <option value="{{ $outfit->id }}" {{ ($model['child_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
-                                                            @endif
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="outfit-sub-item">
-                                                <div class="item-image-box" data-image-target>Image for bottoms</div>
-                                                <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
-                                                    <select name="models[{{ $index }}][child_bottom_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
-                                                        @foreach($outfits['child'] ?? [] as $outfit)
-                                                            @if($outfit->sub_category === 'bottom')
-                                                                <option value="{{ $outfit->id }}" {{ ($model['child_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
-                                                            @endif
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -509,10 +471,10 @@
                     <div class="grid grid-3 condensed">
                         <div class="field-block">
                             <label class="required">Gender</label>
-                            <select name="models[__INDEX__][gender]" class="pill-select" required>
+                            <select name="models[__INDEX__][gender]" class="pill-select" data-gender-select required>
                                 @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
                                     @if($key !== 'any')
-                                        <option value="{{ $key }}">{{ $label }}</option>
+                                        <option value="{{ $key }}" {{ $key === 'male' ? 'selected' : '' }}>{{ $label }}</option>
                                     @endif
                                 @endforeach
                             </select>
@@ -596,7 +558,7 @@
 
                         <div class="outfit-selection-grid">
                             <!-- Male Outfits -->
-                            <div class="outfit-type-card">
+                            <div class="outfit-type-card" data-outfit-gender="male">
                                 <div class="outfit-type-header">
                                     <i class="fas fa-shopping-bag"></i>
                                     <span>Male Outfits</span>
@@ -648,7 +610,7 @@
                                 </div>
 
                                 <!-- Female Outfits -->
-                                <div class="outfit-type-card">
+                                <div class="outfit-type-card" data-outfit-gender="female">
                                     <div class="outfit-type-header">
                                         <i class="fas fa-shopping-bag"></i>
                                         <span>Female Outfits</span>
@@ -685,43 +647,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Child Outfits -->
-                                <div class="outfit-type-card">
-                                    <div class="outfit-type-header">
-                                        <i class="fas fa-shopping-bag"></i>
-                                        <span>Child Outfits</span>
-                                    </div>
-                                    <div class="outfit-item-group">
-                                        <div class="outfit-sub-item">
-                                            <div class="item-image-box" data-image-target>Image for tops</div>
-                                            <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
-                                                <select name="models[__INDEX__][child_top_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
-                                                    @foreach($outfits['child'] ?? [] as $outfit)
-                                                        @if($outfit->sub_category === 'top')
-                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="outfit-sub-item">
-                                            <div class="item-image-box" data-image-target>Image for bottoms</div>
-                                            <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
-                                                <select name="models[__INDEX__][child_bottom_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
-                                                    @foreach($outfits['child'] ?? [] as $outfit)
-                                                        @if($outfit->sub_category === 'bottom')
-                                                            <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                         </div>
                     </div>
                 </div>

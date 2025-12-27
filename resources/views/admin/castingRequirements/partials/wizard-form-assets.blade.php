@@ -257,22 +257,94 @@
     .outfit-section-title { font-size: 15px; font-weight: 600; color: #101828; margin-bottom: 2px; }
     .outfit-section-subtitle { font-size: 13px; color: #667085; margin-bottom: 18px; }
 
-    .outfit-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .outfit-selection-grid { display: flex; flex-direction: column; gap: 20px; }
 
     .outfit-type-card { background: #fff; border: 1px solid #EAECF0; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05); }
+    .outfit-type-card[data-outfit-gender] { display: flex; }
 
-    .outfit-type-header { display: flex; align-items: center; gap: 10px; color: #344054; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+    .outfit-type-header { display: flex; align-items: center; gap: 10px; color: #344054; font-weight: 600; font-size: 14px; margin-bottom: 12px; }
     .outfit-type-header i { color: #475467; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #F9FAFB; border-radius: 6px; border: 1px solid #EAECF0; }
 
     .traditional-dress-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #EAECF0; border-radius: 8px; color: #475467; font-size: 13px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
     .traditional-dress-btn:hover { background: #F9FAFB; border-color: #D0D5DD; }
 
+    /* Male outfits: row layout with 3 equal sections */
+    .outfit-type-card[data-outfit-gender="male"] .outfit-item-group { 
+        display: flex; 
+        flex-direction: row; 
+        gap: 12px; 
+    }
+    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: row; 
+        align-items: flex-start; 
+        gap: 14px; 
+        background: #F9FAFB; 
+        padding: 14px; 
+        border-radius: 12px; 
+        border: 1px solid #F2F4F7; 
+    }
+
+    /* Female outfits: row layout with 2 equal sections */
+    .outfit-type-card[data-outfit-gender="female"] .outfit-item-group { 
+        display: flex; 
+        flex-direction: row; 
+        gap: 12px; 
+    }
+    .outfit-type-card[data-outfit-gender="female"] .outfit-sub-item { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: row; 
+        align-items: flex-start; 
+        gap: 14px; 
+        background: #F9FAFB; 
+        padding: 14px; 
+        border-radius: 12px; 
+        border: 1px solid #F2F4F7; 
+    }
+
+    /* Default for other cases */
     .outfit-item-group { display: flex; flex-direction: column; gap: 10px; }
     .outfit-sub-item { display: flex; align-items: flex-start; gap: 14px; background: #F9FAFB; padding: 14px; border-radius: 12px; border: 1px solid #F2F4F7; }
 
+    /* Image box for row layout - fixed width, side by side with details */
+    .outfit-type-card[data-outfit-gender] .item-image-box { 
+        width: 110px; 
+        height: 110px; 
+        background: #F2F4F7; 
+        border-radius: 10px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 11px; 
+        color: #667085; 
+        text-align: center; 
+        padding: 10px; 
+        flex-shrink: 0; 
+        line-height: 1.4; 
+    }
+    .outfit-type-card[data-outfit-gender] .item-image-box img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        border-radius: 8px; 
+    }
+
+    /* Default image box for column layout */
     .item-image-box { width: 110px; height: 110px; background: #F2F4F7; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #667085; text-align: center; padding: 10px; flex-shrink: 0; line-height: 1.4; }
     .item-image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
+    /* Item details for row layout - next to image */
+    .outfit-type-card[data-outfit-gender] .item-details { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 10px; 
+        align-self: center; 
+    }
+
+    /* Default item details */
     .item-details { flex: 1; display: flex; flex-direction: column; gap: 10px; align-self: center; }
     .item-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #475467; text-transform: uppercase; letter-spacing: 0.8px; }
     .item-label i { font-size: 13px; color: #98A2B3; }
@@ -281,7 +353,12 @@
     .item-select:focus { border-color: #98A2B3; outline: none; }
 
     @media (max-width: 992px) {
-        .outfit-selection-grid { grid-template-columns: 1fr; }
+        .outfit-type-card[data-outfit-gender] .outfit-item-group { 
+            flex-direction: column; 
+        }
+        .outfit-type-card[data-outfit-gender] .outfit-sub-item { 
+            flex: none; 
+        }
     }
     /* Custom Picker Dropdown */
     .field-block { position: relative; }
@@ -381,6 +458,30 @@
     .dark-input.has-picker { cursor: pointer; }
     .dark-input.has-picker input { cursor: pointer; }
     .picker-icon { color: #a8adb5; font-size: 14px; }
+
+    /* Validation Error Styles */
+    .validation-error {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+    .is-invalid {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+    }
+    .dark-input.is-invalid {
+        border: 1px solid #dc2626;
+    }
+    .duration-value.is-invalid {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 1px rgba(220, 38, 69, 0.25) !important;
+    }
+    .pill-select.is-invalid,
+    .pill-input.is-invalid {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+    }
 </style>
 <script>
     var uploadedReferenceMap = {}
@@ -486,17 +587,182 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // Helper function to show validation error
+    const showFieldError = (field, message) => {
+        field.classList.add('is-invalid');
+        let errorDiv = field.parentElement?.querySelector('.validation-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'validation-error';
+            errorDiv.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 4px;';
+            field.parentElement?.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    };
+
+    // Helper function to clear validation error
+    const clearFieldError = (field) => {
+        field.classList.remove('is-invalid');
+        const errorDiv = field.parentElement?.querySelector('.validation-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    };
+
+    // Clear all validation errors in a step
+    const clearStepErrors = (stepElement) => {
+        stepElement.querySelectorAll('.is-invalid').forEach(field => {
+            clearFieldError(field);
+        });
+    };
+
     const isStepValid = (index) => {
-        const stepFields = steps[index].querySelectorAll('input, select, textarea');
+        const stepElement = steps[index];
+        clearStepErrors(stepElement);
         let valid = true;
-        stepFields.forEach(field => {
-            if (field.required && !field.value) {
-                field.classList.add('is-invalid');
+        const errors = [];
+
+        // Step 1: Basic Information
+        if (index === 0) {
+            // Validate Shoot Title (required)
+            const projectName = stepElement.querySelector('#project_name');
+            if (projectName && projectName.hasAttribute('required')) {
+                if (!projectName.value || projectName.value.trim() === '') {
+                    showFieldError(projectName, 'Shoot title is required.');
+                    valid = false;
+                } else {
+                    clearFieldError(projectName);
+                }
+            }
+
+            // Validate Description (only text - letters and spaces, no numbers or special characters)
+            const description = stepElement.querySelector('#description');
+            if (description) {
+                if (description.value && description.value.trim()) {
+                    // Only allow letters (a-z, A-Z) and spaces
+                    const textOnlyPattern = /^[a-zA-Z\s]+$/;
+                    
+                    if (!textOnlyPattern.test(description.value.trim())) {
+                        showFieldError(description, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
+                        valid = false;
+                    } else {
+                        clearFieldError(description);
+                    }
+                }
+                // Description is optional, so we don't require it, but if it has a value, it must be text only
+            }
+
+            // Validate Shoot Date (required and cannot be earlier than today)
+            const shootDate = stepElement.querySelector('#shoot_date');
+            if (shootDate) {
+                if (!shootDate.value || shootDate.value.trim() === '') {
+                    showFieldError(shootDate, 'Shoot date is required.');
+                    valid = false;
+                } else {
+                    const selectedDate = new Date(shootDate.value + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate < today) {
+                        showFieldError(shootDate, 'Shoot date cannot be earlier than today.');
+                        valid = false;
+                    } else {
+                        clearFieldError(shootDate);
+                    }
+                }
+            }
+
+            // Validate Shoot Time (required)
+            const shootTime = stepElement.querySelector('#shoot_time');
+            if (shootTime) {
+                if (!shootTime.value || shootTime.value.trim() === '') {
+                    showFieldError(shootTime, 'Start time is required.');
+                    valid = false;
+                } else {
+                    clearFieldError(shootTime);
+                }
+            }
+
+            // Validate Duration (cannot be 0 and is required)
+            const duration = stepElement.querySelector('#duration');
+            if (duration) {
+                if (!duration.value || duration.value.trim() === '') {
+                    showFieldError(duration, 'Duration is required.');
+                    valid = false;
+                } else {
+                    const durationValue = parseFloat(duration.value);
+                    if (isNaN(durationValue) || durationValue <= 0) {
+                        showFieldError(duration, 'Duration must be greater than 0.');
+                        valid = false;
+                    } else {
+                        clearFieldError(duration);
+                    }
+                }
+            }
+        }
+
+        // Step 2: Model Specifications
+        if (index === 1) {
+            const modelCards = stepElement.querySelectorAll('[data-model-card]');
+            if (modelCards.length === 0) {
+                alert('At least one model requirement is required.');
                 valid = false;
             } else {
-                field.classList.remove('is-invalid');
+                modelCards.forEach((card, cardIndex) => {
+                    // Validate Gender (required)
+                    const genderSelect = card.querySelector('select[name*="[gender]"]');
+                    if (genderSelect && genderSelect.hasAttribute('required')) {
+                        if (!genderSelect.value || genderSelect.value === '') {
+                            showFieldError(genderSelect, 'Gender is required.');
+                            valid = false;
+                        } else {
+                            clearFieldError(genderSelect);
+                        }
+                    }
+
+                    // Validate Age Range (required)
+                    const ageRangeSelect = card.querySelector('select[name*="[age_range_key]"]');
+                    if (ageRangeSelect && ageRangeSelect.hasAttribute('required')) {
+                        if (!ageRangeSelect.value || ageRangeSelect.value === '') {
+                            showFieldError(ageRangeSelect, 'Age range is required.');
+                            valid = false;
+                        } else {
+                            clearFieldError(ageRangeSelect);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Step 3: Notes & References (optional validations if needed)
+        if (index === 2) {
+            // Step 3 is mostly optional, but we can add validations if needed
+            // For now, no specific validations required
+        }
+
+        // General required field validation for all steps
+        const stepFields = stepElement.querySelectorAll('input[required], select[required], textarea[required]');
+        stepFields.forEach(field => {
+            if (!field.value || (field.type === 'text' && field.value.trim() === '')) {
+                if (!field.classList.contains('is-invalid')) {
+                    const fieldName = field.getAttribute('name') || field.getAttribute('id') || 'This field';
+                    showFieldError(field, `${fieldName} is required.`);
+                }
+                valid = false;
+            } else {
+                clearFieldError(field);
             }
         });
+
+        if (!valid) {
+            // Scroll to first error
+            const firstError = stepElement.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+
         return valid;
     };
 
@@ -521,6 +787,85 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { once: true });
 
     showStep(currentStep);
+
+    // Clear validation errors when user types/changes values
+    form.addEventListener('input', function(e) {
+        if (e.target.classList.contains('is-invalid')) {
+            clearFieldError(e.target);
+        }
+        
+        // Real-time validation for description field - only allow letters and spaces
+        if (e.target.id === 'description') {
+            const textOnlyPattern = /^[a-zA-Z\s]*$/;
+            let value = e.target.value;
+            
+            // Remove any characters that are not letters or spaces
+            if (!textOnlyPattern.test(value)) {
+                // Filter out non-letter, non-space characters
+                const cleaned = value.replace(/[^a-zA-Z\s]/g, '');
+                e.target.value = cleaned;
+                
+                // Show error if invalid characters were removed
+                if (cleaned.length < originalLength) {
+                    showFieldError(e.target, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
+                }
+            } else {
+                clearFieldError(e.target);
+            }
+        }
+    });
+
+    form.addEventListener('change', function(e) {
+        if (e.target.classList.contains('is-invalid')) {
+            clearFieldError(e.target);
+        }
+    });
+
+    // Prevent typing invalid characters in description field (only letters and spaces)
+    const descriptionField = document.getElementById('description');
+    if (descriptionField) {
+        descriptionField.addEventListener('keypress', function(e) {
+            // Allow: letters (a-z, A-Z), space, backspace, delete, tab, arrow keys
+            const char = String.fromCharCode(e.which || e.keyCode);
+            const textOnlyPattern = /^[a-zA-Z\s]$/;
+            
+            // Allow control keys (backspace, delete, tab, arrow keys, etc.)
+            if (e.which === 0 || e.which === 8 || e.which === 9 || e.which === 46 || 
+                (e.which >= 35 && e.which <= 40)) {
+                return true;
+            }
+            
+            // Block if not a letter or space
+            if (!textOnlyPattern.test(char)) {
+                e.preventDefault();
+                showFieldError(this, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
+                return false;
+            }
+        });
+
+        // Prevent paste of invalid characters in description field
+        descriptionField.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const cleaned = pastedText.replace(/[^a-zA-Z\s]/g, '');
+            
+            // Insert cleaned text at cursor position
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const currentValue = this.value;
+            this.value = currentValue.substring(0, start) + cleaned + currentValue.substring(end);
+            
+            // Set cursor position
+            this.setSelectionRange(start + cleaned.length, start + cleaned.length);
+            
+            // Show error if some characters were removed
+            if (cleaned.length < pastedText.length) {
+                showFieldError(this, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
+            } else {
+                clearFieldError(this);
+            }
+        });
+    }
 });
 
 const initModelCard = (scope) => {
@@ -585,6 +930,54 @@ const initModelCard = (scope) => {
 
     $(scope).on('change', '[data-outfit-select]', function() {
         updateOutfitImage(this);
+    });
+
+    // Handle gender-based outfit visibility
+    function toggleOutfitsByGender(genderSelect, modelCard) {
+        const gender = genderSelect.value;
+        const outfitContainer = modelCard.querySelector('.outfit-selection-grid');
+        if (!outfitContainer) return;
+
+        const maleOutfits = outfitContainer.querySelector('[data-outfit-gender="male"]');
+        const femaleOutfits = outfitContainer.querySelector('[data-outfit-gender="female"]');
+
+        if (gender === 'male') {
+            if (maleOutfits) {
+                maleOutfits.style.display = 'flex';
+                maleOutfits.style.flexDirection = 'column';
+            }
+            if (femaleOutfits) femaleOutfits.style.display = 'none';
+        } else if (gender === 'female') {
+            if (maleOutfits) maleOutfits.style.display = 'none';
+            if (femaleOutfits) {
+                femaleOutfits.style.display = 'flex';
+                femaleOutfits.style.flexDirection = 'column';
+            }
+        } else {
+            // If gender is 'any' or other, show both
+            if (maleOutfits) {
+                maleOutfits.style.display = 'flex';
+                maleOutfits.style.flexDirection = 'column';
+            }
+            if (femaleOutfits) {
+                femaleOutfits.style.display = 'flex';
+                femaleOutfits.style.flexDirection = 'column';
+            }
+        }
+    }
+
+    // Initialize gender-based outfit visibility for existing selects
+    scope.querySelectorAll('[data-gender-select]').forEach(select => {
+        const modelCard = select.closest('[data-model-card]');
+        if (modelCard) {
+            // Set initial state
+            toggleOutfitsByGender(select, modelCard);
+            
+            // Listen for changes
+            select.addEventListener('change', () => {
+                toggleOutfitsByGender(select, modelCard);
+            });
+        }
     });
 
     // Initialize custom label multiselects if the init function is available

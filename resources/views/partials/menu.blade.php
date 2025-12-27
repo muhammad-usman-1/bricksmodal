@@ -18,7 +18,23 @@
             margin-bottom: 12px;
             gap: 4px;
         }
-        .bm-brand img { height: 36px; width: auto; }
+        .bm-brand img { height: 36px; width: auto; transition: opacity 0.3s ease; }
+        
+        /* Collapsed state - completely hide sidebar */
+        #sidebar.collapsed {
+            width: 0 !important;
+            overflow: hidden !important;
+            border-right: none !important;
+            transition: width 0.3s ease, border 0.3s ease;
+        }
+        
+        /* Adjust main content when sidebar is collapsed */
+        @media (min-width: 992px) {
+            body:has(#sidebar.collapsed) .c-wrapper,
+            #sidebar.collapsed ~ .c-wrapper {
+                margin-left: 0 !important;
+            }
+        }
         .bm-nav { list-style: none; padding: 0; margin: 0; flex: 1; }
         .bm-item { margin-bottom: 6px; }
         .bm-link {
@@ -546,4 +562,5 @@ letter-spacing: 1.4px;">STUDIO</div>
             el.classList.toggle('show');
         }
     }
+
 </script>

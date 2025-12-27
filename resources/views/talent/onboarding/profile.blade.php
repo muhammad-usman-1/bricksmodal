@@ -205,18 +205,24 @@
         }
 
         .weight-input {
-            background: #2d2d32;
+            background: #000000 !important;
             border: 1px solid #1c1c21;
             box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
-            color: #f6f7fb;
+            color: #ffffff !important;
             padding-right: 38px;
 
             background-repeat: no-repeat;
             background-position: calc(100% - 12px) 50%;
         }
 
+        .weight-input:focus {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border-color: #1c1c21;
+        }
+
         .weight-input::placeholder {
-            color: #b5b9c5;
+            color: #ffffff !important;
         }
 
         .weight-input::-webkit-outer-spin-button,
@@ -240,14 +246,42 @@
             background-position: calc(100% - 12px) 50%;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
             padding-right: 42px;
+            padding-left: 50px;
             height: 44px;
             border-radius: 10px;
+            position: relative;
+            z-index: 1;
+            /* Hide scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        select.control.nationality-select::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         select.control.nationality-select:focus {
             border-color: #0f0f0f !important;
             box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.16);
             background-color: #1f1f1f !important;
+        }
+
+        .nationality-wrapper {
+            position: relative;
+        }
+
+        .nationality-flag {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 100;
+            background: transparent;
         }
 
         .phone-row {
@@ -667,6 +701,18 @@
             color: var(--ink-700);
         }
 
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .field.has-error .control,
+        .field.has-error select.control {
+            border-color: #dc3545;
+        }
+
         @media (max-width: 520px) {
             .wizard-card {
                 max-width: 100%;
@@ -750,21 +796,54 @@
                             </div>
                             <div class="field">
                                 <label for="nationality">Nationality</label>
-                                <select id="nationality" name="nationality" class="control nationality-select">
-                                    <option value="" {{ old('nationality', $profile->nationality) === null ? 'selected' : '' }}>Select nationality</option>
-                                    <option value="kw" {{ old('nationality', $profile->nationality) === 'kw' ? 'selected' : '' }}>Kuwaiti</option>
-                                    <option value="ae" {{ old('nationality', $profile->nationality) === 'ae' ? 'selected' : '' }}>Emirati</option>
-                                    <option value="sa" {{ old('nationality', $profile->nationality) === 'sa' ? 'selected' : '' }}>Saudi</option>
-                                    <option value="bh" {{ old('nationality', $profile->nationality) === 'bh' ? 'selected' : '' }}>Bahraini</option>
-                                    <option value="qa" {{ old('nationality', $profile->nationality) === 'qa' ? 'selected' : '' }}>Qatari</option>
-                                    <option value="om" {{ old('nationality', $profile->nationality) === 'om' ? 'selected' : '' }}>Omani</option>
-                                    <option value="other" {{ old('nationality', $profile->nationality) === 'other' ? 'selected' : '' }}>Other</option>
-                                </select>
+                                <div class="nationality-wrapper">
+                                    @php
+                                        $selectedNationality = old('nationality', $profile->nationality);
+                                        $flagDisplay = $selectedNationality ? 'block' : 'none';
+                                        $flagSrc = $selectedNationality ? 'https://flagcdn.com/24x18/' . strtolower($selectedNationality) . '.png' : '';
+                                    @endphp
+                                    <img id="nationality_flag" class="nationality-flag" src="{{ $flagSrc }}" alt="" style="display: {{ $flagDisplay }};">
+                                    <select id="nationality" name="nationality" class="control nationality-select" required>
+                                        <option value="" {{ $selectedNationality === null ? 'selected' : '' }}>Select nationality</option>
+                                        @php
+                                            $countries = [
+                                                'af' => 'Afghanistan', 'al' => 'Albania', 'dz' => 'Algeria', 'as' => 'American Samoa', 'ad' => 'Andorra', 'ao' => 'Angola', 'ai' => 'Anguilla', 'aq' => 'Antarctica', 'ag' => 'Antigua and Barbuda', 'ar' => 'Argentina', 'am' => 'Armenia', 'aw' => 'Aruba', 'au' => 'Australia', 'at' => 'Austria', 'az' => 'Azerbaijan',
+                                                'bs' => 'Bahamas', 'bh' => 'Bahrain', 'bd' => 'Bangladesh', 'bb' => 'Barbados', 'by' => 'Belarus', 'be' => 'Belgium', 'bz' => 'Belize', 'bj' => 'Benin', 'bm' => 'Bermuda', 'bt' => 'Bhutan', 'bo' => 'Bolivia', 'ba' => 'Bosnia and Herzegovina', 'bw' => 'Botswana', 'br' => 'Brazil', 'io' => 'British Indian Ocean Territory', 'bn' => 'Brunei', 'bg' => 'Bulgaria', 'bf' => 'Burkina Faso', 'bi' => 'Burundi',
+                                                'cv' => 'Cabo Verde', 'kh' => 'Cambodia', 'cm' => 'Cameroon', 'ca' => 'Canada', 'ky' => 'Cayman Islands', 'cf' => 'Central African Republic', 'td' => 'Chad', 'cl' => 'Chile', 'cn' => 'China', 'cx' => 'Christmas Island', 'cc' => 'Cocos Islands', 'co' => 'Colombia', 'km' => 'Comoros', 'cg' => 'Congo', 'cd' => 'Congo (DRC)', 'ck' => 'Cook Islands', 'cr' => 'Costa Rica', 'ci' => 'Côte d\'Ivoire', 'hr' => 'Croatia', 'cu' => 'Cuba', 'cw' => 'Curaçao', 'cy' => 'Cyprus', 'cz' => 'Czech Republic',
+                                                'dk' => 'Denmark', 'dj' => 'Djibouti', 'dm' => 'Dominica', 'do' => 'Dominican Republic',
+                                                'ec' => 'Ecuador', 'eg' => 'Egypt', 'sv' => 'El Salvador', 'gq' => 'Equatorial Guinea', 'er' => 'Eritrea', 'ee' => 'Estonia', 'sz' => 'Eswatini', 'et' => 'Ethiopia',
+                                                'fk' => 'Falkland Islands', 'fo' => 'Faroe Islands', 'fj' => 'Fiji', 'fi' => 'Finland', 'fr' => 'France', 'gf' => 'French Guiana', 'pf' => 'French Polynesia', 'tf' => 'French Southern Territories',
+                                                'ga' => 'Gabon', 'gm' => 'Gambia', 'ge' => 'Georgia', 'de' => 'Germany', 'gh' => 'Ghana', 'gi' => 'Gibraltar', 'gr' => 'Greece', 'gl' => 'Greenland', 'gd' => 'Grenada', 'gp' => 'Guadeloupe', 'gu' => 'Guam', 'gt' => 'Guatemala', 'gg' => 'Guernsey', 'gn' => 'Guinea', 'gw' => 'Guinea-Bissau', 'gy' => 'Guyana',
+                                                'ht' => 'Haiti', 'hm' => 'Heard Island', 'hn' => 'Honduras', 'hk' => 'Hong Kong', 'hu' => 'Hungary',
+                                                'is' => 'Iceland', 'in' => 'India', 'id' => 'Indonesia', 'ir' => 'Iran', 'iq' => 'Iraq', 'ie' => 'Ireland', 'im' => 'Isle of Man', 'il' => 'Israel', 'it' => 'Italy',
+                                                'jm' => 'Jamaica', 'jp' => 'Japan', 'je' => 'Jersey', 'jo' => 'Jordan',
+                                                'kz' => 'Kazakhstan', 'ke' => 'Kenya', 'ki' => 'Kiribati', 'kp' => 'Korea (North)', 'kr' => 'Korea (South)', 'kw' => 'Kuwait', 'kg' => 'Kyrgyzstan',
+                                                'la' => 'Laos', 'lv' => 'Latvia', 'lb' => 'Lebanon', 'ls' => 'Lesotho', 'lr' => 'Liberia', 'ly' => 'Libya', 'li' => 'Liechtenstein', 'lt' => 'Lithuania', 'lu' => 'Luxembourg',
+                                                'mo' => 'Macao', 'mg' => 'Madagascar', 'mw' => 'Malawi', 'my' => 'Malaysia', 'mv' => 'Maldives', 'ml' => 'Mali', 'mt' => 'Malta', 'mh' => 'Marshall Islands', 'mq' => 'Martinique', 'mr' => 'Mauritania', 'mu' => 'Mauritius', 'yt' => 'Mayotte', 'mx' => 'Mexico', 'fm' => 'Micronesia', 'md' => 'Moldova', 'mc' => 'Monaco', 'mn' => 'Mongolia', 'me' => 'Montenegro', 'ms' => 'Montserrat', 'ma' => 'Morocco', 'mz' => 'Mozambique', 'mm' => 'Myanmar',
+                                                'na' => 'Namibia', 'nr' => 'Nauru', 'np' => 'Nepal', 'nl' => 'Netherlands', 'nc' => 'New Caledonia', 'nz' => 'New Zealand', 'ni' => 'Nicaragua', 'ne' => 'Niger', 'ng' => 'Nigeria', 'nu' => 'Niue', 'nf' => 'Norfolk Island', 'mk' => 'North Macedonia', 'mp' => 'Northern Mariana Islands', 'no' => 'Norway',
+                                                'om' => 'Oman',
+                                                'pk' => 'Pakistan', 'pw' => 'Palau', 'ps' => 'Palestine', 'pa' => 'Panama', 'pg' => 'Papua New Guinea', 'py' => 'Paraguay', 'pe' => 'Peru', 'ph' => 'Philippines', 'pn' => 'Pitcairn', 'pl' => 'Poland', 'pt' => 'Portugal', 'pr' => 'Puerto Rico',
+                                                'qa' => 'Qatar',
+                                                're' => 'Réunion', 'ro' => 'Romania', 'ru' => 'Russia', 'rw' => 'Rwanda',
+                                                'bl' => 'Saint Barthélemy', 'sh' => 'Saint Helena', 'kn' => 'Saint Kitts and Nevis', 'lc' => 'Saint Lucia', 'mf' => 'Saint Martin', 'pm' => 'Saint Pierre and Miquelon', 'vc' => 'Saint Vincent and the Grenadines', 'ws' => 'Samoa', 'sm' => 'San Marino', 'st' => 'São Tomé and Príncipe', 'sa' => 'Saudi Arabia', 'sn' => 'Senegal', 'rs' => 'Serbia', 'sc' => 'Seychelles', 'sl' => 'Sierra Leone', 'sg' => 'Singapore', 'sx' => 'Sint Maarten', 'sk' => 'Slovakia', 'si' => 'Slovenia', 'sb' => 'Solomon Islands', 'so' => 'Somalia', 'za' => 'South Africa', 'gs' => 'South Georgia', 'ss' => 'South Sudan', 'es' => 'Spain', 'lk' => 'Sri Lanka', 'sd' => 'Sudan', 'sr' => 'Suriname', 'sj' => 'Svalbard and Jan Mayen', 'se' => 'Sweden', 'ch' => 'Switzerland', 'sy' => 'Syria',
+                                                'tw' => 'Taiwan', 'tj' => 'Tajikistan', 'tz' => 'Tanzania', 'th' => 'Thailand', 'tl' => 'Timor-Leste', 'tg' => 'Togo', 'tk' => 'Tokelau', 'to' => 'Tonga', 'tt' => 'Trinidad and Tobago', 'tn' => 'Tunisia', 'tr' => 'Turkey', 'tm' => 'Turkmenistan', 'tc' => 'Turks and Caicos Islands', 'tv' => 'Tuvalu',
+                                                'ug' => 'Uganda', 'ua' => 'Ukraine', 'ae' => 'United Arab Emirates', 'gb' => 'United Kingdom', 'um' => 'United States Minor Outlying Islands', 'us' => 'United States', 'uy' => 'Uruguay', 'uz' => 'Uzbekistan',
+                                                'vu' => 'Vanuatu', 've' => 'Venezuela', 'vn' => 'Vietnam', 'vg' => 'Virgin Islands (British)', 'vi' => 'Virgin Islands (U.S.)',
+                                                'wf' => 'Wallis and Futuna', 'eh' => 'Western Sahara',
+                                                'ye' => 'Yemen',
+                                                'zm' => 'Zambia', 'zw' => 'Zimbabwe'
+                                            ];
+                                            $selectedNationality = old('nationality', $profile->nationality);
+                                        @endphp
+                                        @foreach($countries as $code => $name)
+                                            <option value="{{ $code }}" {{ $selectedNationality === $code ? 'selected' : '' }}>{{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
                         <div class="field" style="margin-top: 10px;">
-                            <label>Mobile Number</label>
                             @php
                                 $whatsappChoice = old(
                                     'whatsapp_choice',
@@ -775,29 +854,35 @@
                                 $loginCountry = old('country_code', $profile->country_code ?? ($authTalent->phone_country_code ?? 'kw'));
                                 $whatsappDefault = old('whatsapp_number', $profile->whatsapp_number ?? $loginMobile);
                             @endphp
-                            <div class="phone-row">
-                                <select class="pill-select" name="country_code" aria-label="Country code" required>
-                                    <option value="kw" {{ $loginCountry === 'kw' ? 'selected' : '' }}>KW +965</option>
-                                    <option value="ae" {{ $loginCountry === 'ae' ? 'selected' : '' }}>AE +971</option>
-                                    <option value="sa" {{ $loginCountry === 'sa' ? 'selected' : '' }}>SA +966</option>
-                                    <option value="bh" {{ $loginCountry === 'bh' ? 'selected' : '' }}>BH +973</option>
-                                    <option value="qa" {{ $loginCountry === 'qa' ? 'selected' : '' }}>QA +974</option>
-                                    <option value="om" {{ $loginCountry === 'om' ? 'selected' : '' }}>OM +968</option>
-                                </select>
-                                <input class="control" id="mobile_number" name="mobile_number" type="tel" placeholder="(555) 000-0000" aria-label="Phone number" value="{{ $loginMobile }}" required>
+                            <div id="mobile_number_section" style="display: none;">
+                                <input type="hidden" name="country_code" id="country_code" value="{{ $loginCountry }}">
+                                <input type="hidden" id="mobile_number" name="mobile_number" value="{{ $loginMobile }}">
                             </div>
-                            <div class="radio-row">
+                            <label for="whatsapp_choice" style="margin-top: 10px; display: block;">WhatsApp Number</label>
+                            <div class="radio-row" style="margin-top: 6px;">
                                 <label style="display:flex;align-items:center;gap:4px;">
                                     <input type="radio" name="whatsapp_choice" value="same" {{ $whatsappChoice === 'alt' ? '' : 'checked' }}>
                                     No (same number)
                                 </label>
                                 <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" name="whatsapp_choice" value="alt" {{ $whatsappChoice === 'alt' ? 'checked' : '' }}>
+                                    <input type="radio" name="whatsapp_choice" value="alt" {{ $whatsappChoice === 'alt' ? 'checked' : '' }} id="whatsapp_yes">
                                     Yes
                                 </label>
                                 <span style="color: #9aa3b5;">I have another number for WhatsApp.</span>
                             </div>
-                            <input type="hidden" name="whatsapp_number" id="whatsapp_number" value="{{ $whatsappDefault }}">
+                            <div id="whatsapp_number_section" style="display: {{ $whatsappChoice === 'alt' ? 'block' : 'none' }}; margin-top: 10px;">
+                                <div class="phone-row">
+                                    <select class="pill-select" name="whatsapp_country_code" id="whatsapp_country_code" aria-label="WhatsApp country code">
+                                        <option value="kw" {{ $loginCountry === 'kw' ? 'selected' : '' }}>KW +965</option>
+                                        <option value="ae" {{ $loginCountry === 'ae' ? 'selected' : '' }}>AE +971</option>
+                                        <option value="sa" {{ $loginCountry === 'sa' ? 'selected' : '' }}>SA +966</option>
+                                        <option value="bh" {{ $loginCountry === 'bh' ? 'selected' : '' }}>BH +973</option>
+                                        <option value="qa" {{ $loginCountry === 'qa' ? 'selected' : '' }}>QA +974</option>
+                                        <option value="om" {{ $loginCountry === 'om' ? 'selected' : '' }}>OM +968</option>
+                                    </select>
+                                    <input class="control" id="whatsapp_number_input" name="whatsapp_number" type="tel" placeholder="(555) 000-0000" aria-label="WhatsApp number" value="{{ $whatsappDefault }}" {{ $whatsappChoice === 'alt' ? 'required' : '' }}>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="actions">
@@ -848,7 +933,7 @@
                             <input type="hidden" name="gender" id="gender" value="{{ old('gender', $profile->gender ?? 'male') }}">
                         </div>
 
-                        <div class="field" style="margin-top: 10px;">
+                        <div class="field" id="hijab_preference_section" style="margin-top: 10px;">
                             <label>Hijab Preference</label>
                             <div class="muted-note">This helps us match you with appropriate casting calls</div>
                             <div class="hijab-group">
@@ -877,7 +962,7 @@
                         </div>
 
                         <div class="field-grid" style="margin-top: 12px;">
-                            <div class="field">
+                            <div class="field" id="hair_color_field">
                                 <label for="hair_color">Hair Color</label>
                                 <input id="hair_color" name="hair_color" class="control" type="text" placeholder="e.g. Brown" value="{{ old('hair_color', $profile->hair_color) }}">
                             </div>
@@ -956,22 +1041,22 @@
                         <div class="field-grid" style="margin-top: 4px;">
                             <div class="field">
                                 <label for="chest">Chest / Bust (cm)</label>
-                                <input id="chest" name="chest" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 90" value="{{ old('chest') }}" />
+                                <input id="chest" name="chest" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 90" value="{{ old('chest', $profile->chest) }}" required />
                             </div>
                             <div class="field">
                                 <label for="waist_cm">Waist (cm)</label>
-                                <input id="waist_cm" name="waist" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 70" value="{{ old('waist') }}" />
+                                <input id="waist_cm" name="waist" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 70" value="{{ old('waist', $profile->waist) }}" required />
                             </div>
                         </div>
 
                         <div class="field-grid" style="margin-top: 14px;">
                             <div class="field">
                                 <label for="hips_cm">Hips (cm)</label>
-                                <input id="hips_cm" name="hips" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 95" value="{{ old('hips') }}" />
+                                <input id="hips_cm" name="hips" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 95" value="{{ old('hips', $profile->hips) }}" required />
                             </div>
                             <div class="field">
                                 <label for="shoe_size">Shoe Size (EU)</label>
-                                <input id="shoe_size" name="shoe_size" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 39" value="{{ old('shoe_size') }}" />
+                                <input id="shoe_size" name="shoe_size" class="measurement-input" type="number" step="0.1" min="0" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required />
                             </div>
                         </div>
 
@@ -1005,6 +1090,11 @@
                                 </svg>
                             </span>
                             <span>We need a copy of your Civil ID or Passport to verify your identity. This information is kept strictly confidential.</span>
+                        </div>
+
+                        <div class="field" style="margin-top: 14px; margin-bottom: 14px;">
+                            <label for="civil_id_number">Civil ID Number</label>
+                            <input id="civil_id_number" name="civil_id_number" class="control" type="text" placeholder="Enter your Civil ID number" value="{{ old('civil_id_number', $profile->civil_id_number) }}" required>
                         </div>
 
                         <div class="upload-grid">
@@ -1086,9 +1176,160 @@
                 if (stepInput) {
                     stepInput.value = current + 1;
                 }
+
+                // Update gender-based fields when Step 2 is displayed
+                if (current === 1) { // Step 2 (0-indexed)
+                    setTimeout(() => {
+                        toggleGenderBasedFields();
+                    }, 50);
+                }
             }
 
+            // Clear errors for a field
+            function clearFieldError(field) {
+                const fieldContainer = field.closest('.field');
+                if (fieldContainer) {
+                    fieldContainer.classList.remove('has-error');
+                    const errorMsg = fieldContainer.querySelector('.field-error');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
+            }
+
+            // Show error for a field
+            function showFieldError(field, message) {
+                const fieldContainer = field.closest('.field');
+                if (!fieldContainer) return;
+
+                fieldContainer.classList.add('has-error');
+
+                // Remove existing error message if any
+                const existingError = fieldContainer.querySelector('.field-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                // Add error message
+                const errorMsg = document.createElement('span');
+                errorMsg.className = 'field-error';
+                errorMsg.textContent = message;
+
+                // Insert after the input/select element
+                const inputElement = fieldContainer.querySelector('.control, select, input[type="file"]');
+                if (inputElement && inputElement.parentElement) {
+                    inputElement.parentElement.insertBefore(errorMsg, inputElement.nextSibling);
+                } else {
+                    fieldContainer.appendChild(errorMsg);
+                }
+            }
+
+            // Validation function for each step
+            function validateStep(stepIndex) {
+                const stepPanel = steps[stepIndex];
+                if (!stepPanel) return true;
+
+                // Clear all previous errors in this step
+                stepPanel.querySelectorAll('.has-error').forEach(el => {
+                    el.classList.remove('has-error');
+                });
+                stepPanel.querySelectorAll('.field-error').forEach(el => {
+                    el.remove();
+                });
+
+                const requiredFields = stepPanel.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    // Skip hidden fields
+                    if (field.offsetParent === null && field.type !== 'hidden') {
+                        return;
+                    }
+
+                    // Check if field is visible (not in a hidden parent)
+                    let isVisible = true;
+                    let parent = field.parentElement;
+                    while (parent && parent !== stepPanel) {
+                        if (parent.style.display === 'none' ||
+                            window.getComputedStyle(parent).display === 'none') {
+                            isVisible = false;
+                            break;
+                        }
+                        parent = parent.parentElement;
+                    }
+
+                    if (!isVisible) return;
+
+                    // Validate field
+                    let fieldInvalid = false;
+                    let errorMessage = '';
+
+                    if (field.type === 'radio' || field.type === 'checkbox') {
+                        const name = field.name;
+                        const checked = stepPanel.querySelector(`[name="${name}"]:checked`);
+                        if (!checked) {
+                            fieldInvalid = true;
+                            const label = field.closest('.field')?.querySelector('label')?.textContent?.trim() || field.name;
+                            errorMessage = `${label} is required`;
+                        }
+                    } else if (field.type === 'file') {
+                        if (!field.files || field.files.length === 0) {
+                            fieldInvalid = true;
+                            const label = field.closest('label')?.querySelector('.upload-label')?.textContent?.trim() ||
+                                         field.closest('label')?.textContent?.trim() ||
+                                         field.name;
+                            errorMessage = `${label} is required`;
+                        }
+                    } else {
+                        if (!field.value || field.value.trim() === '') {
+                            fieldInvalid = true;
+                            const label = field.closest('.field')?.querySelector('label')?.textContent?.trim() || field.name;
+                            errorMessage = `${label} is required`;
+                        }
+                    }
+
+                    if (fieldInvalid) {
+                        isValid = false;
+                        showFieldError(field, errorMessage);
+                    } else {
+                        clearFieldError(field);
+                    }
+                });
+
+                // Scroll to first error if validation failed
+                if (!isValid) {
+                    const firstError = stepPanel.querySelector('.has-error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        const firstInput = firstError.querySelector('input, select, textarea');
+                        if (firstInput) {
+                            firstInput.focus();
+                        }
+                    }
+                }
+
+                return isValid;
+            }
+
+            // Clear errors when user starts typing/selecting
+            document.addEventListener('input', function(e) {
+                if (e.target.hasAttribute('required')) {
+                    clearFieldError(e.target);
+                }
+            });
+
+            document.addEventListener('change', function(e) {
+                if (e.target.hasAttribute('required')) {
+                    clearFieldError(e.target);
+                }
+            });
+
             function next() {
+                // Validate current step before proceeding
+                if (!validateStep(current)) {
+                    return;
+                }
+
                 if (current < steps.length - 1) {
                     current += 1;
                     render();
@@ -1096,6 +1337,7 @@
             }
 
             function prev() {
+                // No validation needed when going back
                 if (current > 0) {
                     current -= 1;
                     render();
@@ -1113,6 +1355,54 @@
                 }
             });
 
+            // Function to toggle hijab and hair color fields based on gender and hijab preference
+            function toggleGenderBasedFields() {
+                const genderInput = document.getElementById('gender');
+                const hijabSection = document.getElementById('hijab_preference_section');
+                const hairColorField = document.getElementById('hair_color_field');
+                const hijabRadios = document.querySelectorAll('input[name="hijab_preference"]');
+
+                if (!genderInput) return;
+
+                const gender = genderInput.value;
+
+                // Show/hide hijab preference based on gender
+                if (hijabSection) {
+                    if (gender === 'female') {
+                        hijabSection.style.display = 'block';
+                        // Make hijab preference required for female
+                        hijabRadios.forEach(radio => {
+                            radio.setAttribute('required', 'required');
+                        });
+
+                        // Check hijab preference for hair color visibility
+                        const selectedHijab = document.querySelector('input[name="hijab_preference"]:checked');
+                        if (hairColorField) {
+                            if (selectedHijab && selectedHijab.value === 'wear_hijab') {
+                                hairColorField.style.display = 'none';
+                                const hairColorInput = document.getElementById('hair_color');
+                                if (hairColorInput) {
+                                    hairColorInput.removeAttribute('required');
+                                }
+                            } else {
+                                hairColorField.style.display = 'block';
+                            }
+                        }
+                    } else {
+                        // Male selected - hide hijab section
+                        hijabSection.style.display = 'none';
+                        // Show hair color for male
+                        if (hairColorField) {
+                            hairColorField.style.display = 'block';
+                        }
+                        // Remove required from hijab preference
+                        hijabRadios.forEach(radio => {
+                            radio.removeAttribute('required');
+                        });
+                    }
+                }
+            }
+
             // segmented toggles
             document.querySelectorAll('[data-segment]').forEach(group => {
                 const buttons = group.querySelectorAll('[data-seg-btn]');
@@ -1124,6 +1414,10 @@
                         const target = btn.dataset.targetInput ? document.querySelector(btn.dataset.targetInput) : null;
                         if (target && btn.dataset.value !== undefined) {
                             target.value = btn.dataset.value;
+                            // Trigger gender-based field toggling
+                            if (target.id === 'gender') {
+                                toggleGenderBasedFields();
+                            }
                         }
                     });
                 });
@@ -1135,33 +1429,98 @@
                         buttons.forEach(b => b.classList.remove('is-active'));
                         activeButton.classList.add('is-active');
                     }
+                    // Initialize gender-based fields
+                    if (targetInput.id === 'gender') {
+                        toggleGenderBasedFields();
+                    }
                 }
+            });
+
+            // Listen for hijab preference changes
+            document.querySelectorAll('input[name="hijab_preference"]').forEach(radio => {
+                radio.addEventListener('change', toggleGenderBasedFields);
             });
 
             // WhatsApp alt toggle and syncing
             const whatsappRadios = document.querySelectorAll('input[name="whatsapp_choice"]');
-            const whatsappHidden = document.getElementById('whatsapp_number');
+            const mobileNumberSection = document.getElementById('mobile_number_section');
+            const whatsappNumberSection = document.getElementById('whatsapp_number_section');
             const mobileInput = document.getElementById('mobile_number');
+            const whatsappInput = document.getElementById('whatsapp_number_input');
 
-            function syncWhatsapp() {
+            function toggleWhatsappFields() {
                 const choice = document.querySelector('input[name="whatsapp_choice"]:checked')?.value;
-                if (!mobileInput || !whatsappHidden) return;
 
                 if (choice === 'alt') {
-                    mobileInput.readOnly = false;
-                    whatsappHidden.value = mobileInput.value;
+                    // When "Yes" is selected: Show WhatsApp number
+                    if (whatsappNumberSection) {
+                        whatsappNumberSection.style.display = 'block';
+                        if (whatsappInput) {
+                            whatsappInput.setAttribute('required', 'required');
+                        }
+                    }
                 } else {
-                    mobileInput.readOnly = true;
-                    whatsappHidden.value = mobileInput.value;
+                    // When "No (same number)" is selected: Hide WhatsApp number
+                    if (whatsappNumberSection) {
+                        whatsappNumberSection.style.display = 'none';
+                        if (whatsappInput) {
+                            whatsappInput.removeAttribute('required');
+                        }
+                    }
                 }
             }
 
-            whatsappRadios.forEach(r => r.addEventListener('change', syncWhatsapp));
-            if (mobileInput) {
-                mobileInput.addEventListener('input', syncWhatsapp);
+            whatsappRadios.forEach(radio => {
+                radio.addEventListener('change', toggleWhatsappFields);
+            });
+
+            toggleWhatsappFields(); // Initialize on page load
+
+            // Nationality flag display
+            const nationalitySelect = document.getElementById('nationality');
+            const nationalityFlag = document.getElementById('nationality_flag');
+
+            function updateNationalityFlag() {
+                if (!nationalitySelect || !nationalityFlag) return;
+
+                const selectedValue = nationalitySelect.value;
+                if (selectedValue && selectedValue !== '') {
+                    const flagUrl = `https://flagcdn.com/24x18/${selectedValue.toLowerCase()}.png`;
+                    nationalityFlag.src = flagUrl;
+                    nationalityFlag.alt = nationalitySelect.options[nationalitySelect.selectedIndex].text;
+                    nationalityFlag.style.display = 'block';
+                    nationalityFlag.style.visibility = 'visible';
+                    nationalityFlag.style.opacity = '1';
+
+                    // Reset onerror handler
+                    nationalityFlag.onerror = function() {
+                        // Try alternative flag source if first fails
+                        this.src = `https://flagcdn.com/w20/${selectedValue.toLowerCase()}.png`;
+                        this.onerror = function() {
+                            // If both fail, try with different size
+                            this.src = `https://flagcdn.com/32x24/${selectedValue.toLowerCase()}.png`;
+                            this.onerror = function() {
+                                this.style.display = 'none';
+                            };
+                        };
+                    };
+                } else {
+                    nationalityFlag.style.display = 'none';
+                }
             }
 
-            syncWhatsapp();
+            if (nationalitySelect && nationalityFlag) {
+                nationalitySelect.addEventListener('change', updateNationalityFlag);
+                // Initialize on page load - use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                    updateNationalityFlag();
+                }, 100);
+
+                // Also update immediately if there's already a selected value
+                if (nationalitySelect.value) {
+                    updateNationalityFlag();
+                }
+            }
 
             // Height placeholder updates based on unit
             const heightUnit = document.getElementById('height_unit');
@@ -1202,6 +1561,11 @@
                     });
                 }
             }
+
+            // Initialize gender-based fields on page load
+            setTimeout(() => {
+                toggleGenderBasedFields();
+            }, 100);
 
             render();
         })();

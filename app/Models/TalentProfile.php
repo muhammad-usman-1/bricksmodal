@@ -79,6 +79,7 @@ class TalentProfile extends Model
         'hair_color',
         'eye_color',
         'shoe_size',
+        'civil_id_number',
         'whatsapp_number',
         'country_code',
         'mobile_number',

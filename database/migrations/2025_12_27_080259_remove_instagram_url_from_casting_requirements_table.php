@@ -6,26 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('casting_requirements', function (Blueprint $table) {
-            $table->string('duration')->nullable()->after('shoot_date_time');
+            $table->dropColumn('instagram_url');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('casting_requirements', function (Blueprint $table) {
-            $table->dropColumn('duration');
+            $table->string('instagram_url')->nullable()->after('location');
         });
     }
 };
-
-
-
-
-
-
-
-
-

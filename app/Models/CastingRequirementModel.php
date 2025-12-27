@@ -38,6 +38,15 @@ class CastingRequirementModel extends Model implements HasMedia
         return $date->format('Y-m-d H:i:s');
     }
 
+    /**
+     * Get reference photos for this model
+     * Reference photos are stored in the media library, not as a direct column
+     */
+    public function getReferencePhotosAttribute()
+    {
+        return $this->getMedia('reference_photo');
+    }
+
     public function castingRequirement()
     {
         return $this->belongsTo(CastingRequirement::class);

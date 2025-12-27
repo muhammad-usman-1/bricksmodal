@@ -27,7 +27,7 @@ class OutfitController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|in:male,female,child',
-            'sub_category' => 'nullable|string|max:255',
+            'sub_category' => 'required|in:top,bottom,traditional',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'sort_order' => 'nullable|integer',
             'is_active' => 'boolean',
@@ -57,7 +57,7 @@ class OutfitController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|in:male,female,child',
-            'sub_category' => 'nullable|string|max:255',
+            'sub_category' => 'required|in:top,bottom,traditional',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'sort_order' => 'nullable|integer',
             'is_active' => 'boolean',

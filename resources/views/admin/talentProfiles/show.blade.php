@@ -52,23 +52,31 @@
     .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 14px; margin-bottom: 14px; }
     .section-title { font-weight: 600; color: var(--ink-900); font-size: 14px; margin-bottom: 12px; }
 
-    .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
     .upload-tile {
         background: white;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
-        height: 220px;
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        min-height: 280px;
         display: grid;
         place-items: center;
         color: var(--ink-500);
         text-align: center;
-        padding: 12px;
+
         position: relative;
         overflow: hidden;
         transition: all 0.2s ease;
     }
     .upload-tile.is-editable:hover { border-color: #0f172a; background: #f1f5f9; cursor: pointer; }
-    .upload-tile img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .upload-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        object-position: center;
+    }
 
     .upload-overlay {
         position: absolute;
@@ -200,6 +208,35 @@
 @php
     $notSet = trans('global.not_set');
 
+    // Country code to name mapping
+    $countries = [
+        'af' => 'Afghanistan', 'al' => 'Albania', 'dz' => 'Algeria', 'as' => 'American Samoa', 'ad' => 'Andorra', 'ao' => 'Angola', 'ai' => 'Anguilla', 'aq' => 'Antarctica', 'ag' => 'Antigua and Barbuda', 'ar' => 'Argentina', 'am' => 'Armenia', 'aw' => 'Aruba', 'au' => 'Australia', 'at' => 'Austria', 'az' => 'Azerbaijan',
+        'bs' => 'Bahamas', 'bh' => 'Bahrain', 'bd' => 'Bangladesh', 'bb' => 'Barbados', 'by' => 'Belarus', 'be' => 'Belgium', 'bz' => 'Belize', 'bj' => 'Benin', 'bm' => 'Bermuda', 'bt' => 'Bhutan', 'bo' => 'Bolivia', 'ba' => 'Bosnia and Herzegovina', 'bw' => 'Botswana', 'br' => 'Brazil', 'io' => 'British Indian Ocean Territory', 'bn' => 'Brunei', 'bg' => 'Bulgaria', 'bf' => 'Burkina Faso', 'bi' => 'Burundi',
+        'cv' => 'Cabo Verde', 'kh' => 'Cambodia', 'cm' => 'Cameroon', 'ca' => 'Canada', 'ky' => 'Cayman Islands', 'cf' => 'Central African Republic', 'td' => 'Chad', 'cl' => 'Chile', 'cn' => 'China', 'cx' => 'Christmas Island', 'cc' => 'Cocos Islands', 'co' => 'Colombia', 'km' => 'Comoros', 'cg' => 'Congo', 'cd' => 'Congo (DRC)', 'ck' => 'Cook Islands', 'cr' => 'Costa Rica', 'ci' => 'Côte d\'Ivoire', 'hr' => 'Croatia', 'cu' => 'Cuba', 'cw' => 'Curaçao', 'cy' => 'Cyprus', 'cz' => 'Czech Republic',
+        'dk' => 'Denmark', 'dj' => 'Djibouti', 'dm' => 'Dominica', 'do' => 'Dominican Republic',
+        'ec' => 'Ecuador', 'eg' => 'Egypt', 'sv' => 'El Salvador', 'gq' => 'Equatorial Guinea', 'er' => 'Eritrea', 'ee' => 'Estonia', 'sz' => 'Eswatini', 'et' => 'Ethiopia',
+        'fk' => 'Falkland Islands', 'fo' => 'Faroe Islands', 'fj' => 'Fiji', 'fi' => 'Finland', 'fr' => 'France', 'gf' => 'French Guiana', 'pf' => 'French Polynesia', 'tf' => 'French Southern Territories',
+        'ga' => 'Gabon', 'gm' => 'Gambia', 'ge' => 'Georgia', 'de' => 'Germany', 'gh' => 'Ghana', 'gi' => 'Gibraltar', 'gr' => 'Greece', 'gl' => 'Greenland', 'gd' => 'Grenada', 'gp' => 'Guadeloupe', 'gu' => 'Guam', 'gt' => 'Guatemala', 'gg' => 'Guernsey', 'gn' => 'Guinea', 'gw' => 'Guinea-Bissau', 'gy' => 'Guyana',
+        'ht' => 'Haiti', 'hm' => 'Heard Island', 'hn' => 'Honduras', 'hk' => 'Hong Kong', 'hu' => 'Hungary',
+        'is' => 'Iceland', 'in' => 'India', 'id' => 'Indonesia', 'ir' => 'Iran', 'iq' => 'Iraq', 'ie' => 'Ireland', 'im' => 'Isle of Man', 'il' => 'Israel', 'it' => 'Italy',
+        'jm' => 'Jamaica', 'jp' => 'Japan', 'je' => 'Jersey', 'jo' => 'Jordan',
+        'kz' => 'Kazakhstan', 'ke' => 'Kenya', 'ki' => 'Kiribati', 'kp' => 'Korea (North)', 'kr' => 'Korea (South)', 'kw' => 'Kuwait', 'kg' => 'Kyrgyzstan',
+        'la' => 'Laos', 'lv' => 'Latvia', 'lb' => 'Lebanon', 'ls' => 'Lesotho', 'lr' => 'Liberia', 'ly' => 'Libya', 'li' => 'Liechtenstein', 'lt' => 'Lithuania', 'lu' => 'Luxembourg',
+        'mo' => 'Macao', 'mg' => 'Madagascar', 'mw' => 'Malawi', 'my' => 'Malaysia', 'mv' => 'Maldives', 'ml' => 'Mali', 'mt' => 'Malta', 'mh' => 'Marshall Islands', 'mq' => 'Martinique', 'mr' => 'Mauritania', 'mu' => 'Mauritius', 'yt' => 'Mayotte', 'mx' => 'Mexico', 'fm' => 'Micronesia', 'md' => 'Moldova', 'mc' => 'Monaco', 'mn' => 'Mongolia', 'me' => 'Montenegro', 'ms' => 'Montserrat', 'ma' => 'Morocco', 'mz' => 'Mozambique', 'mm' => 'Myanmar',
+        'na' => 'Namibia', 'nr' => 'Nauru', 'np' => 'Nepal', 'nl' => 'Netherlands', 'nc' => 'New Caledonia', 'nz' => 'New Zealand', 'ni' => 'Nicaragua', 'ne' => 'Niger', 'ng' => 'Nigeria', 'nu' => 'Niue', 'nf' => 'Norfolk Island', 'mk' => 'North Macedonia', 'mp' => 'Northern Mariana Islands', 'no' => 'Norway',
+        'om' => 'Oman',
+        'pk' => 'Pakistan', 'pw' => 'Palau', 'ps' => 'Palestine', 'pa' => 'Panama', 'pg' => 'Papua New Guinea', 'py' => 'Paraguay', 'pe' => 'Peru', 'ph' => 'Philippines', 'pn' => 'Pitcairn', 'pl' => 'Poland', 'pt' => 'Portugal', 'pr' => 'Puerto Rico',
+        'qa' => 'Qatar',
+        're' => 'Réunion', 'ro' => 'Romania', 'ru' => 'Russia', 'rw' => 'Rwanda',
+        'bl' => 'Saint Barthélemy', 'sh' => 'Saint Helena', 'kn' => 'Saint Kitts and Nevis', 'lc' => 'Saint Lucia', 'mf' => 'Saint Martin', 'pm' => 'Saint Pierre and Miquelon', 'vc' => 'Saint Vincent and the Grenadines', 'ws' => 'Samoa', 'sm' => 'San Marino', 'st' => 'São Tomé and Príncipe', 'sa' => 'Saudi Arabia', 'sn' => 'Senegal', 'rs' => 'Serbia', 'sc' => 'Seychelles', 'sl' => 'Sierra Leone', 'sg' => 'Singapore', 'sx' => 'Sint Maarten', 'sk' => 'Slovakia', 'si' => 'Slovenia', 'sb' => 'Solomon Islands', 'so' => 'Somalia', 'za' => 'South Africa', 'gs' => 'South Georgia', 'ss' => 'South Sudan', 'es' => 'Spain', 'lk' => 'Sri Lanka', 'sd' => 'Sudan', 'sr' => 'Suriname', 'sj' => 'Svalbard and Jan Mayen', 'se' => 'Sweden', 'ch' => 'Switzerland', 'sy' => 'Syria',
+        'tw' => 'Taiwan', 'tj' => 'Tajikistan', 'tz' => 'Tanzania', 'th' => 'Thailand', 'tl' => 'Timor-Leste', 'tg' => 'Togo', 'tk' => 'Tokelau', 'to' => 'Tonga', 'tt' => 'Trinidad and Tobago', 'tn' => 'Tunisia', 'tr' => 'Turkey', 'tm' => 'Turkmenistan', 'tc' => 'Turks and Caicos Islands', 'tv' => 'Tuvalu',
+        'ug' => 'Uganda', 'ua' => 'Ukraine', 'ae' => 'United Arab Emirates', 'gb' => 'United Kingdom', 'um' => 'United States Minor Outlying Islands', 'us' => 'United States', 'uy' => 'Uruguay', 'uz' => 'Uzbekistan',
+        'vu' => 'Vanuatu', 've' => 'Venezuela', 'vn' => 'Vietnam', 'vg' => 'Virgin Islands (British)', 'vi' => 'Virgin Islands (U.S.)',
+        'wf' => 'Wallis and Futuna', 'eh' => 'Western Sahara',
+        'ye' => 'Yemen',
+        'zm' => 'Zambia', 'zw' => 'Zimbabwe'
+    ];
+
     $headshots = [
         'headshot_center_path' => 'Headshot (Center)',
         'headshot_left_path'   => 'Headshot (Left)',
@@ -223,13 +260,13 @@
         ['label' => 'Display name', 'name' => 'display_name', 'value' => $talentProfile->display_name, 'type' => 'text'],
         ['label' => 'First name', 'name' => 'first_name', 'value' => $talentProfile->first_name, 'type' => 'text'],
         ['label' => 'Last name', 'name' => 'last_name', 'value' => $talentProfile->last_name, 'type' => 'text'],
-        ['label' => 'Nationality', 'name' => 'nationality', 'value' => $talentProfile->nationality, 'type' => 'text'],
+        ['label' => 'Nationality', 'name' => 'nationality', 'value' => $talentProfile->nationality, 'type' => 'nationality'],
         ['label' => 'Date of birth', 'name' => 'date_of_birth', 'value' => optional($talentProfile->date_of_birth)->format('Y-m-d'), 'type' => 'date'],
+        ['label' => 'Gender', 'name' => 'gender', 'value' => $talentProfile->gender, 'type' => 'select', 'options' => ['male' => 'Male', 'female' => 'Female'], 'data-field' => 'gender'],
     ];
 
     $accountFields = [
         ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
-        ['label' => 'Country code', 'name' => 'country_code', 'value' => $talentProfile->country_code, 'type' => 'text'],
         ['label' => 'Mobile number', 'name' => 'mobile_number', 'value' => $talentProfile->mobile_number, 'type' => 'text'],
         ['label' => 'Daily rate', 'name' => 'daily_rate', 'value' => $talentProfile->daily_rate, 'type' => 'number', 'required' => true],
         ['label' => 'Hourly rate', 'name' => 'hourly_rate', 'value' => $talentProfile->hourly_rate, 'type' => 'number'],
@@ -249,9 +286,9 @@
 
     $appearanceFields = [
         ['label' => 'Skin tone', 'name' => 'skin_tone', 'value' => $talentProfile->skin_tone, 'type' => 'select', 'options' => \App\Models\TalentProfile::SKIN_TONE_SELECT],
-        ['label' => 'Hair color', 'name' => 'hair_color', 'value' => $talentProfile->hair_color, 'type' => 'text'],
+        ['label' => 'Hair color', 'name' => 'hair_color', 'value' => $talentProfile->hair_color, 'type' => 'text', 'data-field' => 'hair_color'],
         ['label' => 'Eye color', 'name' => 'eye_color', 'value' => $talentProfile->eye_color, 'type' => 'text'],
-        ['label' => 'Hijab preference', 'name' => 'hijab_preference', 'value' => $talentProfile->hijab_preference, 'type' => 'text'],
+        ['label' => 'Hijab preference', 'name' => 'hijab_preference', 'value' => $talentProfile->hijab_preference, 'type' => 'hijab', 'data-field' => 'hijab_preference'],
         ['label' => 'Visible tattoos', 'name' => 'has_visible_tattoos', 'value' => $talentProfile->has_visible_tattoos, 'type' => 'boolean'],
         ['label' => 'Piercings', 'name' => 'has_piercings', 'value' => $talentProfile->has_piercings, 'type' => 'boolean'],
     ];
@@ -399,7 +436,15 @@
                     <div class="section-title">{{ $section['title'] }}</div>
                     <table class="info-table">
                         @foreach($section['fields'] as $f)
-                            <tr>
+                            @if(isset($f['hide_in_edit']) && $f['hide_in_edit'])
+                                <tr class="edit-mode-only" style="display: none;">
+                                    <td>{{ $f['label'] }}</td>
+                                    <td>
+                                        <input type="hidden" name="{{ $f['name'] }}" value="{{ $f['value'] }}">
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr @if(isset($f['data-field'])) data-field-row="{{ $f['data-field'] }}" @endif>
                                 <td>{{ $f['label'] }}</td>
                                 <td>
                                     <div class="display-mode-only {{ is_null($f['value']) || $f['value'] === '' ? 'not-set' : '' }}">
@@ -407,11 +452,29 @@
                                             {{ $f['options'][$f['value']] ?? $notSet }}
                                         @elseif($f['type'] === 'boolean')
                                             {{ is_null($f['value']) ? $notSet : ($f['value'] ? 'Yes' : 'No') }}
+                                        @elseif($f['name'] === 'hijab_preference')
+                                            @if($f['value'] === 'wear_hijab')
+                                                Yes
+                                            @elseif($f['value'] === 'no_hijab')
+                                                No
+                                            @else
+                                                {{ $notSet }}
+                                            @endif
+                                        @elseif($f['name'] === 'nationality' && $f['value'])
+                                            @php
+                                                $nationalityCode = strtolower($f['value']);
+                                                $flagUrl = 'https://flagcdn.com/w40/' . $nationalityCode . '.png';
+                                                $countryName = $countries[$nationalityCode] ?? ucfirst($f['value']);
+                                            @endphp
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 22px; height: 18px; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #e5e7eb;" onerror="this.style.display='none';">
+                                                <span style="font-weight: 500;">{{ $countryName }}</span>
+                                            </div>
                                         @else
                                             {{ $f['value'] ?? $notSet }}
                                         @endif
                                     </div>
-                                    <div class="edit-mode-only">
+                                    <div class="edit-mode-only" @if(isset($f['data-field'])) data-field="{{ $f['data-field'] }}" @endif>
                                         @if($f['type'] === 'textarea')
                                             <textarea name="{{ $f['name'] }}" class="inline-edit-input" rows="3">{{ $f['value'] }}</textarea>
                                         @elseif($f['type'] === 'select')
@@ -425,6 +488,22 @@
                                             <select name="{{ $f['name'] }}" class="inline-edit-input">
                                                 <option value="1" {{ $f['value'] == 1 ? 'selected' : '' }}>Yes</option>
                                                 <option value="0" {{ $f['value'] == 0 ? 'selected' : '' }}>No</option>
+                                            </select>
+                                        @elseif($f['type'] === 'nationality')
+                                            <div class="nationality-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                                                <img id="nationality_flag_edit" class="nationality-flag" src="{{ $f['value'] ? 'https://flagcdn.com/24x18/' . strtolower($f['value']) . '.png' : '' }}" alt="" style="display: {{ $f['value'] ? 'block' : 'none' }}; width: 24px; height: 18px; border-radius: 2px;">
+                                                <select name="{{ $f['name'] }}" id="nationality_select" class="inline-edit-input" style="flex: 1;">
+                                                    <option value="">Select nationality</option>
+                                                    @foreach($countries as $code => $name)
+                                                        <option value="{{ $code }}" {{ (string)$f['value'] === (string)$code ? 'selected' : '' }}>{{ $name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @elseif($f['type'] === 'hijab')
+                                            <select name="{{ $f['name'] }}" id="hijab_preference_select" class="inline-edit-input">
+                                                <option value="">Select</option>
+                                                <option value="wear_hijab" {{ $f['value'] === 'wear_hijab' ? 'selected' : '' }}>Yes</option>
+                                                <option value="no_hijab" {{ $f['value'] === 'no_hijab' ? 'selected' : '' }}>No</option>
                                             </select>
                                         @else
                                             <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}" class="inline-edit-input" {{ ($f['required'] ?? false) ? 'required' : '' }}>
@@ -688,6 +767,8 @@
         if (startEditBtn && form) {
             startEditBtn.addEventListener('click', () => {
                 form.classList.add('is-editing');
+                // Trigger gender-based field visibility when entering edit mode
+                setTimeout(toggleGenderBasedFields, 100);
             });
         }
 
@@ -696,6 +777,72 @@
                 // To properly cancel, we just reload the page to discard unsaved state
                 window.location.reload();
             });
+        }
+
+        // Nationality flag update
+        const nationalitySelect = document.getElementById('nationality_select');
+        const nationalityFlag = document.getElementById('nationality_flag_edit');
+
+        if (nationalitySelect && nationalityFlag) {
+            nationalitySelect.addEventListener('change', function() {
+                const selectedValue = this.value;
+                if (selectedValue && selectedValue !== '') {
+                    const flagUrl = `https://flagcdn.com/24x18/${selectedValue.toLowerCase()}.png`;
+                    nationalityFlag.src = flagUrl;
+                    nationalityFlag.style.display = 'block';
+                    nationalityFlag.onerror = function() {
+                        this.style.display = 'none';
+                    };
+                } else {
+                    nationalityFlag.style.display = 'none';
+                }
+            });
+        }
+
+        // Gender-based field visibility
+        function toggleGenderBasedFields() {
+            const genderSelect = document.querySelector('select[name="gender"]');
+            if (!genderSelect) return;
+
+            const gender = genderSelect.value;
+            const hijabRow = document.querySelector('tr[data-field-row="hijab_preference"]');
+            const hairColorRow = document.querySelector('tr[data-field-row="hair_color"]');
+            const hijabSelect = document.getElementById('hijab_preference_select');
+
+            // Show/hide hijab preference based on gender
+            if (hijabRow) {
+                if (gender === 'male') {
+                    hijabRow.style.display = 'none';
+                    // Clear hijab preference when hidden
+                    if (hijabSelect) {
+                        hijabSelect.value = '';
+                    }
+                } else {
+                    hijabRow.style.display = '';
+                }
+            }
+
+            // Show/hide hair color based on gender and hijab preference
+            if (hairColorRow) {
+                if (gender === 'female' && hijabSelect && hijabSelect.value === 'wear_hijab') {
+                    hairColorRow.style.display = 'none';
+                } else {
+                    hairColorRow.style.display = '';
+                }
+            }
+        }
+
+        // Initialize on page load and when gender changes
+        const genderSelect = document.querySelector('select[name="gender"]');
+        if (genderSelect) {
+            genderSelect.addEventListener('change', toggleGenderBasedFields);
+            toggleGenderBasedFields(); // Initialize
+        }
+
+        // Update hair color visibility when hijab preference changes
+        const hijabSelect = document.getElementById('hijab_preference_select');
+        if (hijabSelect) {
+            hijabSelect.addEventListener('change', toggleGenderBasedFields);
         }
     });
 </script>

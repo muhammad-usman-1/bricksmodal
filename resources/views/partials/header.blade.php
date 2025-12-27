@@ -122,6 +122,9 @@
             <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
         </div>
         <div id="admin-icons-group">
+            <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important;">
+                <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
+            </button>
             <a href="{{ route('admin.outfits.index') }}" class="header-icon-link" aria-label="Add New">
                 <img src="{{ asset('images/plus.png') }}" alt="Add">
             </a>
@@ -172,3 +175,61 @@
         </div>
     </div>
 </header>
+
+<script>
+    // Sidebar collapse functionality
+    (function() {
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('sidebarCollapseBtn');
+        const collapseIcon = collapseBtn?.querySelector('i');
+        const wrapper = document.querySelector('.c-wrapper');
+        
+        if (!sidebar || !collapseBtn) return;
+
+        // Function to adjust main content
+        const adjustMainContent = (collapsed) => {
+            if (wrapper) {
+                if (collapsed) {
+                    wrapper.style.marginLeft = '0';
+                } else {
+                    wrapper.style.marginLeft = '';
+                }
+            }
+        };
+
+        // Check localStorage for saved state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            adjustMainContent(true);
+        }
+
+        collapseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            sidebar.classList.toggle('collapsed');
+            const collapsed = sidebar.classList.contains('collapsed');
+            
+            // Adjust main content
+            adjustMainContent(collapsed);
+            
+            // Save state to localStorage
+            localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+            
+            // Update icon (optional - can change icon if needed)
+            if (collapseIcon) {
+                if (collapsed) {
+                    collapseIcon.classList.remove('fa-bars');
+                    collapseIcon.classList.add('fa-times');
+                } else {
+                    collapseIcon.classList.remove('fa-times');
+                    collapseIcon.classList.add('fa-bars');
+                }
+            }
+            
+            // Update aria-label
+            collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
+        });
+    })();
+</script>
