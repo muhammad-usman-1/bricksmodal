@@ -30,12 +30,12 @@
         border-radius: 10px !important;
         padding: 8px 15px !important;
         width: 100% !important;
-        
+
         flex-shrink: 1 !important;
     }
 
     #admin-search-box i {
-        color: #9ca3af !important;
+        color: #a3a9b3 !important;
         font-size: 14px !important;
     }
 
