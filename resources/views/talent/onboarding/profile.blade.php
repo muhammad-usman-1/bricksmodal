@@ -298,6 +298,7 @@
             height: 42px;
             padding: 0 12px;
             font-size: 13px;
+            
             color: var(--ink-900);
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%235b6171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>');
             background-repeat: no-repeat;
