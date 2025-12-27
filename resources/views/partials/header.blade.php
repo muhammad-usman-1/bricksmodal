@@ -30,7 +30,7 @@
         border-radius: 10px !important;
         padding: 8px 15px !important;
         width: 100% !important;
-        max-width: 520px !important;
+        
         flex-shrink: 1 !important;
     }
 
@@ -117,14 +117,14 @@
 
 <header class="c-header c-header-fixed admin-header" id="admin-main-header">
     <div id="admin-topbar-container">
+        <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
+            <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
+        </button>
         <div id="admin-search-box">
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
         </div>
         <div id="admin-icons-group">
-            <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important;">
-                <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
-            </button>
             <a href="{{ route('admin.outfits.index') }}" class="header-icon-link" aria-label="Add New">
                 <img src="{{ asset('images/plus.png') }}" alt="Add">
             </a>
@@ -183,7 +183,7 @@
         const collapseBtn = document.getElementById('sidebarCollapseBtn');
         const collapseIcon = collapseBtn?.querySelector('i');
         const wrapper = document.querySelector('.c-wrapper');
-        
+
         if (!sidebar || !collapseBtn) return;
 
         // Function to adjust main content
@@ -202,32 +202,37 @@
         if (isCollapsed) {
             sidebar.classList.add('collapsed');
             adjustMainContent(true);
+            // Set initial icon state
+            if (collapseIcon) {
+                collapseIcon.classList.remove('fa-bars');
+                collapseIcon.classList.add('fa-chevron-right');
+            }
         }
 
         collapseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             sidebar.classList.toggle('collapsed');
             const collapsed = sidebar.classList.contains('collapsed');
-            
+
             // Adjust main content
             adjustMainContent(collapsed);
-            
+
             // Save state to localStorage
             localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
-            
-            // Update icon (optional - can change icon if needed)
+
+            // Update icon
             if (collapseIcon) {
                 if (collapsed) {
                     collapseIcon.classList.remove('fa-bars');
-                    collapseIcon.classList.add('fa-times');
+                    collapseIcon.classList.add('fa-chevron-right');
                 } else {
-                    collapseIcon.classList.remove('fa-times');
+                    collapseIcon.classList.remove('fa-chevron-right');
                     collapseIcon.classList.add('fa-bars');
                 }
             }
-            
+
             // Update aria-label
             collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
         });
