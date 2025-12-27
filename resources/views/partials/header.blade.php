@@ -29,6 +29,7 @@
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
         padding: 8px 15px !important;
+    
         width: 100% !important;
 
         flex-shrink: 1 !important;

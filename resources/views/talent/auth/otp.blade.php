@@ -3,7 +3,7 @@
 @section('content')
     <style>
         body {
-            background: #ffffff url('{{ asset('images/landing.jpg') }}') center center / cover no-repeat;
+            background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
         }
 
