@@ -438,7 +438,7 @@ margin-bottom: 0;
                             ?? 0;
                         $requiredCount = $castingRequirement->count ?? 0;
                     @endphp
-                    <tr data-status="{{ $statusKey }}" data-location="{{ $location }}">
+                    <tr data-status="{{ $statusKey }}" data-location="{{ $location }}" data-show-url="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" class="clickable-row">
                         <td data-label="Shoot Name">
                             <div class="shoot-name">
                                 <div class="logo-circle">{{ $initials }}</div>
@@ -453,12 +453,12 @@ margin-bottom: 0;
                          <td data-label="Required">
                             <span class="required-pill"><span class="icon"><i class="fas fa-users"></i></span>{{ $requiredCount }}</span>
                         </td>
-                        <td data-label="Applicants">
+                        <td data-label="Applicants" class="no-click">
                             <a class="applicants-btn" href="{{ route('admin.casting-requirements.applicants', $castingRequirement->id) }}">View Applicants</a>
                             <span class="applicants-count">{{ $applicantsCount }} applied</span>
                         </td>
 
-                        <td data-label="Actions" class="actions-cell">
+                        <td data-label="Actions" class="actions-cell no-click">
                             <div class="action-menu">
                                 <button class="action-toggle" type="button" aria-label="Actions">
                                     <i class="fas fa-ellipsis-v"></i>
@@ -575,6 +575,41 @@ margin-bottom: 0;
 
         statusFilter?.addEventListener('change', applyFilters);
         locationFilter?.addEventListener('change', applyFilters);
+
+        // Make rows clickable - redirect to show page
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', function(e) {
+                // Don't navigate if clicking on interactive elements
+                if (e.target.closest('.no-click') || 
+                    e.target.closest('a') || 
+                    e.target.closest('button') || 
+                    e.target.closest('.action-menu') ||
+                    e.target.closest('.action-list')) {
+                    return;
+                }
+                
+                const showUrl = this.dataset.showUrl;
+                if (showUrl) {
+                    window.location.href = showUrl;
+                }
+            });
+        });
+
+        // Add hover effect for clickable rows
+        const style = document.createElement('style');
+        style.textContent = `
+            .clickable-row:hover {
+                background-color: #f8f9fa !important;
+            }
+            .clickable-row td.no-click {
+                cursor: default;
+            }
+            .clickable-row .no-click:hover {
+                background-color: transparent !important;
+            }
+        `;
+        document.head.appendChild(style);
 
         document.querySelectorAll('.action-toggle').forEach(toggle => {
             toggle.addEventListener('click', function (e) {

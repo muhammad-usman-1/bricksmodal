@@ -107,8 +107,8 @@
     .info-table .not-set { color: #3b82f6; }
 
     .action-bar { margin-top: 12px; display: flex; justify-content: flex-end; gap: 10px; }
-    .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 8px 12px; font-size: 12px; }
-    .btn-approve { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-size: 12px; }
+    .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 10px 38px; font-size: 18px; margin-bottom:10px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-approve { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 10px 38px; font-size: 18px;  margin-bottom:10px; display: inline-flex; align-items: center; gap: 8px; }
 
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -541,12 +541,12 @@
     <div class="action-bar">
         <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;">
             @csrf
-            <button type="submit" class="btn-reject">Reject</button>
+            <button type="submit" class="btn-reject"><i class="fas fa-times"></i> Reject</button>
         </form>
         @if(($talentProfile->verification_status ?? '') !== 'approved')
             <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
                 @csrf
-                <button type="submit" class="btn-approve">Accept</button>
+                <button type="submit" class="btn-approve"><i class="fas fa-check"></i> Accept</button>
             </form>
         @endif
     </div>
