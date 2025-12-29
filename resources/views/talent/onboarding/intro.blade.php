@@ -7,7 +7,7 @@
 
     <style>
         body {
-           background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
+           background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
             color: #1f1f1f;
         }
@@ -188,7 +188,7 @@
             gap: 10px;
             font-size: 13px;
             color: #1f2937;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
         }
 
         .consent input {

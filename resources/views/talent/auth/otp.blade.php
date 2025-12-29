@@ -3,7 +3,7 @@
 @section('content')
     <style>
         body {
-            background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
+            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
         }
 
@@ -63,21 +63,21 @@
         .otp-input {
             width: 54px;
             height: 48px;
-            border: 1px solid #1a1a1a;
+            border: 1px solid #e1e5eb;
             border-radius: 10px;
-            background: #1a1a1a;
+            background: #f8f9fa;
             text-align: center;
             font-size: 20px;
             font-weight: 600;
-            color: #ffffff;
+            color: #1a1a1a;
             outline: none;
             transition: border-color .15s, box-shadow .15s, background .15s;
         }
 
         .otp-input:focus {
-            border-color: #000000;
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
-            background: #1a1a1a;
+            border-color: #b7bec6;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+            background: #ffffff;
         }
 
         .submit-btn {
@@ -131,6 +131,13 @@
             border-bottom: 1px solid #3f3f3f;
             padding-bottom: 2px;
         }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 
     <div class="auth-shell">
@@ -139,6 +146,14 @@
             <div class="eyebrow">Studio</div>
             <h1>Verify Identity</h1>
             <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+
+            @if ($errors->any())
+                <div class="error-message">
+                    @foreach ($errors->all() as $error)
+                        {{ $error }}
+                    @endforeach
+                </div>
+            @endif
 
             <form id="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
                 @csrf

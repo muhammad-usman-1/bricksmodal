@@ -23,6 +23,7 @@ class AdminSetting extends Model
         'date_format',
         'time_format',
         'appearance',
+        'background_image_path',
     ];
 
     protected $casts = [
@@ -37,5 +38,15 @@ class AdminSetting extends Model
     public static function singleton(): self
     {
         return static::firstOrCreate(['id' => 1]);
+    }
+
+    /**
+     * Get the background image URL, falling back to default if not set
+     */
+    public function getBackgroundImageUrlAttribute(): string
+    {
+        return $this->background_image_path 
+            ? asset('storage/' . $this->background_image_path)
+            : asset('images/models_bg.png');
     }
 }

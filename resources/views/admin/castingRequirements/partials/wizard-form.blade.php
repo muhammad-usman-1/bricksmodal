@@ -363,9 +363,10 @@
                                         <div class="outfit-type-header">
                                             <i class="fas fa-shopping-bag"></i>
                                             <span>Male Outfits</span>
+                                            <button type="button" class="traditional-outfit-btn" data-toggle-traditional>Switch to Traditional Outfit</button>
                                         </div>
                                         <div class="outfit-item-group">
-                                            <div class="outfit-sub-item">
+                                            <div class="outfit-sub-item" data-outfit-type="traditional" style="display: none;">
                                                 <div class="item-image-box" data-image-target>Image for traditional</div>
                                                 <div class="item-details">
                                                     <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
@@ -379,7 +380,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="outfit-sub-item">
+                                            <div class="outfit-sub-item" data-outfit-type="top">
                                                 <div class="item-image-box" data-image-target>Image for tops</div>
                                                 <div class="item-details">
                                                     <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
@@ -393,7 +394,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="outfit-sub-item">
+                                            <div class="outfit-sub-item" data-outfit-type="bottom">
                                                 <div class="item-image-box" data-image-target>Image for bottoms</div>
                                                 <div class="item-details">
                                                     <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
@@ -562,9 +563,10 @@
                                 <div class="outfit-type-header">
                                     <i class="fas fa-shopping-bag"></i>
                                     <span>Male Outfits</span>
+                                    <button type="button" class="traditional-outfit-btn" data-toggle-traditional>Switch to Traditional Outfit</button>
                                 </div>
                                     <div class="outfit-item-group">
-                                        <div class="outfit-sub-item">
+                                        <div class="outfit-sub-item" data-outfit-type="traditional" style="display: none;">
                                             <div class="item-image-box" data-image-target>Image for traditional</div>
                                             <div class="item-details">
                                                 <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
@@ -578,7 +580,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="outfit-sub-item">
+                                        <div class="outfit-sub-item" data-outfit-type="top">
                                             <div class="item-image-box" data-image-target>Image for tops</div>
                                             <div class="item-details">
                                                 <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
@@ -592,7 +594,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="outfit-sub-item">
+                                        <div class="outfit-sub-item" data-outfit-type="bottom">
                                             <div class="item-image-box" data-image-target>Image for bottoms</div>
                                             <div class="item-details">
                                                 <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>

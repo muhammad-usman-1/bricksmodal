@@ -20,7 +20,7 @@
         }
 
         body {
-             background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
+             background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
 
             color: var(--ink-900);
@@ -135,7 +135,7 @@
             height: 42px;
             border-radius: 10px;
             border: 1px solid var(--border);
-            background: var(--control);
+            background: #e5e7eb;
             padding: 0 12px;
             font-size: 13px;
             color: var(--ink-900);
@@ -147,11 +147,11 @@
         select.control:focus {
             border-color: #cdd4e3;
             box-shadow: 0 0 0 3px rgba(56, 115, 255, 0.12);
-            background: #fff;
+            background: #e5e7eb;
         }
 
         .control::placeholder {
-            color: #9aa3b5;
+            color: #000000;
         }
 
         .dob-wrap {
@@ -169,7 +169,8 @@
 
         .dob-input {
             padding-right: 48px;
-            background: #f6f7fb;
+            background: #e5e7eb;
+            color: #000000;
             cursor: pointer;
         }
 
@@ -201,28 +202,25 @@
 
         .height-input,
         .weight-input {
-            height: 44px;
+            height: 42px;
         }
 
         .weight-input {
-            background: #000000 !important;
-            border: 1px solid #1c1c21;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
-            color: #ffffff !important;
-            padding-right: 38px;
-
-            background-repeat: no-repeat;
-            background-position: calc(100% - 12px) 50%;
+            background: var(--control) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--ink-900) !important;
+            padding-right: 12px;
         }
 
         .weight-input:focus {
-            background: #000000 !important;
-            color: #ffffff !important;
-            border-color: #1c1c21;
+            background: #fff !important;
+            color: var(--ink-900) !important;
+            border-color: #cdd4e3 !important;
+            box-shadow: 0 0 0 3px rgba(56, 115, 255, 0.12) !important;
         }
 
         .weight-input::placeholder {
-            color: #ffffff !important;
+            color: #9aa3b5 !important;
         }
 
         .weight-input::-webkit-outer-spin-button,
@@ -238,16 +236,15 @@
 
         select.control.nationality-select {
             appearance: none;
-            background-color: #1f1f1f !important;
-            color: #f3f4f6 !important;
-            border: 1px solid #0f0f0f !important;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23e5e7eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>');
+            background-color: #e5e7eb !important;
+            color: #000000 !important;
+            border: 1px solid var(--border) !important;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>');
             background-repeat: no-repeat;
             background-position: calc(100% - 12px) 50%;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
             padding-right: 42px;
             padding-left: 50px;
-            height: 44px;
+            height: 42px;
             border-radius: 10px;
             position: relative;
             z-index: 1;
@@ -261,9 +258,9 @@
         }
 
         select.control.nationality-select:focus {
-            border-color: #0f0f0f !important;
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.16);
-            background-color: #1f1f1f !important;
+            border-color: #cdd4e3 !important;
+            box-shadow: 0 0 0 3px rgba(56, 115, 255, 0.12) !important;
+            background-color: #e5e7eb !important;
         }
 
         .nationality-wrapper {
@@ -275,7 +272,7 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            width: 24px;
+            width: 28px;
             height: 18px;
             object-fit: cover;
             border-radius: 2px;
@@ -298,7 +295,7 @@
             height: 42px;
             padding: 0 12px;
             font-size: 13px;
-            
+
             color: var(--ink-900);
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%235b6171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>');
             background-repeat: no-repeat;
@@ -345,6 +342,13 @@
             transform: translateY(-1px);
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
             background: var(--primary) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-submit:hover,
+        .btn-submit:focus,
+        .btn-submit:active {
+            background: #0b9f62 !important;
             color: #ffffff !important;
         }
 
@@ -461,14 +465,20 @@
         .seg-btn .seg-icon {
             width: 20px;
             height: 20px;
-            border-radius: 999px;
-            background: #dfe3ec;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--ink-700);
+        }
+
+        .seg-btn .seg-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .seg-btn {
+            background: #ffffff;
+            border-color: var(--border);
         }
 
         .seg-btn.is-active {
@@ -477,9 +487,24 @@
             border-color: #0f0f0f;
         }
 
-        .seg-btn.is-active .seg-icon {
-            background: #ffffff;
-            color: #0f0f0f;
+        /* Male icon (black) - when selected: make white */
+        .seg-btn.is-active[data-value="male"] .seg-icon img {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Male icon (black) - when not selected: stays black (no filter) */
+        .seg-btn:not(.is-active)[data-value="male"] .seg-icon img {
+            filter: none;
+        }
+
+        /* Female icon (white) - when selected: stays white (no filter) */
+        .seg-btn.is-active[data-value="female"] .seg-icon img {
+            filter: none;
+        }
+
+        /* Female icon (white) - when not selected: make black */
+        .seg-btn:not(.is-active)[data-value="female"] .seg-icon img {
+            filter: brightness(0);
         }
 
         .muted-note {
@@ -530,19 +555,25 @@
 
         .measurement-input {
             width: 100%;
-            height: 44px;
+            height: 42px;
             border-radius: 10px;
-            border: none;
-            background: #3a3b40;
-            color: #ffffff;
+            border: 1px solid var(--border);
+            background: var(--control);
+            color: var(--ink-900);
             padding: 0 12px;
             font-size: 13px;
             outline: none;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .measurement-input:focus {
+            border-color: #cdd4e3;
+            box-shadow: 0 0 0 3px rgba(56, 115, 255, 0.12);
+            background: #fff;
         }
 
         .measurement-input::placeholder {
-            color: #b5b9c5;
+            color: #9aa3b5;
         }
 
         .measurement-input::-webkit-outer-spin-button,
@@ -659,6 +690,12 @@
             border-color: #c6ccda;
             background: #ffffff;
             box-shadow: 0 10px 28px rgba(0, 13, 37, 0.08);
+        }
+
+        .upload-card.drag-over {
+            border-color: #0f0f0f;
+            background: #f0f4ff;
+            box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.1);
         }
 
         .upload-inner {
@@ -801,7 +838,7 @@
                                     @php
                                         $selectedNationality = old('nationality', $profile->nationality);
                                         $flagDisplay = $selectedNationality ? 'block' : 'none';
-                                        $flagSrc = $selectedNationality ? 'https://flagcdn.com/24x18/' . strtolower($selectedNationality) . '.png' : '';
+                                        $flagSrc = $selectedNationality ? 'https://flagcdn.com/w160/' . strtolower($selectedNationality) . '.png' : '';
                                     @endphp
                                     <img id="nationality_flag" class="nationality-flag" src="{{ $flagSrc }}" alt="" style="display: {{ $flagDisplay }};">
                                     <select id="nationality" name="nationality" class="control nationality-select" required>
@@ -854,24 +891,55 @@
                                 $loginMobile = old('mobile_number', $profile->mobile_number ?? ($authTalent->phone_number ?? ''));
                                 $loginCountry = old('country_code', $profile->country_code ?? ($authTalent->phone_country_code ?? 'kw'));
                                 $whatsappDefault = old('whatsapp_number', $profile->whatsapp_number ?? $loginMobile);
+
+                                // Format country code for display
+                                $countryCodes = [
+                                    'kw' => '+965',
+                                    'ae' => '+971',
+                                    'sa' => '+966',
+                                    'bh' => '+973',
+                                    'qa' => '+974',
+                                    'om' => '+968'
+                                ];
+                                $displayCountryCode = $countryCodes[$loginCountry] ?? '+965';
+                                $countryNames = [
+                                    'kw' => 'KW',
+                                    'ae' => 'AE',
+                                    'sa' => 'SA',
+                                    'bh' => 'BH',
+                                    'qa' => 'QA',
+                                    'om' => 'OM'
+                                ];
+                                $displayCountryName = $countryNames[$loginCountry] ?? 'KW';
                             @endphp
-                            <div id="mobile_number_section" style="display: none;">
                                 <input type="hidden" name="country_code" id="country_code" value="{{ $loginCountry }}">
                                 <input type="hidden" id="mobile_number" name="mobile_number" value="{{ $loginMobile }}">
-                            </div>
-                            <label for="whatsapp_choice" style="margin-top: 10px; display: block;">WhatsApp Number</label>
+
+                            <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px; display: block;">Do you have a WhatsApp number on the same number?</label>
+
                             <div class="radio-row" style="margin-top: 6px;">
                                 <label style="display:flex;align-items:center;gap:4px;">
                                     <input type="radio" name="whatsapp_choice" value="same" {{ $whatsappChoice === 'alt' ? '' : 'checked' }}>
-                                    No (same number)
-                                </label>
-                                <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" name="whatsapp_choice" value="alt" {{ $whatsappChoice === 'alt' ? 'checked' : '' }} id="whatsapp_yes">
                                     Yes
                                 </label>
-                                <span style="color: #9aa3b5;">I have another number for WhatsApp.</span>
+                                <label style="display:flex;align-items:center;gap:4px;">
+                                    <input type="radio" name="whatsapp_choice" value="alt" {{ $whatsappChoice === 'alt' ? 'checked' : '' }} id="whatsapp_no">
+                                    No
+                                </label>
                             </div>
-                            <div id="whatsapp_number_section" style="display: {{ $whatsappChoice === 'alt' ? 'block' : 'none' }}; margin-top: 10px;">
+
+                            <div style="margin-top: 12px;">
+                                <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px; display: block;">Mobile Number</label>
+                                <div class="phone-row">
+                                    <div class="pill-prefix" style="width: 110px; display: flex; align-items: center; justify-content: center; height: 42px; background: var(--control); border: 1px solid var(--border); border-radius: 10px; color: var(--ink-700); font-size: 13px;">
+                                        {{ $displayCountryName }} {{ $displayCountryCode }}
+                                    </div>
+                                    <input class="control" type="text" value="{{ $loginMobile }}" readonly style="background: #e5e7eb; color: #000000; cursor: not-allowed; opacity: 0.7;">
+                                </div>
+                            </div>
+
+                            <div id="whatsapp_number_section" style="display: {{ $whatsappChoice === 'alt' ? 'block' : 'none' }}; margin-top: 12px;">
+                                <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px; display: block;">WhatsApp Number</label>
                                 <div class="phone-row">
                                     <select class="pill-select" name="whatsapp_country_code" id="whatsapp_country_code" aria-label="WhatsApp country code">
                                         <option value="kw" {{ $loginCountry === 'kw' ? 'selected' : '' }}>KW +965</option>
@@ -903,20 +971,12 @@
 
                         <div class="field-grid">
                             <div class="field">
-                                <label for="height">Height</label>
-                                <div class="height-row">
-                                    @php
-                                        $heightUnit = old('height_unit', 'cm');
-                                    @endphp
-                                    <select id="height_unit" name="height_unit" class="unit-select" aria-label="Height unit">
-                                        <option value="cm" {{ $heightUnit === 'cm' ? 'selected' : '' }}>cm</option>
-                                        <option value="ft" {{ $heightUnit === 'ft' ? 'selected' : '' }}>ft</option>
-                                    </select>
-                                    <input id="height" name="height" class="control height-input" type="number" step="0.1" min="0" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}">
-                                </div>
+                                <label for="height">Height (cm)</label>
+                                <input type="hidden" name="height_unit" value="cm">
+                                <input id="height" name="height" class="control" type="number" step="0.1" min="0" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}">
                             </div>
                             <div class="field">
-                                <label for="weight">Weight</label>
+                                <label for="weight">Weight(kg)</label>
                                 <input id="weight" name="weight" class="control weight-input" type="number" step="0.1" min="0" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}">
                             </div>
                         </div>
@@ -925,10 +985,14 @@
                             <label>Select Your Gender</label>
                             <div class="segmented" data-segment>
                                 <button type="button" class="seg-btn" data-seg-btn data-target-input="#gender" data-value="male">
-                                    <span class="seg-icon">♂</span> Male
+                                    <span class="seg-icon">
+                                        <img src="{{ asset('images/male.png') }}" alt="Male">
+                                    </span> Male
                                 </button>
                                 <button type="button" class="seg-btn" data-seg-btn data-target-input="#gender" data-value="female">
-                                    <span class="seg-icon">♀</span> Female
+                                    <span class="seg-icon">
+                                        <img src="{{ asset('images/female.png') }}" alt="Female">
+                                    </span> Female
                                 </button>
                             </div>
                             <input type="hidden" name="gender" id="gender" value="{{ old('gender', $profile->gender ?? 'male') }}">
@@ -963,11 +1027,11 @@
                         </div>
 
                         <div class="field-grid" style="margin-top: 12px;">
-                            <div class="field" id="hair_color_field">
+                            <div class="field" id="hair_color_field" style="display: flex;">
                                 <label for="hair_color">Hair Color</label>
                                 <input id="hair_color" name="hair_color" class="control" type="text" placeholder="e.g. Brown" value="{{ old('hair_color', $profile->hair_color) }}">
                             </div>
-                            <div class="field">
+                            <div class="field" style="display: flex;">
                                 <label for="eye_color">Eye Color</label>
                                 <input id="eye_color" name="eye_color" class="control" type="text" placeholder="e.g. Blue" value="{{ old('eye_color', $profile->eye_color) }}">
                             </div>
@@ -1174,7 +1238,7 @@
                                 </svg>
                                 Back
                             </button>
-                            <button type="submit" class="btn-primary" style="background:#0b9f62;">
+                            <button type="submit" class="btn-primary btn-submit" style="background:#0b9f62;">
                                 Submit Application
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M5 12h14" />
@@ -1219,6 +1283,13 @@
                 if (current === 1) { // Step 2 (0-indexed)
                     setTimeout(() => {
                         toggleGenderBasedFields();
+                    }, 50);
+                }
+
+                // Initialize drag and drop when Step 4 is displayed
+                if (current === 3) { // Step 4 (0-indexed)
+                    setTimeout(() => {
+                        initializeDragAndDrop();
                     }, 50);
                 }
             }
@@ -1423,7 +1494,7 @@
                                     hairColorInput.removeAttribute('required');
                                 }
                             } else {
-                                hairColorField.style.display = 'block';
+                                hairColorField.style.display = 'flex';
                             }
                         }
                     } else {
@@ -1431,7 +1502,7 @@
                         hijabSection.style.display = 'none';
                         // Show hair color for male
                         if (hairColorField) {
-                            hairColorField.style.display = 'block';
+                            hairColorField.style.display = 'flex';
                         }
                         // Remove required from hijab preference
                         hijabRadios.forEach(radio => {
@@ -1481,16 +1552,14 @@
 
             // WhatsApp alt toggle and syncing
             const whatsappRadios = document.querySelectorAll('input[name="whatsapp_choice"]');
-            const mobileNumberSection = document.getElementById('mobile_number_section');
             const whatsappNumberSection = document.getElementById('whatsapp_number_section');
-            const mobileInput = document.getElementById('mobile_number');
             const whatsappInput = document.getElementById('whatsapp_number_input');
 
             function toggleWhatsappFields() {
                 const choice = document.querySelector('input[name="whatsapp_choice"]:checked')?.value;
 
                 if (choice === 'alt') {
-                    // When "Yes" is selected: Show WhatsApp number
+                    // When "No" is selected: Show WhatsApp number
                     if (whatsappNumberSection) {
                         whatsappNumberSection.style.display = 'block';
                         if (whatsappInput) {
@@ -1498,7 +1567,7 @@
                         }
                     }
                 } else {
-                    // When "No (same number)" is selected: Hide WhatsApp number
+                    // When "Yes" is selected: Hide WhatsApp number
                     if (whatsappNumberSection) {
                         whatsappNumberSection.style.display = 'none';
                         if (whatsappInput) {
@@ -1523,7 +1592,7 @@
 
                 const selectedValue = nationalitySelect.value;
                 if (selectedValue && selectedValue !== '') {
-                    const flagUrl = `https://flagcdn.com/24x18/${selectedValue.toLowerCase()}.png`;
+                    const flagUrl = `https://flagcdn.com/w160/${selectedValue.toLowerCase()}.png`;
                     nationalityFlag.src = flagUrl;
                     nationalityFlag.alt = nationalitySelect.options[nationalitySelect.selectedIndex].text;
                     nationalityFlag.style.display = 'block';
@@ -1533,13 +1602,9 @@
                     // Reset onerror handler
                     nationalityFlag.onerror = function() {
                         // Try alternative flag source if first fails
-                        this.src = `https://flagcdn.com/w20/${selectedValue.toLowerCase()}.png`;
-                        this.onerror = function() {
-                            // If both fail, try with different size
-                            this.src = `https://flagcdn.com/32x24/${selectedValue.toLowerCase()}.png`;
+                        this.src = `https://flagcdn.com/w160/${selectedValue.toLowerCase()}.png`;
                             this.onerror = function() {
                                 this.style.display = 'none';
-                            };
                         };
                     };
                 } else {
@@ -1585,10 +1650,8 @@
 
             function updateLabel(input, label) {
                 if (!input || !label) return;
-                input.addEventListener('change', () => {
                     const fileName = input.files && input.files[0] ? input.files[0].name : '';
                     label.textContent = fileName || label.dataset.defaultText || label.textContent;
-                });
             }
 
             if (frontLabel) frontLabel.dataset.defaultText = frontLabel.textContent;
@@ -1596,10 +1659,107 @@
             if (headshotLabel) headshotLabel.dataset.defaultText = headshotLabel.textContent;
             if (fullbodyLabel) fullbodyLabel.dataset.defaultText = fullbodyLabel.textContent;
 
-            updateLabel(frontInput, frontLabel);
-            updateLabel(backInput, backLabel);
-            updateLabel(headshotInput, headshotLabel);
-            updateLabel(fullbodyInput, fullbodyLabel);
+            // Update labels on file change
+            if (frontInput) {
+                frontInput.addEventListener('change', () => updateLabel(frontInput, frontLabel));
+            }
+            if (backInput) {
+                backInput.addEventListener('change', () => updateLabel(backInput, backLabel));
+            }
+            if (headshotInput) {
+                headshotInput.addEventListener('change', () => updateLabel(headshotInput, headshotLabel));
+            }
+            if (fullbodyInput) {
+                fullbodyInput.addEventListener('change', () => updateLabel(fullbodyInput, fullbodyLabel));
+            }
+
+            // Drag and drop functionality
+            function setupDragAndDrop(uploadCard, fileInput) {
+                if (!uploadCard || !fileInput) return;
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Prevent default drag behaviors on the upload card
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    uploadCard.addEventListener(eventName, preventDefaults, false);
+                });
+
+                // Highlight drop area when item is dragged over it
+                uploadCard.addEventListener('dragenter', (e) => {
+                    preventDefaults(e);
+                    uploadCard.classList.add('drag-over');
+                }, false);
+
+                uploadCard.addEventListener('dragover', (e) => {
+                    preventDefaults(e);
+                    uploadCard.classList.add('drag-over');
+                }, false);
+
+                uploadCard.addEventListener('dragleave', (e) => {
+                    preventDefaults(e);
+                    // Only remove highlight if we're leaving the card itself, not a child element
+                    if (!uploadCard.contains(e.relatedTarget)) {
+                        uploadCard.classList.remove('drag-over');
+                    }
+                }, false);
+
+                uploadCard.addEventListener('drop', (e) => {
+                    preventDefaults(e);
+                    uploadCard.classList.remove('drag-over');
+
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (files.length > 0) {
+                        // Validate file type (images only)
+                        const file = files[0];
+                        if (file.type.startsWith('image/')) {
+                            // Create a new FileList-like object
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            fileInput.files = dataTransfer.files;
+
+                            // Trigger change event to update label
+                            const changeEvent = new Event('change', { bubbles: true });
+                            fileInput.dispatchEvent(changeEvent);
+                        } else {
+                            alert('Please drop an image file.');
+                        }
+                    }
+                }, false);
+            }
+
+            // Setup drag and drop for upload cards (only when step 4 is active)
+            function initializeDragAndDrop() {
+                // Only initialize if step 4 is active
+                const step4Panel = document.querySelector('[data-step="4"]');
+                if (!step4Panel || !step4Panel.classList.contains('is-active')) {
+                    return;
+                }
+
+                // Setup drag and drop for ID documents
+                const frontCard = document.querySelector('label[for="upload_front"]');
+                const backCard = document.querySelector('label[for="upload_back"]');
+
+                // Setup drag and drop for profile images
+                const headshotCard = document.querySelector('label[for="upload_headshot"]');
+                const fullbodyCard = document.querySelector('label[for="upload_fullbody"]');
+
+                if (frontCard && frontInput) setupDragAndDrop(frontCard, frontInput);
+                if (backCard && backInput) setupDragAndDrop(backCard, backInput);
+                if (headshotCard && headshotInput) setupDragAndDrop(headshotCard, headshotInput);
+                if (fullbodyCard && fullbodyInput) setupDragAndDrop(fullbodyCard, fullbodyInput);
+            }
+
+            // Initialize on page load if step 4 is already active
+            setTimeout(() => {
+                if (current === 3) {
+                    initializeDragAndDrop();
+                }
+            }, 200);
 
             if (stepInput) {
                 const form = document.getElementById('profile-wizard');

@@ -19,7 +19,7 @@
         }
 
         body {
-            background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
+            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
             min-height: 100vh;
         }
@@ -212,6 +212,25 @@
             margin-right: 12px;
         }
 
+        .secondary-link,
+        .secondary-link:visited,
+        .secondary-link:hover,
+        .secondary-link:active {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            color: #3f3f3f;
+            font-size: 12px;
+            margin-top: 18px;
+            text-decoration: none;
+        }
+
+        .secondary-link span {
+            border-bottom: 1px solid #3f3f3f;
+            padding-bottom: 2px;
+        }
+
         @media (max-width: 520px) {
             .login-card {
                 border-radius: 14px;
@@ -269,6 +288,10 @@
                     Sign in with Google
                 </a>
             </div>
+
+            <a class="secondary-link" href="{{ route('talent.login') }}">
+                <span>Sign in as Model</span>
+            </a>
         </div>
     </div>
 @endsection

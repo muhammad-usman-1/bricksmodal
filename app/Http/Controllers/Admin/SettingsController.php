@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminSetting;
 use Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class SettingsController extends Controller
@@ -35,9 +36,29 @@ class SettingsController extends Controller
             'date_format' => ['nullable', 'string', 'max:50'],
             'time_format' => ['nullable', 'string', 'max:50'],
             'appearance' => ['nullable', 'string', 'max:50'],
+            'background_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
+            'remove_background_image' => ['sometimes', 'boolean'],
         ]);
 
         $settings = AdminSetting::singleton();
+
+        // Handle background image upload
+        if ($request->has('remove_background_image') && $request->boolean('remove_background_image')) {
+            // Remove background image
+            if ($settings->background_image_path) {
+                Storage::disk('public')->delete($settings->background_image_path);
+                $validated['background_image_path'] = null;
+            }
+        } elseif ($request->hasFile('background_image')) {
+            // Delete old background image if exists
+            if ($settings->background_image_path) {
+                Storage::disk('public')->delete($settings->background_image_path);
+            }
+            
+            // Store new background image
+            $path = $request->file('background_image')->store('backgrounds', 'public');
+            $validated['background_image_path'] = $path;
+        }
 
         // Ensure missing checkboxes are treated as false
         foreach ([
@@ -50,6 +71,9 @@ class SettingsController extends Controller
         ] as $flag) {
             $validated[$flag] = $request->boolean($flag);
         }
+
+        // Remove file input from validated data before saving
+        unset($validated['background_image'], $validated['remove_background_image']);
 
         $settings->fill($validated)->save();
 

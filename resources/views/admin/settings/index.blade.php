@@ -117,7 +117,7 @@
 
 <div class="settings-shell">
     <div class="settings-frame">
-        <form method="POST" action="{{ route('admin.settings.update') }}">
+        <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
             @csrf
             <div class="settings-top">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -297,6 +297,38 @@
                         <div class="icon-wrap"><i class="fas fa-desktop"></i></div>
                         <span>System</span>
                     </label>
+                </div>
+            </div>
+
+            <div class="card-block">
+                <div class="card-head">
+                    <div class="icon-circle"><i class="fas fa-image"></i></div>
+                    <div>
+                        <p class="card-title">Background Image</p>
+                        <p class="card-sub">Upload a custom background image for authentication and onboarding pages</p>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    @if($settings->background_image_path)
+                        <div style="margin-bottom: 12px; padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e1e4ea;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                                <img src="{{ asset('storage/' . $settings->background_image_path) }}" alt="Current background" style="max-width: 200px; max-height: 120px; border-radius: 6px; object-fit: cover; border: 1px solid #e1e4ea;">
+                                <div style="flex: 1;">
+                                    <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #2c2d33;">Current Background Image</p>
+                                    <p style="margin: 0; font-size: 11px; color: #8b8f99;">Upload a new image to replace it</p>
+                                </div>
+                            </div>
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #dc3545; cursor: pointer;">
+                                <input type="checkbox" name="remove_background_image" value="1" style="margin: 0;">
+                                <span>Remove background image (use default)</span>
+                            </label>
+                        </div>
+                    @endif
+                    <div class="field">
+                        <label>Upload Background Image</label>
+                        <input type="file" name="background_image" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" style="padding: 8px; border: 1px solid #e1e4ea; border-radius: 8px; font-size: 12px; width: 100%;">
+                        <p style="margin: 6px 0 0; font-size: 11px; color: #8b8f99;">JPG, PNG, GIF, or WebP. Max size: 5MB</p>
+                    </div>
                 </div>
             </div>
         </form>

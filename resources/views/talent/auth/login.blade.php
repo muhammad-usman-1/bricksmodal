@@ -7,7 +7,7 @@
 
     <style>
         body {
-            background: #ffffff url('{{ asset('images/landing1.jpg') }}') center center / cover no-repeat;
+            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat;
             font-family: 'Arimo', sans-serif;
         }
 
@@ -88,10 +88,10 @@
         }
 
         .country-flag {
-            width: 24px;
+            width: 27px;
             height: 18px;
             display: inline-block;
-            border-radius: 2px;
+
             object-fit: cover;
             flex-shrink: 0;
         }
@@ -199,7 +199,7 @@
                 <label class="field-label" for="phone">Phone Number</label>
                 <div class="phone-wrapper">
                     <div class="country-code-display">
-                        <img src="https://flagcdn.com/w20/kw.png" alt="Kuwait" class="country-flag" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2218%22%3E%3Crect width=%2224%22 height=%226%22 fill=%22%23007A3D%22/%3E%3Crect y=%226%22 width=%2224%22 height=%226%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2212%22 width=%2224%22 height=%226%22 fill=%22%23CE1126%22/%3E%3Cpath d=%22M0 0 L8 9 L0 18 Z%22 fill=%22%23000000%22/%3E%3C/svg%3E';">
+                        <img src="https://flagcdn.com/w160/kw.png" alt="Kuwait" class="country-flag" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2218%22%3E%3Crect width=%2224%22 height=%226%22 fill=%22%23007A3D%22/%3E%3Crect y=%226%22 width=%2224%22 height=%226%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2212%22 width=%2224%22 height=%226%22 fill=%22%23CE1126%22/%3E%3Cpath d=%22M0 0 L8 9 L0 18 Z%22 fill=%22%23000000%22/%3E%3C/svg%3E';">
                         <span>+965</span>
                     </div>
                     <div class="phone-input-wrapper">

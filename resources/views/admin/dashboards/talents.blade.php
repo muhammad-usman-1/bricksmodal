@@ -29,7 +29,7 @@ line-height: 36px; /* 150% */}
     .pill-btn.active { background: #0f1524; color: #fff; border-color: #0f1524; }
 
     .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; }
+    .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -47,6 +47,7 @@ line-height: 36px; /* 150% */}
     }
 
     .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 10; opacity: 0.6; }
+    .card-ellipsis:hover { opacity: 1; }
 
     .card-overlay {
         position: absolute; left: 0; right: 0; bottom: 0;
@@ -70,9 +71,6 @@ line-height: 36px; /* 150% */}
     .joined-info { display: flex; flex-direction: column; gap: 2px; }
     .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; }
     .joined-date { font-size: 12px; font-weight: 500; color: #fff; }
-
-    .view-link { color: #fff; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: opacity 0.2s; }
-    .view-link:hover { opacity: 0.8; text-decoration: none; color: #fff; }
 
     @media (max-width: 640px) {
         .talent-card { height: 280px; }
@@ -179,7 +177,7 @@ line-height: 36px; /* 150% */}
                     }
                     $avatar = $avatar ?: $fallbackImg;
                 @endphp
-                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}">
+                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}">
                     <img class="talent-img" src="{{ $avatar }}" alt="{{ $displayName }}">
                     <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
                     <span class="card-ellipsis"><i class="fas fa-ellipsis-v"></i></span>
@@ -201,9 +199,6 @@ line-height: 36px; /* 150% */}
                                 <span class="joined-label">Joined</span>
                                 <span class="joined-date">{{ $joinedAt }}</span>
                             </div>
-                            <a class="view-link" href="{{ route('admin.talent-profiles.show', $talent->id) }}">
-                                View details <i class="fas fa-chevron-right" style="font-size:10px;"></i>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -255,6 +250,20 @@ line-height: 36px; /* 150% */}
         });
 
         searchInput?.addEventListener('input', applyFilters);
+
+        // Make cards clickable
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't navigate if clicking on the ellipsis menu
+                if (e.target.closest('.card-ellipsis')) {
+                    return;
+                }
+                const url = this.dataset.url;
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
     });
 </script>
 @endsection

@@ -35,13 +35,13 @@
     .field-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
     .field-block label { font-size: 12px; color: #101828; font-weight: 700; margin: 0; }
     .shoot-page label { font-weight: 700; }
-    .dark-input { background: #0f0f11; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
+    .dark-input { background: #e5e7eb; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
     .dark-input.has-textarea { align-items: flex-start; padding: 10px; }
-    .dark-input input { background: transparent; border: none; color: #f7f7f7; width: 100%; font-size: 12px; padding: 4px 0; outline: none; }
-    .dark-input input::placeholder { color: #a8adb5; }
-    .dark-input textarea { background: transparent; border: none; color: #f7f7f7; width: 100%; font-size: 12px; padding: 0; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
-    .dark-input textarea::placeholder { color: #a8adb5; }
-    .dark-input.has-icon .input-icon { color: #a8adb5; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
+    .dark-input input { background: transparent; border: none; color: #000000; width: 100%; font-size: 12px; padding: 4px 0; outline: none; }
+    .dark-input input::placeholder { color: #000000; }
+    .dark-input textarea { background: transparent; border: none; color: #000000; width: 100%; font-size: 12px; padding: 0; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
+    .dark-input textarea::placeholder { color: #000000; }
+    .dark-input.has-icon .input-icon { color: #000000; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .dark-input.has-pill { padding-right: 42px; }
     .input-pill { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 999px; background: #0f9f4f; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
     .dark-input.has-suffix { padding-right: 48px; }
@@ -170,8 +170,8 @@
     .dark-input input,
     .dark-input input:-webkit-autofill,
     .dark-input input:-webkit-autofill:hover,
-    .dark-input input:-webkit-autofill:focus { background: transparent !important; -webkit-text-fill-color: #f7f7f7; box-shadow: 0 0 0px 1000px #0f0f11 inset !important; caret-color: #f7f7f7; }
-    .dark-input textarea { caret-color: #f7f7f7; }
+    .dark-input input:-webkit-autofill:focus { background: transparent !important; -webkit-text-fill-color: #000000; box-shadow: 0 0 0px 1000px #e5e7eb inset !important; caret-color: #000000; }
+    .dark-input textarea { caret-color: #000000; }
 
     .label-multiselect {
         position: relative;
@@ -264,44 +264,62 @@
 
     .outfit-type-header { display: flex; align-items: center; gap: 10px; color: #344054; font-weight: 600; font-size: 14px; margin-bottom: 12px; }
     .outfit-type-header i { color: #475467; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #F9FAFB; border-radius: 6px; border: 1px solid #EAECF0; }
+    .traditional-outfit-btn { background: #0f1014; border: 1px solid #0f1014; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; transition: all 0.2s; margin-left: auto; }
+    .traditional-outfit-btn:hover { background: #0f1014; border-color: #0f1014; opacity: 0.9; }
 
     .traditional-dress-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #EAECF0; border-radius: 8px; color: #475467; font-size: 13px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
     .traditional-dress-btn:hover { background: #F9FAFB; border-color: #D0D5DD; }
 
-    /* Male outfits: row layout with 3 equal sections */
-    .outfit-type-card[data-outfit-gender="male"] .outfit-item-group { 
-        display: flex; 
-        flex-direction: row; 
-        gap: 12px; 
+    /* Male outfits: row layout with 2 equal sections by default (like female) */
+    .outfit-type-card[data-outfit-gender="male"] .outfit-item-group {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
     }
-    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: row; 
-        align-items: flex-start; 
-        gap: 14px; 
-        background: #F9FAFB; 
-        padding: 14px; 
-        border-radius: 12px; 
-        border: 1px solid #F2F4F7; 
+    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 14px;
+        background: #F9FAFB;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #F2F4F7;
+    }
+    /* When traditional mode is active, show only traditional */
+    .outfit-type-card[data-outfit-gender="male"][data-traditional-mode="true"] .outfit-sub-item[data-outfit-type="traditional"] {
+        display: flex !important;
+    }
+    .outfit-type-card[data-outfit-gender="male"][data-traditional-mode="true"] .outfit-sub-item[data-outfit-type="top"],
+    .outfit-type-card[data-outfit-gender="male"][data-traditional-mode="true"] .outfit-sub-item[data-outfit-type="bottom"] {
+        display: none !important;
+    }
+    /* By default, hide traditional and show top/bottom */
+    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item[data-outfit-type="traditional"] {
+        display: none;
+    }
+    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item[data-outfit-type="top"],
+    .outfit-type-card[data-outfit-gender="male"] .outfit-sub-item[data-outfit-type="bottom"] {
+        display: flex;
     }
 
     /* Female outfits: row layout with 2 equal sections */
-    .outfit-type-card[data-outfit-gender="female"] .outfit-item-group { 
-        display: flex; 
-        flex-direction: row; 
-        gap: 12px; 
+    .outfit-type-card[data-outfit-gender="female"] .outfit-item-group {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
     }
-    .outfit-type-card[data-outfit-gender="female"] .outfit-sub-item { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: row; 
-        align-items: flex-start; 
-        gap: 14px; 
-        background: #F9FAFB; 
-        padding: 14px; 
-        border-radius: 12px; 
-        border: 1px solid #F2F4F7; 
+    .outfit-type-card[data-outfit-gender="female"] .outfit-sub-item {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 14px;
+        background: #F9FAFB;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #F2F4F7;
     }
 
     /* Default for other cases */
@@ -309,26 +327,26 @@
     .outfit-sub-item { display: flex; align-items: flex-start; gap: 14px; background: #F9FAFB; padding: 14px; border-radius: 12px; border: 1px solid #F2F4F7; }
 
     /* Image box for row layout - fixed width, side by side with details */
-    .outfit-type-card[data-outfit-gender] .item-image-box { 
-        width: 110px; 
-        height: 110px; 
-        background: #F2F4F7; 
-        border-radius: 10px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        font-size: 11px; 
-        color: #667085; 
-        text-align: center; 
-        padding: 10px; 
-        flex-shrink: 0; 
-        line-height: 1.4; 
+    .outfit-type-card[data-outfit-gender] .item-image-box {
+        width: 110px;
+        height: 110px;
+        background: #F2F4F7;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #667085;
+        text-align: center;
+        padding: 10px;
+        flex-shrink: 0;
+        line-height: 1.4;
     }
-    .outfit-type-card[data-outfit-gender] .item-image-box img { 
-        width: 100%; 
-        height: 100%; 
-        object-fit: cover; 
-        border-radius: 8px; 
+    .outfit-type-card[data-outfit-gender] .item-image-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
     }
 
     /* Default image box for column layout */
@@ -336,12 +354,12 @@
     .item-image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
     /* Item details for row layout - next to image */
-    .outfit-type-card[data-outfit-gender] .item-details { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        gap: 10px; 
-        align-self: center; 
+    .outfit-type-card[data-outfit-gender] .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-self: center;
     }
 
     /* Default item details */
@@ -353,11 +371,11 @@
     .item-select:focus { border-color: #98A2B3; outline: none; }
 
     @media (max-width: 992px) {
-        .outfit-type-card[data-outfit-gender] .outfit-item-group { 
-            flex-direction: column; 
+        .outfit-type-card[data-outfit-gender] .outfit-item-group {
+            flex-direction: column;
         }
-        .outfit-type-card[data-outfit-gender] .outfit-sub-item { 
-            flex: none; 
+        .outfit-type-card[data-outfit-gender] .outfit-sub-item {
+            flex: none;
         }
     }
     /* Custom Picker Dropdown */
@@ -457,7 +475,7 @@
 
     .dark-input.has-picker { cursor: pointer; }
     .dark-input.has-picker input { cursor: pointer; }
-    .picker-icon { color: #a8adb5; font-size: 14px; }
+    .picker-icon { color: #000000; font-size: 14px; }
 
     /* Validation Error Styles */
     .validation-error {
@@ -641,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (description.value && description.value.trim()) {
                     // Only allow letters (a-z, A-Z) and spaces
                     const textOnlyPattern = /^[a-zA-Z\s]+$/;
-                    
+
                     if (!textOnlyPattern.test(description.value.trim())) {
                         showFieldError(description, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
                         valid = false;
@@ -662,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const selectedDate = new Date(shootDate.value + 'T00:00:00');
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    
+
                     if (selectedDate < today) {
                         showFieldError(shootDate, 'Shoot date cannot be earlier than today.');
                         valid = false;
@@ -793,18 +811,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('is-invalid')) {
             clearFieldError(e.target);
         }
-        
+
         // Real-time validation for description field - only allow letters and spaces
         if (e.target.id === 'description') {
             const textOnlyPattern = /^[a-zA-Z\s]*$/;
             let value = e.target.value;
-            
+
             // Remove any characters that are not letters or spaces
             if (!textOnlyPattern.test(value)) {
                 // Filter out non-letter, non-space characters
                 const cleaned = value.replace(/[^a-zA-Z\s]/g, '');
                 e.target.value = cleaned;
-                
+
                 // Show error if invalid characters were removed
                 if (cleaned.length < originalLength) {
                     showFieldError(e.target, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
@@ -828,13 +846,13 @@ document.addEventListener('DOMContentLoaded', function () {
             // Allow: letters (a-z, A-Z), space, backspace, delete, tab, arrow keys
             const char = String.fromCharCode(e.which || e.keyCode);
             const textOnlyPattern = /^[a-zA-Z\s]$/;
-            
+
             // Allow control keys (backspace, delete, tab, arrow keys, etc.)
-            if (e.which === 0 || e.which === 8 || e.which === 9 || e.which === 46 || 
+            if (e.which === 0 || e.which === 8 || e.which === 9 || e.which === 46 ||
                 (e.which >= 35 && e.which <= 40)) {
                 return true;
             }
-            
+
             // Block if not a letter or space
             if (!textOnlyPattern.test(char)) {
                 e.preventDefault();
@@ -848,16 +866,16 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
             const cleaned = pastedText.replace(/[^a-zA-Z\s]/g, '');
-            
+
             // Insert cleaned text at cursor position
             const start = this.selectionStart;
             const end = this.selectionEnd;
             const currentValue = this.value;
             this.value = currentValue.substring(0, start) + cleaned + currentValue.substring(end);
-            
+
             // Set cursor position
             this.setSelectionRange(start + cleaned.length, start + cleaned.length);
-            
+
             // Show error if some characters were removed
             if (cleaned.length < pastedText.length) {
                 showFieldError(this, 'Description must contain only text (letters and spaces). Numbers and special characters are not allowed.');
@@ -972,7 +990,7 @@ const initModelCard = (scope) => {
         if (modelCard) {
             // Set initial state
             toggleOutfitsByGender(select, modelCard);
-            
+
             // Listen for changes
             select.addEventListener('change', () => {
                 toggleOutfitsByGender(select, modelCard);
@@ -984,6 +1002,29 @@ const initModelCard = (scope) => {
     if (window.__initLabelMultiselect) {
         window.__initLabelMultiselect(scope);
     }
+
+    // Initialize traditional outfit toggle for male outfits
+    scope.querySelectorAll('[data-toggle-traditional]').forEach(btn => {
+        if (btn.dataset.toggleBound === 'true') return;
+        btn.dataset.toggleBound = 'true';
+
+        btn.addEventListener('click', function() {
+            const outfitCard = this.closest('[data-outfit-gender="male"]');
+            if (!outfitCard) return;
+
+            const isTraditionalMode = outfitCard.dataset.traditionalMode === 'true';
+
+            if (isTraditionalMode) {
+                // Switch to top/bottom mode
+                outfitCard.dataset.traditionalMode = 'false';
+                this.textContent = 'Switch to Traditional Outfit';
+            } else {
+                // Switch to traditional mode
+                outfitCard.dataset.traditionalMode = 'true';
+                this.textContent = 'Switch to Casual Outfit';
+            }
+        });
+    });
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1006,15 +1047,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const wrapper = document.createElement('div');
         const displayIndex = index + 1;
         const displayWord = numberToWord(displayIndex);
-        
+
         // Use regex to replace Model __INDEX_DISPLAY__ with Model One/Two etc
         let html = template.innerHTML
             .replace(/__INDEX__/g, index)
             .replace(/Model __INDEX_DISPLAY__/g, `Model ${displayWord}`)
             // Fallback for strict numbers if needed elsewhere
-            .replace(/__INDEX_DISPLAY__/g, displayIndex) 
+            .replace(/__INDEX_DISPLAY__/g, displayIndex)
             .trim();
-            
+
         wrapper.innerHTML = html;
         return wrapper.firstElementChild;
     };
@@ -1082,6 +1123,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     initModelCard(document);
+
+    // Initialize traditional outfit toggle for all existing male outfit cards
+    document.querySelectorAll('[data-outfit-gender="male"]').forEach(card => {
+        card.dataset.traditionalMode = 'false'; // Default to top/bottom mode
+    });
 });
 
 window.initShootLocationAutocomplete = function () {
