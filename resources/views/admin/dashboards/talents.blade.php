@@ -31,7 +31,11 @@ line-height: 36px; /* 150% */}
     .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
-    .talent-img { width: 100%; height: 100%; object-fit: cover; }
+    .talent-img-container { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
+    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out; transform: scale(1.05); z-index: 1; }
+    .talent-img.active { opacity: 1; transform: scale(1); z-index: 1; }
+    .talent-card:hover .talent-img:not(.active) { opacity: 0; }
+    .talent-card:hover .talent-img.active { opacity: 1; transform: scale(1); }
 
     .badge-active {
         position: absolute; top: 15px; left: 15px;
@@ -41,12 +45,14 @@ line-height: 36px; /* 150% */}
         display: inline-flex; align-items: center; gap: 6px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        z-index: 20;
+        pointer-events: none;
     }
     .badge-active::before {
         content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%;
     }
 
-    .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 10; opacity: 0.6; }
+    .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 20; opacity: 0.6; }
     .card-ellipsis:hover { opacity: 1; }
 
     .card-overlay {
@@ -57,20 +63,23 @@ line-height: 36px; /* 150% */}
         color: #fff;
         display: flex; flex-direction: column;
         justify-content: flex-end;
+        z-index: 10;
+        pointer-events: none;
+        transition: none;
     }
 
-    .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
-    .overlay-flag { position: absolute; left: 0; top: 0; width: 29px; height: 22px;  overflow: hidden; }
-    .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; }
+    .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; transition: none; }
+    .overlay-flag { position: absolute; left: 0; top: 0; width: 29px; height: 22px;  overflow: hidden; transition: none; }
+    .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; transition: none; }
 
-    .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; }
+    .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; transition: none; }
 
-    .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; }
+    .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; transition: none; }
 
-    .overlay-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-    .joined-info { display: flex; flex-direction: column; gap: 2px; }
-    .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; }
-    .joined-date { font-size: 12px; font-weight: 500; color: #fff; }
+    .overlay-bottom { display: flex; justify-content: space-between; align-items: flex-end; transition: none; }
+    .joined-info { display: flex; flex-direction: column; gap: 2px; transition: none; }
+    .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; transition: none; }
+    .joined-date { font-size: 12px; font-weight: 500; color: #fff; transition: none; }
 
     @media (max-width: 640px) {
         .talent-card { height: 280px; }
@@ -176,9 +185,72 @@ line-height: 36px; /* 150% */}
                         }
                     }
                     $avatar = $avatar ?: $fallbackImg;
+                    
+                    // Collect all images for hover effect
+                    $headshotImages = [];
+                    $fullBodyImages = [];
+                    
+                    // Helper function to normalize image path
+                    $normalizeImage = function($path) {
+                        if (!$path) return null;
+                        if (is_array($path)) {
+                            $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+                        }
+                        if (!$path) return null;
+                        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
+                            return $path;
+                        }
+                        $normalized = ltrim($path, '/');
+                        $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/') ? substr($normalized, 8) : $normalized;
+                        if (file_exists(public_path('storage/' . $storageRelative))) {
+                            return asset('storage/' . $storageRelative);
+                        } elseif (file_exists(public_path($normalized))) {
+                            return asset($normalized);
+                        } else {
+                            return asset('storage/' . $storageRelative);
+                        }
+                    };
+                    
+                    // Collect headshot images
+                    if ($talent->headshot_left_path) {
+                        $img = $normalizeImage($talent->headshot_left_path);
+                        if ($img) $headshotImages[] = $img;
+                    }
+                    if ($talent->headshot_center_path) {
+                        $img = $normalizeImage($talent->headshot_center_path);
+                        if ($img) $headshotImages[] = $img;
+                    }
+                    if ($talent->headshot_right_path) {
+                        $img = $normalizeImage($talent->headshot_right_path);
+                        if ($img) $headshotImages[] = $img;
+                    }
+                    
+                    // Collect full-body images
+                    if ($talent->full_body_front_path) {
+                        $img = $normalizeImage($talent->full_body_front_path);
+                        if ($img) $fullBodyImages[] = $img;
+                    }
+                    if ($talent->full_body_right_path) {
+                        $img = $normalizeImage($talent->full_body_right_path);
+                        if ($img) $fullBodyImages[] = $img;
+                    }
+                    if ($talent->full_body_back_path) {
+                        $img = $normalizeImage($talent->full_body_back_path);
+                        if ($img) $fullBodyImages[] = $img;
+                    }
+                    
+                    // Combine all images (headshots first, then full-body)
+                    $allImages = array_merge($headshotImages, $fullBodyImages);
+                    if (empty($allImages)) {
+                        $allImages = [$avatar];
+                    }
                 @endphp
-                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}">
-                    <img class="talent-img" src="{{ $avatar }}" alt="{{ $displayName }}">
+                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
+                    <div class="talent-img-container">
+                        @foreach($allImages as $index => $imgSrc)
+                            <img class="talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
+                        @endforeach
+                    </div>
                     <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
                     <span class="card-ellipsis"><i class="fas fa-ellipsis-v"></i></span>
                     <div class="card-overlay">
@@ -262,6 +334,36 @@ line-height: 36px; /* 150% */}
                 if (url) {
                     window.location.href = url;
                 }
+            });
+        });
+
+        // Image rotation on hover
+        cards.forEach(card => {
+            const images = card.querySelectorAll('.talent-img');
+            if (images.length <= 1) return; // No rotation needed if only one image
+            
+            let currentIndex = 0;
+            let rotationInterval = null;
+            
+            card.addEventListener('mouseenter', function() {
+                // Start rotation
+                rotationInterval = setInterval(() => {
+                    images[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % images.length;
+                    images[currentIndex].classList.add('active');
+                }, 800); // Change image every 800ms
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                // Stop rotation and reset to first image
+                if (rotationInterval) {
+                    clearInterval(rotationInterval);
+                    rotationInterval = null;
+                }
+                images.forEach((img, idx) => {
+                    img.classList.toggle('active', idx === 0);
+                });
+                currentIndex = 0;
             });
         });
     });
