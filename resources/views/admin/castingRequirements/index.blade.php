@@ -442,7 +442,7 @@ margin-bottom: 0;
                         <td data-label="Shoot Name">
                             <div class="shoot-name">
                                 <div class="logo-circle">{{ $initials }}</div>
-                                <span>{{ $projectName }}</span>
+                                <a href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" style="text-decoration: none; color: inherit;">{{ $projectName }}</a>
                             </div>
                         </td>
                         <td data-label="Location" class="location-cell">{{ $location }}</td>

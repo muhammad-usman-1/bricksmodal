@@ -29,7 +29,7 @@
         border: 1px solid #e5e7eb !important;
         border-radius: 10px !important;
         padding: 8px 15px !important;
-    
+
         width: 100% !important;
 
         flex-shrink: 1 !important;
@@ -125,6 +125,20 @@
     html[data-theme="dark"] .header-icon-link:hover {
         background: #252932 !important;
     }
+
+    /* Keep dropdown items black on click/hover */
+    .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+    }
+    .dropdown-menu .dropdown-item:hover,
+    .dropdown-menu .dropdown-item:focus,
+    .dropdown-menu .dropdown-item:active {
+        color: #000000 !important;
+        background-color: #f3f4f6 !important;
+    }
+    .dropdown-menu .dropdown-item i {
+        color: #000000 !important;
+    }
 </style>
 
 <header class="c-header c-header-fixed admin-header" id="admin-main-header">
@@ -137,9 +151,29 @@
             <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
         </div>
         <div id="admin-icons-group">
-            <a href="{{ route('admin.outfits.index') }}" class="header-icon-link" aria-label="Add New">
-                <img src="{{ asset('images/plus.png') }}" alt="Add">
-            </a>
+            <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
+                <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Add New" style="margin-left: 0 !important;">
+                    <img src="{{ asset('images/plus.png') }}" alt="Add">
+                </a>
+                <div class="dropdown-menu dropdown-menu-right pt-0" style="min-width: 180px;">
+                    <a class="dropdown-item" href="{{ route('admin.talent-profiles.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                        <i class="fas fa-star" style="width: 16px; text-align: center;"></i>
+                        <span>Add Talent</span>
+                    </a>
+                    <a class="dropdown-item" href="{{ route('admin.casting-requirements.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                        <i class="fas fa-camera" style="width: 16px; text-align: center;"></i>
+                        <span>Add New Shoot</span>
+                    </a>
+                    <a class="dropdown-item" href="{{ route('admin.admin-management.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                        <i class="fas fa-user-circle" style="width: 16px; text-align: center;"></i>
+                        <span>Add User</span>
+                    </a>
+                    <a class="dropdown-item" href="{{ route('admin.outfits.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                        <i class="fas fa-tshirt" style="width: 16px; text-align: center;"></i>
+                        <span>Add Outfit</span>
+                    </a>
+                </div>
+            </div>
             <a href="{{ route('admin.settings.index') }}" class="header-icon-link" aria-label="Settings">
                 <img src="{{ asset('images/setting.png') }}" alt="Settings">
             </a>
