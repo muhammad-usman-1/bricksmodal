@@ -22,6 +22,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            
             padding: 24px;
         }
         .auth-card {
