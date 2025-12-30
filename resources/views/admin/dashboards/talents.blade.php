@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('content')
+<link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 <style>
     :root {
         --bg: #f7f8fb;
@@ -32,7 +33,7 @@ line-height: 36px; /* 150% */}
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img-container { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
-    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out; transform: scale(1.05); z-index: 1; }
+    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; transform: scale(1.05); z-index: 1; }
     .talent-img.active { opacity: 1; transform: scale(1); z-index: 1; }
     .talent-card:hover .talent-img:not(.active) { opacity: 0; }
     .talent-card:hover .talent-img.active { opacity: 1; transform: scale(1); }
@@ -69,7 +70,7 @@ line-height: 36px; /* 150% */}
     }
 
     .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; transition: none; }
-    .overlay-flag { position: absolute; left: 0; top: 0; width: 29px; height: 22px;  overflow: hidden; transition: none; }
+    .overlay-flag { position: absolute; left: 0; top: 0; width: auto; height: 22px; aspect-ratio: 4 / 3; display: inline-block; transition: none; background-size: contain; background-position: center; background-repeat: no-repeat; }
     .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; transition: none; }
 
     .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; transition: none; }
@@ -185,11 +186,11 @@ line-height: 36px; /* 150% */}
                         }
                     }
                     $avatar = $avatar ?: $fallbackImg;
-                    
+
                     // Collect all images for hover effect
                     $headshotImages = [];
                     $fullBodyImages = [];
-                    
+
                     // Helper function to normalize image path
                     $normalizeImage = function($path) {
                         if (!$path) return null;
@@ -210,7 +211,7 @@ line-height: 36px; /* 150% */}
                             return asset('storage/' . $storageRelative);
                         }
                     };
-                    
+
                     // Collect headshot images
                     if ($talent->headshot_left_path) {
                         $img = $normalizeImage($talent->headshot_left_path);
@@ -224,7 +225,7 @@ line-height: 36px; /* 150% */}
                         $img = $normalizeImage($talent->headshot_right_path);
                         if ($img) $headshotImages[] = $img;
                     }
-                    
+
                     // Collect full-body images
                     if ($talent->full_body_front_path) {
                         $img = $normalizeImage($talent->full_body_front_path);
@@ -238,7 +239,7 @@ line-height: 36px; /* 150% */}
                         $img = $normalizeImage($talent->full_body_back_path);
                         if ($img) $fullBodyImages[] = $img;
                     }
-                    
+
                     // Combine all images (headshots first, then full-body)
                     $allImages = array_merge($headshotImages, $fullBodyImages);
                     if (empty($allImages)) {
@@ -256,8 +257,8 @@ line-height: 36px; /* 150% */}
                     <div class="card-overlay">
                         <div class="overlay-top">
                             <div class="overlay-flag">
-                                @if($flagUrl)
-                                    <img src="{{ $flagUrl }}" alt="{{ $flagCode }}" style="width:100%; height:100%; object-fit: cover;">
+                                @if($flagCode && strlen($flagCode) === 2)
+                                    <span class="fi fi-{{ strtolower($flagCode) }}" title="{{ $flagCode }}"></span>
                                 @else
                                     <div style="background:#444; color:#fff; font-size:8px; width:50%; height:50%; display:grid; place-items:center;">{{ strtoupper(substr($flagCode ?? '??',0,2)) }}</div>
                                 @endif
@@ -341,19 +342,19 @@ line-height: 36px; /* 150% */}
         cards.forEach(card => {
             const images = card.querySelectorAll('.talent-img');
             if (images.length <= 1) return; // No rotation needed if only one image
-            
+
             let currentIndex = 0;
             let rotationInterval = null;
-            
+
             card.addEventListener('mouseenter', function() {
                 // Start rotation
                 rotationInterval = setInterval(() => {
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
-                }, 800); // Change image every 800ms
+                }, 400); // Change image every 400ms
             });
-            
+
             card.addEventListener('mouseleave', function() {
                 // Stop rotation and reset to first image
                 if (rotationInterval) {

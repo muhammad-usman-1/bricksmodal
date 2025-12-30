@@ -18,15 +18,7 @@ class SettingsController extends Controller
 
         $settings = AdminSetting::singleton();
 
-        // Calculate maximum possible file size from PHP limits
-        $maxFileSize = $this->getMaxFileSize();
-
-        // Get actual PHP limits for display
-        $phpUploadMax = $this->parseSize(ini_get('upload_max_filesize'));
-        $phpPostMax = $this->parseSize(ini_get('post_max_size'));
-        $phpActualMax = min($phpUploadMax, $phpPostMax);
-
-        return view('admin.settings.index', compact('settings', 'maxFileSize', 'phpActualMax', 'phpUploadMax', 'phpPostMax'));
+        return view('admin.settings.index', compact('settings'));
     }
 
     /**
@@ -118,9 +110,6 @@ class SettingsController extends Controller
         }
 
         try {
-            // Get maximum file size
-            $maxFileSize = $this->getMaxFileSize();
-
             $validated = $request->validate([
                 'email_notifications' => ['sometimes', 'boolean'],
                 'push_notifications' => ['sometimes', 'boolean'],
@@ -133,7 +122,7 @@ class SettingsController extends Controller
                 'date_format' => ['nullable', 'string', 'max:50'],
                 'time_format' => ['nullable', 'string', 'max:50'],
                 'appearance' => ['nullable', 'string', 'max:50'],
-                'background_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:' . $maxFileSize],
+                'background_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp'],
                 'remove_background_image' => ['sometimes', 'boolean'],
             ]);
 
@@ -153,14 +142,6 @@ class SettingsController extends Controller
                     // Validate file is actually uploaded (not corrupted)
                     if (!$file->isValid()) {
                         return back()->with('error', 'The uploaded file is invalid or corrupted. Please try uploading again.');
-                    }
-
-                    // Check file size again (in case it bypassed validation)
-                    $fileSizeKB = $file->getSize() / 1024;
-                    if ($fileSizeKB > $maxFileSize) {
-                        $fileSizeMB = round($fileSizeKB / 1024, 2);
-                        $maxSizeMB = round($maxFileSize / 1024, 2);
-                        return back()->with('error', "The file size ({$fileSizeMB} MB) exceeds the maximum allowed size of {$maxSizeMB} MB.");
                     }
 
                     // Delete old background image if exists

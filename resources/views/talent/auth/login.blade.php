@@ -4,6 +4,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500&display=swap" rel="stylesheet">
+    <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 
     <style>
         body {
@@ -88,12 +89,14 @@
         }
 
         .country-flag {
-            width: 27px;
+            width: auto;
             height: 18px;
+            aspect-ratio: 4 / 3;
             display: inline-block;
-
-            object-fit: cover;
             flex-shrink: 0;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .phone-input-wrapper {
@@ -199,7 +202,7 @@
                 <label class="field-label" for="phone">Phone Number</label>
                 <div class="phone-wrapper">
                     <div class="country-code-display">
-                        <img src="https://flagcdn.com/w160/kw.png" alt="Kuwait" class="country-flag" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2218%22%3E%3Crect width=%2224%22 height=%226%22 fill=%22%23007A3D%22/%3E%3Crect y=%226%22 width=%2224%22 height=%226%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2212%22 width=%2224%22 height=%226%22 fill=%22%23CE1126%22/%3E%3Cpath d=%22M0 0 L8 9 L0 18 Z%22 fill=%22%23000000%22/%3E%3C/svg%3E';">
+                        <span class="fi fi-kw country-flag" title="Kuwait"></span>
                         <span>+965</span>
                     </div>
                     <div class="phone-input-wrapper">

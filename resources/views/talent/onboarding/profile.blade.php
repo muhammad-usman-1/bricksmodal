@@ -4,6 +4,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 
     <style>
         :root {
@@ -272,13 +273,15 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            width: 28px;
+            width: auto;
             height: 18px;
-            object-fit: cover;
-            border-radius: 2px;
+            aspect-ratio: 4 / 3;
+            display: inline-block;
             pointer-events: none;
             z-index: 100;
-            background: transparent;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .phone-row {
@@ -837,10 +840,10 @@
                                 <div class="nationality-wrapper">
                                     @php
                                         $selectedNationality = old('nationality', $profile->nationality);
-                                        $flagDisplay = $selectedNationality ? 'block' : 'none';
-                                        $flagSrc = $selectedNationality ? 'https://flagcdn.com/w160/' . strtolower($selectedNationality) . '.png' : '';
+                                        $flagDisplay = $selectedNationality ? 'inline-block' : 'none';
+                                        $flagClass = $selectedNationality ? 'fi-' . strtolower($selectedNationality) : '';
                                     @endphp
-                                    <img id="nationality_flag" class="nationality-flag" src="{{ $flagSrc }}" alt="" style="display: {{ $flagDisplay }};">
+                                    <span id="nationality_flag" class="fi nationality-flag {{ $flagClass }}" style="display: {{ $flagDisplay }};"></span>
                                     <select id="nationality" name="nationality" class="control nationality-select" required>
                                         <option value="" {{ $selectedNationality === null ? 'selected' : '' }}>Select nationality</option>
                                         @php
@@ -1592,23 +1595,14 @@
 
                 const selectedValue = nationalitySelect.value;
                 if (selectedValue && selectedValue !== '') {
-                    const flagUrl = `https://flagcdn.com/w160/${selectedValue.toLowerCase()}.png`;
-                    nationalityFlag.src = flagUrl;
-                    nationalityFlag.alt = nationalitySelect.options[nationalitySelect.selectedIndex].text;
-                    nationalityFlag.style.display = 'block';
-                    nationalityFlag.style.visibility = 'visible';
-                    nationalityFlag.style.opacity = '1';
-
-                    // Reset onerror handler
-                    nationalityFlag.onerror = function() {
-                        // Try alternative flag source if first fails
-                        this.src = `https://flagcdn.com/w160/${selectedValue.toLowerCase()}.png`;
-                            this.onerror = function() {
-                                this.style.display = 'none';
-                        };
-                    };
+                    // Remove all existing flag classes
+                    nationalityFlag.className = 'fi nationality-flag';
+                    // Add the new flag class
+                    nationalityFlag.classList.add('fi-' + selectedValue.toLowerCase());
+                    nationalityFlag.style.display = 'inline-block';
                 } else {
                     nationalityFlag.style.display = 'none';
+                    nationalityFlag.className = 'fi nationality-flag';
                 }
             }
 

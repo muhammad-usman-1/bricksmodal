@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('content')
+<link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 <style>
     :root {
         --bg: #f6f7fb;
@@ -70,6 +71,36 @@
         transition: all 0.2s ease;
     }
     .upload-tile.is-editable:hover { border-color: #0f172a; background: #f1f5f9; cursor: pointer; }
+    .upload-tile.is-editable.drag-over { border-color: #10B981; background: #d1fae5; border-width: 2px; }
+    .remove-image-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(15, 23, 42, 0.85);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .remove-image-btn:hover {
+        background: rgba(15, 23, 42, 1);
+        transform: scale(1.1);
+    }
+    .is-editing .upload-tile .remove-image-btn {
+        display: flex;
+    }
+    .upload-tile .remove-image-btn {
+        display: none;
+    }
     .upload-tile img {
         width: 100%;
         height: 100%;
@@ -194,7 +225,9 @@
     }
     .inline-edit-input:focus { border-color: #0f172a; outline: none; box-shadow: 0 0 0 2px rgba(15,23,42,0.1); }
 
-    .save-btn { background: #10B981; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .save-btn { background: #10B981; color: #fff; border: none !important; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: none; }
+    .save-btn:hover { background: #059669; }
+    .save-btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
     .cancel-btn { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
     @media (max-width: 640px) {
@@ -351,9 +384,12 @@
             <div class="upload-grid">
                 @foreach($headshots as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
+                    <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
+                                <i class="fa fa-times"></i>
+                            </button>
                         @else
                             <div class="upload-placeholder">
                                 <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
@@ -376,9 +412,12 @@
             <div class="upload-grid">
                 @foreach($fullBody as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
+                    <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
+                                <i class="fa fa-times"></i>
+                            </button>
                         @else
                             <div class="upload-placeholder">
                                 <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
@@ -401,9 +440,12 @@
             <div class="upload-grid">
                 @foreach($idDocs as $field => $label)
                     @php $img = $talentProfile->{$field} ?: null; @endphp
-                    <div class="upload-tile is-editable" onclick="if(document.getElementById('talentEditForm').classList.contains('is-editing')) this.querySelector('input').click()">
+                    <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
+                                <i class="fa fa-times"></i>
+                            </button>
                         @else
                             <div class="upload-placeholder">
                                 <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
@@ -463,11 +505,10 @@
                                         @elseif($f['name'] === 'nationality' && $f['value'])
                                             @php
                                                 $nationalityCode = strtolower($f['value']);
-                                                $flagUrl = 'https://flagcdn.com/w40/' . $nationalityCode . '.png';
                                                 $countryName = $countries[$nationalityCode] ?? ucfirst($f['value']);
                                             @endphp
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 22px; height: 18px; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #e5e7eb;" onerror="this.style.display='none';">
+                                                <span class="fi fi-{{ $nationalityCode }}" style="width: auto; height: 18px; aspect-ratio: 4 / 3; display: inline-block;" title="{{ $countryName }}"></span>
                                                 <span style="font-weight: 500;">{{ $countryName }}</span>
                                             </div>
                                         @else
@@ -491,7 +532,7 @@
                                             </select>
                                         @elseif($f['type'] === 'nationality')
                                             <div class="nationality-wrapper" style="display: flex; align-items: center; gap: 8px;">
-                                                <img id="nationality_flag_edit" class="nationality-flag" src="{{ $f['value'] ? 'https://flagcdn.com/24x18/' . strtolower($f['value']) . '.png' : '' }}" alt="" style="display: {{ $f['value'] ? 'block' : 'none' }}; width: 24px; height: 18px; border-radius: 2px;">
+                                                <span id="nationality_flag_edit" class="fi nationality-flag {{ $f['value'] ? 'fi-' . strtolower($f['value']) : '' }}" style="display: {{ $f['value'] ? 'inline-block' : 'none' }}; width: auto; height: 18px; aspect-ratio: 4 / 3;"></span>
                                                 <select name="{{ $f['name'] }}" id="nationality_select" class="inline-edit-input" style="flex: 1;">
                                                     <option value="">Select nationality</option>
                                                     @foreach($countries as $code => $name)
@@ -721,22 +762,88 @@
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             const tile = input.closest('.upload-tile');
-            const preview = tile.querySelector('.preview-img');
             const placeholder = tile.querySelector('.upload-placeholder');
+            let preview = tile.querySelector('.preview-img');
+            let removeBtn = tile.querySelector('.remove-image-btn');
 
             reader.onload = function(e) {
-                if (preview) {
-                    preview.src = e.target.result;
-                } else if (placeholder) {
+                // Remove placeholder if exists
+                if (placeholder) {
                     placeholder.style.display = 'none';
-                    const newImg = document.createElement('img');
-                    newImg.src = e.target.result;
-                    newImg.classList.add('preview-img');
-                    tile.prepend(newImg);
+                }
+
+                // Remove existing preview image if any
+                if (preview && preview.tagName === 'IMG') {
+                    preview.remove();
+                }
+
+                // Create new preview image
+                const newImg = document.createElement('img');
+                newImg.src = e.target.result;
+                newImg.classList.add('preview-img');
+                tile.insertBefore(newImg, tile.firstChild);
+
+                // Add remove button if it doesn't exist
+                if (!removeBtn) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'remove-image-btn';
+                    btn.innerHTML = '<i class="fa fa-times"></i>';
+                    btn.title = 'Remove image';
+                    btn.onclick = function(e) {
+                        removeImage(this, e);
+                    };
+                    tile.appendChild(btn);
+                } else {
+                    removeBtn.style.display = 'flex';
                 }
             }
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function removeImage(btn, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const tile = btn.closest('.upload-tile');
+        const fileInput = tile.querySelector('input[type="file"]');
+        const preview = tile.querySelector('.preview-img');
+        const placeholder = tile.querySelector('.upload-placeholder');
+
+        // Remove preview image
+        if (preview) {
+            preview.remove();
+        }
+
+        // Remove the remove button
+        btn.remove();
+
+        // Show placeholder
+        if (placeholder) {
+            placeholder.style.display = 'grid';
+        }
+
+        // Clear file input
+        if (fileInput) {
+            fileInput.value = '';
+            // Reattach change handler
+            fileInput.onchange = function() {
+                previewImage(this);
+            };
+        }
+    }
+
+    function handleFileSelect(fileInput, file) {
+        // Create a FileList-like object
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        // Call previewImage directly (don't trigger change event to avoid double processing)
+        previewImage(fileInput);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -787,14 +894,14 @@
             nationalitySelect.addEventListener('change', function() {
                 const selectedValue = this.value;
                 if (selectedValue && selectedValue !== '') {
-                    const flagUrl = `https://flagcdn.com/24x18/${selectedValue.toLowerCase()}.png`;
-                    nationalityFlag.src = flagUrl;
-                    nationalityFlag.style.display = 'block';
-                    nationalityFlag.onerror = function() {
-                        this.style.display = 'none';
-                    };
+                    // Remove all existing flag classes
+                    nationalityFlag.className = 'fi nationality-flag';
+                    // Add the new flag class
+                    nationalityFlag.classList.add('fi-' + selectedValue.toLowerCase());
+                    nationalityFlag.style.display = 'inline-block';
                 } else {
                     nationalityFlag.style.display = 'none';
+                    nationalityFlag.className = 'fi nationality-flag';
                 }
             });
         }
@@ -844,6 +951,185 @@
         if (hijabSelect) {
             hijabSelect.addEventListener('change', toggleGenderBasedFields);
         }
+
+        // Hide top bar success message and show SweetAlert instead
+        const successMessage = document.querySelector('.alert-success');
+        if (successMessage && successMessage.textContent.trim()) {
+            // Hide the top bar message
+            successMessage.closest('.row')?.remove();
+            // Show SweetAlert with specific message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Talent profile has been updated',
+                confirmButtonColor: '#10B981',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        // Handle form submission to show SweetAlert on success
+        const editForm = document.getElementById('talentEditForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                // Let the form submit normally
+                // The success message will be handled by the redirect response
+            });
+        }
+
+        // Prevent default drag behavior globally when dragging files
+        let isDraggingFile = false;
+        document.addEventListener('dragstart', function(e) {
+            if (e.dataTransfer.types.includes('Files')) {
+                isDraggingFile = true;
+            }
+        }, false);
+
+        document.addEventListener('dragend', function(e) {
+            isDraggingFile = false;
+        }, false);
+
+        // Prevent default drop behavior globally when dragging files
+        document.addEventListener('dragover', function(e) {
+            if (isDraggingFile) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, false);
+
+        document.addEventListener('drop', function(e) {
+            if (isDraggingFile) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, false);
+
+        // Drag-and-drop functionality for upload tiles
+        const uploadTiles = document.querySelectorAll('.upload-tile.is-editable');
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        uploadTiles.forEach(tile => {
+            const fileInput = tile.querySelector('input[type="file"]');
+            if (!fileInput) return;
+
+            let dragCounter = 0;
+            let isDraggingOver = false;
+
+            // Prevent default drag behaviors on tile
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                tile.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop zone when item is dragged over it
+            tile.addEventListener('dragenter', function(e) {
+                dragCounter++;
+                isDraggingOver = true;
+                // Only highlight if in edit mode
+                if (editForm && editForm.classList.contains('is-editing')) {
+                    tile.classList.add('drag-over');
+                }
+            }, false);
+
+            tile.addEventListener('dragover', function(e) {
+                isDraggingOver = true;
+                // Only highlight if in edit mode
+                if (editForm && editForm.classList.contains('is-editing')) {
+                    tile.classList.add('drag-over');
+                }
+            }, false);
+
+            // Remove highlight when leaving drop zone
+            tile.addEventListener('dragleave', function(e) {
+                dragCounter--;
+                if (dragCounter <= 0) {
+                    dragCounter = 0;
+                    isDraggingOver = false;
+                    tile.classList.remove('drag-over');
+                }
+            }, false);
+
+            // Handle dropped files
+            tile.addEventListener('drop', function(e) {
+                dragCounter = 0;
+                isDraggingOver = false;
+                tile.classList.remove('drag-over');
+
+                // Only process if in edit mode
+                if (!editForm || !editForm.classList.contains('is-editing')) {
+                    return;
+                }
+
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    const file = files[0];
+
+                    // Validate file type
+                    const accept = fileInput.getAttribute('accept');
+                    let isValidType = true;
+
+                    if (accept) {
+                        const acceptTypes = accept.split(',').map(t => t.trim());
+                        isValidType = acceptTypes.some(type => {
+                            if (type.startsWith('.')) {
+                                return file.name.toLowerCase().endsWith(type.toLowerCase());
+                            } else if (type.includes('*')) {
+                                const baseType = type.split('/')[0];
+                                return file.type.startsWith(baseType + '/');
+                            } else {
+                                return file.type === type;
+                            }
+                        });
+                    }
+
+                    if (isValidType) {
+                        handleFileSelect(fileInput, file);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid File Type',
+                            text: 'Please upload a file with the correct format.',
+                            confirmButtonColor: '#10B981'
+                        });
+                    }
+                }
+            }, false);
+
+            // Track if a drop just occurred to prevent click event
+            let justDropped = false;
+
+            // Click to upload handler (only when not dragging)
+            tile.addEventListener('click', function(e) {
+                // Don't trigger if clicking remove button
+                if (e.target.closest('.remove-image-btn')) {
+                    return;
+                }
+
+                // Don't trigger if we just dropped a file (prevent double action)
+                if (justDropped) {
+                    justDropped = false;
+                    return;
+                }
+
+                // Only trigger if in edit mode
+                if (editForm && editForm.classList.contains('is-editing')) {
+                    fileInput.click();
+                }
+            }, false);
+
+            // Mark that a drop occurred
+            tile.addEventListener('drop', function() {
+                justDropped = true;
+                setTimeout(function() {
+                    justDropped = false;
+                }, 300);
+            });
+        });
     });
 </script>
 @endsection

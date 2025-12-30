@@ -327,7 +327,7 @@
                     <div class="field">
                         <label>Upload Background Image</label>
                         <input type="file" id="background_image" name="background_image" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" style="padding: 8px; border: 1px solid #e1e4ea; border-radius: 8px; font-size: 12px; width: 100%;">
-                        <p style="margin: 6px 0 0; font-size: 11px; color: #8b8f99;">JPG, PNG, GIF, or WebP. Max size: {{ number_format($maxFileSize / 1024, 1) }}MB</p>
+                        <p style="margin: 6px 0 0; font-size: 11px; color: #8b8f99;">JPG, PNG, GIF, or WebP</p>
                     </div>
                 </div>
             </div>
@@ -381,34 +381,11 @@
         @endif
 
         // Client-side file validation
-        const MAX_MB = {{ $maxFileSize / 1024 }};
-        const MAX_BYTES = {{ $maxFileSize }} * 1024;
-        const FRONTEND_MAX_MB = 2; // 2MB limit for frontend check
-        const FRONTEND_MAX_BYTES = FRONTEND_MAX_MB * 1024 * 1024; // 2MB in bytes
-        
         const backgroundImageInput = document.getElementById('background_image');
         if (backgroundImageInput) {
-
             backgroundImageInput.addEventListener('change', function(e) {
                 const file = this.files && this.files[0];
                 if (!file) {
-                    return;
-                }
-
-                // Check file size - 2MB limit on frontend
-                if (file.size > FRONTEND_MAX_BYTES) {
-                    this.value = '';
-                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'File Too Large',
-                            text: `The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${FRONTEND_MAX_MB} MB.`,
-                            confirmButtonColor: '#3085d6',
-                        });
-                    } else {
-                        alert(`The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${FRONTEND_MAX_MB} MB.`);
-                    }
                     return;
                 }
 
@@ -428,69 +405,12 @@
                     }
                     return;
                 }
-
-                // Check file size against server limit (if file passed 2MB check but exceeds server limit)
-                if (file.size > MAX_BYTES) {
-                    this.value = '';
-                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'File Too Large',
-                            text: `The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${MAX_MB.toFixed(1)} MB.`,
-                            confirmButtonColor: '#3085d6',
-                        });
-                    } else {
-                        alert(`The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${MAX_MB.toFixed(1)} MB.`);
-                    }
-                    return;
-                }
             });
         }
 
         // Handle form submission errors and network errors
         const form = document.querySelector('form[action="{{ route('admin.settings.update') }}"]');
         if (form) {
-            form.addEventListener('submit', function(e) {
-                const fileInput = document.getElementById('background_image');
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    
-                    // Check 2MB limit first
-                    if (file.size > FRONTEND_MAX_BYTES) {
-                        e.preventDefault();
-                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'File Too Large',
-                                text: `The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${FRONTEND_MAX_MB} MB.`,
-                                confirmButtonColor: '#3085d6',
-                            });
-                        } else {
-                            alert(`The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${FRONTEND_MAX_MB} MB.`);
-                        }
-                        return false;
-                    }
-                    
-                    // Double-check file size against server limit
-                    if (file.size > MAX_BYTES) {
-                        e.preventDefault();
-                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'File Too Large',
-                                text: `The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${MAX_MB.toFixed(1)} MB.`,
-                                confirmButtonColor: '#3085d6',
-                            });
-                        } else {
-                            alert(`The file size (${fileSizeMB} MB) exceeds the maximum allowed size of ${MAX_MB.toFixed(1)} MB.`);
-                        }
-                        return false;
-                    }
-                }
-            });
 
             // Handle form submission errors (network errors, server errors, etc.)
             form.addEventListener('error', function(e) {
