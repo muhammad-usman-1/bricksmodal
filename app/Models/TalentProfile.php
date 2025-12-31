@@ -148,6 +148,11 @@ class TalentProfile extends Model
         return $this->hasMany(CastingApplication::class, 'talent_profile_id');
     }
 
+    public function settings()
+    {
+        return $this->hasOne(TalentSetting::class, 'talent_profile_id');
+    }
+
     /**
      * Check if talent has card details stored
      */

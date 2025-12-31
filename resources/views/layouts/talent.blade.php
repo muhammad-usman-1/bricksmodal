@@ -20,110 +20,282 @@
 <body class="c-app">
     @include('partials.talent-menu')
     <div class="c-wrapper">
-        <header class="c-header c-header-fixed talent-header px-3">
             <style>
-                :root {
-                    --rose-10: #fff9f8;
-                    --rose-100: #f6e6e4;
-                    --rose-200: #e9d3d1;
-                    --rose-700: #8a6561;
-                    --text-900: #5b4a48;
-                }
+            #admin-main-header {
+                background-color: #ffffff !important;
+                border-bottom: 1px solid #edf0f2 !important;
+                box-shadow: none !important;
+                height: 64px !important;
+                display: flex !important;
+                align-items: center !important;
+                padding: 0 24px !important;
+                width: 100% !important;
+                z-index: 1030 !important;
+            }
 
-                .talent-header {
-                    background: #fff;
-                    border-bottom: 1px solid #efe3e1;
-                }
+            #admin-topbar-container {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
 
-                .talent-header .icon-btn {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 999px;
-                    border: 1px solid var(--rose-200);
-                    background: var(--rose-10);
-                    color: var(--rose-700);
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 10px;
-                }
+            #admin-search-box {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                background: #f7f9fb !important;
+                border: 1px solid #e5e7eb !important;
+                border-radius: 10px !important;
+                padding: 8px 15px !important;
 
-                .talent-header .avatar {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 999px;
-                    overflow: hidden;
-                    border: 1px solid var(--rose-200);
-                    background: #f1e8e7;
-                }
+                width: 100% !important;
 
-                .talent-header .avatar img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
+                flex-shrink: 1 !important;
+            }
 
-                .talent-header .brand-xs {
-                    color: var(--text-900);
-                    font-weight: 800;
+            #admin-search-box i {
+                color: #a3a9b3 !important;
+                font-size: 14px !important;
+            }
+
+            #admin-search-box input {
+                border: none !important;
+                outline: none !important;
+                background: transparent !important;
+                width: 100% !important;
+                font-size: 13px !important;
+                color: #111827 !important;
+            }
+
+            #admin-icons-group {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                flex-shrink: 0 !important;
+                margin-left: 20px !important;
+            }
+
+            .header-icon-link {
+                margin-left: 18px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 10px !important;
+                transition: background 0.2s !important;
+                text-decoration: none !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .header-icon-link:first-child {
+                margin-left: 0 !important;
+            }
+
+            .header-icon-link:hover {
+                background: #f3f4f6 !important;
+            }
+
+            /* Collapse button with border */
+            #sidebarCollapseBtn {
+                border: 1px solid #e5e7eb !important;
+                background: #ffffff !important;
+            }
+
+            #sidebarCollapseBtn:hover {
+                background: #f9fafb !important;
+                border-color: #d1d5db !important;
+            }
+
+            .header-icon-link img {
+                width: 20px !important;
+                height: 20px !important;
+                display: block !important;
+            }
+
+            .noti-badge {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                width: 8px !important;
+                height: 8px !important;
+                background: #ef4444 !important;
+                border-radius: 50% !important;
+                border: 2px solid #fff !important;
+            }
+
+            /* Dark Mode Header Styles */
+            html[data-theme="dark"] #admin-main-header {
+                background-color: #1a1d23 !important;
+                border-bottom-color: #2d3138 !important;
+            }
+
+            html[data-theme="dark"] #admin-search-box {
+                background: #252932 !important;
+                border-color: #2d3138 !important;
+            }
+
+            html[data-theme="dark"] #admin-search-box input {
+                color: #e5e7eb !important;
+            }
+
+            html[data-theme="dark"] .header-icon-link:hover {
+                background: #252932 !important;
+            }
+
+            /* Keep dropdown items black on click/hover */
+            .dropdown-menu .dropdown-item {
+                color: #000000 !important;
+            }
+            .dropdown-menu .dropdown-item:hover,
+            .dropdown-menu .dropdown-item:focus,
+            .dropdown-menu .dropdown-item:active {
+                color: #000000 !important;
+                background-color: #f3f4f6 !important;
+            }
+            .dropdown-menu .dropdown-item i {
+                color: #000000 !important;
                 }
             </style>
 
-            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
-                data-class="c-sidebar-show" aria-label="Toggle sidebar">
-                <i class="fas fa-fw fa-bars"></i>
+        <header class="c-header c-header-fixed admin-header" id="admin-main-header">
+            <div id="admin-topbar-container">
+                <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
+                    <i class="fas fa-angle-right" style="font-size: 18px; color: #374151;"></i>
             </button>
-
-            <a class="c-header-brand d-lg-none brand-xs" href="{{ route('talent.dashboard') }}">
-                {{ trans('panel.site_title') }}
-            </a>
-
+                <div id="admin-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
+                </div>
+                <div id="admin-icons-group">
+                    <a class="header-icon-link" href="#" aria-label="Add New" style="margin-left: 18px !important;">
+                        <img src="{{ asset('images/plus.png') }}" alt="Add">
+                    </a>
+                    <a href="{{ Route::has('talent.settings.index') ? route('talent.settings.index') : '#' }}" class="header-icon-link" aria-label="Settings">
+                        <img src="{{ asset('images/setting.png') }}" alt="Settings">
+                    </a>
+                    <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
             @php
                 $talentUser = auth('talent')->user();
-                $profile = $talentUser?->talentProfile;
+                            $unreadCount = $talentUser ? $talentUser->unreadNotifications->count() : 0;
+                        @endphp
+                        <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" style="margin-left: 0 !important; position: relative !important;">
+                            <img src="{{ asset('images/noti.png') }}" alt="Notifications">
+                            <span class="noti-badge {{ $unreadCount > 0 ? '' : 'd-none' }}"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
+                            <div class="dropdown-header bg-light py-2">
+                                <strong>Notifications</strong>
+                                @if($talentUser && $unreadCount > 0)
+                                    <a href="#" class="float-right text-muted" style="font-size: 0.8em;">
+                                        Mark all as read
+                                    </a>
+                                @endif
+                            </div>
+                            @if($talentUser)
+                                @forelse($talentUser->notifications()->latest()->limit(10)->get() as $notification)
+                                    <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
+                                       href="#">
+                                        @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
+                                            <i class="fas fa-user text-info"></i>
+                                        @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
+                                            <i class="fas fa-video text-warning"></i>
+                                        @else
+                                            <i class="fas fa-bell text-secondary"></i>
+                                        @endif
+                                        {{ $notification->data['title'] ?? 'Notification' }}
+                                        @if(isset($notification->data['message']))
+                                            <div class="small text-muted">{{ $notification->data['message'] }}</div>
+                                        @endif
+                                        <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
+                                    </a>
+                                @empty
+                                    <div class="dropdown-item text-center text-muted">
+                                        No notifications
+                                    </div>
+                                @endforelse
+                            @else
+                                <div class="dropdown-item text-center text-muted">
+                                    No notifications
+                                </div>
+                            @endif
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center" href="#">
+                                View all notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-                // Original sources (may be strings OR arrays depending on your code)
-                $avatarRaw =
-                    $profile?->headshot_center_path ??
-                    ($profile?->headshot_left_path ?? $profile?->headshot_right_path);
+        <script>
+            // Sidebar collapse functionality
+            (function() {
+                const sidebar = document.getElementById('sidebar');
+                const collapseBtn = document.getElementById('sidebarCollapseBtn');
+                const collapseIcon = collapseBtn?.querySelector('i');
+                const wrapper = document.querySelector('.c-wrapper');
 
-                // Normalize to a string
-                if (is_array($avatarRaw)) {
-                    // common shapes: ['url'=>...], ['path'=>...], ['0'=>...]
-                    $avatar =
-                        $avatarRaw['url'] ?? ($avatarRaw['path'] ?? (isset($avatarRaw[0]) ? $avatarRaw[0] : null));
+                if (!sidebar || !collapseBtn) return;
+
+                // Function to adjust main content
+                const adjustMainContent = (collapsed) => {
+                    if (wrapper) {
+                        if (collapsed) {
+                            wrapper.style.marginLeft = '70px';
                 } else {
-                    $avatar = $avatarRaw;
+                            wrapper.style.marginLeft = '';
+                        }
+                    }
+                };
+
+                // Check localStorage for saved state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    adjustMainContent(true);
+                    // Set initial icon state
+                    if (collapseIcon) {
+                        collapseIcon.classList.remove('fa-angle-right');
+                        collapseIcon.classList.add('fa-bars');
+                    }
                 }
 
-                // Tiny inline SVG fallback (never 404s)
-                $fallbackSvg =
-                    'data:image/svg+xml;utf8,' .
-                    rawurlencode('
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
-              <rect width="96" height="96" rx="48" fill="#eddcda"/>
-              <circle cx="48" cy="38" r="18" fill="#c8adab"/>
-              <rect x="20" y="60" width="56" height="22" rx="11" fill="#d8c1bf"/>
-            </svg>');
-                $avatarSrc = $avatar ?: $fallbackSvg;
-            @endphp
+                collapseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-            <ul class="c-header-nav ml-auto align-items-center">
-                <li class="c-header-nav-item">
-                    <a href="{{ Route::has('talent.settings.index') ? route('talent.settings.index') : '#' }}"
-                        class="icon-btn" aria-label="{{ __('Settings') }}"><i class="fas fa-sliders-h"></i></a>
-                </li>
-                <li class="c-header-nav-item">
-                    <a href="{{ Route::has('talent.notifications') ? route('talent.notifications') : '#' }}"
-                        class="icon-btn" aria-label=" "><i class="far fa-bell"></i></a>
-                </li>
-                <li class="c-header-nav-item d-flex align-items-center">
-                    <span class="avatar">
-                        <img src="{{ $avatarSrc }}" alt="{{ $talentUser?->name ?? 'Profile' }}">
-                    </span>
-                </li>
-            </ul>
-        </header>
+                    sidebar.classList.toggle('collapsed');
+                    const collapsed = sidebar.classList.contains('collapsed');
+
+                    // Adjust main content
+                    adjustMainContent(collapsed);
+
+                    // Save state to localStorage
+                    localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+
+                    // Update icon
+                    if (collapseIcon) {
+                        if (collapsed) {
+                            collapseIcon.classList.remove('fa-angle-right');
+                            collapseIcon.classList.add('fa-bars');
+                        } else {
+                            collapseIcon.classList.remove('fa-bars');
+                            collapseIcon.classList.add('fa-angle-right');
+                        }
+                    }
+
+                    // Update aria-label
+                    collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
+                });
+            })();
+        </script>
 
 
         <div class="c-body">

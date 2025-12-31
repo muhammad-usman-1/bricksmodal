@@ -1,396 +1,344 @@
 @extends('layouts.talent')
 
 @section('content')
-    <style>
-        :root {
-            --rose-10: #fff9f8;
-            --rose-100: #f6e6e4;
-            --rose-200: #e9d3d1;
-            --rose-700: #8a6561;
-            --text-900: #5b4a48;
-            --muted: #8c7b79;
-            --white: #fff;
-        }
+<style>
+    .my-shoots-page {
 
-        /* === Layout: full-width, left aligned (no centering) === */
-        .content,
-        .projects-wrap {
-            max-width: none !important;
-            width: 100% !important;
-        }
+    }
 
-        /* Status tabs */
-        .status-tabs {
-            display: flex;
-            gap: 28px;
-            border-bottom: 1px solid #dcdfe4;
-            margin-bottom: 14px;
-        }
+    .my-shoots-container {
 
-        .status-tab {
-            position: relative;
-            padding-bottom: 12px;
-            font-weight: 600;
-            color: #1f2933;
-            text-decoration: none;
-            line-height: 1.2;
-        }
+        margin: 0 auto;
+        
+    }
 
-        .status-tab::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -1px;
-            width: 0;
-            height: 2px;
-            background: #0f172a;
-            transition: width 0.2s ease;
-        }
+    .my-shoots-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 32px;
+    }
 
-        .status-tab.active {
-            color: #0f172a;
-        }
+    .my-shoots-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
 
-        .status-tab.active::after {
-            width: 26px;
-        }
+    .my-shoots-subtitle {
+        font-size: 15px;
+        color: #6b7280;
+        margin: 0;
+    }
 
-        /* Search: no shadow */
-        .search-wrap {
-            position: relative;
-        }
+    .shoots-tabs {
+        display: flex;
+        gap: 8px;
+    }
 
-        .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #a0a4b8;
-            font-size: 0.9rem;
-        }
+    .shoot-tab {
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: #fff;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+    }
 
-        .proj-search {
-            width: 100%;
-            border: 1px solid #e9d3d1;
-            background: #fff;
-            border-radius: 999px;
-            padding: 10px 14px 10px 40px;
-            color: var(--text-900);
-            outline: none;
-            box-shadow: none !important;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%238a6561' stroke-width='1.6'/%3E%3Cpath d='M20 20l-3.2-3.2' stroke='%238a6561' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: 12px 50%;
-        }
+    .shoot-tab.active {
+        background: #f3f4f6;
+        color: #111827;
+    }
 
-        .proj-search::placeholder {
-            color: #b49a97
-        }
+    .shoot-tab:hover {
+        text-decoration: none;
+        color: #111827;
+    }
 
-        .location-link {
-            color: var(--rose-700);
-            font-weight: 700;
+    .shoots-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
 
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-        }
+    .shoot-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+    }
 
-        .location-link:hover {
-            text-decoration: none;
-        }
+    .shoot-card:hover {
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-color: #d1d5db;
+    }
 
-        /* Cards: no shadow, clean borders, grid for stable button alignment */
-        .card-job {
-            border: 1px solid #eee;
-            background: #fff;
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin: 14px 0;
-            display: grid;
-            grid-template-columns: 1fr 110px;
-            gap: 16px;
-            box-shadow: none !important;
-        }
+    .shoot-icon-container {
+        width: 64px;
+        height: 64px;
+        background: #f3f4f6;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 
-        .job-left {
-            min-width: 0;
-        }
+    .shoot-icon-container i {
+        font-size: 24px;
+        color: #374151;
+    }
 
-        .job-title {
-            margin: 0;
-            color: var(--text-900);
-            font-weight: 800;
-            line-height: 1.2;
-        }
+    .shoot-details {
+        flex: 1;
+        min-width: 0;
+    }
 
-        .job-sub {
-            margin: 2px 0 8px;
-            color: var(--muted);
-            font-weight: 700;
-        }
+    .shoot-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
 
-        .job-meta {
-            color: #9a807d;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
+    .shoot-info {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
 
-        .chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-        }
+    .shoot-info-separator {
+        color: #9ca3af;
+    }
 
-        .chip {
-            background: #f6e6e4;
-            border: 1px solid #e9d3d1;
-            border-radius: 999px;
-            padding: 4px 10px;
-            color: var(--rose-700);
-            font-weight: 800;
-            font-size: 12px;
-        }
+    .shoot-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-shrink: 0;
+    }
 
-        .chip-status {
-            background: #eef2ff;
-            border-color: #e0e7ff;
-            color: #4338ca;
-        }
+    .shoot-status-tag {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
-        .chip-status-applied {
-            background: #e0f2fe;
-            border-color: #bae6fd;
-            color: #0c4a6e;
-        }
+    .shoot-status-applied {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-        .chip-status-shortlisted {
-            background: #fef3c7;
-            border-color: #fde68a;
-            color: #92400e;
-        }
+    .shoot-status-shortlisted {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-        .chip-status-selected {
-            background: #ecfdf3;
-            border-color: #bbf7d0;
-            color: #166534;
-        }
+    .shoot-status-selected {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-        .chip-status-rejected {
-            background: #fee2e2;
-            border-color: #fecaca;
-            color: #b91c1c;
-        }
+    .shoot-status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-        /* Right column: avatar on top, button under it (no shadow) */
-        .job-aside {
-            display: flex;
+    .shoot-arrow {
+        color: #374151;
+        font-size: 18px;
+    }
+
+    .empty-state {
+        background: #fff;
+        border-radius: 12px;
+        padding: 48px 24px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .empty-state-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state-text {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .my-shoots-header {
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            gap: 16px;
         }
 
-        .avatar {
-            width: 68px;
-            height: 68px;
-            border-radius: 10px;
-            background: #f7efee;
-            border: 1px solid #e9d3d1;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            box-shadow: none !important;
-        }
-
-        .avatar img {
+        .shoots-tabs {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
-        .btn-pill {
-            width: 100%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: #8a6561;
-            color: #fff;
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-weight: 800;
-            box-shadow: none !important;
-            text-decoration: none;
-        }
-
-        .btn-pill:hover {
-            filter: brightness(.97);
-        }
-
-        /* Empty state */
-        .empty {
-            background: #fff;
-            border-radius: 12px;
-            border: 1px dashed #e9d3d1;
-            padding: 18px;
+        .shoot-tab {
+            flex: 1;
             text-align: center;
-            color: #8c7b79;
         }
 
-        /* Mobile: stack nicely */
-        @media (max-width:600px) {
-            .card-job {
-                grid-template-columns: 1fr;
-            }
-
-            .job-aside {
-                flex-direction: row;
-                gap: 12px;
-                justify-content: flex-start;
-            }
-
-            .btn-pill {
-                width: auto;
-                padding: 8px 14px;
-            }
+        .shoot-card {
+            flex-direction: column;
+            align-items: flex-start;
         }
-    </style>
 
-    <div class="projects-wrap">
-        @php
-            $filters = [
-                'all' => trans('global.talent_projects_filter_all'),
-                'applied' => trans('global.talent_projects_filter_applied'),
-                'shortlisted' => trans('global.talent_projects_filter_shortlisted'),
-                'selected' => trans('global.talent_projects_filter_selected'),
-                'rejected' => trans('global.talent_projects_filter_rejected'),
-            ];
-        @endphp
+        .shoot-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
 
-        <div class="status-tabs mb-3">
-            @foreach ($filters as $value => $label)
-                @php
-                    $tabQuery = collect([
-                        'status' => $value === 'all' ? null : $value,
-                        'q' => request('q'),
-                    ])->filter(function ($val) {
-                        return !is_null($val) && $val !== '';
-                    })->toArray();
-                @endphp
-                <a href="{{ route('talent.projects.index', $tabQuery) }}"
-                    class="status-tab {{ $statusFilter === $value ? 'active' : '' }}">
-                    {{ $label }}
+<div class="my-shoots-page">
+    <div class="my-shoots-container">
+        <div class="my-shoots-header">
+            <div>
+                <h1 class="my-shoots-title">My Shoots</h1>
+                <p class="my-shoots-subtitle">Track your current casting calls and past shoots.</p>
+            </div>
+            <div class="shoots-tabs">
+                <a href="{{ route('talent.projects.index', ['tab' => 'active']) }}"
+                   class="shoot-tab {{ request('tab', 'active') === 'active' ? 'active' : '' }}">
+                    Active
                 </a>
-            @endforeach
+                <a href="{{ route('talent.projects.index', ['tab' => 'history']) }}"
+                   class="shoot-tab {{ request('tab') === 'history' ? 'active' : '' }}">
+                    History
+                </a>
+            </div>
         </div>
 
-        {{-- Search --}}
-        <form method="GET" action="{{ route('talent.projects.index') }}" class="mb-3">
-            @if ($statusFilter !== 'all')
-                <input type="hidden" name="status" value="{{ $statusFilter }}">
-            @endif
-            <div class="search-wrap">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text"
-                    name="q"
-                    value="{{ request('q') }}"
-                    class="proj-search"
-                    placeholder="{{ __('Search') }}">
-            </div>
-        </form>
-
-        {{-- Cards --}}
-        @forelse($projects as $project)
+        <div class="shoots-list">
             @php
-                $statusText = \App\Models\CastingRequirement::STATUS_SELECT[$project->status] ?? $project->status;
-                $when = null;
+                $currentTab = request('tab', 'active');
+                $filteredProjects = collect();
 
-                if ($project->shoot_date_time) {
-                    try {
-                        $when = \Illuminate\Support\Carbon::parse($project->shoot_date_time)->format('d M Y | h:i A');
-                    } catch (\Throwable $e) {
-                        $when = $project->shoot_date_time;
+                foreach ($projects as $project) {
+                    // Filter based on project status, not application status
+                    if ($currentTab === 'active') {
+                        // Show only shoots that are NOT completed (advertised, processing)
+                        if ($project->status !== 'completed') {
+                            $filteredProjects->push($project);
+                        }
+                    } else {
+                        // Show only completed shoots
+                        if ($project->status === 'completed') {
+                            $filteredProjects->push($project);
+                        }
                     }
-                } elseif ($project->shoot_date_display) {
-                    $when = $project->shoot_date_display;
                 }
-
-                $locationQuery = $project->location ? $project->location . ', Kuwait' : null;
-
-                $avatar =
-                    $project->avatar_url ??
-                    'data:image/svg+xml;utf8,' .
-                        rawurlencode(
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" rx="12" fill="#efe4e3"/><circle cx="40" cy="32" r="14" fill="#c8adab"/><rect x="18" y="50" width="44" height="18" rx="9" fill="#dcc5c3"/></svg>',
-                        );
             @endphp
 
-            <div class="card-job">
-                <div class="job-left">
-                    <h5 class="job-title">{{ $project->project_name }}</h5>
-                    <div class="job-sub">{{ $project->role_name ?? ($project->sub_title ?? __('Project')) }}</div>
+            @forelse($filteredProjects as $project)
+                @php
+                    $application = $applicationsByProject->get($project->id);
+                    $applicationStatus = $application->status ?? null;
+                    $applicationStatusLabel = $applicationStatus ? (\App\Models\CastingApplication::STATUS_SELECT[$applicationStatus] ?? ucfirst($applicationStatus)) : 'Not Applied';
 
-                    <div class="job-meta">
-                        @if ($when)
-                            <span>{{ $when }}</span>
-                        @endif
-                        @if ($project->location)
-                            &nbsp;·&nbsp;
-                            <span>
-                                <i class="fas fa-map-marker-alt mr-1"></i>
-                                <button type="button"
-                                    class="location-link"
-                                    data-map-toggle="project-map-{{ $project->id }}">
-                                    {{ $project->location }}
-                                </button>
+                    // Format shoot date
+                    $shootDate = null;
+                    if ($project->shoot_date_display) {
+                        $shootDate = $project->shoot_date_display;
+                    } elseif ($project->shoot_date) {
+                        try {
+                            $shootDate = \Carbon\Carbon::parse($project->shoot_date)->format('F d, Y');
+                        } catch (\Exception $e) {
+                            $shootDate = $project->shoot_date;
+                        }
+                    }
+
+                    // Format application date
+                    $applicationDate = null;
+                    if ($application && $application->created_at) {
+                        $applicationDate = $application->created_at->format('F d, Y');
+                    }
+
+                    $location = $project->location ?? null;
+                @endphp
+
+                <a href="{{ route('talent.projects.show', $project) }}" class="shoot-card">
+                    <div class="shoot-icon-container">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="shoot-details">
+                        <h3 class="shoot-title">{{ $project->project_name }}</h3>
+                        <p class="shoot-info">
+                            @if($shootDate)
+                                <span>{{ $shootDate }}</span>
+                            @endif
+                            @if($location)
+                                @if($shootDate)
+                                    <span class="shoot-info-separator">•</span>
+                                @endif
+                                <span>{{ $location }}</span>
+                            @endif
+                            @if($applicationDate)
+                                @if($shootDate || $location)
+                                    <span class="shoot-info-separator">•</span>
+                                @endif
+                                <span>Applied: {{ $applicationDate }}</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="shoot-right">
+                        @if($applicationStatus)
+                            <span class="shoot-status-tag shoot-status-{{ $applicationStatus }}">
+                                {{ $applicationStatusLabel }}
+                            </span>
+                        @else
+                            <span class="shoot-status-tag shoot-status-applied" style="background: #e5e7eb; color: #6b7280;">
+                                Not Applied
                             </span>
                         @endif
+                        <i class="fas fa-chevron-right shoot-arrow"></i>
                     </div>
-
-                    <div class="chips">
-                        @if ($statusText)
-                            <span class="chip">{{ $statusText }}</span>
+                </a>
+            @empty
+                <div class="empty-state">
+                    <h3 class="empty-state-title">No shoots found</h3>
+                    <p class="empty-state-text">
+                        @if($currentTab === 'active')
+                            You don't have any active shoots at the moment.
+                        @else
+                            You don't have any past shoots in your history.
                         @endif
-                        @if ($applicationsByProject->has($project->id))
-                            @php
-                                $application = $applicationsByProject->get($project->id);
-                                $applicationStatusLabel = \App\Models\CastingApplication::STATUS_SELECT[$application->status] ?? ucfirst($application->status);
-                                $applicationStatusClass = 'chip-status-' . ($application->status ?? 'default');
-                            @endphp
-                            <span class="chip chip-status {{ $applicationStatusClass }}">{{ $applicationStatusLabel }}</span>
-                        @endif
-                        @if ($project->gender)
-                            <span class="chip text-capitalize">{{ $project->gender }}</span>
-                        @endif
-                        @if ($project->duration)
-                            <span class="chip">{{ $project->duration }}</span>
-                        @endif
-                    </div>
+                    </p>
                 </div>
-
-                <div class="job-aside">
-                    <div class="avatar">
-                        <img src="{{ $avatar }}" alt="project">
-                    </div>
-                    <button type="button" class="btn-pill" onclick="window.location.href='{{ route('talent.projects.show', $project) }}'">
-                        {{ __('View Details') }}
-                    </button>
-                </div>
-            </div>
-        @empty
-            <div class="empty">{{ trans('global.no_projects_available') }}</div>
-        @endforelse
-
-        {{-- Pagination left-aligned --}}
-        <div class="d-flex justify-content-start mt-3">
-            {{ $projects->withQueryString()->links() }}
+            @endforelse
         </div>
-    </div>
 
+        @if($filteredProjects->count() > 0 && method_exists($projects, 'links'))
+            <div class="d-flex justify-content-start mt-4">
+                {{ $projects->withQueryString()->links() }}
+            </div>
+        @endif
+    </div>
+</div>
 @endsection

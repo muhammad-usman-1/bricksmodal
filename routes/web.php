@@ -202,6 +202,10 @@ Route::prefix('talent')->as('talent.')->group(function () {
             Route::post('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'storeCardDetails'])->name('payments.store-card-details');
             Route::post('payments/{casting_application}/request', [\App\Http\Controllers\Talent\PaymentController::class, 'requestPayment'])->name('payments.request');
             Route::post('payments/{casting_application}/confirm-received', [\App\Http\Controllers\Talent\PaymentController::class, 'confirmReceived'])->name('payments.confirm-received');
+
+            // Talent Settings Routes
+            Route::get('settings', [\App\Http\Controllers\Talent\SettingsController::class, 'index'])->name('settings.index');
+            Route::post('settings', [\App\Http\Controllers\Talent\SettingsController::class, 'update'])->name('settings.update');
         });
     });
 });

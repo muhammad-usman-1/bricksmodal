@@ -39,18 +39,9 @@ class ProjectController extends Controller
 
         $query = CastingRequirement::with(['modelRequirements.labels']);
 
-        if ($statusFilter === 'all') {
-            $query->whereIn('status', ['advertised', 'processing']);
-        } else {
-            if ($profile) {
-                $query->whereHas('castingApplications', function ($q) use ($profile, $statusFilter) {
-                    $q->where('talent_profile_id', $profile->id)
-                        ->where('status', $statusFilter);
-                });
-            } else {
-                $query->whereRaw('0 = 1');
-            }
-        }
+        // Include all statuses (advertised, processing, completed) so tabs can filter them
+        // The view will handle filtering by tab (active vs history)
+        $query->whereIn('status', ['advertised', 'processing', 'completed']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {

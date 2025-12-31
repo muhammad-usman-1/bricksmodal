@@ -1,170 +1,493 @@
 @extends('layouts.talent')
 
 @section('content')
-<div class="content">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2 class="mb-1">{{ trans('global.payment_dashboard') }}</h2>
-            <p class="text-muted mb-0">Track your payment requests and earnings</p>
-        </div>
-        <div class="col-md-4 text-right">
-            <a href="{{ route('talent.payments.card-details') }}" class="btn btn-outline-primary">
-                <i class="fas fa-credit-card mr-1"></i>
-                {{ $profile->hasCardDetails() ? 'Update' : 'Add' }} Card Details
-            </a>
-        </div>
-    </div>
+@php
+    // Calculate summary stats
+    $availableBalance = $applications->where('payment_status', 'received')->sum(function($app) {
+        return $app->rate_offered ?? $app->rate ?? 0;
+    });
 
-    @if(session('message'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('message') }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    @endif
+    $pendingAmount = $applications->whereIn('payment_status', ['pending', 'requested', 'approved', 'released'])->sum(function($app) {
+        return $app->rate_offered ?? $app->rate ?? 0;
+    });
 
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show">
-            @foreach($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    @endif
+    $totalEarned = $applications->sum(function($app) {
+        return $app->rate_offered ?? $app->rate ?? 0;
+    });
 
-    @if(!$profile->hasCardDetails())
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle mr-2"></i>
-            <strong>Action Required:</strong> Please add your card details to receive payments.
-            <a href="{{ route('talent.payments.card-details') }}" class="alert-link">Add Card Details</a>
-        </div>
-    @endif
+    // Get status filter
+    $statusFilter = request('status', 'all');
 
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Total Earnings</div>
-                    <h4 class="mb-0">${{ number_format($applications->sum(function($app) { return $app->rate_offered ?? $app->rate ?? 0; }), 2) }}</h4>
+    // Filter applications by status
+    $filteredApplications = $applications;
+    if ($statusFilter !== 'all') {
+        $filteredApplications = $applications->where('payment_status', $statusFilter);
+    }
+
+    // Get payment method - for now using placeholder logic
+    function getPaymentMethod($application) {
+        // This would come from actual payment data
+        if ($application->payment_status === 'received') {
+            return 'Bank Transfer'; // or PayPal based on actual data
+        } elseif ($application->payment_status === 'pending') {
+            return 'Pending';
+        }
+        return 'Bank Transfer';
+    }
+@endphp
+
+<style>
+    .payments-page {
+
+
+
+    }
+
+    .payments-container {
+
+        margin: 0 auto;
+        
+    }
+
+    .payments-header {
+        margin-bottom: 32px;
+    }
+
+    .payments-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
+
+    .payments-subtitle {
+        font-size: 15px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .summary-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .summary-card-content {
+        flex: 1;
+    }
+
+    .summary-card-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 0 0 4px 0;
+        font-weight: 500;
+    }
+
+    .summary-card-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .section-controls {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .status-filter {
+        padding: 8px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .manage-payments-btn {
+        padding: 10px 20px;
+        background: #111827;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .manage-payments-btn:hover {
+        background: #374151;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .payments-table {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .table thead {
+        background: #f9fafb;
+    }
+
+    .table th {
+        padding: 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table td {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+        color: #111827;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .project-name {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .amount-value {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .status-tag {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-requested {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .date-text {
+        color: #6b7280;
+    }
+
+    .payment-method {
+        color: #6b7280;
+    }
+
+    .earnings-section {
+        margin-top: 40px;
+    }
+
+    .earnings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+    }
+
+    .earning-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .earning-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
+
+    .earning-card-role {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0 0 16px 0;
+    }
+
+    .earning-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .earning-amount {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .earnings-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="payments-page">
+    <div class="payments-container">
+        <div class="payments-header">
+            <h1 class="payments-title">Payments Overview</h1>
+            <p class="payments-subtitle">Manage all payments from here.</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-card-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="summary-card-content">
+                    <p class="summary-card-label">Available Balance</p>
+                    <p class="summary-card-value">${{ number_format($availableBalance, 2) }}</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="summary-card-content">
+                    <p class="summary-card-label">Pending Amount</p>
+                    <p class="summary-card-value">${{ number_format($pendingAmount, 2) }}</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="summary-card-content">
+                    <p class="summary-card-label">Total Earned</p>
+                    <p class="summary-card-value">${{ number_format($totalEarned, 2) }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Pending</div>
-                    <h4 class="mb-0">{{ $applications->where('payment_status', 'pending')->count() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Requested</div>
-                    <h4 class="mb-0">{{ $applications->whereIn('payment_status', ['requested', 'approved'])->count() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Received</div>
-                    <h4 class="mb-0">{{ $applications->where('payment_status', 'received')->count() }}</h4>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Payment History</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
+        <!-- Recent Payments Section -->
+        <div class="recent-payments-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Payments</h2>
+                <div class="section-controls">
+                    <select class="status-filter" id="statusFilter" onchange="window.location.href='{{ route('talent.payments.index') }}?status=' + this.value">
+                        <option value="all" {{ $statusFilter === 'all' ? 'selected' : '' }}>All Status</option>
+                        <option value="received" {{ $statusFilter === 'received' ? 'selected' : '' }}>Paid</option>
+                        <option value="pending" {{ $statusFilter === 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="requested" {{ $statusFilter === 'requested' ? 'selected' : '' }}>Requested</option>
+                        <option value="approved" {{ $statusFilter === 'approved' ? 'selected' : '' }}>Approved</option>
+                    </select>
+                    <a href="{{ route('talent.payments.card-details') }}" class="manage-payments-btn">Manage Payments</a>
+                </div>
+            </div>
+
+            <div class="payments-table">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <th>Project</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Requested Date</th>
-                            <th>Actions</th>
+                            <th>PROJECT</th>
+                            <th>AMOUNT</th>
+                            <th>STATUS</th>
+                            <th>DATE</th>
+                            <th>PAYMENT METHOD</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($applications as $application)
+                        @forelse($filteredApplications as $application)
+                            @php
+                                $project = $application->casting_requirement;
+                                $amount = $application->rate_offered ?? $application->rate ?? 0;
+                                $paymentStatus = $application->payment_status ?? 'pending';
+                                $statusLabel = \App\Models\CastingApplication::PAYMENT_STATUS_SELECT[$paymentStatus] ?? ucfirst($paymentStatus);
+
+                                // Format date
+                                $paymentDate = null;
+                                if ($application->payment_received_at) {
+                                    $paymentDate = $application->payment_received_at;
+                                } elseif ($application->payment_released_at) {
+                                    $paymentDate = $application->payment_released_at;
+                                } elseif ($application->payment_requested_at) {
+                                    $paymentDate = $application->payment_requested_at;
+                                } else {
+                                    $paymentDate = $application->updated_at;
+                                }
+
+                                $dateFormatted = $paymentDate ? $paymentDate->format('M d, Y') : 'N/A';
+                                $dateAgo = $paymentDate ? $paymentDate->diffForHumans() : '';
+
+                                $paymentMethod = getPaymentMethod($application);
+
+                                // Status tag class
+                                $statusClass = 'status-pending';
+                                if ($paymentStatus === 'received') {
+                                    $statusClass = 'status-paid';
+                                } elseif ($paymentStatus === 'approved') {
+                                    $statusClass = 'status-approved';
+                                } elseif ($paymentStatus === 'requested') {
+                                    $statusClass = 'status-requested';
+                                }
+                            @endphp
                             <tr>
                                 <td>
-                                    <strong>{{ optional($application->casting_requirement)->project_name ?? 'N/A' }}</strong>
-                                    @if($application->admin_notes)
-                                        <br><small class="text-muted">{{ Str::limit($application->admin_notes, 50) }}</small>
+                                    <span class="project-name">{{ $project->project_name ?? 'N/A' }}</span>
+                                </td>
+                                <td>
+                                    <span class="amount-value">${{ number_format($amount, 2) }}</span>
+                                </td>
+                                <td>
+                                    <span class="status-tag {{ $statusClass }}">{{ $statusLabel }}</span>
+                                </td>
+                                <td>
+                                    <span class="date-text">{{ $dateFormatted }}</span>
+                                    @if($dateAgo)
+                                        <br><small style="color: #9ca3af;">{{ $dateAgo }}</small>
                                     @endif
                                 </td>
                                 <td>
-                                    <strong>${{ number_format($application->rate_offered ?? $application->rate ?? 0, 2) }}</strong>
-                                </td>
-                                <td>
-                                    <span class="badge {{ $application->getPaymentStatusBadgeClass() }}">
-                                        {{ \App\Models\CastingApplication::PAYMENT_STATUS_SELECT[$application->payment_status] ?? ucfirst($application->payment_status) }}
-                                    </span>
-                                    @if($application->payment_status === 'pending')
-                                        <br><small class="text-muted">Ready to request</small>
-                                    @elseif($application->payment_status === 'requested')
-                                        <br><small class="text-muted">Awaiting approval</small>
-                                    @elseif($application->payment_status === 'approved')
-                                        <br><small class="text-muted">Payment being processed</small>
-                                    @elseif($application->payment_status === 'released')
-                                        <br><small class="text-muted">Sent to your card</small>
-                                    @elseif($application->payment_status === 'rejected')
-                                        <br><small class="text-danger">{{ $application->payment_rejection_reason }}</small>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($application->payment_requested_at)
-                                        {{ $application->payment_requested_at->format('M d, Y') }}
-                                        <br><small class="text-muted">{{ $application->payment_requested_at->diffForHumans() }}</small>
-                                    @else
-                                        <span class="text-muted">Not requested</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($application->canRequestPayment() && $profile->hasCardDetails())
-                                        <form action="{{ route('talent.payments.request', $application) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Request payment for this project?')">
-                                                <i class="fas fa-paper-plane mr-1"></i> Request Payment
-                                            </button>
-                                        </form>
-                                    @elseif($application->payment_status === 'released')
-                                        <form action="{{ route('talent.payments.confirm-received', $application) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Confirm that you have received this payment?')">
-                                                <i class="fas fa-check mr-1"></i> Confirm Received
-                                            </button>
-                                        </form>
-                                    @elseif($application->payment_status === 'received')
-                                        <span class="text-success">
-                                            <i class="fas fa-check-circle"></i> Completed
-                                        </span>
-                                    @elseif(!$profile->hasCardDetails() && $application->payment_status === 'pending')
-                                        <a href="{{ route('talent.payments.card-details') }}" class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-credit-card"></i> Add Card First
-                                        </a>
-                                    @else
-                                        <span class="text-muted small">-</span>
-                                    @endif
+                                    <span class="payment-method">{{ $paymentMethod }}</span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
-                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                    <p>No payment records found</p>
-                                    <small>Payments will appear here once you're selected for projects</small>
+                                <td colspan="5" class="empty-state">
+                                    <p>No payments found</p>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Earnings by Shoot Section -->
+        <div class="earnings-section">
+            <h2 class="section-title">Earnings by Shoot</h2>
+            <div class="earnings-grid">
+                @forelse($applications as $application)
+                    @php
+                        $project = $application->casting_requirement;
+                        $amount = $application->rate_offered ?? $application->rate ?? 0;
+                        $paymentStatus = $application->payment_status ?? 'pending';
+                        $statusLabel = \App\Models\CastingApplication::PAYMENT_STATUS_SELECT[$paymentStatus] ?? ucfirst($paymentStatus);
+
+                        // Get role from model requirement or default
+                        $role = 'Model';
+                        if ($project && $project->modelRequirements->isNotEmpty()) {
+                            $firstReq = $project->modelRequirements->first();
+                            $role = $firstReq->title ?? 'Model';
+                        }
+
+                        $statusClass = 'status-pending';
+                        if ($paymentStatus === 'received' || $paymentStatus === 'approved') {
+                            $statusClass = 'status-paid';
+                        }
+                    @endphp
+                    <div class="earning-card">
+                        <h3 class="earning-card-title">{{ $project->project_name ?? 'N/A' }}</h3>
+                        <p class="earning-card-role">Role: {{ $role }}</p>
+                        <div class="earning-card-footer">
+                            <span class="earning-amount">${{ number_format($amount, 2) }}</span>
+                            <span class="status-tag {{ $statusClass }}">{{ $statusLabel }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <p>No earnings found</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

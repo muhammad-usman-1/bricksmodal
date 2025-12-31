@@ -1,745 +1,1004 @@
 @extends('layouts.talent')
 
 @section('content')
-    <style>
-        /* ===== Theme ===== */
-        :root {
-            --rose-10: #fff9f8;
-            --rose-100: #f6e6e4;
-            --rose-200: #e9d3d1;
-            --rose-300: #d9bebc;
-            --rose-700: #8a6561;
-            --text-900: #5b4a48;
-            --muted: #8c7b79;
-            --white: #fff;
+@php
+    $timezone = config('app.timezone', 'UTC');
+    $shootStart = null;
+    $rawShootDates = array_filter([
+        $castingRequirement->shoot_date_time ?? null,
+        $castingRequirement->shoot_date_display ?? null,
+    ]);
+
+    foreach ($rawShootDates as $rawShootDate) {
+        try {
+            $shootStart = \Illuminate\Support\Carbon::parse($rawShootDate, $timezone);
+            break;
+        } catch (\Throwable $e) {
+            continue;
         }
+    }
 
-        /* ===== Layout: full-width (no centered card) ===== */
-        .page-wrap {
-
-            width: 100%;
-
+    // Format date as "2025-06-15"
+    $formattedShootDate = null;
+    if ($shootStart) {
+        $formattedShootDate = $shootStart->format('Y-m-d');
+    } elseif ($castingRequirement->shoot_date_display) {
+        try {
+            $parsed = \Carbon\Carbon::parse($castingRequirement->shoot_date_display);
+            $formattedShootDate = $parsed->format('Y-m-d');
+        } catch (\Exception $e) {
+            $formattedShootDate = $castingRequirement->shoot_date_display;
         }
+    } else {
+        $formattedShootDate = 'Date TBD';
+    }
 
-        /* ===== Header band ===== */
-        .head-band {
-            display: grid;
-            grid-template-columns: 1fr 110px;
+    $formattedShootTime = $shootStart ? $shootStart->format('H:i') : '08:00';
+    $duration = $castingRequirement->duration ?? '3 hours';
+
+    // Calculate application deadline
+    $applicationDeadline = null;
+    if ($shootStart) {
+        $applicationDeadline = $shootStart->copy()->subDays(7)->format('Y-m-d');
+    } else {
+        $applicationDeadline = \Carbon\Carbon::now()->addDays(7)->format('Y-m-d');
+    }
+
+    $locationQuery = $castingRequirement->location ? $castingRequirement->location . ', Kuwait' : null;
+    $mapSrc = $locationQuery ? 'https://www.google.com/maps?q=' . rawurlencode($locationQuery) . '&t=&z=15&ie=UTF8&iwloc=B&output=embed' : null;
+    $googleMapsUrl = $locationQuery ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($locationQuery) : null;
+
+    $moodboardImages = $castingRequirement->reference;
+@endphp
+
+<style>
+    .project-show-page {
+        background: #f3f4f6;
+        min-height: 100vh;
+        padding: 32px 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .project-show-container {
+         
+        margin: 0 auto;
+
+    }
+
+    /* Top Card */
+    .top-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        margin-bottom: 32px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+        .top-card {
+            flex-direction: row;
+        }
+    }
+
+    .about-shoot-panel {
+        padding: 32px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .map-panel {
+        background: #e5e7eb;
+        position: relative;
+        min-height: 250px;
+        flex: 1;
+    }
+
+    .map-panel iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .map-overlay-btn {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: #111827;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+        z-index: 10;
+    }
+    .map-overlay-btn:hover {
+        background: #000;
+        color: #fff;
+    }
+
+    .section-pill {
+        display: inline-block;
+        background: #111827;
+        color: #fff;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        align-self: flex-start;
+    }
+
+    .project-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+    }
+
+    .client-name {
+        font-size: 15px;
+        color: #6b7280;
+        margin: 0 0 32px 0;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    @media (max-width: 640px) {
+        .info-grid {
+            grid-template-columns: 1fr;
             gap: 16px;
-            align-items: start;
-            border: 1px solid #efe0df;
-            border-radius: 14px;
-            background: var(--rose-10);
         }
+    }
 
-        .head-left {
-            padding: 14px;
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .info-label {
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .deadline-banner {
+        background: #fffbeb;
+        border: 1px solid #fcd34d; /* Slight border for visibility */
+        color: #b45309;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-block;
+        align-self: flex-start;
+    }
+
+
+    /* Main Layout Grid */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    @media (min-width: 1024px) {
+        .main-grid {
+            grid-template-columns: 2fr 1fr;
         }
+    }
 
-        .head-eyebrow {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            color: #9a8582;
-            font-weight: 800;
-            font-size: 12px;
-        }
+    /* Left Column Sections */
+    .content-section {
+        margin-bottom: 32px;
+    }
 
-        .chip {
-            background: var(--rose-100);
-            border: 1px solid var(--rose-200);
-            border-radius: 999px;
-            padding: 4px 10px;
-            color: var(--rose-700);
-            font-weight: 800;
-            font-size: 12px;
-        }
+    .section-heading {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 20px;
+    }
 
-        .title {
-            margin: 2px 0;
-            color: var(--text-900);
-            font-weight: 900;
-            letter-spacing: .2px;
-        }
+    /* Requirements Styling */
+    .req-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
 
-        .sub {
-            color: var(--muted);
-            font-weight: 700;
-            margin: 0 0 6px;
-        }
+    .req-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
 
-        .meta {
-            display: flex;
-            gap: 14px;
-            color: #a08885;
-            font-size: 12px;
-        }
+    .req-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #111827;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
 
-        .head-right {
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-        }
+    .req-details h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+    }
 
-        .apply-pill {
-            margin:12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            border-radius: 999px;
-            background: var(--rose-700);
-            color: #fff;
-            padding: 8px 16px;
-            font-weight: 800;
-            text-decoration: none;
-            white-space: nowrap;
-        }
+    .req-details p {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: #6b7280;
+    }
 
-        .head-right .apply-pill {
-            width: 100%;
-        }
+    .rate-pill {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .rate-premium {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .rate-basic {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-        .apply-pill:hover {
-            color: #fff;
-            text-decoration: none;
-            opacity: .9;
-        }
+    /* Brief & Moodboard */
+    .brief-card, .moodboard-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
 
-        .apply-pill[disabled] {
-            opacity: .6;
-            cursor: not-allowed
-        }
+    .brief-text {
+        color: #4b5563;
+        line-height: 1.6;
+        font-size: 15px;
+    }
 
-        .title-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-        }
+    .moodboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
 
-        /* ===== Sections ===== */
-        .section {
-            border: 1px solid #efe0df;
-            border-radius: 14px;
-            background: #fff;
-            margin-top: 12px;
-        }
+    .moodboard-img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 8px;
+    }
 
-        .section h6 {
-            margin: 0;
-            color: var(--text-900);
-            font-weight: 900;
-            padding: 12px 14px;
-            border-bottom: 1px solid #f1e7e6;
-        }
+    /* Right Sidebar - Apply Card */
+    .apply-card {
+        background: #111827;
+        border-radius: 16px;
+        padding: 32px;
+        color: #fff;
+        position: sticky;
+        top: 32px;
+    }
 
-        .section .body {
-            padding: 12px 14px;
-            color: #5f4f4d;
-            line-height: 1.55
-        }
+    .apply-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #fff;
+    }
 
-        .model-req-list {
-            display: grid;
-            gap: 12px;
-        }
+    .apply-subtitle {
+        color: #9ca3af;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 32px;
+    }
 
-        .model-req-card {
-            border: 1px solid #f3e3e2;
-            border-radius: 12px;
-            padding: 12px 14px;
-            background: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        }
+    .apply-btn {
+        display: block;
+        width: 100%;
+        background: #fff;
+        color: #111827;
+        text-align: center;
+        padding: 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        margin-bottom: 24px;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .apply-btn:hover {
+        background: #f3f4f6;
+        text-decoration: none;
+        color: #111827;
+    }
+    .apply-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
 
-        .label-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
+    .apply-terms {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.5;
+        margin-bottom: 32px;
+        padding-bottom: 32px;
+        border-bottom: 1px solid #374151;
+    }
 
-        .label-pill {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 2px 10px;
-            background: var(--rose-100);
-            color: var(--rose-700);
-            font-weight: 700;
-            font-size: 12px;
-        }
+    .apply-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    .meta-label {
+        font-size: 14px;
+        color: #9ca3af;
+    }
+    .meta-value {
+        font-size: 14px;
+        color: #fff;
+        font-weight: 600;
+    }
 
-        /* Timeline */
-        .timeline {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
+    /* Modal Styles */
+    .apply-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 16px;
+    }
+    
+    .apply-modal-container {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+    }
 
-        .timeline-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-width: 80px;
-            flex: 1;
-        }
+    .modal-header {
+        padding: 24px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
 
-        .timeline-node {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            border: 2px solid var(--rose-200);
-            color: var(--rose-200);
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--white);
-            transition: all .2s ease;
-        }
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 4px 0;
+    }
 
-        .timeline-step.completed .timeline-node,
-        .timeline-step.active .timeline-node {
-            background: var(--rose-700);
-            border-color: var(--rose-700);
-            color: #fff;
-        }
+    .modal-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+    }
 
-        .timeline-label {
-            margin-top: 6px;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--text-900);
-        }
+    .close-modal-btn {
+        background: #f3f4f6;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .close-modal-btn:hover {
+        background: #e5e7eb;
+        color: #374151;
+    }
 
-        .timeline-line {
-            flex: 1;
-            height: 2px;
-            background: var(--rose-200);
-        }
+    .modal-body {
+        padding: 24px;
+        overflow-y: auto;
+    }
 
-        .timeline-line.active {
-            background: var(--rose-700);
-        }
+    .section-label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 12px;
+        display: block;
+    }
 
-        .location-link {
-            color: var(--rose-700);
-            font-weight: 700;
-            text-decoration: underline;
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-        }
+    /* Shoot Summary Card */
+    .summary-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
 
-        .location-link:hover {
-            text-decoration: none;
-        }
-        .map-embed {
-            margin-top: 10px;
-            border: 1px solid #f0e3e1;
-            border-radius: 12px;
-            overflow: hidden;
-        }
+    .summary-project {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 4px;
+    }
 
-        .map-embed iframe {
-            width: 100%;
-            height: 300px;
-            border: 0;
-        }
+    .summary-client {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 16px;
+    }
 
-        @media (max-width:900px) {
-            .head-band {
-                grid-template-columns: 1fr
-            }
-        }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Ensure 3 columns for Date, Time, Location */
+        gap: 12px;
+    }
 
-        /* ===== Modal ===== */
-        .modal-mask {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .28);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1050;
-        }
+    .summary-item {
+        display: flex;
+        flex-direction: column; /* Icon and text */
+        gap: 4px;
+    }
 
-        .modal-mask.show {
-            display: flex
-        }
+    .summary-icon-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+    
+    .summary-value {
+        font-size: 13px;
+        color: #111827;
+        font-weight: 600;
+        line-height: 1.4;
+    }
 
-        .modal-card {
-            width: min(520px, 92vw);
-            background: #fff;
-            border: 1px solid #efe0df;
-            border-radius: 14px;
-            overflow: hidden
-        }
+    /* Form Elements */
+    .input-group {
+        margin-bottom: 24px;
+    }
 
-        .modal-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 14px;
-            background: var(--rose-10);
-            border-bottom: 1px solid #f1e7e6
-        }
+    .rate-input-wrapper {
+        position: relative;
+    }
 
-        .modal-head h5 {
-            margin: 0;
-            color: var(--text-900);
-            font-weight: 900
-        }
+    .rate-input {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #111827;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .rate-input:focus {
+        border-color: #d1d5db;
+    }
 
-        .modal-close {
-            border: none;
-            background: transparent;
-            font-size: 18px;
-            line-height: 1;
-            color: #8a6561
-        }
+    .currency-symbol {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-weight: 600;
+    }
 
-        .modal-body {
-            padding: 14px
-        }
+    /* Confirmation Box */
+    .confirmation-box {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-        .form-label {
-            font-weight: 800;
-            color: #6e5c5a
-        }
+    .checkbox-item {
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
 
-        .form-control {
-            border: 1px solid var(--rose-200);
-            border-radius: 10px
-        }
+    .checkbox-custom {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        cursor: pointer;
+        position: relative;
+        margin-top: 2px;
+    }
 
-        .modal-foot {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 12px 14px;
-            border-top: 1px solid #f1e7e6
-        }
+    .checkbox-input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 100%;
+        width: 100%;
+        z-index: 10;
+        margin: 0;
+    }
 
-        .btn-rose {
-            background: var(--rose-700);
-            border: none;
-            color: #fff;
-            border-radius: 10px;
-            padding: 8px 14px;
-            font-weight: 800
-        }
+    /* Style when checked */
+    .checkbox-input:checked + .checkbox-bg {
+        background: #111827;
+        border-color: #111827;
+    }
+    
+    .checkbox-bg {
+        width: 100%;
+        height: 100%;
+        border-radius: 2px;
+        background: #fff;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        .btn-ghost {
-            background: #f6f1f0;
-            border: 1px solid var(--rose-200);
-            color: #5b4a48;
-            border-radius: 10px;
-            padding: 8px 14px;
-            font-weight: 800
-        }
+    .checkbox-input:checked + .checkbox-bg::after {
+        content: '✓';
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+    }
 
-        .alert-info {
-            background: #f6e6e4;
-            border-color: #e9d3d1;
-            color: #5b4a48
-        }
-    </style>
+    .checkbox-text {
+        font-size: 14px;
+        color: #111827;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    
+    .checkbox-subtext {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 400;
+        display: block;
+        margin-top: 2px;
+    }
 
-    <div class="page-wrap">
-        @php
-            $timezone = config('app.timezone', 'UTC');
-            $shootStart = null;
-            $rawShootDates = array_filter([
-                $castingRequirement->shoot_date_time ?? null,
-                $castingRequirement->shoot_date_display ?? null,
-            ]);
-            $manualFormats = [
-                'd/m/Y H:i:s',
-                'd/m/Y H:i',
-                'd-m-Y H:i:s',
-                'd-m-Y H:i',
-                'Y-m-d H:i:s',
-                'Y-m-d\TH:i:sP',
-                'Y-m-d',
-            ];
+    /* Message Area */
+    .message-area {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-height: 100px;
+        font-size: 14px;
+        font-family: inherit;
+        resize: vertical;
+        margin-bottom: 8px;
+    }
+    
+    .char-count {
+        text-align: right;
+        font-size: 12px;
+        color: #9ca3af;
+    }
 
-            foreach ($rawShootDates as $rawShootDate) {
-                try {
-                    $shootStart = \Illuminate\Support\Carbon::parse($rawShootDate, $timezone);
-                } catch (\Throwable $e) {
-                    foreach ($manualFormats as $format) {
-                        try {
-                            $shootStart = \Illuminate\Support\Carbon::createFromFormat($format, $rawShootDate, $timezone);
-                            break;
-                        } catch (\Throwable $inner) {
-                            continue;
-                        }
-                    }
-                }
+    /* Footer */
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #f3f4f6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
 
-                if ($shootStart) {
-                    break;
-                }
-            }
+    .btn-cancel {
+        padding: 10px 20px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #374151;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .btn-submit {
+        padding: 10px 24px;
+        background: #9ca3af; /* Disabled gray initially */
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    /* Active submit state */
+    .btn-submit.active {
+        background: #111827; /* Dark active color */
+    }
 
-            $formattedShootDate = null;
-            if ($shootStart) {
-                $formattedShootDate = $shootStart->copy()->timezone($timezone)->format('d M Y | h:i A');
-            } elseif (!empty($castingRequirement->shoot_date_display)) {
-                $formattedShootDate = $castingRequirement->shoot_date_display;
-            }
+</style>
 
-            $currentStage = 1;
-            if (isset($existingApplication) && $existingApplication) {
-                $currentStage = 2;
+<div class="project-show-page">
+    <div class="project-show-container">
 
-                if (in_array($existingApplication->status, ['shortlisted', 'selected'])) {
-                    $currentStage = 3;
-                }
+        <!-- Top Section -->
+        <div class="top-card">
+            <div class="about-shoot-panel">
+                <div class="section-pill">ABOUT SHOOT</div>
+                <h1 class="project-title">{{ $castingRequirement->project_name }}</h1>
+                <p class="client-name">Client: {{ $castingRequirement->client_name ?? 'Zara Official' }}</p>
 
-                if ($existingApplication->status === 'selected') {
-                    $currentStage = 4;
-                }
-
-                if (in_array($existingApplication->payment_status, ['released', 'received'])) {
-                    $currentStage = 5;
-                }
-            }
-
-            $timelineStages = [
-                ['label' => __('Advertised')],
-                ['label' => __('Applied')],
-                ['label' => __('Short Listed')],
-                ['label' => __('Selected')],
-                ['label' => __('Done')],
-            ];
-
-            foreach ($timelineStages as $index => &$stage) {
-                $position = $index + 1;
-                if ($position < $currentStage) {
-                    $stage['state'] = 'completed';
-                } elseif ($position === $currentStage) {
-                    $stage['state'] = 'active';
-                } else {
-                    $stage['state'] = 'inactive';
-                }
-            }
-            unset($stage);
-
-            $locationQuery = $castingRequirement->location
-                ? $castingRequirement->location . ', Kuwait'
-                : null;
-
-            $mapSrc = $locationQuery
-                ? 'https://www.google.com/maps?q=' . rawurlencode($locationQuery) . '&t=&z=15&ie=UTF8&iwloc=B&output=embed'
-                : null;
-
-            $googleCalendarUrl = null;
-            if ($shootStart) {
-                try {
-                    $shootEnd = (clone $shootStart)->addHours(2);
-
-                    $startUtc = $shootStart->copy()->timezone('UTC')->format('Ymd\THis\Z');
-                    $endUtc = $shootEnd->copy()->timezone('UTC')->format('Ymd\THis\Z');
-
-                    $details = trim(implode("\n", array_filter([
-                        $castingRequirement->description ?? ($castingRequirement->notes ?? null),
-                        $castingRequirement->posted_by ? __('Posted by: :name', ['name' => $castingRequirement->posted_by]) : null,
-                        request()->fullUrl(),
-                    ])));
-
-                    $query = array_filter([
-                        'action' => 'TEMPLATE',
-                        'text' => $castingRequirement->project_name ?? __('Project Shoot'),
-                        'dates' => "{$startUtc}/{$endUtc}",
-                        'details' => $details ?: null,
-                        'location' => $castingRequirement->location ?? null,
-                    ]);
-
-                    $googleCalendarUrl = 'https://calendar.google.com/calendar/render?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
-                } catch (\Throwable $e) {
-                    $googleCalendarUrl = null;
-                }
-            }
-        @endphp
-        <div class="mb-2">
-            <a href="{{ route('talent.projects.index') }}" class="text-decoration-none" style="color:#8a6561;font-weight:800;">
-                <i class="fas fa-chevron-left mr-1"></i>{{ __('Back') }}
-            </a>
-        </div>
-
-        {{-- Header band (full width) --}}
-        <div class="head-band">
-            <div class="head-left">
-                <div class="head-eyebrow">
-                    <span>{{ __('Project Commercial Shoot') }}</span>
-                    @php $statusText = \App\Models\CastingRequirement::STATUS_SELECT[$castingRequirement->status ?? ''] ?? $castingRequirement->status; @endphp
-                    @if ($statusText)
-                        <span class="chip">{{ $statusText }}</span>
-                    @endif
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label"><i class="far fa-calendar"></i> Date</span>
+                        <span class="info-value">{{ $formattedShootDate }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="far fa-clock"></i> Time</span>
+                        <span class="info-value">{{ $formattedShootTime }} ({{ $duration }})</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                        <span class="info-value">{{ $castingRequirement->location ?? 'Malibu Beach, CA' }}</span>
+                    </div>
                 </div>
-                <div class="title-row">
-                    <h2 class="title">{{ $castingRequirement->project_name }}</h2>
-                    @if ($googleCalendarUrl)
-                        <a
-                            class="apply-pill"
-                            href="{{ $googleCalendarUrl }}"
-                            target="_blank"
-                            rel="noopener"
-                            title="{{ __('Add this shoot to your Google Calendar') }}"
-                        >
-                            <i class="far fa-calendar-plus mr-1"></i>{{ __('Add to Calendar') }}
-                        </a>
-                    @endif
-                </div>
-                <div class="sub">{{ __('Posted by') }} {{ $castingRequirement->posted_by ?? 'Admin' }}</div>
-                <div class="meta">
-                    @if ($formattedShootDate)
-                        <span><i class="far fa-calendar mr-1"></i>{{ $formattedShootDate }}</span>
-                    @endif
-                    @if ($castingRequirement->location)
-                        <span>
-                            <i class="fas fa-map-marker-alt mr-1"></i>
-                            @if ($locationQuery)
-                                <button type="button"
-                                    class="location-link"
-                                    data-map-toggle="project-detail-map">
-                                    {{ $castingRequirement->location }}
-                                </button>
-                            @else
-                                {{ $castingRequirement->location }}
-                            @endif
-                        </span>
-                    @endif
-                    @if ($castingRequirement->duration)
-                        <span><i class="far fa-clock mr-1"></i>{{ $castingRequirement->duration }}</span>
-                    @endif
-                </div>
-                <div class="timeline">
-                    @foreach ($timelineStages as $stage)
-                        <div class="timeline-step {{ $stage['state'] }}">
-                            <div class="timeline-node">{{ $loop->iteration }}</div>
-                            <span class="timeline-label">{{ $stage['label'] }}</span>
-                        </div>
-                        @if (! $loop->last)
-                            <div class="timeline-line {{ ($loop->index + 2) <= $currentStage ? 'active' : '' }}"></div>
-                        @endif
-                    @endforeach
+
+                <div class="deadline-banner">
+                    Application Deadline: {{ $applicationDeadline }}
                 </div>
             </div>
-            <div class="head-right">
-                @if (isset($existingApplication) && $existingApplication)
-                    <button class="apply-pill" disabled>{{ __('Applied') }}</button>
+
+            <div class="map-panel">
+                @if($mapSrc)
+                    <iframe src="{{ $mapSrc }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    @if($googleMapsUrl)
+                        <a href="{{ $googleMapsUrl }}" target="_blank" class="map-overlay-btn">Open Google Maps</a>
+                    @endif
                 @else
-                    <button id="openApplyModal" class="apply-pill">{{ __('Apply Now') }}</button>
+                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#9ca3af;">
+                        No Location Data
+                    </div>
                 @endif
             </div>
         </div>
 
-        {{-- Description --}}
-        <div class="section">
-            <h6>{{ __('Description') }}</h6>
-            <div class="body">
-                {{ $castingRequirement->description ?? ($castingRequirement->notes ?? __('No description provided.')) }}
-            </div>
-            @if ($mapSrc)
-                <div class="map-embed"
-                    id="project-detail-map"
-                    data-map-src="{{ $mapSrc }}"
-                    style="display: block;">
-                    <iframe
-                        src="{{ $mapSrc }}"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-            @endif
-        </div>
+        <!-- Main Content -->
+        <div class="main-grid">
 
-        @if($castingRequirement->modelRequirements->isNotEmpty())
-            <div class="section">
-                <h6>{{ __('Model Requirements') }}</h6>
-                <div class="body model-req-list">
-                    @foreach($castingRequirement->modelRequirements as $modelRequirement)
-                        <div class="model-req-card">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <strong>{{ $modelRequirement->title ?? __('Model #:number', ['number' => $loop->iteration]) }}</strong>
-                                <span class="badge badge-pill badge-secondary">{{ $modelRequirement->quantity }} {{ __('slots') }}</span>
-                            </div>
-                            <ul class="list-unstyled small text-muted mb-2">
-                                <li><strong>{{ __('Rate') }}:</strong> {{ $modelRequirement->rate ? '$' . number_format($modelRequirement->rate, 2) : __('Not specified') }}</li>
-                                <li><strong>{{ __('Gender') }}:</strong> {{ \App\Models\CastingRequirement::GENDER_SELECT[$modelRequirement->gender] ?? __('Any') }}</li>
-                                <li><strong>{{ __('Age Range') }}:</strong>
-                                    @php $rangeOption = \App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$modelRequirement->age_range_key] ?? null; @endphp
-                                    {{ $rangeOption['label'] ?? __('Any age') }}
-                                </li>
-                                <li><strong>{{ __('Hair') }}:</strong> {{ $modelRequirement->hair_color ?: __('Any') }}</li>
-                            </ul>
-                            @if($modelRequirement->labels->isNotEmpty())
-                                <div class="label-pills">
-                                    @foreach($modelRequirement->labels as $label)
-                                        <span class="label-pill">{{ $label->name }}</span>
-                                    @endforeach
+            <!-- Left Column -->
+            <div class="left-col">
+
+                <!-- Requirements -->
+                <div class="content-section">
+                    <h2 class="section-heading">Requirements</h2>
+                    @if($castingRequirement->modelRequirements->isNotEmpty())
+                        @foreach($castingRequirement->modelRequirements as $index => $modelReq)
+                            @php
+                                $genderLabel = \App\Models\CastingRequirement::GENDER_SELECT[$modelReq->gender] ?? 'Any';
+                                $ageRange = \App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$modelReq->age_range_key] ?? null;
+                                $ageLabel = $ageRange ? $ageRange['label'] : 'Any Age';
+                                $rate = $modelReq->rate ?? null;
+                                $isPremium = $rate && $rate > 500;
+                            @endphp
+                            <div class="req-card">
+                                <div class="req-left">
+                                    <div class="req-number">{{ $index + 1 }}</div>
+                                    <div class="req-details">
+                                        <h4>{{ $modelReq->title ?? $genderLabel . ' Models (' . $ageLabel . ')' }}</h4>
+                                        <p>Any Skin Tone • Any Height</p>
+                                    </div>
                                 </div>
-                            @else
-                                <span class="text-muted small">{{ __('No specific labels required') }}</span>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        {{-- Outfit & Nails --}}
-        @if (!empty($castingRequirement->outfit) || !empty($castingRequirement->nails))
-            <div class="section">
-                <h6>{{ __('Outfit & Nails') }}</h6>
-                <div class="body">
-                    @if(!empty($castingRequirement->outfit))
-                        @php
-                            $selectedOutfits = $castingRequirement->getSelectedOutfits();
-                        @endphp
-                        @if($selectedOutfits->isNotEmpty())
-                            <strong>{{ __('Required Outfits:') }}</strong><br>
-                            <ul class="mb-2">
-                                @foreach($selectedOutfits as $outfit)
-                                    <li>{{ $outfit->name }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
-                    @endif
-                    @if(!empty($castingRequirement->nails))
-                        {!! nl2br(e($castingRequirement->nails)) !!}
+                                <div class="req-right">
+                                    <span class="rate-pill {{ $isPremium ? 'rate-premium' : 'rate-basic' }}">
+                                        {{ $isPremium ? 'PREMIUM RATE' : 'BASIC RATE' }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="req-card"><p>No specific requirements listed.</p></div>
                     @endif
                 </div>
-            </div>
-        @endif
 
-        {{-- Usage Rights --}}
-        @if (!empty($castingRequirement->usage_rights))
-            <div class="section">
-                <h6>{{ __('Usage Rights') }}</h6>
-                <div class="body">{{ $castingRequirement->usage_rights }}</div>
-            </div>
-        @endif
-
-        {{-- Notes --}}
-        @if (!empty($castingRequirement->extra_notes))
-            <div class="section">
-                <h6>{{ __('Notes') }}</h6>
-                <div class="body">{{ $castingRequirement->extra_notes }}</div>
-            </div>
-        @endif
-    </div>
-
-    {{-- ===== Apply Modal ===== --}}
-    @if (!isset($existingApplication) || !$existingApplication)
-        <div id="applyModal" class="modal-mask" aria-hidden="true">
-            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
-                <div class="modal-head">
-                    <h5 id="applyTitle">{{ __('Apply to this project') }}</h5>
-                    <button type="button" class="modal-close" aria-label="{{ __('Close') }}" data-close>×</button>
+                <!-- Shoot Brief -->
+                <div class="content-section">
+                    <h2 class="section-heading">Shoot Brief</h2>
+                    <div class="brief-card">
+                        <p class="brief-text">
+                            {{ $castingRequirement->description ?? 'We are looking for diverse, confident models to showcase our new summer collection in a vibrant beach setting. The shoot will capture the essence of summer freedom and style, featuring flowing fabrics, bright colors, and natural lighting. Models should be comfortable with outdoor shooting conditions and able to convey energy and joy through their poses. Previous experience with fashion photography is preferred but not required. We value authenticity and natural beauty over conventional standards.' }}
+                        </p>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    @if ($errors->has('rate') || $errors->has('talent_notes'))
-                        <div class="alert alert-info mb-2">{{ __('Please fix the errors below.') }}</div>
+
+                <!-- Moodboard -->
+                @if($moodboardImages && $moodboardImages->isNotEmpty())
+                <div class="content-section">
+                    <h2 class="section-heading">Moodboard</h2>
+                    <div class="moodboard-card">
+                        <div class="moodboard-grid">
+                            @foreach($moodboardImages->take(3) as $image)
+                                <img src="{{ $image->getUrl() }}" alt="Moodboard" class="moodboard-img">
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+            </div>
+
+            <!-- Right Column (Apply) -->
+            <div class="right-col">
+                <div class="apply-card">
+                    <h3 class="apply-title">Ready to Apply?</h3>
+                    <p class="apply-subtitle">Submit your profile for review by the casting team.</p>
+
+                    @if(isset($existingApplication) && $existingApplication)
+                        <button class="apply-btn" disabled>ALREADY APPLIED</button>
+                    @else
+                        <!-- Trigger Modal -->
+                        <button type="button" class="apply-btn" id="openApplyModal">APPLY NOW ></button>
                     @endif
-                    <form id="applyForm" method="POST" action="{{ route('talent.projects.apply', $castingRequirement) }}">
-                        @csrf
-                        <div class="form-group">
-                            <label class="form-label"
-                                for="rate">{{ trans('cruds.castingApplication.fields.rate') }}</label>
-                            <input type="number" step="0.01" name="rate" id="rate"
-                                class="form-control @error('rate') is-invalid @enderror" value="{{ old('rate') }}">
-                            @error('rate')
-                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                            @enderror
-                        </div>
 
-                        <div class="form-group mb-0">
-                            <label class="form-label"
-                                for="talent_notes">{{ trans('cruds.castingApplication.fields.talent_notes') }}</label>
-                            <textarea name="talent_notes" id="talent_notes" rows="4"
-                                class="form-control @error('talent_notes') is-invalid @enderror">{{ old('talent_notes') }}</textarea>
-                            @error('talent_notes')
-                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                            @enderror
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-foot">
-                    <button class="btn-ghost" type="button" data-close>{{ __('Cancel') }}</button>
-                    <button class="btn-rose" type="submit" form="applyForm">{{ __('Submit Application') }}</button>
+                    <div class="apply-terms">
+                        By applying, you agree to our terms and conditions. Response time is typically 2-3 business days.
+                    </div>
+
+                    <div class="apply-meta">
+                        <span class="meta-label">Duration:</span>
+                        <span class="meta-value">{{ $duration }}</span>
+                    </div>
+                    <div class="apply-meta">
+                        <span class="meta-label">Apply Before:</span>
+                        <span class="meta-value">{{ $applicationDeadline }}</span>
+                    </div>
                 </div>
             </div>
+
         </div>
-    @endif
 
-    <script>
-        (function() {
-            const modal = document.getElementById('applyModal');
-            const openBtn = document.getElementById('openApplyModal');
-            const closers = document.querySelectorAll('[data-close]');
+    </div>
+</div>
 
-            function open() {
-                if (modal) {
-                    modal.classList.add('show');
-                    modal.setAttribute('aria-hidden', 'false');
-                }
-            }
+<!-- Modal Structure -->
+@if(!isset($existingApplication) || !$existingApplication)
+<div id="applyModal" class="apply-modal-overlay" style="display: none;">
+    <div class="apply-modal-container">
+        <!-- Header -->
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">Apply for Shoot</h3>
+                <p class="modal-subtitle">Confirm your availability and submit your profile for review.</p>
+            </div>
+            <button id="closeApplyModal" class="close-modal-btn">&times;</button>
+        </div>
 
-            function close() {
-                if (modal) {
-                    modal.classList.remove('show');
-                    modal.setAttribute('aria-hidden', 'true');
-                }
-            }
+        <form method="POST" action="{{ route('talent.projects.apply', $castingRequirement) }}" id="applyForm">
+            @csrf
+            
+            <div class="modal-body">
+                <!-- Shoot Summary -->
+                <label class="section-label">Shoot Summary</label>
+                <div class="summary-card">
+                    <div class="summary-project">{{ $castingRequirement->project_name }}</div>
+                    <div class="summary-client">Client: {{ $castingRequirement->client_name ?? 'Client Name' }}</div>
+                    
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-icon-label"><i class="far fa-calendar"></i> Date</div>
+                            <div class="summary-value">{{ $formattedShootDate }}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon-label"><i class="far fa-clock"></i> Time</div>
+                            <div class="summary-value">{{ $formattedShootTime }} ({{ $duration }})</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon-label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                            <div class="summary-value">{{ $castingRequirement->location ?? 'Location' }}</div>
+                        </div>
+                    </div>
+                </div>
 
-            if (openBtn) openBtn.addEventListener('click', open);
-            closers.forEach(b => b.addEventListener('click', close));
-            if (modal) {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) close();
-                });
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') close();
-                });
-            }
+                <!-- Rate Input -->
+                <div class="input-group">
+                    <label class="section-label">Enter Your Shoot Rate</label>
+                    <div class="rate-input-wrapper">
+                        <input type="number" name="rate" class="rate-input" placeholder="Enter your rate" step="0.01" required>
+                        <span class="currency-symbol">$</span>
+                    </div>
+                </div>
 
-            // Re-open modal if validation failed
-            @if ($errors->has('rate') || $errors->has('talent_notes'))
-                open();
-            @endif
-        })();
+                <!-- Confirmation Box -->
+                <label class="section-label">Confirmation</label>
+                <div class="confirmation-box">
+                    <!-- Checkbox 1 -->
+                    <div class="checkbox-item">
+                        <div class="checkbox-custom">
+                            <input type="checkbox" class="checkbox-input" required>
+                            <div class="checkbox-bg"></div>
+                        </div>
+                        <div>
+                            <span class="checkbox-text">I am available on the shoot date.</span>
+                            <span class="checkbox-subtext">Confirm you can attend on {{ $formattedShootDate }}</span>
+                        </div>
+                    </div>
 
-        document.addEventListener('click', function (event) {
-            const toggle = event.target.closest('[data-map-toggle]')
-            if (!toggle) {
-                return
+                    <!-- Checkbox 2 -->
+                    <div class="checkbox-item">
+                        <div class="checkbox-custom">
+                            <input type="checkbox" class="checkbox-input" required>
+                            <div class="checkbox-bg"></div>
+                        </div>
+                        <div>
+                            <span class="checkbox-text">I agree to the shoot duration and location.</span>
+                            <span class="checkbox-subtext">{{ $duration }} at {{ $castingRequirement->location ?? 'Location' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox 3 -->
+                    <div class="checkbox-item">
+                        <div class="checkbox-custom">
+                            <input type="checkbox" class="checkbox-input" required>
+                            <div class="checkbox-bg"></div>
+                        </div>
+                        <div>
+                            <span class="checkbox-text">I confirm my profile information is accurate.</span>
+                            <span class="checkbox-subtext">Ensure your portfolio and details are up to date</span>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox 4 -->
+                    <div class="checkbox-item">
+                        <div class="checkbox-custom">
+                            <input type="checkbox" class="checkbox-input" required>
+                            <div class="checkbox-bg"></div>
+                        </div>
+                        <div>
+                            <span class="checkbox-text">I confirm my profile is accurate, I have no undisclosed injuries...</span>
+                            <span class="checkbox-subtext">Please read <a href="#" style="color:#2563eb;">terms and polices</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message -->
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label class="section-label">Message to Casting Team (Optional)</label>
+                    <textarea name="talent_notes" class="message-area" placeholder="Optional message for the casting team" maxlength="300" id="messageBox"></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/300</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="cancelApply">Cancel</button>
+                <button type="submit" class="btn-submit active">APPLY NOW ></button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('applyModal');
+        const openBtn = document.getElementById('openApplyModal');
+        const closeBtn = document.getElementById('closeApplyModal');
+        const cancelBtn = document.getElementById('cancelApply');
+        const messageBox = document.getElementById('messageBox');
+        const charCount = document.getElementById('charCount');
+
+        function openModal() {
+            if(modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
             }
-            const targetId = toggle.getAttribute('data-map-toggle')
-            const map = document.getElementById(targetId)
-            if (!map) {
-                return
+        }
+        function closeModal() {
+            if(modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
             }
-            const iframe = map.querySelector('iframe')
-            if (iframe && !iframe.getAttribute('src')) {
-                const mapSrc = map.getAttribute('data-map-src')
-                if (mapSrc) {
-                    iframe.setAttribute('src', mapSrc)
-                }
+        }
+
+        if(openBtn) openBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+        
+        if(closeBtn) closeBtn.addEventListener('click', closeModal);
+        if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // Close on click outside
+        if(modal) {
+            modal.addEventListener('click', function(e) {
+                if(e.target === modal) closeModal();
+            });
+        }
+        
+        // Character Counter
+        if(messageBox && charCount) {
+            messageBox.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+        }
+        
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+                closeModal();
             }
-            map.style.display = map.style.display === 'block' ? 'none' : 'block'
-        })
-    </script>
+        });
+    });
+</script>
 @endsection
+
+
+
