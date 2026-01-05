@@ -147,6 +147,19 @@
             <h1>Verify Identity</h1>
             <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
 
+            @if(isset($otp) && !empty($otp))
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
+                <div style="font-size: 24px; font-weight: 700; color: #92400e; letter-spacing: 4px; font-family: 'Courier New', monospace;">{{ $otp }}</div>
+                <div style="font-size: 11px; color: #92400e; margin-top: 4px;">This OTP is stored in the database</div>
+            </div>
+            @else
+            <div style="background: #fee2e2; border: 1px solid #f87171; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 11px; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Debug Info</div>
+                <div style="font-size: 12px; color: #991b1b;">OTP not found. Phone: {{ ($phone['phone_country_code'] ?? 'N/A') . ' ' . ($phone['phone_number'] ?? 'N/A') }}</div>
+            </div>
+            @endif
+
             @if ($errors->any())
                 <div class="error-message">
                     @foreach ($errors->all() as $error)
