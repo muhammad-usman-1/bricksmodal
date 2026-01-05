@@ -1234,6 +1234,31 @@
                             </div>
                         </div>
 
+                        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                            <div class="step-title" style="font-size: 15px; margin-bottom: 8px;">Profile Video</div>
+                            <p class="step-sub" style="margin-bottom: 14px;">Upload a video to showcase your talent and personality.</p>
+
+                            <div class="field">
+                                <label class="upload-card" for="upload_video" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
+                                    <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;">
+                                    <div class="upload-inner">
+                                        <div class="upload-icon">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                            </svg>
+                                        </div>
+                                        <div class="upload-label">Profile Video</div>
+                                        <div data-file-label="video">Click to upload video (MP4, MOV, AVI, WEBM)</div>
+                                        <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Max file size: 500MB</div>
+                                    </div>
+                                </label>
+                                @error('video')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="action-group" style="margin-top: 10px;">
                             <button type="button" class="btn-secondary" data-prev>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1642,6 +1667,10 @@
             const headshotLabel = document.querySelector('[data-file-label="headshot"]');
             const fullbodyLabel = document.querySelector('[data-file-label="fullbody"]');
 
+            // file label update for video upload
+            const videoInput = document.getElementById('upload_video');
+            const videoLabel = document.querySelector('[data-file-label="video"]');
+
             function updateLabel(input, label) {
                 if (!input || !label) return;
                     const fileName = input.files && input.files[0] ? input.files[0].name : '';
@@ -1652,6 +1681,7 @@
             if (backLabel) backLabel.dataset.defaultText = backLabel.textContent;
             if (headshotLabel) headshotLabel.dataset.defaultText = headshotLabel.textContent;
             if (fullbodyLabel) fullbodyLabel.dataset.defaultText = fullbodyLabel.textContent;
+            if (videoLabel) videoLabel.dataset.defaultText = videoLabel.textContent;
 
             // Update labels on file change
             if (frontInput) {
@@ -1665,6 +1695,9 @@
             }
             if (fullbodyInput) {
                 fullbodyInput.addEventListener('change', () => updateLabel(fullbodyInput, fullbodyLabel));
+            }
+            if (videoInput) {
+                videoInput.addEventListener('change', () => updateLabel(videoInput, videoLabel));
             }
 
             // Drag and drop functionality

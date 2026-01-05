@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Label;
 use App\Models\Language;
 use App\Models\TalentProfile;
+use App\Services\MuxService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -19,12 +20,25 @@ class ProfileController extends Controller
         $user = $request->user('talent');
         $profile = $this->resolveProfile($user);
 
+        // Get MUX playback ID if video exists
+        $muxPlaybackId = null;
+        if ($profile->mux_video_asset_id) {
+            try {
+                $muxService = new MuxService();
+                $muxPlaybackId = $muxService->getPlaybackId($profile->mux_video_asset_id);
+            } catch (\Exception $e) {
+                // Log error but don't break the page
+                \Log::error('Failed to get MUX playback ID: ' . $e->getMessage());
+            }
+        }
+
         return view('talent.profile.index', [
             'profile'          => $profile->load('languages', 'labels'),
             'languages'        => Language::orderBy('title')->get(),
             'availableLabels'  => Label::orderBy('name')->get(),
             'skinToneOptions'  => TalentProfile::SKIN_TONE_SELECT,
             'statusOptions'    => TalentProfile::VERIFICATION_STATUS_SELECT,
+            'muxPlaybackId'    => $muxPlaybackId,
         ]);
     }
 

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Talent;
 use App\Http\Controllers\Controller;
 use App\Models\Label;
 use App\Models\TalentProfile;
+use App\Services\MuxService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OnboardingController extends Controller
@@ -127,6 +129,7 @@ class OnboardingController extends Controller
             'id_back'           => [$profile->id_back_path ? 'nullable' : 'required', 'image', 'max:4096'],
             'headshot'          => [$profile->headshot_center_path ? 'nullable' : 'required', 'image', 'max:4096'],
             'fullbody'          => [$profile->full_body_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
+            'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'], // 500MB max
         ]);
 
         $user = $request->user('talent');
@@ -135,6 +138,18 @@ class OnboardingController extends Controller
         $user->update([
             'name' => $fullName,
         ]);
+
+        // Handle video upload to MUX
+        $muxVideoAssetId = $profile->mux_video_asset_id;
+        if ($request->hasFile('video')) {
+            try {
+                $muxService = new MuxService();
+                $muxVideoAssetId = $muxService->uploadVideo($request->file('video'));
+            } catch (\Exception $e) {
+                Log::error('Failed to upload video to MUX: ' . $e->getMessage());
+                return back()->withErrors(['video' => 'Failed to upload video. Please try again.'])->withInput();
+            }
+        }
 
         $profile->update([
             'first_name'        => $data['first_name'],
@@ -164,6 +179,7 @@ class OnboardingController extends Controller
             'id_back_path'      => Arr::get($data, 'id_back') ? $this->storeTalentFile($profile, $data['id_back'], 'id/back') : $profile->id_back_path,
             'headshot_center_path' => Arr::get($data, 'headshot') ? $this->storeTalentFile($profile, $data['headshot'], 'photos/headshot') : $profile->headshot_center_path,
             'full_body_front_path' => Arr::get($data, 'fullbody') ? $this->storeTalentFile($profile, $data['fullbody'], 'photos/fullbody') : $profile->full_body_front_path,
+            'mux_video_asset_id' => $muxVideoAssetId,
             'onboarding_step'   => 'pending-approval',
             'onboarding_completed_at' => now(),
             'verification_status'     => 'pending',

@@ -129,7 +129,19 @@ class TalentProfileController extends Controller
         $languages = \App\Models\Language::all();
         $labels = \App\Models\Label::all();
 
-        return view('admin.talentProfiles.show', compact('talentProfile', 'reviews', 'languages', 'labels'));
+        // Get MUX playback ID if video exists
+        $muxPlaybackId = null;
+        if ($talentProfile->mux_video_asset_id) {
+            try {
+                $muxService = new \App\Services\MuxService();
+                $muxPlaybackId = $muxService->getPlaybackId($talentProfile->mux_video_asset_id);
+            } catch (\Exception $e) {
+                // Log error but don't break the page
+                \Log::error('Failed to get MUX playback ID for admin: ' . $e->getMessage());
+            }
+        }
+
+        return view('admin.talentProfiles.show', compact('talentProfile', 'reviews', 'languages', 'labels', 'muxPlaybackId'));
     }
 
     public function destroy(TalentProfile $talentProfile)

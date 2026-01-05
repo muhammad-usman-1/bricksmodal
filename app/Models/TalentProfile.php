@@ -94,6 +94,7 @@ class TalentProfile extends Model
         'full_body_front_path',
         'full_body_right_path',
         'full_body_back_path',
+        'mux_video_asset_id',
         'onboarding_step',
         'onboarding_completed_at',
         'created_at',

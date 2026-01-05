@@ -463,6 +463,23 @@
             </div>
         </div>
 
+        @if($muxPlaybackId)
+        <div class="section-card">
+            <div class="section-title">Profile Video</div>
+            <div style="width: 100%; max-width: 100%; margin-top: 16px;">
+                <div id="mux-player" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000;">
+                    <script src="https://unpkg.com/@mux/mux-player"></script>
+                    <mux-player
+                        stream-type="on-demand"
+                        playback-id="{{ $muxPlaybackId }}"
+                        metadata-video-title="Talent Profile Video"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                    ></mux-player>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="info-grid">
             @php
                 $sections = [
