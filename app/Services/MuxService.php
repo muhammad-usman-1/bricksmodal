@@ -113,6 +113,7 @@ class MuxService
             }
 
             // Create a direct upload
+            // Note: Setting 'test' to false allows full video playback (test mode limits to 10 seconds)
             $createUploadRequest = new \MuxPhp\Models\CreateUploadRequest([
                 'new_asset_settings' => new CreateAssetRequest([
                     'playback_policy' => ['public'],
@@ -120,7 +121,7 @@ class MuxService
                         'generated_subtitles' => false,
                     ]),
                 ]),
-                'test' => config('app.env') !== 'production',
+                'test' => false, // Set to false to allow full video playback
             ]);
 
             $upload = $this->directUploadsApi->createDirectUpload($createUploadRequest);

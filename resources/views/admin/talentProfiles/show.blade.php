@@ -473,6 +473,7 @@
                         stream-type="on-demand"
                         playback-id="{{ $muxPlaybackId }}"
                         metadata-video-title="Talent Profile Video"
+                        default-show-captions="false"
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
                     ></mux-player>
                 </div>
