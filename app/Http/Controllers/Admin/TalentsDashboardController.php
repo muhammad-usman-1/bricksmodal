@@ -14,6 +14,7 @@ class TalentsDashboardController extends Controller
         abort_if(Gate::denies('talent_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $talents = TalentProfile::with(['languages', 'user'])
+            ->where('onboarding_steps_completed', '>=', 3)
             ->latest()
             ->get();
 

@@ -132,9 +132,11 @@ class MuxService
 
             $uploadId = $upload->getData()->getId();
             $uploadUrl = $upload->getData()->getUrl();
+            Log::info("Mux Direct Upload created. ID: $uploadId");
 
             // Upload the file to MUX using a client with SSL configuration
             $uploadClient = $this->createGuzzleClient();
+            Log::info("Starting PUT request to Mux URL...");
             $response = $uploadClient->put($uploadUrl, [
                 'body' => fopen($file->getRealPath(), 'r'),
                 'headers' => [
@@ -143,8 +145,10 @@ class MuxService
             ]);
 
             if ($response->getStatusCode() !== 200) {
+                Log::error("Mux PUT failed. Status: " . $response->getStatusCode() . " Body: " . $response->getBody());
                 throw new \Exception('Failed to upload video to MUX');
             }
+            Log::info("Mux PUT successful. Status: " . $response->getStatusCode());
 
             // Wait for the asset to be ready (polling)
             $assetId = null;
@@ -162,10 +166,14 @@ class MuxService
 
                         if ($status === 'asset_created') {
                             $assetId = $uploadStatus->getData()->getAssetId();
+                            Log::info("Mux asset created: $assetId");
                             break;
                         } elseif ($status === 'errored') {
-                            throw new \Exception('MUX upload failed: ' . ($uploadStatus->getData()->getError()?->getMessage() ?? 'Unknown error'));
+                             $errMsg = $uploadStatus->getData()->getError()?->getMessage() ?? 'Unknown error';
+                             Log::error("Mux processing failed: $errMsg");
+                             throw new \Exception('MUX upload failed: ' . $errMsg);
                         }
+                        Log::info("Mux upload status: $status (Attempt $attempt/$maxAttempts)");
                     }
                 } catch (\Exception $e) {
                     Log::warning('Error checking MUX upload status: ' . $e->getMessage());

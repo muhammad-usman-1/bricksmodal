@@ -41,7 +41,7 @@
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-            }
+                }
 
             #admin-search-box {
                 display: flex !important;
@@ -77,7 +77,7 @@
                 justify-content: flex-end !important;
                 flex-shrink: 0 !important;
                 margin-left: 20px !important;
-            }
+                }
 
             .header-icon-link {
                 margin-left: 18px !important;
@@ -105,7 +105,7 @@
             #sidebarCollapseBtn {
                 border: 1px solid #e5e7eb !important;
                 background: #ffffff !important;
-            }
+                }
 
             #sidebarCollapseBtn:hover {
                 background: #f9fafb !important;
@@ -138,7 +138,7 @@
             html[data-theme="dark"] #admin-search-box {
                 background: #252932 !important;
                 border-color: #2d3138 !important;
-            }
+                }
 
             html[data-theme="dark"] #admin-search-box input {
                 color: #e5e7eb !important;
@@ -251,7 +251,7 @@
                             wrapper.style.marginLeft = '70px';
                 } else {
                             wrapper.style.marginLeft = '';
-                        }
+                }
                     }
                 };
 

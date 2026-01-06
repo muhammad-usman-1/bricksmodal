@@ -183,6 +183,7 @@ Route::prefix('talent')->as('talent.')->group(function () {
     Route::middleware('auth:talent')->group(function () {
         Route::get('onboarding', [OnboardingController::class, 'start'])->name('onboarding.start');
         Route::get('onboarding/intro', [OnboardingController::class, 'intro'])->name('onboarding.intro');
+        Route::post('onboarding/save-step', [OnboardingController::class, 'saveStep'])->name('onboarding.save-step');
         Route::get('onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');

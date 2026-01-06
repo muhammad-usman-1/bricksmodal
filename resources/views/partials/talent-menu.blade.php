@@ -449,31 +449,31 @@ letter-spacing: 1.4px;">STUDIO</div>
         </div>
 
         <ul class="bm-nav">
-            <li class="c-sidebar-nav-item">
+        <li class="c-sidebar-nav-item">
                 <a href="{{ route('talent.dashboard') }}" class="bm-link {{ request()->routeIs('talent.dashboard') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard" style="width: 16px; height: 16px; object-fit: contain;">
                     Dashboard
-                </a>
-            </li>
-            <li class="c-sidebar-nav-item">
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
                 <a href="{{ Route::has('talent.projects.index') ? route('talent.projects.index') : '#' }}" class="bm-link {{ request()->routeIs('talent.projects.*') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/camera.png') }}" alt="My Shoots" style="width: 16px; height: 16px; object-fit: contain;">
                     My Shoots
-                </a>
-            </li>
-            <li class="c-sidebar-nav-item">
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
                 <a href="{{ route('talent.profile.show') }}" class="bm-link {{ request()->routeIs('talent.profile.*') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/user.png') }}" alt="My Profile" style="width: 16px; height: 16px; object-fit: contain;">
                     My Profile
-                </a>
-            </li>
-            <li class="c-sidebar-nav-item">
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
                 <a href="{{ Route::has('talent.payments.index') ? route('talent.payments.index') : '#' }}" class="bm-link {{ request()->routeIs('talent.payments.*') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/payment.png') }}" alt="My Payment" style="width: 16px; height: 16px; object-fit: contain;">
                     My Payment
-                </a>
-            </li>
-        </ul>
+            </a>
+        </li>
+    </ul>
 
         @php
             $talentUser = auth('talent')->user();
