@@ -135,7 +135,7 @@
         <p>Sign in with Google to access your admin<br>dashboard</p>
 
         <a class="btn google" href="{{ route('admin.login.google') }}">
-            <img src="{{ asset('images/googleicon.png') }}" alt="Google Logo" width="18" height="18">
+            <img src="{{ asset('images/GoogleIcon.png') }}" alt="Google Logo" width="18" height="18">
             Continue with Google
         </a>
 
