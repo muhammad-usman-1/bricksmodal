@@ -523,12 +523,18 @@
             text-decoration: none;
             cursor: pointer;
             margin-bottom: 20px;
-            transition: color 0.2s;
+            padding: 10px 18px;
+            border: 1px solid #e0e7ff;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            background: #ffffff;
         }
 
         .add-more-link:hover {
             color: #4f46e5;
-            text-decoration: underline;
+            background: #f5f7ff;
+            border-color: #c7d2fe;
+            text-decoration: none !important;
         }
 
         .additional-photos-area {
@@ -902,13 +908,6 @@
                 <form method="POST" action="{{ route('talent.onboarding.store', 'step-4') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="step-panel is-active" data-step="4">
-                        <div style="display: flex; justify-content: flex-end;">
-                            <a id="add-more-photos-btn" class="add-more-link">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Add More Photos
-                            </a>
-                        </div>
-
                         <div id="step-4-main-section">
                             <div class="info-box">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1031,9 +1030,15 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                 Back
                             </a>
-                             <button type="submit" class="btn-primary btn-submit" style="padding: 0 32px;">
-                                 Submit Application
-                             </button>
+                            <div style="display: flex; align-items: center; gap: 24px;">
+                                <a id="add-more-photos-btn" class="add-more-link" style="margin-bottom: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    Add More Photos
+                                </a>
+                                <button type="submit" class="btn-primary btn-submit" style="padding: 0 32px;">
+                                    Submit Application
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1237,6 +1242,7 @@
                       addMoreBtn.addEventListener('click', () => {
                           mainSection.style.display = 'none';
                           additionalSection.style.display = 'block';
+                          addMoreBtn.style.display = 'none'; // Hide the "Add more" button
                       });
                   }
 
@@ -1244,6 +1250,7 @@
                       backToMainBtn.addEventListener('click', () => {
                           additionalSection.style.display = 'none';
                           mainSection.style.display = 'block';
+                          if(addMoreBtn) addMoreBtn.style.display = 'inline-flex'; // Show it back
                       });
                   }
 
