@@ -190,4 +190,9 @@ class TalentProfile extends Model
         // Remove spaces and dashes for storage
         $this->attributes['card_number'] = $value ? preg_replace('/[\s\-]/', '', $value) : null;
     }
+
+    public function media()
+    {
+        return $this->hasMany(TalentMedia::class, 'talent_profile_id');
+    }
 }

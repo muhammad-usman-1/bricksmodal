@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Talent;
 use App\Http\Controllers\Controller;
 use App\Models\Label;
 use App\Models\TalentProfile;
+use App\Models\TalentMedia;
 use App\Services\MuxService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,7 +78,8 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
-        $currentStep = $this->currentStep($profile);
+        // Use the step from URL if valid, otherwise fallback to profile progress
+        $currentStep = $this->isValidStep($step) ? $step : $this->currentStep($profile);
 
         $viewData = [
             'profile'      => $profile,
@@ -165,7 +167,6 @@ class OnboardingController extends Controller
 
         switch ($step) {
             case 'step-1':
-                // ... (unchanged)
                 $data = $request->validate([
                     'first_name'        => ['required', 'string', 'max:120'],
                     'last_name'         => ['required', 'string', 'max:120'],
@@ -173,11 +174,16 @@ class OnboardingController extends Controller
                     'nationality'       => ['nullable', 'string', 'max:120'],
                     'country_code'      => ['required', 'string', 'max:10'],
                     'mobile_number'     => ['required', 'string', 'max:30'],
-                    'whatsapp_number'   => ['nullable', 'string', 'max:30'],
+                    'whatsapp_number'   => ['nullable', 'required_if:whatsapp_choice,alt', 'string', 'max:30'],
+                    'whatsapp_choice'   => ['required', 'in:same,alt'],
                 ]);
-// ...
+
                 $fullName = trim($data['first_name'] . ' ' . $data['last_name']);
                 $request->user('talent')->update(['name' => $fullName]);
+
+                $whatsappNumber = ($data['whatsapp_choice'] === 'same') 
+                    ? $data['mobile_number'] 
+                    : ($data['whatsapp_number'] ?? $data['mobile_number']);
 
                 $profile->update([
                     'first_name'        => $data['first_name'],
@@ -187,7 +193,7 @@ class OnboardingController extends Controller
                     'nationality'       => Arr::get($data, 'nationality'),
                     'country_code'      => $data['country_code'],
                     'mobile_number'     => $this->sanitizePhoneNumber($data['mobile_number']),
-                    'whatsapp_number'   => $this->sanitizePhoneNumber(Arr::get($data, 'whatsapp_number')),
+                    'whatsapp_number'   => $this->sanitizePhoneNumber($whatsappNumber),
                     'date_of_birth'     => $data['date_of_birth'],
                     'onboarding_step'   => 'step-2',
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 1),
@@ -210,7 +216,7 @@ class OnboardingController extends Controller
 
                 $profile->update([
                     'gender'            => $data['gender'],
-                    'hijab_preference'  => Arr::get($data, 'hijab_preference'),
+                    'hijab_preference'  => $data['gender'] === 'female' ? Arr::get($data, 'hijab_preference') : null,
                     'height'            => Arr::get($data, 'height'),
                     'weight'            => Arr::get($data, 'weight'),
                     'hair_color'        => Arr::get($data, 'hair_color'),
@@ -256,6 +262,8 @@ class OnboardingController extends Controller
                         'headshot'          => [$profile->headshot_center_path ? 'nullable' : 'required', 'image', 'max:4096'],
                         'fullbody'          => [$profile->full_body_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
                         'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
+                        'additional_photos' => ['nullable', 'array'],
+                        'additional_photos.*' => ['image', 'max:4096'],
                     ]);
                     Log::info('Validation passed.');
                 } catch (\Illuminate\Validation\ValidationException $e) {
@@ -293,6 +301,16 @@ class OnboardingController extends Controller
                     }
                 } else {
                     Log::info('No video file present in request.');
+                }
+
+                if ($request->hasFile('additional_photos')) {
+                    foreach ($request->file('additional_photos') as $photo) {
+                        $path = $this->storeTalentFile($profile, $photo, 'photos/additional');
+                        $profile->media()->create([
+                            'file_path' => $path,
+                            'type' => 'photo',
+                        ]);
+                    }
                 }
 
                 $profile->update([
