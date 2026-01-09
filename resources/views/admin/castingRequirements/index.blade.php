@@ -359,6 +359,79 @@ margin-bottom: 0;
     }
     .action-item button { border: none; background: none; padding: 0; width: 100%; text-align: left; color: inherit; }
 
+    .avatar-stack {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 4px;
+        transition: transform 0.2s ease;
+    }
+
+    .avatar-stack:hover {
+        transform: scale(1.05);
+    }
+
+    .avatar-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        margin-left: -12px;
+        background: #f4f0ff;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .avatar-circle:first-child {
+        margin-left: 0;
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-more {
+        background: #2C2C2E;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 1;
+    }
+
+    .required-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .required-icon-square {
+        width: 32px;
+        height: 32px;
+        background: #1c1c1e;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .required-icon-square img {
+        width: 16px;
+        height: 16px;
+        filter: brightness(0) invert(1);
+    }
+
+    .required-number {
+        font-size: 16px;
+        font-weight: 400;
+        color: #1c1c1e;
+    }
+
     @media (max-width: 768px) {
         .top-row { flex-direction: column; align-items: flex-start; }
         .filters-row { width: 100%; }
@@ -451,11 +524,63 @@ margin-bottom: 0;
                             <span class="status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
                         </td>
                          <td data-label="Required">
-                            <span class="required-pill"><span class="icon"><i class="fas fa-users"></i></span>{{ $requiredCount }}</span>
+                            <div class="required-box">
+                                <div class="required-icon-square">
+                                    <img src="{{ asset('images/talent.png') }}" alt="Required">
+                                </div>
+                                <span class="required-number">{{ $requiredCount }}</span>
+                            </div>
                         </td>
                         <td data-label="Applicants" class="no-click">
-                            <a class="applicants-btn" href="{{ route('admin.casting-requirements.applicants', $castingRequirement->id) }}">View Applicants</a>
-                            <span class="applicants-count">{{ $applicantsCount }} applied</span>
+                            @php
+                                $apps = $castingRequirement->castingApplications ?? collect();
+                                $appCount = $apps->count();
+                                $displayApps = $apps->take(2);
+                                $remainingCount = $appCount - 2;
+                                $avatarFallback = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#f3f1f5"/><circle cx="60" cy="50" r="26" fill="#d9d3de"/><rect x="24" y="82" width="72" height="22" rx="11" fill="#e3dde8"/></svg>');
+                            @endphp
+                            <a href="{{ route('admin.casting-requirements.applicants', $castingRequirement->id) }}" class="avatar-stack" style="text-decoration: none;">
+                                @foreach($displayApps as $app)
+                                    @php
+                                        $p = $app->talent_profile;
+                                        $src = null;
+                                        if ($p) {
+                                            $avatarRaw = $p->headshot_center_path ?? ($p->headshot_left_path ?? $p->headshot_right_path);
+                                            if ($avatarRaw) {
+                                                if (is_array($avatarRaw)) {
+                                                    $avatarCandidate = $avatarRaw['url'] ?? ($avatarRaw['path'] ?? ($avatarRaw[0] ?? null));
+                                                } else {
+                                                    $avatarCandidate = $avatarRaw;
+                                                }
+                                                
+                                                if ($avatarCandidate) {
+                                                    if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
+                                                        $src = $avatarCandidate;
+                                                    } else {
+                                                        $normalized = ltrim($avatarCandidate, '/');
+                                                        if (\Illuminate\Support\Str::startsWith($normalized, 'storage/')) {
+                                                            $src = asset($normalized);
+                                                        } else {
+                                                            $src = asset('storage/' . $normalized);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        $src = $src ?: $avatarFallback;
+                                    @endphp
+                                    <div class="avatar-circle">
+                                        <img src="{{ $src }}" alt="Applicant">
+                                    </div>
+                                @endforeach
+                                @if($appCount > 2)
+                                    <div class="avatar-circle avatar-more">
+                                        {{ $remainingCount }}+
+                                    </div>
+                                @elseif($appCount == 0)
+                                    <span style="color: var(--muted); font-size: 11px;">No applicants</span>
+                                @endif
+                            </a>
                         </td>
 
                         <td data-label="Actions" class="actions-cell no-click">

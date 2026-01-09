@@ -117,10 +117,12 @@
                                 @endcan
 
                                 @can('talent_profile_delete')
-                                    <form action="{{ route('admin.talent-profiles.destroy', $talentProfile->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                    <form action="{{ route('admin.talent-profiles.destroy', $talentProfile->id) }}" method="POST" data-swal-confirm="Are you sure? All the data will be deleted." style="display: inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-danger">
+                                            {{ trans('global.delete') }}
+                                        </button>
                                     </form>
                                 @endcan
 
@@ -165,14 +167,23 @@
         return
       }
 
-      if (confirm('{{ trans('global.areYouSure') }}')) {
-        $.ajax({
-          headers: {'x-csrf-token': _token},
-          method: 'POST',
-          url: config.url,
-          data: { ids: ids, _method: 'DELETE' }})
-          .done(function () { location.reload() })
-      }
+      Swal.fire({
+        text: '{{ trans('global.areYouSure') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '{{ trans('global.yes') }}'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            headers: {'x-csrf-token': _token},
+            method: 'POST',
+            url: config.url,
+            data: { ids: ids, _method: 'DELETE' }})
+            .done(function () { location.reload() })
+        }
+      })
     }
   }
   dtButtons.push(deleteButton)

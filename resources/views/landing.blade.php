@@ -20,10 +20,10 @@
             background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
             font-family: 'Space Grotesk', sans-serif;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             
-            padding: 24px;
+            padding: 100px 20px 40px;
         }
         .auth-card {
             width: 100%;

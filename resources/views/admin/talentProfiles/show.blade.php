@@ -210,9 +210,10 @@
     .badge-paid { background: #ecfdf3; color: #15803d; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
     .billing-amount { text-align: right; color: #0f172a; font-weight: 700; font-size: 14px; align-self: center; }
 
-    .edit-mode-only { display: none; }
-    .is-editing .edit-mode-only { display: block; }
-    .is-editing .display-mode-only { display: none; }
+    .edit-mode-only { display: none !important; }
+    .is-editing .edit-mode-only { display: block !important; }
+    .is-editing .display-mode-only { display: none !important; }
+    .top-actions-right-display { display: flex; gap: 10px; }
 
     .inline-edit-input {
         width: 100%;
@@ -289,8 +290,6 @@
 
     // Field configurations for easy rendering
     $profileFields = [
-        ['label' => 'Legal name', 'name' => 'legal_name', 'value' => $talentProfile->legal_name, 'type' => 'text', 'required' => true],
-        ['label' => 'Display name', 'name' => 'display_name', 'value' => $talentProfile->display_name, 'type' => 'text'],
         ['label' => 'First name', 'name' => 'first_name', 'value' => $talentProfile->first_name, 'type' => 'text'],
         ['label' => 'Last name', 'name' => 'last_name', 'value' => $talentProfile->last_name, 'type' => 'text'],
         ['label' => 'Nationality', 'name' => 'nationality', 'value' => $talentProfile->nationality, 'type' => 'nationality'],
@@ -349,6 +348,14 @@
         return $application->getPaymentAmount();
     });
 @endphp
+<div class="talent-shell">
+
+    @can('talent_profile_delete')
+        <form action="{{ route('admin.talent-profiles.destroy', $talentProfile->id) }}" method="POST" id="delete-talent-form" data-swal-confirm="Are you sure you want to delete this talent? All the data will be deleted." style="display: none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endcan
 
     <form action="{{ route('admin.talent-profiles.update', $talentProfile) }}" method="POST" id="talentEditForm" enctype="multipart/form-data">
         @csrf
@@ -362,7 +369,12 @@
             <div class="top-actions-center">
             </div>
             <div class="top-actions-right">
-                <div class="display-mode-only">
+                <div class="display-mode-only top-actions-right-display">
+                    @can('talent_profile_delete')
+                        <button type="submit" form="delete-talent-form" class="btn" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <i class="far fa-trash-alt"></i> Delete profile
+                        </button>
+                    @endcan
                     <button type="button" class="edit-btn" id="startEditBtn">Edit profile</button>
                 </div>
                 <div class="edit-mode-only">
@@ -597,7 +609,7 @@
         </div> {{-- end info-grid --}}
     </form> {{-- end talentEditForm --}}
 
-    <div class="action-bar">
+    <div class="action-bar display-mode-only">
         <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;">
             @csrf
             <button type="submit" class="btn-reject"><i class="fas fa-times"></i> Reject</button>
@@ -775,6 +787,7 @@
         </div>
     </div>
 </div>
+</div>
 <script>
     function previewImage(input) {
         if (input.files && input.files[0]) {
@@ -891,6 +904,10 @@
 
         if (startEditBtn && form) {
             startEditBtn.addEventListener('click', () => {
+                const shell = document.querySelector('.talent-shell');
+                if (shell) {
+                    shell.classList.add('is-editing');
+                }
                 form.classList.add('is-editing');
                 // Trigger gender-based field visibility when entering edit mode
                 setTimeout(toggleGenderBasedFields, 100);

@@ -12,6 +12,8 @@ use App\Models\TalentProfile;
 use App\Models\User;
 use App\Models\CastingApplication;
 use App\Models\BankDetail;
+use App\Models\TalentMedia;
+use App\Models\TalentSetting;
 use App\Support\EmailTemplateManager;
 use Gate;
 use Illuminate\Http\Request;
@@ -250,10 +252,14 @@ class TalentProfileController extends Controller
 
             $talentProfile->languages()->detach();
             $talentProfile->labels()->detach();
-            CastingApplication::where('talent_profile_id', $talentProfile->id)->delete();
-            BankDetail::where('talent_profile_id', $talentProfile->id)->delete();
+            
+            // Force delete related records to satisfy foreign key constraints
+            CastingApplication::where('talent_profile_id', $talentProfile->id)->forceDelete();
+            BankDetail::where('talent_profile_id', $talentProfile->id)->forceDelete();
+            TalentMedia::where('talent_profile_id', $talentProfile->id)->forceDelete();
+            TalentSetting::where('talent_profile_id', $talentProfile->id)->delete(); // TalentSetting doesn't use SoftDeletes
 
-            $talentProfile->delete();
+            $talentProfile->forceDelete();
 
             if ($user) {
                 $user->roles()->detach();

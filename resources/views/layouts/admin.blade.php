@@ -305,8 +305,8 @@
                             text: message,
                             icon: 'warning',
                             showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
+                            confirmButtonColor: '#000000',
+                            cancelButtonColor: '#6c757d',
                             confirmButtonText: '{{ trans('global.yes') }}'
                         }).then((result) => {
                             if (result.isConfirmed) {

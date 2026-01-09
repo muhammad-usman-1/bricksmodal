@@ -2,7 +2,7 @@
     $isEdit = $isEdit ?? false;
 @endphp
 <style>
-    .shoot-page { background: #f7f8fc; padding: 10px 0 22px; }
+    .shoot-page {  padding: 10px 0 22px; }
     .shoot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .shoot-title1 { color: #101828; font-size: 24px; font-weight: 400; line-height: 30px; }
     .shoot-title { color: #101828; font-size: 20px; font-weight: 400; line-height: 30px; }
@@ -33,26 +33,31 @@
     .condensed { grid-gap: 12px; }
 
     .field-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-    .field-block label { font-size: 12px; color: #101828; font-weight: 700; margin: 0; }
-    .shoot-page label { font-weight: 700; }
-    .dark-input { background: #e5e7eb; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
+    .field-block label { font-size: 13px; color: #475467; font-weight: 600; margin-bottom: 4px; }
+    .shoot-page label { font-weight: 600; }
+    .dark-input { background: #fff; border: 1px solid #EAECF0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 8px; position: relative; transition: all 0.2s; }
+    .dark-input:focus-within { border-color: #0f1014; box-shadow: 0 0 0 3px rgba(15,16,20,0.08); }
     .dark-input.has-textarea { align-items: flex-start; padding: 10px; }
-    .dark-input input { background: transparent; border: none; color: #000000; width: 100%; font-size: 12px; padding: 4px 0; outline: none; }
-    .dark-input input::placeholder { color: #000000; }
-    .dark-input textarea { background: transparent; border: none; color: #000000; width: 100%; font-size: 12px; padding: 0; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
-    .dark-input textarea::placeholder { color: #000000; }
-    .dark-input.has-icon .input-icon { color: #000000; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
+    .dark-input input { background: transparent; border: none !important; outline: none !important; box-shadow: none !important; color: #101828; width: 100%; font-size: 14px; padding: 0; }
+    .dark-input input::placeholder { color: #98A2B3; }
+    .dark-input textarea { background: transparent; border: none !important; outline: none !important; box-shadow: none !important; color: #101828; width: 100%; font-size: 14px; padding: 0; resize: vertical; min-height: 80px; font-family: inherit; }
+    .dark-input textarea::placeholder { color: #98A2B3; }
+    .dark-input.has-icon .input-icon { color: #98A2B3; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; }
     .dark-input.has-pill { padding-right: 42px; }
     .input-pill { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 999px; background: #0f9f4f; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
     .dark-input.has-suffix { padding-right: 48px; }
-    .input-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #a8adb5; font-size: 11px; }
+    .input-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #667085; font-size: 11px; }
 
-    .duration-input { display: inline-flex; align-items: center; gap: 10px;  border-radius: 10px; width: 100%; }
-    .duration-value { width: 70px; text-align: center; color: #f7f7f7; background: #0f0f11; border: 1px solid #1a1a1c; border-radius: 8px; font-weight: 700; font-size: 14px; padding: 9px 0; -moz-appearance: textfield; }
+    .duration-input { display: flex; align-items: center; gap: 8px; width: 100%; }
+    .duration-value { width: auto; flex: 1; min-width: 60px; text-align: center; color: #101828; background: #fff; border: 1px solid #EAECF0; border-radius: 8px; font-weight: 600; font-size: 14px; padding: 10px 0; -moz-appearance: textfield; }
     .duration-value::-webkit-outer-spin-button,
     .duration-value::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .duration-value.is-invalid { border-color: #dc3545; box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.25); }
-    .duration-unit { color: #a8adb5; font-size: 12px; font-weight: 600; }
+    .duration-unit { background: #fff; border: 1px solid #EAECF0; border-radius: 8px; padding: 10px 16px; color: #98A2B3; font-size: 14px; font-weight: 500; min-width: 80px; text-align: center; }
+
+    /* Step 2 Overrides */
+    .duration-value.step2-style { background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; font-size: 12px; color: #4c5160; font-weight: 500; }
+    .duration-unit.step2-style { background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; font-size: 12px; color: #4c5160; min-width: 70px; }
 
     .step2-head { margin-left: 40px;display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .add-model-btn { background: #0f1014; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
@@ -166,12 +171,12 @@
     /* Full width datetime picker */
     .form-group .datetime { width: 100% !important; }
 
-    /* Prevent autofill and focus from tinting the dark inputs */
+    /* Prevent autofill and focus from tinting the inputs */
     .dark-input input,
     .dark-input input:-webkit-autofill,
     .dark-input input:-webkit-autofill:hover,
-    .dark-input input:-webkit-autofill:focus { background: transparent !important; -webkit-text-fill-color: #000000; box-shadow: 0 0 0px 1000px #e5e7eb inset !important; caret-color: #000000; }
-    .dark-input textarea { caret-color: #000000; }
+    .dark-input input:-webkit-autofill:focus { background: transparent !important; -webkit-text-fill-color: #101828; box-shadow: 0 0 0px 1000px #fff inset !important; caret-color: #101828; }
+    .dark-input textarea { caret-color: #101828; }
 
     .label-multiselect {
         position: relative;
@@ -475,7 +480,7 @@
 
     .dark-input.has-picker { cursor: pointer; }
     .dark-input.has-picker input { cursor: pointer; }
-    .picker-icon { color: #000000; font-size: 14px; }
+    .picker-icon { color: #98A2B3; font-size: 18px; }
 
     /* Validation Error Styles */
     .validation-error {

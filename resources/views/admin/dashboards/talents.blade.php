@@ -29,8 +29,8 @@ line-height: 36px; /* 150% */}
     .pill-btn { border: 1px solid var(--border); background: #fff; color: var(--ink-700); border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; transition: all .15s ease; }
     .pill-btn.active { background: #0f1524; color: #fff; border-color: #0f1524; }
 
-    .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; transition: transform 0.2s ease; cursor: pointer; }
+    .talent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img-container { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
     .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; transform: scale(1.05); z-index: 1; }
@@ -53,8 +53,50 @@ line-height: 36px; /* 150% */}
         content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%;
     }
 
-    .card-ellipsis { position: absolute; top: 12px; right: 15px; color: #111; font-size: 16px; cursor: pointer; z-index: 20; opacity: 0.6; }
-    .card-ellipsis:hover { opacity: 1; }
+    .card-ellipsis { position: absolute; top: 12px; right: 15px; z-index: 30; }
+    .dropdown-toggle-btn { color: #111; font-size: 16px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+    .dropdown-toggle-btn:hover { opacity: 1; }
+
+    .actions-dropdown-container { position: relative; display: inline-block; }
+    .actions-dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 8px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 100;
+        min-width: 140px;
+        display: none;
+        overflow: hidden;
+    }
+    .actions-dropdown-menu.active { display: block; animation: dropdownFade 0.2s ease; }
+
+    @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .actions-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--ink-700);
+        text-decoration: none;
+        transition: background 0.12s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+    .actions-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); text-decoration: none; }
+    .actions-dropdown-item.text-danger { color: #dc2626; }
+    .actions-dropdown-item.text-danger:hover { background: #fef2f2; }
 
     .card-overlay {
         position: absolute; left: 0; right: 0; bottom: 0;
@@ -88,13 +130,18 @@ line-height: 36px; /* 150% */}
     }
 
     .talents-footer {
+        position: sticky;
+        bottom: 20px;
         margin-top: 20px;
         display: flex;
         justify-content: flex-end;
-        padding-bottom: 10px;
+        padding: 0;
+        z-index: 100;
+        pointer-events: none; /* Allow clicks to pass through the transparent container */
     }
 
     .add-talent-btn {
+        pointer-events: auto; /* Enable clicks on the button itself */
         background: #0f172a;
         color: #fff;
         border: none;
@@ -253,7 +300,21 @@ line-height: 36px; /* 150% */}
                         @endforeach
                     </div>
                     <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
-                    <span class="card-ellipsis"><i class="fas fa-ellipsis-v"></i></span>
+                    <div class="card-ellipsis actions-dropdown-container">
+                        <span class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></span>
+                        <div class="actions-dropdown-menu">
+                            <a href="{{ route('admin.talent-profiles.show', $talent->id) }}" class="actions-dropdown-item">
+                                <i class="far fa-eye"></i> View Profile
+                            </a>
+                            <form action="{{ route('admin.talent-profiles.destroy', $talent->id) }}" method="POST" class="delete-talent-form" data-swal-confirm="Are you sure? All the data will be deleted." style="margin:0;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="actions-dropdown-item text-danger">
+                                    <i class="far fa-trash-alt"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                     <div class="card-overlay">
                         <div class="overlay-top">
                             <div class="overlay-flag">
@@ -343,20 +404,18 @@ line-height: 36px; /* 150% */}
             const images = card.querySelectorAll('.talent-img');
             if (images.length <= 1) return; // No rotation needed if only one image
 
-            let currentIndex = 0;
             let rotationInterval = null;
+            let currentIndex = 0;
 
             card.addEventListener('mouseenter', function() {
-                // Start rotation
                 rotationInterval = setInterval(() => {
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
-                }, 400); // Change image every 400ms
+                }, 400);
             });
 
             card.addEventListener('mouseleave', function() {
-                // Stop rotation and reset to first image
                 if (rotationInterval) {
                     clearInterval(rotationInterval);
                     rotationInterval = null;
@@ -365,6 +424,56 @@ line-height: 36px; /* 150% */}
                     img.classList.toggle('active', idx === 0);
                 });
                 currentIndex = 0;
+            });
+        });
+
+        // Ellipsis dropdown toggle
+        const dropdownBtns = document.querySelectorAll('.dropdown-toggle-btn');
+        dropdownBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const menu = this.nextElementSibling;
+                
+                // Close other open menus
+                document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
+                    if (m !== menu) m.classList.remove('active');
+                });
+                
+                menu.classList.toggle('active');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
+                menu.classList.remove('active');
+            });
+        });
+
+        // Direct SweetAlert handler for delete forms (backup for global listener)
+        document.querySelectorAll('.delete-talent-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (form.dataset.swalConfirmed === 'true') return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const message = form.dataset.swalConfirm || 'Are you sure?';
+                
+                Swal.fire({
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#000000',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.dataset.swalConfirmed = 'true';
+                        form.submit();
+                    }
+                });
             });
         });
     });

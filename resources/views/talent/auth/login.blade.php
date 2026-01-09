@@ -13,11 +13,11 @@
         }
 
         .auth-shell {
-            min-height: calc(100vh - 60px);
+            min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 100px 20px 40px;
         }
 
         .auth-card {
@@ -43,12 +43,14 @@
             margin-bottom: 20px;
         }
 
-        h1 {
+       h1 {
+            font-family: 'Arimo', sans-serif;
             font-weight: 400;
             font-size: 24px;
             line-height: 36px;
             margin: 0 0 10px;
             color: #1a1a1a;
+            text-align: center;
         }
 
         .lead {

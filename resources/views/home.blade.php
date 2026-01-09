@@ -509,7 +509,7 @@ line-height: 36px;
                                             <a href="{{ route('admin.talent-profiles.show', $talent) }}" class="actions-dropdown-item">
                                                 <i class="far fa-eye"></i> View Profile
                                             </a>
-                                            <form action="{{ route('admin.talent-profiles.destroy', $talent) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this talent?')">
+                                            <form action="{{ route('admin.talent-profiles.destroy', $talent) }}" method="POST" data-swal-confirm="Are you sure you want to delete this talent? All the data will be deleted.">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="actions-dropdown-item text-danger">

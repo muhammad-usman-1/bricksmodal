@@ -151,8 +151,8 @@
                         <div class="field-block">
                             <label for="shoot_date">Date</label>
                             <div class="dark-input has-picker" id="datePickerTrigger">
-                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="Select Date">
-                                <span class="picker-icon"><i class="fas fa-calendar-alt"></i></span>
+                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="mm/dd/yy">
+                                <span class="picker-icon"><i class="far fa-calendar-alt"></i></span>
                             </div>
                             <div class="custom-picker-dropdown" id="calendarDropdown">
                                 <div class="picker-top-header">
@@ -180,8 +180,8 @@
                         <div class="field-block">
                             <label for="shoot_time">Start Time</label>
                             <div class="dark-input has-picker" id="timePickerTrigger">
-                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="Select Time">
-                                <span class="picker-icon"><i class="fas fa-clock"></i></span>
+                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--/--/--">
+                                <span class="picker-icon"><i class="far fa-clock"></i></span>
                             </div>
                             <div class="custom-picker-dropdown" id="timeDropdown">
                                 <div class="picker-top-header">
@@ -281,7 +281,25 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
+                                
+                                <div class="field-block">
+                                    <label class="required">Hours Needed</label>
+                                    <div class="duration-input">
+                                        <input 
+                                            class="duration-value step2-style"
+                                            type="number" 
+                                            name="models[{{ $index }}][model_hours]" 
+                                            value="{{ $model['model_hours'] ?? '' }}"
+                                            placeholder="4" 
+                                            min="1"
+                                            required
+                                        >
+                                        <span class="duration-unit step2-style">hours</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-3 condensed">
                                 <div class="field-block">
                                     <label>Height Range</label>
                                     <select name="models[{{ $index }}][height_range]" class="pill-select">
@@ -292,9 +310,7 @@
                                         <option value="180+" {{ ($model['height_range'] ?? '') === '180+' ? 'selected' : '' }}>180+ cm</option>
                                     </select>
                                 </div>
-                            </div>
 
-                            <div class="grid grid-3 condensed">
                                 <div class="field-block">
                                     <label>Weight Range</label>
                                     <select name="models[{{ $index }}][weight_range]" class="pill-select">
@@ -313,8 +329,10 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                            </div>
 
-                                <div class="field-block">
+                            <div class="grid grid-2 condensed">
+                                 <div class="field-block">
                                     <label>Skin Color</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $skin = $model['skin_color'] ?? ''; @endphp
@@ -325,9 +343,6 @@
                                     </div>
                                     <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input>
                                 </div>
-                            </div>
-
-                            <div class="grid grid-2 condensed">
                                 <div class="field-block">
                                     <label>Eye Color</label>
                                     <div class="swatch-row" data-swatch-group>
@@ -340,18 +355,7 @@
                                     <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input>
                                 </div>
                             </div>
-
-                            <div class="field-block">
-                                <label>Any Reference Photo</label>
-                                <label class="dropbox" data-file-drop>
-                                    <input type="file" class="d-none" name="models[{{ $index }}][reference_photo][]" data-file-input multiple>
-                                    <div class="dropbox-inner">
-                                        <i class="fas fa-upload"></i>
-                                        <div class="drop-title" data-file-label>Upload Reference Photos</div>
-                                        <div class="drop-sub">Drag and drop or click to browse</div>
-                                    </div>
-                                </label>
-                            </div>
+                            <!-- Removed Reference Photo Section -->
 
                             <div class="outfit-selection-container">
                                 <div class="outfit-section-title">Outfit Selection</div>
@@ -490,6 +494,24 @@
                             </select>
                         </div>
                         <div class="field-block">
+                            <label class="required">Hours Needed</label>
+                             <div class="duration-input">
+                                <input 
+                                    class="duration-value step2-style"
+                                    type="number" 
+                                    name="models[__INDEX__][model_hours]" 
+                                    placeholder="4" 
+                                    value=""
+                                    min="1"
+                                    required
+                                >
+                                <span class="duration-unit step2-style">hours</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-3 condensed">
+                         <div class="field-block">
                             <label>Height Range</label>
                             <select name="models[__INDEX__][height_range]" class="pill-select">
                                 <option value="" selected>Choose height range</option>
@@ -499,9 +521,6 @@
                                 <option value="180+">180+ cm</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="grid grid-3 condensed">
                         <div class="field-block">
                             <label>Weight Range</label>
                             <select name="models[__INDEX__][weight_range]" class="pill-select">
@@ -516,7 +535,10 @@
                             <label>Others</label>
                             <input type="text" name="models[__INDEX__][hair_color]" class="pill-input" placeholder="other details">
                         </div>
-                        <div class="field-block">
+                    </div>
+                    
+                    <div class="grid grid-2 condensed">
+                         <div class="field-block">
                             <label>Skin Color</label>
                             <div class="swatch-row" data-swatch-group>
                                 <button type="button" class="swatch" data-swatch-value="tan" style="background:#e6bd8d;"></button>
@@ -526,9 +548,6 @@
                             </div>
                             <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input>
                         </div>
-                    </div>
-
-                    <div class="grid grid-2 condensed">
                         <div class="field-block">
                             <label>Eye Color</label>
                             <div class="swatch-row" data-swatch-group>
@@ -540,18 +559,7 @@
                             <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input>
                         </div>
                     </div>
-
-                    <div class="field-block">
-                        <label>Any Reference Photo</label>
-                        <label class="dropbox" data-file-drop>
-                            <input type="file" class="d-none" name="models[__INDEX__][reference_photo][]" data-file-input multiple>
-                            <div class="dropbox-inner">
-                                <i class="fas fa-upload"></i>
-                                <div class="drop-title" data-file-label>Upload Reference Photos</div>
-                                <div class="drop-sub">Drag and drop or click to browse</div>
-                            </div>
-                        </label>
-                    </div>
+                    <!-- Reference Photo Removed from Template -->
 
                     <div class="outfit-selection-container">
                         <div class="outfit-section-title">Outfit Selection</div>
@@ -648,51 +656,48 @@
                                         </div>
                                     </div>
                                 </div>
-
                         </div>
                     </div>
                 </div>
             </template>
 
             <div class="shoot-step" data-step="3">
-                <h4>Stage 3 · Notes & References</h4>
-                <p class="text-muted mb-4">Share outfits, references, and any important instructions.</p>
+                <div class="shoot-step-card">
+                    <h4>Stage 3 · Shoot Brief/Notes </h4>
+                    <p class="text-muted mb-4">Share complete detail, and any important instructions.</p>
 
-                <div class="form-group d-none">
-                    <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
-                    <p class="text-muted small">Select one or multiple outfits</p>
-                </div>
+                    <div class="form-group d-none">
+                        <label>{{ trans('cruds.castingRequirement.fields.outfit') }}</label>
+                        <p class="text-muted small">Select one or multiple outfits</p>
+                    </div>
 
-                <div class="form-group">
-                    <label for="reference">{{ trans('cruds.castingRequirement.fields.reference') }}</label>
-                    <div class="needsclick dropzone {{ $errors->has('reference') ? 'is-invalid' : '' }}" id="reference-dropzone"></div>
-                    @if($errors->has('reference'))
-                        <div class="invalid-feedback">{{ $errors->first('reference') }}</div>
-                    @endif
-                </div>
+                    <!-- Reference Photo Removed from Step 3 -->
 
-                <div class="form-group">
-                    <label for="notes">{{ trans('cruds.castingRequirement.fields.notes') }}</label>
-                    <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
-                    @if($errors->has('notes'))
-                        <div class="invalid-feedback">{{ $errors->first('notes') }}</div>
-                    @endif
-                </div>
-
-                @if($isEdit)
-                    <div class="form-group">
-                        <label class="required" for="status">{{ trans('cruds.castingRequirement.fields.status') }}</label>
-                        <select class="form-control {{ $errors->has('status') ? 'is-invalid' : '' }}" name="status" id="status" required>
-                            <option value disabled {{ old('status', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
-                            @foreach(App\Models\CastingRequirement::STATUS_SELECT as $key => $label)
-                                <option value="{{ $key }}" {{ old('status', $castingRequirement->status) === $key ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @if($errors->has('status'))
-                            <div class="invalid-feedback">{{ $errors->first('status') }}</div>
+                    <div class="field-block">
+                        <label for="notes">{{ trans('cruds.castingRequirement.fields.notes') }}</label>
+                        <div class="dark-input has-textarea">
+                             <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4" placeholder="Enter notes...">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
+                        </div>
+                        @if($errors->has('notes'))
+                            <div class="invalid-feedback">{{ $errors->first('notes') }}</div>
                         @endif
                     </div>
-                @endif
+
+                    @if($isEdit)
+                        <div class="form-group">
+                            <label class="required" for="status">{{ trans('cruds.castingRequirement.fields.status') }}</label>
+                            <select class="form-control {{ $errors->has('status') ? 'is-invalid' : '' }}" name="status" id="status" required>
+                                <option value disabled {{ old('status', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
+                                @foreach(App\Models\CastingRequirement::STATUS_SELECT as $key => $label)
+                                    <option value="{{ $key }}" {{ old('status', $castingRequirement->status) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('status'))
+                                <div class="invalid-feedback">{{ $errors->first('status') }}</div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
 

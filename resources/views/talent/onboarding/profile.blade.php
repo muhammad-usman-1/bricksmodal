@@ -2,6 +2,7 @@
 
 @section('styles')
     <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --bg: #f6f7fb;
@@ -641,7 +642,19 @@
         <div class="wizard-card">
             <div class="wizard-hero">
                 <!-- Logo removed -->
-                <div class="hero-title">Complete Your Profile</div>
+                <div class="hero-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    Complete Your Profile
+                    <a href="javascript:void(0)" id="logout-trigger" style="color: #ffffff; opacity: 0.8; transition: opacity 0.2s;" title="Logout">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </a>
+                </div>
+                <form id="logout-form" action="{{ route('talent.logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
                 <div class="hero-sub">Step <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, default => 1 } }}</span> of 4</div>
                 <div class="progress-track" aria-hidden="true">
                     <span class="progress-bar {{ $currentStep == 'step-1' ? 'is-active' : ($profile->onboarding_steps_completed >= 1 ? 'is-complete' : '') }}" data-progress-index="0"></span>
@@ -1316,8 +1329,34 @@
                           multiUploadArea.querySelector('.upload-label').textContent = 'Drop multiple photos here or click to browse';
                       }
                   }
-             }
-             initStep4();
+            }
+            initStep4();
+
+            // Logout Logic
+            document.getElementById('logout-trigger')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Even if you log out, all the data filled so far in the completed steps will be saved, and you can continue from the next step when you log back in.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1a1a1a',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('logout-form').submit();
+                    }
+                });
+            });
+
+            // Hover effect for logout icon
+            const logoutTrigger = document.getElementById('logout-trigger');
+            if (logoutTrigger) {
+                logoutTrigger.addEventListener('mouseenter', () => logoutTrigger.style.opacity = '1');
+                logoutTrigger.addEventListener('mouseleave', () => logoutTrigger.style.opacity = '0.8');
+            }
 
         })();
     </script>

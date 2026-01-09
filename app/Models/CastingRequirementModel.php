@@ -21,6 +21,7 @@ class CastingRequirementModel extends Model implements HasMedia
     protected $casts = [
         'rate' => 'float',
         'quantity' => 'integer',
+        'model_hours' => 'integer',
     ];
 
     public const AGE_RANGE_OPTIONS = [
