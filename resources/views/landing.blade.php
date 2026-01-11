@@ -63,6 +63,7 @@
             text-align: center;
         }
         .btn {
+            height:56px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -70,11 +71,11 @@
             width: 100%;
             padding: 12px 14px;
             border-radius: 14px;
-            border: 1px solid #e6e6e6;
+            border: 2px solid #c7c3c3;
             background: #ffffff;
             color: #1f1f1f;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 400;
             text-decoration: none;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin-bottom: 14px;
@@ -101,6 +102,8 @@
             border: none;
             margin-top: 6px;
             font-family: 'Arimo', sans-serif;
+            height: 52px;
+            align-items: center;
         }
         .btn.primary:hover {
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
@@ -111,9 +114,10 @@
             justify-content: center;
             width: 100%;
             color: #3f3f3f;
-            font-size: 12px;
-
+            font-size: 14px;
+            font-weight: 400;
             text-decoration: none;
+             font-family: 'Arimo', sans-serif;
         }
         .secondary-link span {
             border-bottom: 1px solid #3f3f3f;

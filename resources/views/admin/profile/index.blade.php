@@ -10,6 +10,10 @@
     .profile-head-text { display: flex; flex-direction: column; }
     .profile-title { font-weight: 400; color: #111827; font-size: 24px; margin: 0; }
     .profile-sub { color: #6b7280; font-size: 14px; margin: 2px 0 0 0; }
+    .profile-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .profile-btn { border: 1px solid #e5e7eb; background: #ffffff; color: #111827; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .profile-btn:hover { background: #f3f4f6; text-decoration: none; color: #0f172a; }
+    /* unify logout with same style */
 
     .profile-card { background: #fff; border: 1px solid #edf0f3; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; }
     .section-title { font-weight: 600; color: #111827; font-size: 15px; margin: 0 0 24px 0; }
@@ -55,6 +59,17 @@
             <div class="profile-head-text">
                 <p class="profile-title">My Profile</p>
                 <p class="profile-sub">Manage your personal information</p>
+            </div>
+            <div class="profile-actions">
+                <a class="profile-btn" href="{{ route('profile.password.edit') }}">
+                    <i class="fas fa-shield-alt"></i> Privacy Setup
+                </a>
+                <form method="POST" action="{{ route('admin.logout') }}" style="margin:0;">
+                    @csrf
+                    <button type="submit" class="profile-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
 

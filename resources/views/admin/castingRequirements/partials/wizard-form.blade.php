@@ -292,16 +292,16 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="field-block">
                                     <label class="required">Hours Needed</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input 
+                                        <input
                                             class="pill-input"
-                                            type="number" 
-                                            name="models[{{ $index }}][model_hours]" 
+                                            type="number"
+                                            name="models[{{ $index }}][model_hours]"
                                             value="{{ $model['model_hours'] ?? '' }}"
-                                            placeholder="4" 
+                                            placeholder="4"
                                             min="1"
                                             required
                                             style="width: 80px; text-align: center;"
@@ -341,7 +341,7 @@
                                     @enderror
                                 </div>
                             </div>
-                            
+
                             <div class="grid grid-3 condensed">
                                 <div class="field-block">
                                     <label class="required">Height Range</label>
@@ -539,11 +539,11 @@
                         <div class="field-block">
                             <label class="required">Hours Needed</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
-                                <input 
+                                <input
                                     class="pill-input"
-                                    type="number" 
-                                    name="models[__INDEX__][model_hours]" 
-                                    placeholder="4" 
+                                    type="number"
+                                    name="models[__INDEX__][model_hours]"
+                                    placeholder="4"
                                     value=""
                                     min="1"
                                     required
@@ -602,7 +602,7 @@
                             <input type="text" name="models[__INDEX__][hair_color]" class="pill-input" placeholder="other details" required>
                         </div>
                     </div>
-                    
+
                     <div class="grid grid-2 condensed">
                          <div class="field-block">
                             <label class="required">Skin Color</label>
@@ -740,7 +740,7 @@
                     <!-- Reference Photo Removed from Step 3 -->
 
                     <div class="field-block">
-                        <label for="notes">{{ trans('cruds.castingRequirement.fields.notes') }}</label>
+                        <label for="notes">Shoot Brief</label>
                         <div class="dark-input has-textarea">
                              <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4" placeholder="Enter notes...">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
                         </div>

@@ -434,12 +434,12 @@ line-height: 36px; /* 150% */}
                 e.preventDefault();
                 e.stopPropagation();
                 const menu = this.nextElementSibling;
-                
+
                 // Close other open menus
                 document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
                     if (m !== menu) m.classList.remove('active');
                 });
-                
+
                 menu.classList.toggle('active');
             });
         });
@@ -455,12 +455,12 @@ line-height: 36px; /* 150% */}
         document.querySelectorAll('.delete-talent-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 if (form.dataset.swalConfirmed === 'true') return;
-                
+
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const message = form.dataset.swalConfirm || 'Are you sure?';
-                
+
                 Swal.fire({
                     text: message,
                     icon: 'warning',

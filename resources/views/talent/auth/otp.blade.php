@@ -82,7 +82,7 @@
 
         .submit-btn {
             width: 100%;
-            height: 46px;
+            height: 52px;
             border: none;
             border-radius: 10px;
             background: #111111;

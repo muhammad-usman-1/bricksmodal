@@ -80,7 +80,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            height: 46px;
+            height: 52px;
             padding: 0 12px;
             border: 1px solid #e6e6e6;
             border-radius: 14px;
@@ -118,7 +118,7 @@
 
         #phone {
             width: 100%;
-            height: 46px;
+            height: 52px;
             padding: 0 14px 0 46px;
             border: 1px solid #e6e6e6;
             border-radius: 14px;
@@ -135,7 +135,7 @@
 
         .submit-btn {
             width: 100%;
-            height: 46px;
+            height: 52px;
             border: none;
             border-radius: 14px;
             background: #111111;
@@ -152,7 +152,7 @@
             margin-bottom: 14px;
         }
 
-        
+
         .alert {
             text-align: left;
         }
@@ -165,9 +165,10 @@
             justify-content: center;
             width: 100%;
             color: #3f3f3f;
-            font-size: 12px;
-           
+             font-size: 14px;
+            font-weight: 400;
             text-decoration: none;
+             font-family: 'Arimo', sans-serif;
         }
         .secondary-link span {
             border-bottom: 1px solid #3f3f3f;
