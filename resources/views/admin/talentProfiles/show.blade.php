@@ -302,16 +302,17 @@
         $storage = \Illuminate\Support\Facades\Storage::disk($disk);
         $cleanPath = ltrim($path, '/');
 
-        if ($disk === 's3') {
+        // Prefer CDN/AWS_URL mapping; url() respects AWS_URL when configured.
+        try {
+            return $storage->url($cleanPath);
+        } catch (\Exception $e) {
+            // Fallback to signed URL if url() fails (e.g., private bucket without AWS_URL)
             try {
-                // Use a signed URL for private buckets; falls back to url() if not supported
                 return $storage->temporaryUrl($cleanPath, now()->addMinutes(60));
-            } catch (\Exception $e) {
-                return $storage->url($cleanPath);
+            } catch (\Exception $e2) {
+                return null;
             }
         }
-
-        return $storage->url($cleanPath);
     };
 
     // Field configurations for easy rendering
