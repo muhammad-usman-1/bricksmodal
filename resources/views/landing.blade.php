@@ -22,7 +22,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            
+
             padding: 100px 20px 40px;
         }
         .auth-card {
@@ -79,11 +79,12 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin-bottom: 14px;
             stroke:#D1D5DC;
+            font-family: 'Arimo', sans-serif;
         }
         .btn svg {
             flex-shrink: 0;
         }
-        
+
         .btn:focus-visible {
             outline: 2px solid #111;
             outline-offset: 4px;
@@ -99,6 +100,7 @@
             color: #ffffff;
             border: none;
             margin-top: 6px;
+            font-family: 'Arimo', sans-serif;
         }
         .btn.primary:hover {
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
@@ -110,7 +112,7 @@
             width: 100%;
             color: #3f3f3f;
             font-size: 12px;
-            
+
             text-decoration: none;
         }
         .secondary-link span {

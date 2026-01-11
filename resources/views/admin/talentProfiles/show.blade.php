@@ -292,8 +292,26 @@
         if (! $path) {
             return null;
         }
+
         $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
-        return $isAbsolute ? $path : \Illuminate\Support\Facades\Storage::url($path);
+        if ($isAbsolute) {
+            return $path;
+        }
+
+        $disk = config('filesystems.default', 'public');
+        $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+        $cleanPath = ltrim($path, '/');
+
+        if ($disk === 's3') {
+            try {
+                // Use a signed URL for private buckets; falls back to url() if not supported
+                return $storage->temporaryUrl($cleanPath, now()->addMinutes(60));
+            } catch (\Exception $e) {
+                return $storage->url($cleanPath);
+            }
+        }
+
+        return $storage->url($cleanPath);
     };
 
     // Field configurations for easy rendering
