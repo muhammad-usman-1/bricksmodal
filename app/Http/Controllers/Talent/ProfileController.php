@@ -32,6 +32,14 @@ class ProfileController extends Controller
             }
         }
 
+        // Stats: shoots completed from selected applications
+        $shootsCompleted = 0;
+        if ($profile) {
+            $shootsCompleted = \App\Models\CastingApplication::where('talent_profile_id', $profile->id)
+                ->where('status', 'selected')
+                ->count();
+        }
+
         return view('talent.profile.index', [
             'profile'          => $profile->load('languages', 'labels'),
             'languages'        => Language::orderBy('title')->get(),
@@ -39,6 +47,7 @@ class ProfileController extends Controller
             'skinToneOptions'  => TalentProfile::SKIN_TONE_SELECT,
             'statusOptions'    => TalentProfile::VERIFICATION_STATUS_SELECT,
             'muxPlaybackId'    => $muxPlaybackId,
+            'shootsCompleted'  => $shootsCompleted,
         ]);
     }
 

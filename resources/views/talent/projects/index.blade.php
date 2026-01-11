@@ -33,25 +33,30 @@
     }
 
     .shoots-tabs {
-        display: flex;
-        gap: 8px;
+        display: inline-flex;
+        align-items: center;
+        background: #f6f7fb;
+        border-radius: 14px;
+        padding: 4px;
+        gap: 6px;
     }
 
     .shoot-tab {
-        padding: 10px 20px;
-        border-radius: 8px;
-        background: #fff;
+        padding: 10px 18px;
+        border-radius: 10px;
+        background: transparent;
         color: #6b7280;
         font-weight: 600;
         font-size: 14px;
         text-decoration: none;
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
+        border: none;
+        transition: all 0.15s ease;
     }
 
     .shoot-tab.active {
-        background: #f3f4f6;
+        background: #ffffff;
         color: #111827;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     }
 
     .shoot-tab:hover {
@@ -95,11 +100,13 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        overflow: hidden;
     }
 
-    .shoot-icon-container i {
-        font-size: 24px;
-        color: #374151;
+    .shoot-icon-container img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
     }
 
     .shoot-details {
@@ -285,7 +292,7 @@
 
                 <a href="{{ route('talent.projects.show', $project) }}" class="shoot-card">
                     <div class="shoot-icon-container">
-                        <i class="fas fa-camera"></i>
+                        <img src="{{ asset('images/camera.png') }}" alt="Shoot">
                     </div>
                     <div class="shoot-details">
                         <h3 class="shoot-title">{{ $project->project_name }}</h3>
@@ -317,7 +324,6 @@
                                 Not Applied
                             </span>
                         @endif
-                        <i class="fas fa-chevron-right shoot-arrow"></i>
                     </div>
                 </a>
             @empty
@@ -336,7 +342,7 @@
 
         @if($filteredProjects->count() > 0 && method_exists($projects, 'links'))
             <div class="d-flex justify-content-start mt-4">
-                {{ $projects->withQueryString()->links() }}
+                {{ $projects->onEachSide(1)->withQueryString()->links() }}
             </div>
         @endif
     </div>

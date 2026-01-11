@@ -376,13 +376,13 @@
 
     <!-- Stats Row -->
     <div class="stats-grid">
-        <!-- 1. Requested -->
+        <!-- 1. Shoots Completed -->
         <div class="stat-card">
             <div class="stat-header">
-                <i class="fas fa-camera"></i> Screenshots requested
+                <i class="fas fa-camera"></i> Shoots completed
             </div>
-            <div class="stat-value">47</div>
-            <div class="stat-trend trend-up">+4 this week</div>
+            <div class="stat-value">{{ $shootsCompleted ?? 0 }}</div>
+            <div class="stat-trend trend-up">Life time</div>
         </div>
 
         <!-- 2. Profile Views -->
