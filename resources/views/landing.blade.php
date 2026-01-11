@@ -31,7 +31,7 @@
             border-radius: 20px;
             background: #ffffff;
             box-shadow: 0 35px 70px rgba(0, 0, 0, 0.08);
-            padding: 36px 32px 28px;
+            padding: 30px 26px 30px;
             text-align: center;
         }
         .logo {
@@ -83,10 +83,7 @@
         .btn svg {
             flex-shrink: 0;
         }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
+        
         .btn:focus-visible {
             outline: 2px solid #111;
             outline-offset: 4px;
@@ -113,7 +110,7 @@
             width: 100%;
             color: #3f3f3f;
             font-size: 12px;
-            margin-top: 12px;
+            
             text-decoration: none;
         }
         .secondary-link span {

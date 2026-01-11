@@ -101,6 +101,15 @@ class StoreCastingRequirementRequest extends FormRequest
                 'integer',
                 'min:1',
             ],
+            'models.*.rate_decision' => [
+                'required',
+                Rule::in(array_keys(CastingRequirementModel::RATE_DECISION_OPTIONS)),
+            ],
+            'models.*.rate' => [
+                'required_if:models.*.rate_decision,admin_decide',
+                'numeric',
+                'min:0',
+            ],
             'models.*.gender' => [
                 'required',
                 Rule::in(array_keys(CastingRequirement::GENDER_SELECT)),

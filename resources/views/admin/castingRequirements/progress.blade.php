@@ -246,106 +246,169 @@
         color: var(--text-sub);
         margin: 0;
     }
-    .sh-filter-btn {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        color: var(--text-sub);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-    }
 
-    /* Talent Grid */
+    /* Talent Grid - matching talents.blade.php */
     .sh-talent-grid {
         margin-bottom: 10px;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
     }
     .sh-talent-card {
-        background: #fff;
-        border-radius: 16px;
-        overflow: hidden;
         position: relative;
-        aspect-ratio: 4/5;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #f0f1f3;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 340px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid var(--border);
+        transition: transform 0.2s ease;
+        cursor: pointer;
+    }
+    .sh-talent-card:hover { transform: translateY(-4px); }
+    .sh-talent-img-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
     }
     .sh-talent-img {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        transform: scale(1.05);
+        z-index: 1;
     }
-    .sh-talent-overlay {
+    .sh-talent-img.active {
+        opacity: 1;
+        transform: scale(1);
+        z-index: 1;
+    }
+    .sh-talent-card:hover .sh-talent-img:not(.active) { opacity: 0; }
+    .sh-talent-card:hover .sh-talent-img.active { opacity: 1; transform: scale(1); }
+
+    .badge-active {
         position: absolute;
-        bottom: 0;
+        top: 15px;
+        left: 15px;
+        background: #e6f7ed;
+        color: #15803d;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        z-index: 20;
+        pointer-events: none;
+    }
+    .badge-active::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: #10b981;
+        border-radius: 50%;
+    }
+
+    .card-overlay {
+        position: absolute;
         left: 0;
         right: 0;
-        padding: 20px;
-        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        bottom: 0;
+        height: 50%;
+        padding: 20px 18px 15px;
+        background: rgba(0, 0, 0, 0.5);
         color: #fff;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
+        justify-content: flex-end;
+        z-index: 10;
+        pointer-events: none;
+        transition: none;
     }
-    .sh-talent-status {
-        position: absolute;
-        top: 16px;
-        left: 16px;
-        background: rgba(255, 255, 255, 0.9);
-        color: #22c55e;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
+
+    .overlay-top {
+        position: relative;
+        width: 100%;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 4px;
+        margin-bottom: 4px;
+        transition: none;
     }
-    .sh-talent-status::before {
-        content: '';
-        display: block;
-        width: 6px;
-        height: 6px;
-        background: #22c55e;
-        border-radius: 50%;
+    .overlay-flag {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: auto;
+        height: 22px;
+        aspect-ratio: 4 / 3;
+        display: inline-block;
+        transition: none;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
     }
-    .sh-talent-name {
+    .overlay-meta-info {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.9);
+        font-weight: 500;
+        transition: none;
+    }
+
+    .talent-name {
+        font-weight: 600;
         font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 2px;
+        margin: 4px 0 12px;
+        text-align: center;
+        transition: none;
     }
-    .sh-talent-meta {
-        font-size: 11px;
-        opacity: 0.8;
+
+    .card-divider {
+        width: 100%;
+        height: 1px;
+        background: rgba(255,255,255,0.3);
         margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        transition: none;
     }
-    .sh-talent-flag {
-        position: absolute;
-        bottom: 60px;
-        left: 20px;
-        width: 24px;
-        height: 16px;
-    }
-    .sh-view-btn {
-        font-size: 11px;
-        color: rgba(255,255,255,0.8);
-        text-decoration: none;
+
+    .overlay-bottom {
         display: flex;
-        align-items: center;
-        gap: 4px;
-        position: absolute;
-        right: 20px;
-        bottom: 20px;
+        justify-content: space-between;
+        align-items: flex-end;
+        transition: none;
     }
-    .sh-view-btn:hover { color: #fff; }
+    .joined-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        transition: none;
+    }
+    .joined-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.7);
+        font-weight: 700;
+        transition: none;
+    }
+    .joined-date {
+        font-size: 12px;
+        font-weight: 500;
+        color: #fff;
+        transition: none;
+    }
 
     @media (max-width: 768px) {
         .sh-top-card { flex-direction: column; }
@@ -430,6 +493,9 @@
                 <div class="sh-actions">
                     <a href="#" class="nav-btn primary">Invite Talents</a>
                     <a href="{{ route('admin.casting-requirements.edit', $project->id) }}" class="nav-btn secondary">Edit Shoot</a>
+                    <button id="shareBtn" class="nav-btn secondary" data-url="{{ route('admin.casting-requirements.show', $project->id) }}">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
                 </div>
             </div>
             
@@ -488,27 +554,143 @@
                 <h3>Talent Pool</h3>
                 <p>View and manage applicants for this shoot.</p>
             </div>
-            <button class="sh-filter-btn"><i class="fas fa-filter"></i> Filter <i class="fas fa-chevron-down" style="font-size:10px; margin-left:4px;"></i></button>
         </div>
 
-        <div class="sh-talent-grid">
-            <!-- Mocking 3 cards for design compliance -->
-            @foreach([1, 2, 3] as $i)
-            <div class="sh-talent-card">
-                <div style="width:100%; height:100%; background:#d1d5db; position:relative;">
-                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop" class="sh-talent-img" alt="Talent">
+        @php
+            $applicants = $project->castingApplications ?? collect();
+            $fallbackImg = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="360"><rect width="300" height="360" rx="18" fill="#e5e7eb"/><path d="M150 170c28 0 50-22 50-50s-22-50-50-50-50 22-50 50 22 50 50 50Zm0 20c-42 0-80 19-92 56-2 6 2 12 8 12h168c6 0 10-6 8-12-12-37-50-56-92-56Z" fill="#cbd5e1"/></svg>');
+        @endphp
+
+        @if($applicants->isEmpty())
+            <div style="text-align: center; padding: 60px 20px; background: #f9fafb; border-radius: 12px; border: 1px dashed #e2e8f0;">
+                <div style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div class="sh-talent-status">Active</div>
-                <div class="sh-talent-overlay">
-                    <div style="margin-bottom:8px; font-size:16px;">🇦🇪</div> 
-                    <div class="sh-talent-meta">Male • 32 Years</div>
-                    <div class="sh-talent-name">Maxie Bogalech</div>
-                    <div style="font-size:10px; opacity:0.7; margin-top:2px;">Joined 29 Nov 2025</div>
-                    <a href="#" class="sh-view-btn">View details <i class="fas fa-chevron-right" style="font-size:10px;"></i></a>
-                </div>
+                <h4 style="font-size: 16px; font-weight: 600; color: #64748b; margin: 0 0 8px 0;">No Applicants Yet</h4>
+                <p style="color: #94a3b8; font-size: 13px; margin: 0;">Applicants for this shoot will appear here once they apply.</p>
             </div>
-            @endforeach
-        </div>
+        @else
+            <div class="sh-talent-grid">
+                @foreach($applicants as $application)
+                    @php
+                        $talent = $application->talent_profile;
+                        if (!$talent) continue;
+                        
+                        $displayName = $talent->display_name ?? $talent->legal_name ?? 'Unknown';
+                        $gender = strtoupper($talent->gender ?? 'N/A');
+                        $dob = optional($talent->date_of_birth);
+                        $age = $dob ? $dob->age : null;
+                        $ageText = $age ? "• $age YEARS" : '';
+                        $joinedAt = optional($talent->created_at)->format('d M Y') ?? '--';
+                        $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
+                        $isVerified = strtolower($talent->verification_status ?? 'pending') === 'approved';
+                        
+                        $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
+                        if (is_array($avatarCandidate)) {
+                            $avatarCandidate = $avatarCandidate['url'] ?? ($avatarCandidate['path'] ?? ($avatarCandidate[0] ?? null));
+                        }
+                        $avatar = null;
+                        if ($avatarCandidate) {
+                            if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
+                                $avatar = $avatarCandidate;
+                            } else {
+                                $normalized = ltrim($avatarCandidate, '/');
+                                $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/') ? substr($normalized, 8) : $normalized;
+                                if (file_exists(public_path('storage/' . $storageRelative))) {
+                                    $avatar = asset('storage/' . $storageRelative);
+                                } elseif (file_exists(public_path($normalized))) {
+                                    $avatar = asset($normalized);
+                                } else {
+                                    $avatar = asset('storage/' . $storageRelative);
+                                }
+                            }
+                        }
+                        $avatar = $avatar ?: $fallbackImg;
+
+                        // Collect all images for hover effect
+                        $headshotImages = [];
+                        $fullBodyImages = [];
+
+                        $normalizeImage = function($path) {
+                            if (!$path) return null;
+                            if (is_array($path)) {
+                                $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+                            }
+                            if (!$path) return null;
+                            if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
+                                return $path;
+                            }
+                            $normalized = ltrim($path, '/');
+                            $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/') ? substr($normalized, 8) : $normalized;
+                            if (file_exists(public_path('storage/' . $storageRelative))) {
+                                return asset('storage/' . $storageRelative);
+                            } elseif (file_exists(public_path($normalized))) {
+                                return asset($normalized);
+                            } else {
+                                return asset('storage/' . $storageRelative);
+                            }
+                        };
+
+                        if ($talent->headshot_left_path) {
+                            $img = $normalizeImage($talent->headshot_left_path);
+                            if ($img) $headshotImages[] = $img;
+                        }
+                        if ($talent->headshot_center_path) {
+                            $img = $normalizeImage($talent->headshot_center_path);
+                            if ($img) $headshotImages[] = $img;
+                        }
+                        if ($talent->headshot_right_path) {
+                            $img = $normalizeImage($talent->headshot_right_path);
+                            if ($img) $headshotImages[] = $img;
+                        }
+
+                        if ($talent->full_body_front_path) {
+                            $img = $normalizeImage($talent->full_body_front_path);
+                            if ($img) $fullBodyImages[] = $img;
+                        }
+                        if ($talent->full_body_right_path) {
+                            $img = $normalizeImage($talent->full_body_right_path);
+                            if ($img) $fullBodyImages[] = $img;
+                        }
+                        if ($talent->full_body_back_path) {
+                            $img = $normalizeImage($talent->full_body_back_path);
+                            if ($img) $fullBodyImages[] = $img;
+                        }
+
+                        $allImages = array_merge($headshotImages, $fullBodyImages);
+                        if (empty($allImages)) {
+                            $allImages = [$avatar];
+                        }
+                    @endphp
+                    <div class="sh-talent-card" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
+                        <div class="sh-talent-img-container">
+                            @foreach($allImages as $index => $imgSrc)
+                                <img class="sh-talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
+                            @endforeach
+                        </div>
+                        <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
+                        <div class="card-overlay">
+                            <div class="overlay-top">
+                                <div class="overlay-flag">
+                                    @if($flagCode && strlen($flagCode) === 2)
+                                        <span class="fi fi-{{ strtolower($flagCode) }}" title="{{ $flagCode }}"></span>
+                                    @endif
+                                </div>
+                                <span class="overlay-meta-info">{{ $gender }} {{ $ageText }}</span>
+                            </div>
+                            <p class="talent-name">{{ $displayName }}</p>
+                            <div class="card-divider"></div>
+                            <div class="overlay-bottom">
+                                <div class="joined-info">
+                                    <span class="joined-label">Joined</span>
+                                    <span class="joined-date">{{ $joinedAt }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     @else
         <!-- Empty State -->
         <div style="text-align: center; padding: 100px 20px; background: #fff; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
@@ -525,4 +707,107 @@
 
 @section('scripts')
 @parent
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shareBtn = document.getElementById('shareBtn');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const url = this.getAttribute('data-url');
+            const fullUrl = window.location.origin + url;
+            
+            // Try to use the modern Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(fullUrl).then(function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Link Copied!',
+                        text: 'The shoot link has been copied to your clipboard.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }).catch(function(err) {
+                    // Fallback if clipboard API fails
+                    fallbackCopyToClipboard(fullUrl);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyToClipboard(fullUrl);
+            }
+        });
+    }
+    
+    function fallbackCopyToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            Swal.fire({
+                icon: 'success',
+                title: 'Link Copied!',
+                text: 'The shoot link has been copied to your clipboard.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Copy Failed',
+                text: 'Could not copy link. Please try again.',
+                confirmButtonColor: '#0f172a'
+            });
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Talent card functionality
+    const cards = Array.from(document.querySelectorAll('.sh-talent-card'));
+
+    // Make cards clickable
+    cards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            const url = this.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+
+    // Image rotation on hover
+    cards.forEach(card => {
+        const images = card.querySelectorAll('.sh-talent-img');
+        if (images.length <= 1) return; // No rotation needed if only one image
+
+        let rotationInterval = null;
+        let currentIndex = 0;
+
+        card.addEventListener('mouseenter', function() {
+            rotationInterval = setInterval(() => {
+                images[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+            }, 400);
+        });
+
+        card.addEventListener('mouseleave', function() {
+            if (rotationInterval) {
+                clearInterval(rotationInterval);
+                rotationInterval = null;
+            }
+            images.forEach((img, idx) => {
+                img.classList.toggle('active', idx === 0);
+            });
+            currentIndex = 0;
+        });
+    });
+});
+</script>
 @endsection

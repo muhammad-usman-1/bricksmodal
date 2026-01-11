@@ -23,6 +23,8 @@
     $defaultModel = [
         'title' => '',
         'quantity' => 1,
+        'rate' => 0,
+        'rate_decision' => 'talent_decide',
         'gender' => 'male',
         'age_range_key' => array_key_first($ageRanges),
         'hair_color' => '',
@@ -44,6 +46,8 @@
                     'id' => $model->id,
                     'title' => $model->title,
                     'quantity' => $model->quantity,
+                    'rate' => $model->rate,
+                    'rate_decision' => $model->rate_decision ?? (($model->rate ?? 0) > 0 ? 'admin_decide' : 'talent_decide'),
                     'gender' => $model->gender ?? 'any',
                     'age_range_key' => $model->age_range_key ?? array_key_first($ageRanges),
                     'hair_color' => $model->hair_color,
@@ -67,6 +71,10 @@
             $modelInputs = [$defaultModel];
         }
     }
+
+    $modelInputs = array_map(function ($model) use ($defaultModel) {
+        return array_merge($defaultModel, $model);
+    }, $modelInputs);
 
     if (!function_exists('numberToWord')) {
         function numberToWord($num) {
@@ -199,20 +207,23 @@
 
                         <div class="field-block">
                             <label for="duration">Duration</label>
-                            <div class="duration-input">
-                                <input
-                                    class="duration-value {{ $errors->has('duration') ? 'is-invalid' : '' }}"
-                                    type="number"
-                                    name="duration"
-                                    id="duration"
-                                    value="{{ $durationValue }}"
-                                    placeholder="2"
-                                    min="0"
-                                    step="1"
-                                    inputmode="numeric"
-                                    pattern="[0-9]*"
-                                >
-                                <span class="duration-unit">hours</span>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <div class="dark-input" style="width: 80px;">
+                                    <input
+                                        class="{{ $errors->has('duration') ? 'is-invalid' : '' }}"
+                                        type="number"
+                                        name="duration"
+                                        id="duration"
+                                        value="{{ $durationValue }}"
+                                        placeholder="2"
+                                        min="0"
+                                        step="1"
+                                        style="text-align: center;"
+                                    >
+                                </div>
+                                <div class="dark-input" style="width: auto; border: none; background: transparent; padding-left: 0; box-shadow: none;">
+                                    <input type="text" value="Hours" readonly style="color: #6b7280; background: transparent; cursor: default; padding: 0; width: auto; font-weight: 500; ">
+                                </div>
                             </div>
                             @if($errors->has('duration'))
                                 <div class="invalid-feedback d-block">{{ $errors->first('duration') }}</div>
@@ -284,26 +295,58 @@
                                 
                                 <div class="field-block">
                                     <label class="required">Hours Needed</label>
-                                    <div class="duration-input">
+                                    <div style="display: flex; gap: 10px; align-items: center;">
                                         <input 
-                                            class="duration-value step2-style"
+                                            class="pill-input"
                                             type="number" 
                                             name="models[{{ $index }}][model_hours]" 
                                             value="{{ $model['model_hours'] ?? '' }}"
                                             placeholder="4" 
                                             min="1"
                                             required
+                                            style="width: 80px; text-align: center;"
                                         >
-                                        <span class="duration-unit step2-style">hours</span>
+                                        <span style="color: #4b5563; font-weight: 500;">Hours</span>
                                     </div>
+                                </div>
+                            </div>
+                            @php
+                                $rateDecision = $model['rate_decision'] ?? (($model['rate'] ?? 0) > 0 ? 'admin_decide' : 'talent_decide');
+                            @endphp
+                            <div class="grid grid-2 condensed">
+                                <div class="field-block">
+                                    <label class="required">Rate?</label>
+                                    <select name="models[{{ $index }}][rate_decision]" class="pill-select" data-rate-decision required>
+                                        <option value="talent_decide" {{ $rateDecision === 'talent_decide' ? 'selected' : '' }}>Talent Decide</option>
+                                        <option value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'selected' : '' }}>Admin Decide</option>
+                                    </select>
+                                    @error('models.' . $index . '.rate_decision')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="field-block" data-rate-input-wrapper style="{{ $rateDecision === 'admin_decide' ? '' : 'display:none;' }}">
+                                    <label class="required">Rate Amount</label>
+                                    <input
+                                        class="pill-input @error('models.' . $index . '.rate') is-invalid @enderror"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        name="models[{{ $index }}][rate]"
+                                        value="{{ $model['rate'] ?? '' }}"
+                                        placeholder="Enter rate"
+                                        data-rate-input
+                                    >
+                                    @error('models.' . $index . '.rate')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             
                             <div class="grid grid-3 condensed">
                                 <div class="field-block">
-                                    <label>Height Range</label>
-                                    <select name="models[{{ $index }}][height_range]" class="pill-select">
-                                        <option value="" {{ ($model['height_range'] ?? '') === '' ? 'selected' : '' }}>Choose height range</option>
+                                    <label class="required">Height Range</label>
+                                    <select name="models[{{ $index }}][height_range]" class="pill-select" required>
+                                        <option value="" disabled {{ ($model['height_range'] ?? '') === '' ? 'selected' : '' }}>Choose height range</option>
                                         <option value="150-160" {{ ($model['height_range'] ?? '') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
                                         <option value="161-170" {{ ($model['height_range'] ?? '') === '161-170' ? 'selected' : '' }}>161 - 170 cm</option>
                                         <option value="171-180" {{ ($model['height_range'] ?? '') === '171-180' ? 'selected' : '' }}>171 - 180 cm</option>
@@ -312,9 +355,9 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label>Weight Range</label>
-                                    <select name="models[{{ $index }}][weight_range]" class="pill-select">
-                                        <option value="" {{ ($model['weight_range'] ?? '') === '' ? 'selected' : '' }}>Choose weight range</option>
+                                    <label class="required">Weight Range</label>
+                                    <select name="models[{{ $index }}][weight_range]" class="pill-select" required>
+                                        <option value="" disabled {{ ($model['weight_range'] ?? '') === '' ? 'selected' : '' }}>Choose weight range</option>
                                         <option value="40-50" {{ ($model['weight_range'] ?? '') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
                                         <option value="51-60" {{ ($model['weight_range'] ?? '') === '51-60' ? 'selected' : '' }}>51 - 60 kg</option>
                                         <option value="61-70" {{ ($model['weight_range'] ?? '') === '61-70' ? 'selected' : '' }}>61 - 70 kg</option>
@@ -323,8 +366,8 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label>Others</label>
-                                    <input type="text" name="models[{{ $index }}][hair_color]" class="pill-input @error('models.' . $index . '.hair_color') is-invalid @enderror" placeholder="other details" value="{{ $model['hair_color'] ?? '' }}">
+                                    <label class="required">Others</label>
+                                    <input type="text" name="models[{{ $index }}][hair_color]" class="pill-input @error('models.' . $index . '.hair_color') is-invalid @enderror" placeholder="other details" value="{{ $model['hair_color'] ?? '' }}" required>
                                     @error('models.' . $index . '.hair_color')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -333,7 +376,7 @@
 
                             <div class="grid grid-2 condensed">
                                  <div class="field-block">
-                                    <label>Skin Color</label>
+                                    <label class="required">Skin Color</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $skin = $model['skin_color'] ?? ''; @endphp
                                         <button type="button" class="swatch {{ $skin === 'tan' ? 'active' : '' }}" data-swatch-value="tan" style="background:#e6bd8d;"></button>
@@ -341,10 +384,10 @@
                                         <button type="button" class="swatch {{ $skin === 'amber' ? 'active' : '' }}" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                         <button type="button" class="swatch {{ $skin === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#8b5a2b;"></button>
                                     </div>
-                                    <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input>
+                                    <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input required>
                                 </div>
                                 <div class="field-block">
-                                    <label>Eye Color</label>
+                                    <label class="required">Eye Color</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $eye = $model['eye_color'] ?? ''; @endphp
                                         <button type="button" class="swatch {{ $eye === 'amber' ? 'active' : '' }}" data-swatch-value="amber" style="background:#c48b5a;"></button>
@@ -352,7 +395,7 @@
                                         <button type="button" class="swatch {{ $eye === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#7a5230;"></button>
                                         <button type="button" class="swatch {{ $eye === 'black' ? 'active' : '' }}" data-swatch-value="black" style="background:#1b1b1d;"></button>
                                     </div>
-                                    <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input>
+                                    <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input required>
                                 </div>
                             </div>
                             <!-- Removed Reference Photo Section -->
@@ -495,26 +538,49 @@
                         </div>
                         <div class="field-block">
                             <label class="required">Hours Needed</label>
-                             <div class="duration-input">
+                            <div style="display: flex; gap: 10px; align-items: center;">
                                 <input 
-                                    class="duration-value step2-style"
+                                    class="pill-input"
                                     type="number" 
                                     name="models[__INDEX__][model_hours]" 
                                     placeholder="4" 
                                     value=""
                                     min="1"
                                     required
+                                    style="width: 80px; text-align: center;"
                                 >
-                                <span class="duration-unit step2-style">hours</span>
+                                <span style="color: #4b5563; font-weight: 500;">Hours</span>
                             </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-2 condensed">
+                        <div class="field-block">
+                            <label class="required">Rate?</label>
+                            <select name="models[__INDEX__][rate_decision]" class="pill-select" data-rate-decision required>
+                                <option value="talent_decide" selected>Talent Decide</option>
+                                <option value="admin_decide">Admin Decide</option>
+                            </select>
+                        </div>
+                        <div class="field-block" data-rate-input-wrapper style="display: none;">
+                            <label class="required">Rate Amount</label>
+                            <input
+                                class="pill-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                name="models[__INDEX__][rate]"
+                                value="0"
+                                placeholder="Enter rate"
+                                data-rate-input
+                            >
                         </div>
                     </div>
 
                     <div class="grid grid-3 condensed">
-                         <div class="field-block">
-                            <label>Height Range</label>
-                            <select name="models[__INDEX__][height_range]" class="pill-select">
-                                <option value="" selected>Choose height range</option>
+                        <div class="field-block">
+                            <label class="required">Height Range</label>
+                            <select name="models[__INDEX__][height_range]" class="pill-select" required>
+                                <option value="" disabled selected>Choose height range</option>
                                 <option value="150-160">150 - 160 cm</option>
                                 <option value="161-170">161 - 170 cm</option>
                                 <option value="171-180">171 - 180 cm</option>
@@ -522,9 +588,9 @@
                             </select>
                         </div>
                         <div class="field-block">
-                            <label>Weight Range</label>
-                            <select name="models[__INDEX__][weight_range]" class="pill-select">
-                                <option value="" selected>Choose weight range</option>
+                            <label class="required">Weight Range</label>
+                            <select name="models[__INDEX__][weight_range]" class="pill-select" required>
+                                <option value="" disabled selected>Choose weight range</option>
                                 <option value="40-50">40 - 50 kg</option>
                                 <option value="51-60">51 - 60 kg</option>
                                 <option value="61-70">61 - 70 kg</option>
@@ -532,31 +598,31 @@
                             </select>
                         </div>
                         <div class="field-block">
-                            <label>Others</label>
-                            <input type="text" name="models[__INDEX__][hair_color]" class="pill-input" placeholder="other details">
+                            <label class="required">Others</label>
+                            <input type="text" name="models[__INDEX__][hair_color]" class="pill-input" placeholder="other details" required>
                         </div>
                     </div>
                     
                     <div class="grid grid-2 condensed">
                          <div class="field-block">
-                            <label>Skin Color</label>
+                            <label class="required">Skin Color</label>
                             <div class="swatch-row" data-swatch-group>
                                 <button type="button" class="swatch" data-swatch-value="tan" style="background:#e6bd8d;"></button>
                                 <button type="button" class="swatch" data-swatch-value="golden" style="background:#d7a86e;"></button>
                                 <button type="button" class="swatch" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#8b5a2b;"></button>
                             </div>
-                            <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input>
+                            <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input required>
                         </div>
                         <div class="field-block">
-                            <label>Eye Color</label>
+                            <label class="required">Eye Color</label>
                             <div class="swatch-row" data-swatch-group>
                                 <button type="button" class="swatch" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                 <button type="button" class="swatch" data-swatch-value="hazel" style="background:#c9a063;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#7a5230;"></button>
                                 <button type="button" class="swatch" data-swatch-value="black" style="background:#1b1b1d;"></button>
                             </div>
-                            <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input>
+                            <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input required>
                         </div>
                     </div>
                     <!-- Reference Photo Removed from Template -->

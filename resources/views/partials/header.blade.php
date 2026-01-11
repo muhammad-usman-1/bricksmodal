@@ -143,8 +143,8 @@
 
 <header class="c-header c-header-fixed admin-header" id="admin-main-header">
     <div id="admin-topbar-container">
-        <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
-            <i class="fas fa-angle-right" style="font-size: 18px; color: #374151;"></i>
+        <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Show Sidebar" style="margin-left: 0 !important; margin-right: 12px !important; display: none;">
+            <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
         </button>
         <div id="admin-search-box">
             <i class="fas fa-search"></i>
@@ -223,7 +223,7 @@
 </header>
 
 <script>
-    // Sidebar collapse functionality
+    // Sidebar uncollapse functionality (collapse is now handled by footer button)
     (function() {
         const sidebar = document.getElementById('sidebar');
         const collapseBtn = document.getElementById('sidebarCollapseBtn');
@@ -243,44 +243,57 @@
             }
         };
 
+        // Function to update button visibility
+        const updateButtonVisibility = (collapsed) => {
+            if (collapseBtn) {
+                collapseBtn.style.display = collapsed ? 'inline-flex' : 'none';
+            }
+        };
+
+        const syncFromState = () => {
+            const collapsed = sidebar.classList.contains('collapsed');
+            updateButtonVisibility(collapsed);
+            adjustMainContent(collapsed);
+        };
+
         // Check localStorage for saved state
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isCollapsed) {
             sidebar.classList.add('collapsed');
-            adjustMainContent(true);
-            // Set initial icon state
-            if (collapseIcon) {
-                collapseIcon.classList.remove('fa-angle-right');
-                collapseIcon.classList.add('fa-bars');
-            }
+        } else {
+            sidebar.classList.remove('collapsed');
         }
+        syncFromState();
 
+        // Only handle uncollapse - collapse is now handled by footer button
         collapseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
 
-            sidebar.classList.toggle('collapsed');
-            const collapsed = sidebar.classList.contains('collapsed');
-
-            // Adjust main content
-            adjustMainContent(collapsed);
+            // Only uncollapse, never collapse
+            sidebar.classList.remove('collapsed');
+            syncFromState();
 
             // Save state to localStorage
-            localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+            localStorage.setItem('sidebarCollapsed', 'false');
 
-            // Update icon
-            if (collapseIcon) {
-                if (collapsed) {
-                    collapseIcon.classList.remove('fa-angle-right');
-                    collapseIcon.classList.add('fa-bars');
-                } else {
-                    collapseIcon.classList.remove('fa-bars');
-                    collapseIcon.classList.add('fa-angle-right');
-                }
-            }
-
-            // Update aria-label
-            collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
+            // Notify other listeners of expanded state
+            window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: false } }));
         });
+
+        // Listen for collapse events from footer button
+        window.addEventListener('sidebar-collapsed', function(e) {
+            const collapsed = e.detail.collapsed;
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+            syncFromState();
+        });
+
+        // Also react to class changes triggered elsewhere
+        const observer = new MutationObserver(syncFromState);
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
     })();
 </script>

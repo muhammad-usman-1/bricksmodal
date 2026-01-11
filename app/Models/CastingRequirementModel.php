@@ -20,6 +20,7 @@ class CastingRequirementModel extends Model implements HasMedia
 
     protected $casts = [
         'rate' => 'float',
+        'rate_decision' => 'string',
         'quantity' => 'integer',
         'model_hours' => 'integer',
     ];
@@ -32,6 +33,11 @@ class CastingRequirementModel extends Model implements HasMedia
         '30-40' => ['label' => '30 – 40', 'min' => 30, 'max' => 40],
         '40-50' => ['label' => '40 – 50', 'min' => 40, 'max' => 50],
         '50+'   => ['label' => '50+', 'min' => 50, 'max' => null],
+    ];
+
+    public const RATE_DECISION_OPTIONS = [
+        'talent_decide' => 'Talent Decide',
+        'admin_decide'  => 'Admin Decide',
     ];
 
     protected function serializeDate(DateTimeInterface $date)

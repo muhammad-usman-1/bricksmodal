@@ -657,24 +657,19 @@ letter-spacing: 1.4px;">STUDIO</div>
             @endphp
             <div class="bm-footer" style="position: relative;">
                 <div class="bm-footer-card">
-                    <div class="bm-footer-user">
+                    <div class="bm-footer-user" style="cursor: pointer;" onclick="window.location.href='{{ route('admin.profile.show') }}'">
                         <div class="bm-footer-avatar">{{ $initials }}</div>
                         <div class="bm-footer-meta">
                             <p class="bm-footer-name">{{ $name }}</p>
                             <p class="bm-footer-role">{{ ucfirst($roleLabel) }}</p>
                         </div>
                     </div>
-                    <button type="button" class="bm-footer-arrow" id="bm-footer-toggle">
+                    <button type="button" class="bm-footer-arrow" id="bm-sidebar-collapse">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
 
-                <div class="bm-footer-dropdown" id="bm-footer-dropdown">
-                    <a href="{{ route('admin.profile.show') }}"><i class="fas fa-user"></i> Profile</a>
-                    <a href="{{ route('admin.settings.index') }}"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="{{ route('profile.password.edit') }}"><i class="fas fa-shield-alt"></i> Privacy Control</a>
-                    <button type="button" onclick="event.preventDefault(); document.getElementById('logoutform').submit();"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </div>
+
             </div>
         @endif
     </div>
@@ -683,37 +678,25 @@ letter-spacing: 1.4px;">STUDIO</div>
 
 <script>
     (function() {
-        const toggle = document.getElementById('bm-footer-toggle');
-        const dropdown = document.getElementById('bm-footer-dropdown');
-        if (!toggle || !dropdown) return;
+        const collapseBtn = document.getElementById('bm-sidebar-collapse');
+        const sidebar = document.getElementById('sidebar');
+        if (!collapseBtn || !sidebar) return;
 
-        const close = () => {
-            dropdown.classList.remove('show');
-            toggle.style.transform = 'rotate(0deg)';
-        };
-
-        const open = () => {
-            dropdown.classList.add('show');
-            toggle.style.transform = 'rotate(180deg)';
-        };
-
-        toggle.addEventListener('click', (e) => {
+        collapseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (dropdown.classList.contains('show')) {
-                close();
-            } else {
-                open();
+            sidebar.classList.add('collapsed');
+            
+            // Adjust main content
+            const wrapper = document.querySelector('.c-wrapper');
+            if (wrapper) {
+                wrapper.style.marginLeft = '70px';
             }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
-                close();
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') close();
+            
+            // Save state to localStorage
+            localStorage.setItem('sidebarCollapsed', 'true');
+            
+            // Notify header to update button visibility
+            window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: true } }));
         });
     })();
 

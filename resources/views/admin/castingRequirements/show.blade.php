@@ -485,12 +485,20 @@
                             <div class="model-detail-value">{{ ucfirst($model->eye_color) }}</div>
                         </div>
                         @endif
-                        @if($model->rate)
                         <div class="model-detail-item">
                             <div class="model-detail-label">Rate</div>
-                            <div class="model-detail-value">${{ number_format($model->rate, 2) }}</div>
+                            <div class="model-detail-value">
+                                @if(($model->rate_decision ?? 'talent_decide') === 'admin_decide')
+                                    @if($model->rate !== null)
+                                        ${{ number_format($model->rate, 2) }}
+                                    @else
+                                        Not set
+                                    @endif
+                                @else
+                                    Talent Decide
+                                @endif
+                            </div>
                         </div>
-                        @endif
                     </div>
 
                     @if($model->labels->isNotEmpty())

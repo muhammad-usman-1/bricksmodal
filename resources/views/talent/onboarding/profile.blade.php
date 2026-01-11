@@ -737,10 +737,10 @@
                              <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px;">Do you have a WhatsApp number on the same number?</label>
                              <div class="radio-row" style="margin-top: 6px;">
                                 <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" name="whatsapp_choice" value="same" {{ $whatsappChoice == 'same' ? 'checked' : '' }}> Yes
+                                    <input type="radio" id="wa_same" name="whatsapp_choice" value="same" {{ $whatsappChoice == 'same' ? 'checked' : '' }}> Yes
                                 </label>
                                 <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" name="whatsapp_choice" value="alt" {{ $whatsappChoice == 'alt' ? 'checked' : '' }}> No
+                                    <input type="radio" id="wa_alt" name="whatsapp_choice" value="alt" {{ $whatsappChoice == 'alt' ? 'checked' : '' }}> No
                                 </label>
                              </div>
                              <div id="whatsapp_number_section" style="display:none; margin-top:12px;">
@@ -752,6 +752,40 @@
                                      <input class="control" id="whatsapp_number_input" name="whatsapp_number" type="tel" value="{{ old('whatsapp_number', $profile->whatsapp_number) }}">
                                 </div>
                              </div>
+                             <script>
+                                (function() {
+                                    try {
+                                        var waSec = document.getElementById('whatsapp_number_section');
+                                        var waInp = document.getElementById('whatsapp_number_input');
+                                        
+                                        function doToggle(forceVal) {
+                                            var val = forceVal;
+                                            if(!val) {
+                                                var chk = document.querySelector('input[name="whatsapp_choice"]:checked');
+                                                val = chk ? chk.value : 'same';
+                                            }
+                                            
+                                            if(waSec) {
+                                                waSec.style.display = (val === 'alt') ? 'block' : 'none';
+                                                if(waInp) {
+                                                    if(val === 'alt') waInp.setAttribute('required', 'required');
+                                                    else waInp.removeAttribute('required');
+                                                }
+                                            }
+                                        }
+
+                                        // Bind events
+                                        var radios = document.getElementsByName('whatsapp_choice');
+                                        for(var i=0; i<radios.length; i++) {
+                                            radios[i].addEventListener('change', function(e) { doToggle(this.value); });
+                                        }
+                                        
+                                        // Init immediately
+                                        doToggle();
+
+                                    } catch(e) { console.error('WA Script Error:', e); }
+                                })();
+                             </script>
                         </div>
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
@@ -774,12 +808,12 @@
                         <div class="field-grid">
                             <div class="field">
                                 <label for="height">Height (cm)</label>
-                                <input id="height" name="height" class="control" type="number" step="0.1" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}">
+                                <input id="height" name="height" class="control" type="number" step="0.1" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}" required>
                                 <input type="hidden" id="height_unit" value="cm">
                             </div>
                             <div class="field">
                                 <label for="weight">Weight (kg)</label>
-                                <input id="weight" name="weight" class="control" type="number" step="0.1" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}">
+                                <input id="weight" name="weight" class="control" type="number" step="0.1" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}" required>
                             </div>
                         </div>
 
@@ -820,14 +854,14 @@
                             </div>
                             <div class="field">
                                 <label for="eye_color">Eye Color</label>
-                                <input id="eye_color" name="eye_color" class="control" type="text" placeholder="e.g. Blue" value="{{ old('eye_color', $profile->eye_color) }}">
+                                <input id="eye_color" name="eye_color" class="control" type="text" placeholder="e.g. Blue" value="{{ old('eye_color', $profile->eye_color) }}" required>
                             </div>
                         </div>
 
                         <div class="field" style="margin-top: 20px;">
                             <label for="skin_tone">Skin Tone</label>
                             <div style="position:relative;">
-                                <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;">
+                                <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;" required>
                                     <option value="">e.g. Fair, Medium, Olive, Dark</option>
                                     @foreach(['Fair','Light','Medium','Olive','Brown','Dark'] as $tone)
                                         <option value="{{$tone}}" {{ old('skin_tone', $profile->skin_tone) == $tone ? 'selected' : '' }}>{{$tone}}</option>
@@ -842,10 +876,10 @@
                                 <h5>Do you have visible tattoos?</h5>
                                 <div style="display: flex; gap: 24px;">
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_visible_tattoos" value="0" {{ old('has_visible_tattoos', $profile->has_visible_tattoos ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;"> No
+                                        <input type="radio" name="has_visible_tattoos" value="0" {{ old('has_visible_tattoos', $profile->has_visible_tattoos ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> No
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_visible_tattoos" value="1" {{ old('has_visible_tattoos', $profile->has_visible_tattoos) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;"> Yes
+                                        <input type="radio" name="has_visible_tattoos" value="1" {{ old('has_visible_tattoos', $profile->has_visible_tattoos) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> Yes
                                     </label>
                                 </div>
                             </div>
@@ -853,10 +887,10 @@
                                 <h5>Do you have piercings?</h5>
                                 <div style="display: flex; gap: 24px;">
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_piercings" value="0" {{ old('has_piercings', $profile->has_piercings ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;"> No
+                                        <input type="radio" name="has_piercings" value="0" {{ old('has_piercings', $profile->has_piercings ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> No
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_piercings" value="1" {{ old('has_piercings', $profile->has_piercings) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;"> Yes
+                                        <input type="radio" name="has_piercings" value="1" {{ old('has_piercings', $profile->has_piercings) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> Yes
                                     </label>
                                 </div>
                             </div>
@@ -1076,26 +1110,9 @@
             document.addEventListener('input', e => { if (e.target.hasAttribute('required')) clearFieldError(e.target); });
             document.addEventListener('change', e => { if (e.target.hasAttribute('required')) clearFieldError(e.target); });
 
-            // 1. WhatsApp Logic
-            const whatsappRadios = document.querySelectorAll('input[name="whatsapp_choice"]');
-            const whatsappNumberSection = document.getElementById('whatsapp_number_section');
-            const whatsappInput = document.getElementById('whatsapp_number_input');
-
-            function toggleWhatsappFields() {
-                const choice = document.querySelector('input[name="whatsapp_choice"]:checked')?.value;
-                if (whatsappNumberSection) {
-                    if (choice === 'alt') {
-                        whatsappNumberSection.style.display = 'block';
-                        whatsappInput?.setAttribute('required', 'required');
-                    } else {
-                        whatsappNumberSection.style.display = 'none';
-                        whatsappInput?.removeAttribute('required');
-                    }
-                }
-            }
-            whatsappRadios.forEach(r => r.addEventListener('change', toggleWhatsappFields));
-            toggleWhatsappFields();
-
+            // 1. WhatsApp Logic - Moved inline for reliability
+            // See Step 1 HTML block above
+            
             // 2. Nationality Flag Logic
             const natSelect = document.getElementById('nationality');
             const natFlag = document.getElementById('nationality_flag');
@@ -1332,22 +1349,150 @@
             }
             initStep4();
 
-            // Logout Logic
-            document.getElementById('logout-trigger')?.addEventListener('click', function(e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Even if you log out, all the data filled so far in the completed steps will be saved, and you can continue from the next step when you log back in.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#1a1a1a',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, log me out',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('logout-form').submit();
+            // --- VALIDATION LOGIC ---
+
+            // Helper: Validate Pattern
+            function restrictInput(input, pattern, removePattern) {
+                input.addEventListener('input', function() {
+                    if (removePattern) {
+                        this.value = this.value.replace(removePattern, '');
                     }
+                });
+            }
+
+            // 1. Weight & Height: Numbers only (prevent non-numeric input)
+            const numberFields = ['height', 'weight', 'chest', 'waist', 'hips', 'shoe_size'];
+            numberFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    restrictInput(el, null, /[^0-9.]/g);
+                }
+            });
+
+            // 2. Hair & Eye Color: Text only (no numbers)
+            const textFields = ['hair_color', 'eye_color'];
+            textFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    restrictInput(el, null, /[0-9]/g);
+                }
+            });
+
+            // 3. Form Submission Validation - Specific Targeting
+            function attachValidation() {
+                // Step 2 Form
+                const formStep2 = document.querySelector('form[action*="step-2"]');
+                if (formStep2) {
+                    formStep2.addEventListener('submit', function(e) {
+                         let isValid = true;
+                         let errorMsg = '';
+                        
+                        // Validate Step 2
+                        const height = document.getElementById('height')?.value;
+                        const weight = document.getElementById('weight')?.value;
+                        const hairColor = document.getElementById('hair_color');
+                        const eyeColor = document.getElementById('eye_color')?.value;
+                        const skinTone = document.getElementById('skin_tone')?.value;
+
+                        // Check required text/number fields
+                        if (!height || !weight || !eyeColor || !skinTone) {
+                            isValid = false;
+                            errorMsg = 'Please fill in all required fields (Height, Weight, Eye Color, Skin Tone).';
+                        }
+                        
+                        // Check hair color if visible
+                        if (isValid && hairColor && hairColor.offsetParent !== null && !hairColor.value) {
+                             isValid = false;
+                             errorMsg = 'Please enter your Hair Color.';
+                        }
+
+                        // Validate specific formats again
+                        if (isValid && (/[^0-9.]/.test(height) || /[^0-9.]/.test(weight))) {
+                            isValid = false;
+                             errorMsg = 'Height and Weight must be numbers.';
+                        }
+
+                        if (isValid && (/[0-9]/.test(eyeColor) || (hairColor && /[0-9]/.test(hairColor.value)))) {
+                             isValid = false;
+                             errorMsg = 'Hair Color and Eye Color must be text only (no numbers).';
+                        }
+                        
+                        // Check radios
+                         if (isValid) {
+                             const tattoos = document.querySelector('input[name="has_visible_tattoos"]:checked');
+                             if (!tattoos) {
+                                  isValid = false;
+                                  errorMsg = 'Please select if you have visible tattoos.';
+                             }
+                         }
+                         
+                         if (isValid) {
+                             const piercings = document.querySelector('input[name="has_piercings"]:checked');
+                             if (!piercings) {
+                                  isValid = false;
+                                  errorMsg = 'Please select if you have piercings.';
+                             }
+                         }
+                         
+                         if (!isValid) {
+                            e.preventDefault();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Missing Information',
+                                text: errorMsg,
+                                confirmButtonColor: '#1a1a1a'
+                            });
+                        }
+                    });
+                }
+                
+                // Step 3 Form
+                const formStep3 = document.querySelector('form[action*="step-3"]');
+                if(formStep3) {
+                     formStep3.addEventListener('submit', function(e) {
+                        const chest = document.getElementById('chest')?.value;
+                        const waist = document.getElementById('waist')?.value;
+                        const hips = document.getElementById('hips')?.value;
+                        const shoeSize = document.getElementById('shoe_size')?.value;
+
+                        if (!chest || !waist || !hips || !shoeSize) {
+                            e.preventDefault();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Missing Information',
+                                text: 'Please fill in all measurement fields.',
+                                confirmButtonColor: '#1a1a1a'
+                            });
+                        }
+                     });
+                }
+            }
+            attachValidation();
+
+
+            // Logout Logic - Robust
+            const logoutLinks = document.querySelectorAll('#logout-trigger');
+            logoutLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Stop bubbling
+                    console.log('Logout clicked');
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Even if you log out, all the data filled so far in the completed steps will be saved.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1a1a1a',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, log me out',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('logout-form');
+                            if(form) form.submit();
+                        }
+                    });
                 });
             });
 
@@ -1357,7 +1502,7 @@
                 logoutTrigger.addEventListener('mouseenter', () => logoutTrigger.style.opacity = '1');
                 logoutTrigger.addEventListener('mouseleave', () => logoutTrigger.style.opacity = '0.8');
             }
-
+            
         })();
     </script>
 @endsection

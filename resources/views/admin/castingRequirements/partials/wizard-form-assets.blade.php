@@ -753,6 +753,23 @@ document.addEventListener('DOMContentLoaded', function () {
                             clearFieldError(ageRangeSelect);
                         }
                     }
+
+                    const rateDecisionSelect = card.querySelector('[data-rate-decision]');
+                    const rateInput = card.querySelector('[data-rate-input]');
+                    if (rateDecisionSelect && rateInput) {
+                        if (rateDecisionSelect.value === 'admin_decide') {
+                            const numericRate = parseFloat(rateInput.value);
+                            if (rateInput.value === '' || Number.isNaN(numericRate) || numericRate < 0) {
+                                showFieldError(rateInput, 'Enter a valid rate for admin-decided models.');
+                                valid = false;
+                            } else {
+                                clearFieldError(rateInput);
+                            }
+                        } else {
+                            rateInput.value = 0;
+                            clearFieldError(rateInput);
+                        }
+                    }
                 });
             }
         }
@@ -911,6 +928,31 @@ const initModelCard = (scope) => {
         if (hidden && hidden.value) {
             setActive(hidden.value);
         }
+    });
+
+    scope.querySelectorAll('[data-rate-decision]').forEach(select => {
+        if (select.dataset.rateBound === 'true') return;
+        select.dataset.rateBound = 'true';
+
+        const card = select.closest('[data-model-card]');
+        const wrapper = card?.querySelector('[data-rate-input-wrapper]');
+        const input = card?.querySelector('[data-rate-input]');
+
+        const syncRateFields = () => {
+            if (!wrapper || !input) {
+                return;
+            }
+
+            if (select.value === 'admin_decide') {
+                wrapper.style.display = '';
+            } else {
+                wrapper.style.display = 'none';
+                input.value = 0;
+            }
+        };
+
+        select.addEventListener('change', syncRateFields);
+        syncRateFields();
     });
 
     scope.querySelectorAll('[data-file-drop]').forEach(drop => {
@@ -1093,7 +1135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const sourceCard = duplicateTrigger.closest('[data-model-card]');
         const newIndex = nextIndex;
         const card = createModelCard(newIndex);
-        const sourceInputs = sourceCard.querySelectorAll('select, input[type="text"], input[type="hidden"], input[type="file"]');
+        const sourceInputs = sourceCard.querySelectorAll('select, input[type="text"], input[type="hidden"], input[type="file"], input[type="number"]');
         sourceInputs.forEach((input) => {
             const name = input.getAttribute('name');
             if (!name) return;

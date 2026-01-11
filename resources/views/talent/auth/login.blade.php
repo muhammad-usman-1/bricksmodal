@@ -3,13 +3,13 @@
 @section('content')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Arimo:wght@400&display=swap" rel="stylesheet">
     <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 
     <style>
         body {
             background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
-            font-family: 'Arimo', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .auth-shell {
@@ -24,23 +24,23 @@
             width: 100%;
             max-width: 380px;
             background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
-            padding: 32px 28px 24px;
+            border-radius: 20px;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.08);
+            padding: 30px 26px 30px;
             text-align: center;
         }
 
         .logo {
             width: 150px;
-            margin: 0 auto 6px;
+            margin: 0 auto 5px;
         }
 
         .eyebrow {
             font-size: 11px;
-            letter-spacing: 0.28em;
+            letter-spacing: 0.35em;
             text-transform: uppercase;
-            color: #7b7b7b;
-            margin-bottom: 20px;
+            color: #a0a0a0;
+            margin-bottom: 10px;
         }
 
        h1 {
@@ -54,6 +54,7 @@
         }
 
         .lead {
+            font-family: 'Arimo', sans-serif;
             font-size: 13px;
             line-height: 1.6;
             color: #5a5a5a;
@@ -72,7 +73,7 @@
         .phone-wrapper {
             display: flex;
             gap: 8px;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
 
         .country-code-display {
@@ -81,8 +82,8 @@
             gap: 6px;
             height: 46px;
             padding: 0 12px;
-            border: 1px solid #e1e5eb;
-            border-radius: 10px;
+            border: 1px solid #e6e6e6;
+            border-radius: 14px;
             background: #f8f9fa;
             font-size: 14px;
             color: #1f1f1f;
@@ -119,8 +120,8 @@
             width: 100%;
             height: 46px;
             padding: 0 14px 0 46px;
-            border: 1px solid #e1e5eb;
-            border-radius: 10px;
+            border: 1px solid #e6e6e6;
+            border-radius: 14px;
             font-size: 14px;
             color: #1f1f1f;
             background: #ffffff;
@@ -136,23 +137,22 @@
             width: 100%;
             height: 46px;
             border: none;
-            border-radius: 10px;
+            border-radius: 14px;
             background: #111111;
             color: #ffffff;
             font-size: 14px;
             font-weight: 500;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 6px;
+            margin-bottom: 14px;
         }
 
-        .submit-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-        }
+        
         .alert {
             text-align: left;
         }
@@ -166,7 +166,7 @@
             width: 100%;
             color: #3f3f3f;
             font-size: 12px;
-            margin-top: 12px;
+           
             text-decoration: none;
         }
         .secondary-link span {

@@ -42,7 +42,7 @@ class CastingRequirementController extends Controller
         $project = CastingRequirement::where('status', '!=', 'completed')
             ->whereDate('shoot_date_time', now()->toDateString())
             ->orderBy('shoot_date_time', 'asc')
-            ->with(['user', 'media'])
+            ->with(['user', 'media', 'castingApplications.talent_profile'])
             ->first();
 
         $castingRequirements = CastingRequirement::with(['user', 'media'])->get();
@@ -80,11 +80,16 @@ class CastingRequirementController extends Controller
 
         foreach ($models as $index => $modelPayload) {
             $ageOption = CastingRequirementModel::AGE_RANGE_OPTIONS[$modelPayload['age_range_key']] ?? ['min' => null, 'max' => null];
+            $rateDecision = $modelPayload['rate_decision'] ?? 'talent_decide';
+            $rateValue = $rateDecision === 'admin_decide'
+                ? (isset($modelPayload['rate']) ? (float) $modelPayload['rate'] : null)
+                : 0;
 
             $model = $castingRequirement->modelRequirements()->create([
                 'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
                 'quantity' => $modelPayload['quantity'],
-                'rate' => null,
+                'rate' => $rateValue,
+                'rate_decision' => $rateDecision,
                 'model_hours' => $modelPayload['model_hours'] ?? null,
                 'gender' => $modelPayload['gender'] ?? null,
                 'hair_color' => $modelPayload['hair_color'] ?? null,
@@ -174,11 +179,16 @@ class CastingRequirementController extends Controller
 
         foreach ($models as $index => $modelPayload) {
             $ageOption = CastingRequirementModel::AGE_RANGE_OPTIONS[$modelPayload['age_range_key']] ?? ['min' => null, 'max' => null];
+            $rateDecision = $modelPayload['rate_decision'] ?? 'talent_decide';
+            $rateValue = $rateDecision === 'admin_decide'
+                ? (isset($modelPayload['rate']) ? (float) $modelPayload['rate'] : null)
+                : 0;
             
             $modelData = [
                 'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
                 'quantity' => $modelPayload['quantity'],
-                'rate' => null,
+                'rate' => $rateValue,
+                'rate_decision' => $rateDecision,
                 'model_hours' => $modelPayload['model_hours'] ?? null,
                 'gender' => $modelPayload['gender'] ?? null,
                 'hair_color' => $modelPayload['hair_color'] ?? null,
