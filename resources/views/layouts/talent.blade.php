@@ -92,6 +92,9 @@
                 border: none !important;
                 background: transparent !important;
             }
+            /* Sidebar toggle hidden by default; we show via JS when collapsed */
+            #sidebarCollapseBtn { display: none !important; }
+            #sidebarCollapseBtn.show-toggle { display: inline-flex !important; }
 
             .header-icon-link:first-child {
                 margin-left: 0 !important;
@@ -166,8 +169,8 @@
         <header class="c-header c-header-fixed admin-header" id="admin-main-header">
             <div id="admin-topbar-container">
                 <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
-                    <i class="fas fa-angle-right" style="font-size: 18px; color: #374151;"></i>
-            </button>
+                    <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
+                </button>
                 <div id="admin-search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
@@ -255,24 +258,25 @@
                     }
                 };
 
+                const syncToggleVisibility = () => {
+                    const collapsed = sidebar.classList.contains('collapsed');
+                    collapseBtn.classList.toggle('show-toggle', collapsed);
+                };
+
                 // Check localStorage for saved state
                 const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                 if (isCollapsed) {
                     sidebar.classList.add('collapsed');
                     adjustMainContent(true);
-                    // Set initial icon state
-                    if (collapseIcon) {
-                        collapseIcon.classList.remove('fa-angle-right');
-                        collapseIcon.classList.add('fa-bars');
-                    }
+                    syncToggleVisibility();
                 }
 
                 collapseBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    sidebar.classList.toggle('collapsed');
-                    const collapsed = sidebar.classList.contains('collapsed');
+                    sidebar.classList.remove('collapsed');
+                    const collapsed = false;
 
                     // Adjust main content
                     adjustMainContent(collapsed);
@@ -280,20 +284,28 @@
                     // Save state to localStorage
                     localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
 
-                    // Update icon
                     if (collapseIcon) {
-                        if (collapsed) {
-                            collapseIcon.classList.remove('fa-angle-right');
-                            collapseIcon.classList.add('fa-bars');
-                        } else {
-                            collapseIcon.classList.remove('fa-bars');
-                            collapseIcon.classList.add('fa-angle-right');
-                        }
+                        collapseIcon.classList.remove('fa-angle-right', 'fa-angle-left');
+                        collapseIcon.classList.add('fa-bars');
                     }
 
-                    // Update aria-label
                     collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
+                    syncToggleVisibility();
                 });
+
+                window.addEventListener('sidebar-collapsed', function(e) {
+                    const collapsed = !!(e.detail && e.detail.collapsed);
+                    if (collapsed) {
+                        sidebar.classList.add('collapsed');
+                        adjustMainContent(true);
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        adjustMainContent(false);
+                    }
+                    syncToggleVisibility();
+                });
+
+                syncToggleVisibility();
             })();
         </script>
 

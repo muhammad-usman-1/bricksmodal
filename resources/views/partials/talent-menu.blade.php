@@ -488,14 +488,14 @@ letter-spacing: 1.4px;">STUDIO</div>
         @if($talentUser)
             <div class="bm-footer" style="position: relative;">
                 <div class="bm-footer-card">
-                    <div class="bm-footer-user">
+                    <div class="bm-footer-user" id="bm-footer-user" style="cursor: pointer;">
                         <div class="bm-footer-avatar">{{ $initials }}</div>
                         <div class="bm-footer-meta">
                             <p class="bm-footer-name">{{ $name }}</p>
                             <p class="bm-footer-role">{{ ucfirst($roleLabel) }}</p>
                         </div>
                     </div>
-                    <button type="button" class="bm-footer-arrow" id="bm-footer-toggle">
+                    <button type="button" class="bm-footer-arrow" id="bm-sidebar-collapse">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
@@ -513,38 +513,52 @@ letter-spacing: 1.4px;">STUDIO</div>
 
 <script>
     (function() {
-        const toggle = document.getElementById('bm-footer-toggle');
-        const dropdown = document.getElementById('bm-footer-dropdown');
-        if (!toggle || !dropdown) return;
+        const collapseBtn = document.getElementById('bm-sidebar-collapse');
+        const sidebar = document.getElementById('sidebar');
+        const footerUser = document.getElementById('bm-footer-user');
+        const footerDropdown = document.getElementById('bm-footer-dropdown');
 
-        const close = () => {
-            dropdown.classList.remove('show');
-            toggle.style.transform = 'rotate(0deg)';
-        };
+        if (collapseBtn && sidebar) {
+            collapseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const wrapper = document.querySelector('.c-wrapper');
+                const collapsed = sidebar.classList.toggle('collapsed');
+                if (wrapper) {
+                    wrapper.style.marginLeft = collapsed ? '70px' : '';
+                }
+                localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+                window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed } }));
+            });
 
-        const open = () => {
-            dropdown.classList.add('show');
-            toggle.style.transform = 'rotate(180deg)';
-        };
-
-        toggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (dropdown.classList.contains('show')) {
-                close();
-            } else {
-                open();
+            // Restore collapsed state from localStorage
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                const wrapper = document.querySelector('.c-wrapper');
+                if (wrapper) wrapper.style.marginLeft = '70px';
+                window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: true } }));
             }
-        });
+        }
 
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
-                close();
-            }
-        });
+        if (footerUser && footerDropdown) {
+            const closeDropdown = () => footerDropdown.classList.remove('show');
+            const toggleDropdown = (e) => {
+                e.stopPropagation();
+                footerDropdown.classList.toggle('show');
+            };
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') close();
-        });
+            footerUser.addEventListener('click', toggleDropdown);
+
+            document.addEventListener('click', (e) => {
+                if (!footerDropdown.contains(e.target) && !footerUser.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeDropdown();
+            });
+        }
     })();
 
     function toggleBmDropdown(id) {

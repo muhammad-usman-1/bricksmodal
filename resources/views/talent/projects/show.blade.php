@@ -60,7 +60,7 @@
     }
 
     .project-show-container {
-         
+
         margin: 0 auto;
 
     }
@@ -398,7 +398,7 @@
         z-index: 10000;
         padding: 16px;
     }
-    
+
     .apply-modal-container {
         background: #fff;
         border-radius: 12px;
@@ -504,7 +504,7 @@
         color: #9ca3af;
         font-weight: 500;
     }
-    
+
     .summary-value {
         font-size: 13px;
         color: #111827;
@@ -594,7 +594,7 @@
         background: #111827;
         border-color: #111827;
     }
-    
+
     .checkbox-bg {
         width: 100%;
         height: 100%;
@@ -619,7 +619,7 @@
         font-weight: 600;
         line-height: 1.4;
     }
-    
+
     .checkbox-subtext {
         font-size: 12px;
         color: #6b7280;
@@ -640,7 +640,7 @@
         resize: vertical;
         margin-bottom: 8px;
     }
-    
+
     .char-count {
         text-align: right;
         font-size: 12px;
@@ -679,7 +679,7 @@
         align-items: center;
         gap: 6px;
     }
-    
+
     /* Active submit state */
     .btn-submit.active {
         background: #111827; /* Dark active color */
@@ -802,7 +802,7 @@
                     <p class="apply-subtitle">Submit your profile for review by the casting team.</p>
 
                     @if(isset($existingApplication) && $existingApplication)
-                        <button class="apply-btn" disabled>ALREADY APPLIED</button>
+                        <button class="apply-btn" disabled>APPLIED</button>
                     @else
                         <!-- Trigger Modal -->
                         <button type="button" class="apply-btn" id="openApplyModal">APPLY NOW ></button>
@@ -843,14 +843,14 @@
 
         <form method="POST" action="{{ route('talent.projects.apply', $castingRequirement) }}" id="applyForm">
             @csrf
-            
+
             <div class="modal-body">
                 <!-- Shoot Summary -->
                 <label class="section-label">Shoot Summary</label>
                 <div class="summary-card">
                     <div class="summary-project">{{ $castingRequirement->project_name }}</div>
                     <div class="summary-client">Client: {{ $castingRequirement->client_name ?? 'Client Name' }}</div>
-                    
+
                     <div class="summary-grid">
                         <div class="summary-item">
                             <div class="summary-icon-label"><i class="far fa-calendar"></i> Date</div>
@@ -868,11 +868,11 @@
                 </div>
 
                 <!-- Rate Input -->
-                <div class="input-group">
-                    <label class="section-label">Enter Your Shoot Rate</label>
-                    <div class="rate-input-wrapper">
-                        <input type="number" name="rate" class="rate-input" placeholder="Enter your rate" step="0.01" required>
-                        <span class="currency-symbol">$</span>
+                <div class="input-group" style="align-items: flex-start;">
+                    <label class="section-label" style="margin-top: 10px;">Enter Your Shoot Rate (KWD)</label>
+                    <div class="rate-input-wrapper" style="align-items: center;">
+                        <input type="number" name="rate" class="rate-input" placeholder="Enter your rate (KWD)" step="0.01" required>
+
                     </div>
                 </div>
 
@@ -972,7 +972,7 @@
             e.preventDefault();
             openModal();
         });
-        
+
         if(closeBtn) closeBtn.addEventListener('click', closeModal);
         if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
@@ -982,14 +982,14 @@
                 if(e.target === modal) closeModal();
             });
         }
-        
+
         // Character Counter
         if(messageBox && charCount) {
             messageBox.addEventListener('input', function() {
                 charCount.textContent = this.value.length;
             });
         }
-        
+
         // Close on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && modal && modal.style.display === 'flex') {

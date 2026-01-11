@@ -33,7 +33,7 @@
 
 <style>
     .dashboard-header {
-        background: #111827;
+        background: black;
         border-radius: 12px;
         padding: 32px 40px;
         margin-bottom: 32px;
@@ -175,7 +175,7 @@
     }
 
     .section-title {
-        color: #111827;
+        color: black;
         font-size: 20px;
         font-weight: 700;
         margin: 0;
@@ -257,7 +257,7 @@
 
     .casting-call-button {
         width: 100%;
-        background: #111827;
+        background: black;
         color: #fff;
         border: none;
         padding: 12px 20px;
@@ -379,7 +379,7 @@
                             <span>{{ $location }}</span>
                         </div>
                     </div>
-                    <a href="{{ route('talent.projects.show', $project) }}" class="casting-call-button">View Details</a>
+                    <a href="{{ route('talent.projects.show', ['castingRequirement' => $project->id]) }}" class="casting-call-button">View Details</a>
                 </div>
             @empty
                 <div class="casting-call-card">
