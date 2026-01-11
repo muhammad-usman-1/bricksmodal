@@ -10,8 +10,8 @@
             @method('PUT')
             @csrf
             <div class="form-group">
-                <label class="required" for="legal_name">{{ trans('cruds.talentProfile.fields.legal_name') }}</label>
-                <input class="form-control {{ $errors->has('legal_name') ? 'is-invalid' : '' }}" type="text" name="legal_name" id="legal_name" value="{{ old('legal_name', $talentProfile->legal_name) }}" required>
+                <label for="legal_name">{{ trans('cruds.talentProfile.fields.legal_name') }}</label>
+                <input class="form-control {{ $errors->has('legal_name') ? 'is-invalid' : '' }}" type="text" name="legal_name" id="legal_name" value="{{ old('legal_name', $talentProfile->legal_name) }}">
                 @if($errors->has('legal_name'))
                     <div class="invalid-feedback">
                         {{ $errors->first('legal_name') }}

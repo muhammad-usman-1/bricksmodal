@@ -20,7 +20,7 @@ class StoreTalentProfileRequest extends FormRequest
             'legal_name' => [
                 'string',
                 'max:100',
-                'required',
+                'nullable',
             ],
             'display_name' => [
                 'string',

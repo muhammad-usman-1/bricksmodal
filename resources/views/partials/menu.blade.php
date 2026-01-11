@@ -657,7 +657,7 @@ letter-spacing: 1.4px;">STUDIO</div>
             @endphp
             <div class="bm-footer" style="position: relative;">
                 <div class="bm-footer-card">
-                    <div class="bm-footer-user" style="cursor: pointer;" onclick="window.location.href='{{ route('admin.profile.show') }}'">
+                    <div class="bm-footer-user" style="cursor: pointer;" id="bm-footer-user">
                         <div class="bm-footer-avatar">{{ $initials }}</div>
                         <div class="bm-footer-meta">
                             <p class="bm-footer-name">{{ $name }}</p>
@@ -669,7 +669,23 @@ letter-spacing: 1.4px;">STUDIO</div>
                     </button>
                 </div>
 
-
+                <div class="bm-footer-dropdown" id="bm-footer-dropdown">
+                    <a href="{{ route('admin.settings.index') }}">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <a href="{{ route('admin.profile.show') }}">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                    <a href="{{ route('profile.password.edit') }}">
+                        <i class="fas fa-shield-alt"></i> Privacy Setup
+                    </a>
+                    <form method="POST" action="{{ route('admin.logout') }}" style="margin:0;">
+                        @csrf
+                        <button type="submit">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         @endif
     </div>
@@ -680,6 +696,8 @@ letter-spacing: 1.4px;">STUDIO</div>
     (function() {
         const collapseBtn = document.getElementById('bm-sidebar-collapse');
         const sidebar = document.getElementById('sidebar');
+        const footerUser = document.getElementById('bm-footer-user');
+        const footerDropdown = document.getElementById('bm-footer-dropdown');
         if (!collapseBtn || !sidebar) return;
 
         collapseBtn.addEventListener('click', (e) => {
@@ -698,6 +716,19 @@ letter-spacing: 1.4px;">STUDIO</div>
             // Notify header to update button visibility
             window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: true } }));
         });
+
+        if (footerUser && footerDropdown) {
+            footerUser.addEventListener('click', function(e) {
+                e.stopPropagation();
+                footerDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!footerDropdown.contains(e.target) && !footerUser.contains(e.target)) {
+                    footerDropdown.classList.remove('show');
+                }
+            });
+        }
     })();
 
     function toggleBmDropdown(id) {
