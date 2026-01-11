@@ -294,12 +294,28 @@
         }
 
         $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+        $awsUrl = rtrim((string) env('AWS_URL'), '/');
+        $disk = config('filesystems.default', 'public');
+        $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+
+        // If absolute and matches AWS_URL, try to generate a signed URL for private buckets
+        if ($isAbsolute && $awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+            $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
+            try {
+                return $storage->temporaryUrl($relative, now()->addMinutes(60));
+            } catch (\Exception $e) {
+                try {
+                    return $storage->url($relative);
+                } catch (\Exception $e2) {
+                    return $path; // fallback to given URL
+                }
+            }
+        }
+
         if ($isAbsolute) {
             return $path;
         }
 
-        $disk = config('filesystems.default', 'public');
-        $storage = \Illuminate\Support\Facades\Storage::disk($disk);
         $cleanPath = ltrim($path, '/');
 
         // Prefer CDN/AWS_URL mapping; url() respects AWS_URL when configured.

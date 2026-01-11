@@ -14,8 +14,6 @@
 
     /* Main Container */
     .dashboard-container {
-        
-        max-width: 1200px;
         margin: 0 auto;
     }
 
@@ -246,6 +244,49 @@
         color: var(--text-sub);
         margin: 0;
     }
+    .sh-filter-group {
+        position: relative;
+    }
+    .sh-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fff;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .sh-filter-menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        min-width: 180px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 12px 28px rgba(15,23,42,0.12);
+        padding: 6px 0;
+        display: none;
+        z-index: 30;
+    }
+    .sh-filter-menu.show { display: block; }
+    .sh-filter-menu button {
+        width: 100%;
+        background: transparent;
+        border: none;
+        text-align: left;
+        padding: 9px 14px;
+        font-size: 13px;
+        color: #0f172a;
+        cursor: pointer;
+    }
+    .sh-filter-menu button:hover {
+        background: #f8fafc;
+    }
 
     /* Talent Grid - matching talents.blade.php */
     .sh-talent-grid {
@@ -253,6 +294,8 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 16px;
+        align-items: stretch;
+        justify-items: stretch;
     }
     .sh-talent-card {
         position: relative;
@@ -428,10 +471,10 @@
         $rawDate = $project->getRawOriginal('shoot_date_time');
         $durationRaw = $project->duration ?? '';
         $duration = preg_replace('/[^0-9]/', '', $durationRaw);
-        
+
         $dateDisplay = '-';
         $timeDisplay = '-';
-        
+
         if ($rawDate) {
             try {
                 $carbonDate = \Carbon\Carbon::parse($rawDate);
@@ -444,9 +487,9 @@
             }
         }
         $status = $project->status ?? 'open';
-        
+
         $steps = ['Advertised', 'Shortlisted', 'Selected', 'Completed'];
-        $currentStepIndex = 1; 
+        $currentStepIndex = 1;
         if($status == 'completed') $currentStepIndex = 3;
         if($status == 'advertised') $currentStepIndex = 0;
     }
@@ -460,7 +503,7 @@
                 <div class="sh-badge">Shoot Listed</div>
                 <h1 class="sh-title">{{ $title }}</h1>
                 <div class="sh-client">Client: {{ $client }}</div>
-                
+
                 <div class="sh-meta-row">
                     <!-- Date -->
                     <div class="sh-meta-item">
@@ -470,7 +513,7 @@
                             <div>{{ $dateDisplay }}</div>
                         </div>
                     </div>
-                    
+
                     <!-- Time -->
                     <div class="sh-meta-item">
                         <div class="sh-meta-icon"><i class="far fa-clock"></i></div>
@@ -489,7 +532,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="sh-actions">
                     <a href="#" class="nav-btn primary">Invite Talents</a>
                     <a href="{{ route('admin.casting-requirements.edit', $project->id) }}" class="nav-btn secondary">Edit Shoot</a>
@@ -498,14 +541,14 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="sh-map-container">
                 @if($location && $location != 'Not Set' && $location != 'Location Pending')
-                <iframe 
-                    width="100%" 
-                    height="100%" 
-                    frameborder="0" 
-                    style="border:0;" 
+                <iframe
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    style="border:0;"
                     src="https://maps.google.com/maps?q={{ urlencode($location) }}&t=&z=13&ie=UTF8&iwloc=&output=embed"
                     allowfullscreen>
                 </iframe>
@@ -530,17 +573,17 @@
                         $isActive = $index == $currentStepIndex;
                         $isLast = $index == count($steps) - 1;
                     @endphp
-                    
+
                     <div class="sh-step {{ $isCompleted ? 'completed' : '' }} {{ $isActive ? 'active' : '' }}">
                         <div class="sh-step-circle">
-                            @if($isCompleted) <i class="fas fa-check"></i> 
+                            @if($isCompleted) <i class="fas fa-check"></i>
                             @elseif($isActive) <i class="fas fa-check"></i>
                             @else {{ $index + 1 }}
                             @endif
                         </div>
                         <div class="sh-step-label">{{ $step }}</div>
                     </div>
-                    
+
                     @if(!$isLast)
                         <div class="sh-line {{ $index < $currentStepIndex ? 'filled' : '' }}"></div>
                     @endif
@@ -553,6 +596,19 @@
             <div class="sh-pool-title">
                 <h3>Talent Pool</h3>
                 <p>View and manage applicants for this shoot.</p>
+            </div>
+            <div class="sh-filter-group">
+                <button type="button" class="sh-filter-btn" id="sh-filter-toggle">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <div class="sh-filter-menu" id="sh-filter-menu">
+                    <button data-filter="all">All</button>
+                    <button data-filter="applied">Applied</button>
+                    <button data-filter="shortlisted">Shortlisted</button>
+                    <button data-filter="selected">Selected</button>
+                    <button data-filter="rejected">Rejected</button>
+                    <button data-filter="did_not_show">Didn't Show</button>
+                </div>
             </div>
         </div>
 
@@ -575,7 +631,7 @@
                     @php
                         $talent = $application->talent_profile;
                         if (!$talent) continue;
-                        
+
                         $displayName = $talent->display_name ?? $talent->legal_name ?? 'Unknown';
                         $gender = strtoupper($talent->gender ?? 'N/A');
                         $dob = optional($talent->date_of_birth);
@@ -584,7 +640,7 @@
                         $joinedAt = optional($talent->created_at)->format('d M Y') ?? '--';
                         $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
                         $isVerified = strtolower($talent->verification_status ?? 'pending') === 'approved';
-                        
+
                         $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
                         if (is_array($avatarCandidate)) {
                             $avatarCandidate = $avatarCandidate['url'] ?? ($avatarCandidate['path'] ?? ($avatarCandidate[0] ?? null));
@@ -662,7 +718,7 @@
                             $allImages = [$avatar];
                         }
                     @endphp
-                    <div class="sh-talent-card" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
+                    <div class="sh-talent-card" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)' data-status="{{ strtolower($application->status ?? 'applied') }}">
                         <div class="sh-talent-img-container">
                             @foreach($allImages as $index => $imgSrc)
                                 <img class="sh-talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
@@ -709,15 +765,45 @@
 @parent
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const filterToggle = document.getElementById('sh-filter-toggle');
+    const filterMenu = document.getElementById('sh-filter-menu');
+    const cards = Array.from(document.querySelectorAll('.sh-talent-card'));
+
+    if (filterToggle && filterMenu) {
+        filterToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            filterMenu.classList.toggle('show');
+        });
+
+        filterMenu.querySelectorAll('button[data-filter]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const value = this.dataset.filter;
+                filterMenu.classList.remove('show');
+
+                cards.forEach(card => {
+                    const status = (card.dataset.status || '').toLowerCase();
+                    const match = value === 'all' || status === value;
+                    card.style.display = match ? '' : 'none';
+                });
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!filterMenu.contains(e.target) && !filterToggle.contains(e.target)) {
+                filterMenu.classList.remove('show');
+            }
+        });
+    }
+
     const shareBtn = document.getElementById('shareBtn');
-    
+
     if (shareBtn) {
         shareBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             const url = this.getAttribute('data-url');
             const fullUrl = window.location.origin + url;
-            
+
             // Try to use the modern Clipboard API
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(fullUrl).then(function() {
@@ -738,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     function fallbackCopyToClipboard(text) {
         const textArea = document.createElement('textarea');
         textArea.value = text;
@@ -746,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
         textArea.style.left = '-999999px';
         document.body.appendChild(textArea);
         textArea.select();
-        
+
         try {
             document.execCommand('copy');
             Swal.fire({
@@ -769,8 +855,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Talent card functionality
-    const cards = Array.from(document.querySelectorAll('.sh-talent-card'));
-
     // Make cards clickable
     cards.forEach(card => {
         card.addEventListener('click', function(e) {

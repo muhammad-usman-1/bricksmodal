@@ -325,7 +325,7 @@
                                     @enderror
                                 </div>
                                 <div class="field-block" data-rate-input-wrapper style="{{ $rateDecision === 'admin_decide' ? '' : 'display:none;' }}">
-                                    <label class="required">Rate Amount</label>
+                                    <label class="required">Rate Amount (KWD)</label>
                                     <input
                                         class="pill-input @error('models.' . $index . '.rate') is-invalid @enderror"
                                         type="number"
@@ -333,7 +333,7 @@
                                         min="0"
                                         name="models[{{ $index }}][rate]"
                                         value="{{ $model['rate'] ?? '' }}"
-                                        placeholder="Enter rate"
+                                        placeholder="Enter rate (KWD)"
                                         data-rate-input
                                     >
                                     @error('models.' . $index . '.rate')
@@ -562,7 +562,7 @@
                             </select>
                         </div>
                         <div class="field-block" data-rate-input-wrapper>
-                            <label class="required">Rate Amount</label>
+                            <label class="required">Rate Amount (KWD)</label>
                             <input
                                 class="pill-input"
                                 type="number"
@@ -570,7 +570,7 @@
                                 min="0"
                                 name="models[__INDEX__][rate]"
                                 value="0"
-                                placeholder="Enter rate"
+                                placeholder="Enter rate (KWD)"
                                 data-rate-input
                             >
                         </div>
