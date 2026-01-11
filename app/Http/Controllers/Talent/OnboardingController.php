@@ -141,7 +141,7 @@ class OnboardingController extends Controller
              } else {
                  Log::info('PHP $_FILES["video"] is not set.');
              }
-             
+
              // Check if request has the file via Laravel
              if ($request->hasFile('video')) {
                  $f = $request->file('video');
@@ -181,8 +181,8 @@ class OnboardingController extends Controller
                 $fullName = trim($data['first_name'] . ' ' . $data['last_name']);
                 $request->user('talent')->update(['name' => $fullName]);
 
-                $whatsappNumber = ($data['whatsapp_choice'] === 'same') 
-                    ? $data['mobile_number'] 
+                $whatsappNumber = ($data['whatsapp_choice'] === 'same')
+                    ? $data['mobile_number']
                     : ($data['whatsapp_number'] ?? $data['mobile_number']);
 
                 $profile->update([
@@ -335,8 +335,9 @@ class OnboardingController extends Controller
 
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
-        $path = $file->store("talent/{$profile->id}/{$folder}", 'public');
-        return Storage::url($path);
+        $disk = config('filesystems.default', 'public');
+        $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
+        return Storage::disk($disk)->url($path);
     }
 
     private function currentStep(TalentProfile $profile): string

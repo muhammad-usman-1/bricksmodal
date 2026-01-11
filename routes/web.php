@@ -29,6 +29,11 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/talent/login');
 Route::view('/welcome', 'landing')->name('landing');
 
+Route::get('/test-s3', function () {
+    \Storage::disk('s3')->put('test/ok.txt', 'It works!');
+    return 'S3 connected';
+});
+
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('login');

@@ -288,6 +288,14 @@
         'id_back_path'  => 'ID Back',
     ];
 
+    $resolveUrl = function ($path) {
+        if (! $path) {
+            return null;
+        }
+        $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+        return $isAbsolute ? $path : \Illuminate\Support\Facades\Storage::url($path);
+    };
+
     // Field configurations for easy rendering
     $profileFields = [
         ['label' => 'First name', 'name' => 'first_name', 'value' => $talentProfile->first_name, 'type' => 'text'],
@@ -395,7 +403,7 @@
             <div class="section-title">Headshots</div>
             <div class="upload-grid">
                 @foreach($headshots as $field => $label)
-                    @php $img = $talentProfile->{$field} ?: null; @endphp
+                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
                     <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
@@ -423,7 +431,7 @@
             <div class="section-title">Full-Body Shots</div>
             <div class="upload-grid">
                 @foreach($fullBody as $field => $label)
-                    @php $img = $talentProfile->{$field} ?: null; @endphp
+                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
                     <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
@@ -451,7 +459,7 @@
             <div class="section-title">ID Documents</div>
             <div class="upload-grid">
                 @foreach($idDocs as $field => $label)
-                    @php $img = $talentProfile->{$field} ?: null; @endphp
+                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
                     <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
                             <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
