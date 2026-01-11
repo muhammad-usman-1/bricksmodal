@@ -16,13 +16,20 @@
 
     body { background: var(--bg); }
 
-    .talents-shell { padding: 8px 0 22px; }
+    .talents-shell { padding: 8px 0 22px; position: relative; }
+    .talents-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0 12px;
+    }
     .talents-head h5 { color: #101828;
 font-size: 24px;
 font-style: normal;
 font-weight: 400;
 line-height: 36px; /* 150% */}
-    .talents-head .meta { margin: 4px 0 16px; color: var(--ink-500); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .talents-head .meta { margin: 4px 0; color: var(--ink-500); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .search-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
     .search-input { min-width: 240px; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--ink-700); background: #fff; }
     .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
@@ -129,19 +136,7 @@ line-height: 36px; /* 150% */}
         .card-overlay { height: 110px; }
     }
 
-    .talents-footer {
-        position: sticky;
-        bottom: 20px;
-        margin-top: 20px;
-        display: flex;
-        justify-content: flex-end;
-        padding: 0;
-        z-index: 100;
-        pointer-events: none; /* Allow clicks to pass through the transparent container */
-    }
-
     .add-talent-btn {
-        pointer-events: auto; /* Enable clicks on the button itself */
         background: #0f172a;
         color: #fff;
         border: none;
@@ -155,6 +150,13 @@ line-height: 36px; /* 150% */}
         box-shadow: 0 10px 20px rgba(15,23,42,0.15);
         text-decoration: none;
         transition: all 0.2s ease;
+    }
+
+    .add-talent-btn.floating {
+        position: fixed;
+        top: 72px;
+        right: 24px;
+        z-index: 40;
     }
 
     .add-talent-btn:hover {
@@ -173,15 +175,34 @@ line-height: 36px; /* 150% */}
     $activeCount = $stats['approved'] ?? ($talents->where('verification_status', 'approved')->count());
     $totalTalents = $stats['total'] ?? $talents->count();
     $fallbackImg = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="360"><rect width="300" height="360" rx="18" fill="#e5e7eb"/><path d="M150 170c28 0 50-22 50-50s-22-50-50-50-50 22-50 50 22 50 50 50Zm0 20c-42 0-80 19-92 56-2 6 2 12 8 12h168c6 0 10-6 8-12-12-37-50-56-92-56Z" fill="#cbd5e1"/></svg>');
+    $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+    $toUrl = function($path) use ($storageDisk) {
+        if (!$path) return null;
+        if (is_array($path)) {
+            $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+        }
+        if (!$path) return null;
+        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
+            return $path;
+        }
+        $clean = ltrim($path, '/');
+        try {
+            return $storageDisk->url($clean);
+        } catch (\Exception $e) {
+            return asset('storage/' . $clean);
+        }
+    };
 @endphp
 
 <div class="talents-shell">
     <div class="talents-head">
-        <h5>Talents</h5>
-        <div class="meta">
-            <strong>{{ $activeCount }} active talents</strong>
-            <span>•</span>
-            <span>Manage and verify profiles</span>
+        <div>
+            <h5>Talents</h5>
+            <div class="meta">
+                <strong>{{ $activeCount }} active talents</strong>
+                <span>•</span>
+                <span>Manage and verify profiles</span>
+            </div>
         </div>
     </div>
 
@@ -213,51 +234,14 @@ line-height: 36px; /* 150% */}
                     $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
                     $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/w40/' . strtolower($flagCode) . '.png' : null;
                     $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
-                    if (is_array($avatarCandidate)) {
-                        $avatarCandidate = $avatarCandidate['url'] ?? ($avatarCandidate['path'] ?? ($avatarCandidate[0] ?? null));
-                    }
-                    $avatar = null;
-                    if ($avatarCandidate) {
-                        if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
-                            $avatar = $avatarCandidate;
-                        } else {
-                            $normalized = ltrim($avatarCandidate, '/');
-                            $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/') ? substr($normalized, 8) : $normalized;
-                            if (file_exists(public_path('storage/' . $storageRelative))) {
-                                $avatar = asset('storage/' . $storageRelative);
-                            } elseif (file_exists(public_path($normalized))) {
-                                $avatar = asset($normalized);
-                            } else {
-                                $avatar = asset('storage/' . $storageRelative);
-                            }
-                        }
-                    }
-                    $avatar = $avatar ?: $fallbackImg;
+                    $avatar = $toUrl($avatarCandidate) ?: $fallbackImg;
 
                     // Collect all images for hover effect
                     $headshotImages = [];
                     $fullBodyImages = [];
 
                     // Helper function to normalize image path
-                    $normalizeImage = function($path) {
-                        if (!$path) return null;
-                        if (is_array($path)) {
-                            $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
-                        }
-                        if (!$path) return null;
-                        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
-                            return $path;
-                        }
-                        $normalized = ltrim($path, '/');
-                        $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/') ? substr($normalized, 8) : $normalized;
-                        if (file_exists(public_path('storage/' . $storageRelative))) {
-                            return asset('storage/' . $storageRelative);
-                        } elseif (file_exists(public_path($normalized))) {
-                            return asset($normalized);
-                        } else {
-                            return asset('storage/' . $storageRelative);
-                        }
-                    };
+                    $normalizeImage = $toUrl;
 
                     // Collect headshot images
                     if ($talent->headshot_left_path) {
@@ -339,14 +323,11 @@ line-height: 36px; /* 150% */}
             @endforeach
         </div>
     @endif
-
-    <div class="talents-footer">
-        <a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn">
-            <i class="fas fa-plus"></i>
-            Add Talent
-        </a>
-    </div>
 </div>
+
+<a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn floating">
+    <i class="fas fa-plus"></i> Add Talent
+</a>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

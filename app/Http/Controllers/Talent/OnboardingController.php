@@ -336,8 +336,8 @@ class OnboardingController extends Controller
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
         $disk = config('filesystems.default', 'public');
-        $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
-        return Storage::disk($disk)->url($path);
+        // Store and return the relative path so we can build URLs consistently
+        return $file->store("talent/{$profile->id}/{$folder}", $disk);
     }
 
     private function currentStep(TalentProfile $profile): string
