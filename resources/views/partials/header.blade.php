@@ -57,6 +57,14 @@
         margin-left: 20px !important;
     }
 
+    body:not(.sidebar-collapsed) #sidebarCollapseBtn {
+        display: none !important;
+    }
+
+    body.sidebar-collapsed #sidebarCollapseBtn {
+        display: inline-flex !important;
+    }
+
     .header-icon-link {
         margin-left: 18px !important;
         display: inline-flex !important;
@@ -252,6 +260,11 @@
 
         const syncFromState = () => {
             const collapsed = sidebar.classList.contains('collapsed');
+            if (collapsed) {
+                document.body.classList.add('sidebar-collapsed');
+            } else {
+                document.body.classList.remove('sidebar-collapsed');
+            }
             updateButtonVisibility(collapsed);
             adjustMainContent(collapsed);
         };
