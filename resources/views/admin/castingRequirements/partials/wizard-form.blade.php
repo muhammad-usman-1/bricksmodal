@@ -24,7 +24,7 @@
         'title' => '',
         'quantity' => 1,
         'rate' => 0,
-        'rate_decision' => 'talent_decide',
+        'rate_decision' => 'admin_decide',
         'gender' => 'male',
         'age_range_key' => array_key_first($ageRanges),
         'hair_color' => '',
@@ -311,7 +311,7 @@
                                 </div>
                             </div>
                             @php
-                                $rateDecision = $model['rate_decision'] ?? (($model['rate'] ?? 0) > 0 ? 'admin_decide' : 'talent_decide');
+                                $rateDecision = $model['rate_decision'] ?? 'admin_decide';
                             @endphp
                             <div class="grid grid-2 condensed">
                                 <div class="field-block">
@@ -557,11 +557,11 @@
                         <div class="field-block">
                             <label class="required">Rate?</label>
                             <select name="models[__INDEX__][rate_decision]" class="pill-select" data-rate-decision required>
-                                <option value="talent_decide" selected>Talent Decide</option>
-                                <option value="admin_decide">Admin Decide</option>
+                                <option value="talent_decide">Talent Decide</option>
+                                <option value="admin_decide" selected>Admin Decide</option>
                             </select>
                         </div>
-                        <div class="field-block" data-rate-input-wrapper style="display: none;">
+                        <div class="field-block" data-rate-input-wrapper>
                             <label class="required">Rate Amount</label>
                             <input
                                 class="pill-input"
