@@ -104,13 +104,13 @@
         transition: all 0.2s;
     }
     .nav-btn.primary {
-        background: #0f172a;
+        background: #000;
         color: #fff;
-        border: 1px solid #0f172a;
+        border: 1px solid #000;
     }
     .nav-btn.secondary {
         background: #fff;
-        color: #0f172a;
+        color: black;
         border: 1px solid #e2e8f0;
     }
     .nav-btn:hover { opacity: 0.9; text-decoration: none; }
@@ -135,7 +135,7 @@
         position: absolute;
         bottom: 16px;
         right: 16px;
-        background: #1e1e1e;
+        background: black;
         color: #fff;
         padding: 10px 20px;
         border-radius: 12px;
@@ -161,7 +161,7 @@
     .sh-progress-card {
         background: var(--card-bg);
         border-radius: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
         padding: 24px 32px;
         margin-bottom: 32px;
     }
@@ -200,22 +200,22 @@
         transition: all 0.3s;
     }
     .sh-step.completed .sh-step-circle {
-        background: #0f172a;
+        background: #000;
         color: #fff;
     }
     .sh-step.active .sh-step-circle {
-        background: #0f172a;
+        background: #000;
         color: #fff;
         box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
     }
     .sh-step-label {
         font-size: 13px;
         font-weight: 600;
-        color: #94a3b8;
+        color: black;
     }
     .sh-step.completed .sh-step-label,
     .sh-step.active .sh-step-label {
-        color: #0f172a;
+
     }
     .sh-line {
         flex: 1;
@@ -224,7 +224,7 @@
         margin: 0 16px;
         margin-bottom: 24px; /* Align with circle center roughly */
     }
-    .sh-line.filled { background: #0f172a; }
+    .sh-line.filled {  background: #000; }
 
     /* Talent Pool Section */
     .sh-pool-header {
@@ -255,7 +255,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         background: #fff;
-        color: #0f172a;
+        color: black;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -281,7 +281,7 @@
         text-align: left;
         padding: 9px 14px;
         font-size: 13px;
-        color: #0f172a;
+        color:  black;
         cursor: pointer;
     }
     .sh-filter-menu button:hover {

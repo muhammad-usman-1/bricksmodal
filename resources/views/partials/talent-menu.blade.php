@@ -24,6 +24,31 @@
             letter-spacing: 0;
             text-align: center;
         }
+
+        /* Don't override icon fonts (Font Awesome) with text font */
+        .bm-sidebar i.fas,
+        .bm-sidebar i.far,
+        .bm-sidebar i.fab,
+        .bm-sidebar i.fa,
+        .bm-sidebar i.fal,
+        .bm-sidebar i.fad {
+            font-family: inherit;
+        }
+        .bm-sidebar i.fas,
+        .bm-sidebar i.fa,
+        .bm-sidebar i.fal,
+        .bm-sidebar i.fad {
+            font-family: "Font Awesome 5 Free" !important;
+            font-weight: 900;
+        }
+        .bm-sidebar i.far {
+            font-family: "Font Awesome 5 Free" !important;
+            font-weight: 400;
+        }
+        .bm-sidebar i.fab {
+            font-family: "Font Awesome 5 Brands" !important;
+            font-weight: 400;
+        }
         .bm-brand {
             display: flex;
             flex-direction: column;

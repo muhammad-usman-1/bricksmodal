@@ -659,7 +659,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 model_hours: 'Hours needed',
                 rate_decision: 'Rate',
                 rate: 'Rate amount',
-                hair_color: 'Others',
                 height_range: 'Height range',
                 weight_range: 'Weight range',
                 skin_color: 'Skin color',

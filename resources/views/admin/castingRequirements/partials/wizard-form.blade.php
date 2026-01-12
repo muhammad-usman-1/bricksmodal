@@ -246,10 +246,10 @@
                                         name="duration"
                                         id="duration"
                                         value="{{ $durationValue }}"
-                                        placeholder="2"
+                                        placeholder="0"
                                         min="0"
                                         step="1"
-                                        style="text-align: center; color: #9aa0ac;"
+                                        style="text-align: center; color: #868c99;"
                                     >
                                 </div>
                                 <div class="dark-input" style="width: auto; border: none; background: transparent; padding-left: 0; box-shadow: none;">
@@ -350,7 +350,7 @@
                                             required
                                             style="width: 80px; text-align: center;"
                                         >
-                                        <span style="color: #4b5563; font-weight: 500;">Hours</span>
+                                        <span style="color: #4b5563; font-weight: 500;">hours</span>
                                     </div>
                                     @error('models.' . $index . '.model_hours')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
@@ -414,14 +414,6 @@
                                         <option value="71+" {{ ($model['weight_range'] ?? '') === '71+' ? 'selected' : '' }}>71+ kg</option>
                                     </select>
                                     @error('models.' . $index . '.weight_range')
-                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="field-block">
-                                    <label class="required">Others</label>
-                                    <input type="text" name="models[{{ $index }}][hair_color]" class="pill-input @error('models.' . $index . '.hair_color') is-invalid @enderror" placeholder="other details" value="{{ $model['hair_color'] ?? '' }}" required>
-                                    @error('models.' . $index . '.hair_color')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
@@ -672,10 +664,6 @@
                                 <option value="61-70">61 - 70 kg</option>
                                 <option value="71+">71+ kg</option>
                             </select>
-                        </div>
-                        <div class="field-block">
-                            <label class="required">Others</label>
-                            <input type="text" name="models[__INDEX__][hair_color]" class="pill-input" placeholder="other details" required>
                         </div>
                     </div>
 

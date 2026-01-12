@@ -167,10 +167,10 @@
 
         <header class="c-header c-header-fixed admin-header" id="admin-main-header">
             <div id="admin-topbar-container">
-                <div id="admin-search-box">
+                <form id="admin-search-box" action="{{ route('talent.projects.index') }}" method="GET" role="search">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
-                </div>
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search shoots or locations..." aria-label="Search" />
+                </form>
                 <div id="admin-icons-group">
                     <a class="header-icon-link" href="#" aria-label="Add New" style="margin-left: 18px !important;">
                         <img src="{{ asset('images/plus.png') }}" alt="Add">

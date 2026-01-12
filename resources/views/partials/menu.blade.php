@@ -1,4 +1,4 @@
-<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show" style="background:#f9fafb; border-right:1px solid #edf0f3; box-shadow: 6px 0 18px rgba(15,23,42,0.05); transition: background 0.3s ease, border-color 0.3s ease;">
+<div id="sidebar" class="c-sidebar c-sidebar-fixed c-sidebar-lg-show" style="background:white; border-right:1px solid #edf0f3;">
 
     <style>
         .bm-sidebar {
@@ -23,6 +23,31 @@
             line-height: 24px;
             letter-spacing: 0;
             text-align: center;
+        }
+
+        /* Don't override icon fonts (Font Awesome) with text font */
+        .bm-sidebar i.fas,
+        .bm-sidebar i.far,
+        .bm-sidebar i.fab,
+        .bm-sidebar i.fa,
+        .bm-sidebar i.fal,
+        .bm-sidebar i.fad {
+            font-family: inherit;
+        }
+        .bm-sidebar i.fas,
+        .bm-sidebar i.fa,
+        .bm-sidebar i.fal,
+        .bm-sidebar i.fad {
+            font-family: "Font Awesome 5 Free" !important;
+            font-weight: 900;
+        }
+        .bm-sidebar i.far {
+            font-family: "Font Awesome 5 Free" !important;
+            font-weight: 400;
+        }
+        .bm-sidebar i.fab {
+            font-family: "Font Awesome 5 Brands" !important;
+            font-weight: 400;
         }
         .bm-brand {
             display: flex;

@@ -122,7 +122,8 @@ class AdminManagementController extends Controller
             abort(404);
         }
 
-        if ($user->isSuperAdmin()) {
+        // Protect super admins (accept either boolean flag or role-based check)
+        if (($user->is_super_admin ?? false) || $user->isSuperAdmin()) {
             return redirect()->route('admin.admin-management.index')
                 ->with('error', 'Cannot edit super admin.');
         }
@@ -135,7 +136,7 @@ class AdminManagementController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if ($user->type !== User::TYPE_ADMIN || $user->isSuperAdmin()) {
+        if ($user->type !== User::TYPE_ADMIN || ($user->is_super_admin ?? false) || $user->isSuperAdmin()) {
             abort(403);
         }
 
@@ -164,7 +165,7 @@ class AdminManagementController extends Controller
 
     public function destroy(User $user)
     {
-        if ($user->type !== User::TYPE_ADMIN || $user->isSuperAdmin()) {
+        if ($user->type !== User::TYPE_ADMIN || ($user->is_super_admin ?? false) || $user->isSuperAdmin()) {
             abort(403);
         }
 

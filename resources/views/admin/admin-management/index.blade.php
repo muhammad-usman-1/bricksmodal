@@ -20,6 +20,7 @@
     .admin-shell { padding: 8px 0 18px; }
     .admin-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
     .admin-title { color: #101828;
+           font-family: 'Arimo', sans-serif;
 font-size: 24px;
 font-style: normal;
 font-weight: 400;
@@ -31,8 +32,8 @@ line-height: 32px; /* 133.333% */ }
     .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
     .table-wrap { overflow-x: auto; }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .admin-table thead th { background: #f9fafb; color: var(--ink-700); text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; font-weight: 700; padding: 11px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    .admin-table tbody td { padding: 12px; border-bottom: 1px solid #f0f2f5; color: var(--ink-700); vertical-align: middle; }
+    .admin-table thead th { background: #f9fafb; color: var(--ink-700); text-transform: uppercase; letter-spacing: 0.4px;    font-family: 'Arimo', sans-serif; font-size: 11px; font-weight: 700; padding: 11px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .admin-table tbody td {     font-family: 'Arimo', sans-serif; padding: 12px; border-bottom: 1px solid #f0f2f5; color: var(--ink-700); vertical-align: middle; }
     .admin-table tbody tr:last-child td { border-bottom: none; }
     .pill { display: inline-flex; align-items: center; justify-content: center; min-width: 68px; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid transparent; }
     .pill-blue { background: var(--pill-blue); color: var(--pill-blue-text); border-color: #cce3ff; }
@@ -61,7 +62,7 @@ line-height: 32px; /* 133.333% */ }
             <h5 class="admin-title">Admin Management</h5>
             <div class="admin-sub">Manage admin users and their permissions.</div>
         </div>
-        <button type="button" class="add-btn" onclick="window.location='{{ route('admin.admin-management.create') }}'"><i class="fas fa-plus"></i> Add New User</button>
+        <a class="add-btn" href="{{ route('admin.admin-management.create') }}"><i class="fas fa-plus"></i> Add New User</a>
     </div>
 
     <div class="admin-card">
@@ -84,6 +85,9 @@ line-height: 32px; /* 133.333% */ }
                             $roleTitle = $role ? strtoupper($role->title) : 'N/A';
                             $permissionCount = $role && $role->permissions ? $role->permissions->count() : 0;
                             $pillClass = $roleTitle === 'ADMIN' ? 'pill-blue' : ($roleTitle === 'CREATIVE' ? 'pill-green' : 'pill-gray');
+                            $isSuperAdmin = (bool)($admin->is_super_admin ?? false) || ($admin->roles && $admin->roles->contains(function ($r) {
+                                return strtolower($r->title) === 'superadmin';
+                            }));
                         @endphp
                         <tr>
                             <td data-label="ID">{{ $admin->id }}</td>
@@ -94,22 +98,34 @@ line-height: 32px; /* 133.333% */ }
                             <td data-label="Actions" style="text-align:right;">
                                 <div class="actions">
 
-                                    <button type="button" class="action-icon edit" title="Edit" style="border:none; background:none; padding:0; cursor:pointer;" onclick="window.location='{{ route('admin.admin-management.edit', $admin) }}'">
-                                        <i class="far fa-edit"></i>
-                                    </button>
+                                    @if(!$isSuperAdmin)
+                                        <a class="action-icon edit" title="Edit" href="{{ route('admin.admin-management.edit', $admin) }}">
+                                            <i class="far fa-edit"></i>
+                                        </a>
+                                    @else
+                                        <span class="action-icon edit" title="Super admin cannot be edited" style="opacity:0.35; cursor:not-allowed;">
+                                            <i class="far fa-edit"></i>
+                                        </span>
+                                    @endif
                                     <form action="{{ route('admin.impersonate.start', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Start impersonating this user? You will switch to their account view.">
                                         @csrf
                                         <button type="submit" class="action-icon impersonate" title="Impersonate" style="border:none; background:none; padding:0; cursor:pointer;">
                                             <i class="fas fa-user-ninja"></i>
                                         </button>
                                     </form>
-                                    <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Are you sure you want to delete this admin?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-icon delete" title="Delete" style="border:none; background:none; padding:0; cursor:pointer;">
+                                    @if(!$isSuperAdmin)
+                                        <form action="{{ route('admin.admin-management.destroy', $admin) }}" method="POST" style="display:inline-block;" data-swal-confirm="Are you sure you want to delete this admin?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="action-icon delete" title="Delete" style="border:none; background:none; padding:0; cursor:pointer;">
+                                                <i class="far fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="action-icon delete" title="Super admin cannot be deleted" style="opacity:0.35; cursor:not-allowed;">
                                             <i class="far fa-trash-alt"></i>
-                                        </button>
-                                    </form>
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

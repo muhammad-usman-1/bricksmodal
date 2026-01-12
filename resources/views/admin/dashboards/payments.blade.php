@@ -14,7 +14,7 @@
 
         .pay-shell {
             padding: 22px 0;
-            font-family: 'Outfit', sans-serif;
+              font-family: 'Arimo', sans-serif;
         }
 
         .pay-header h5 {
@@ -133,7 +133,9 @@
             padding: 16px 24px;
             border-bottom: 1px solid #f2f4f7;
             text-align: left;
+               font-family: 'Arimo', sans-serif;
         }
+
 
         .pay-table tbody td {
             padding: 16px 24px;
@@ -141,6 +143,7 @@
             color: #475467;
             font-size: 14px;
             vertical-align: middle;
+               font-family: 'Arimo', sans-serif;
         }
 
         .talent-name {

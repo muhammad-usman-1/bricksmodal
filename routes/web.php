@@ -49,6 +49,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::middleware('auth:admin')->group(function () {
         Route::get('/', [AdminHomeController::class, 'index'])->name('home');
+        Route::get('search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
         Route::get('notifications', [\App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('notifications.index');
         Route::get('notifications/{notification}', [\App\Http\Controllers\Admin\NotificationsController::class, 'show'])->name('notifications.show');
         Route::get('notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
