@@ -8,6 +8,22 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* Typography for side menu */
+        .bm-link,
+        .bm-link-dropdown-toggle,
+        .bm-sub-link,
+        .bm-dropdown-items a,
+        .bm-footer,
+        .bm-footer * {
+            font-family: 'Arimo', sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 16px;
+            line-height: 24px;
+            letter-spacing: 0;
+            text-align: center;
+        }
         .bm-brand {
             display: flex;
             flex-direction: column;
@@ -228,7 +244,7 @@
         .bm-link:hover { background: #eef1f6; color: #0f172a;   text-decoration: none;}
         .bm-link i { color: #374151; width: 16px; text-align: center; }
         .bm-link.c-active {
-            background: #11141a;
+            background: #000000;
             color: #fff;
             box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
@@ -279,6 +295,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            align-items: flex-start;
         }
 
         .bm-footer-name {
@@ -304,6 +321,15 @@
             color: #4b5563;
             cursor: pointer;
             transition: transform 0.15s ease;
+        }
+        .bm-footer-arrow svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            transition: transform 0.2s ease;
+        }
+        .bm-footer-arrow svg.rotated {
+            transform: rotate(180deg);
         }
 
         .bm-footer-dropdown {
@@ -411,12 +437,12 @@
         .bm-link-dropdown-toggle:hover { background: #eef1f6; color: #0f172a; }
 
         .bm-link-dropdown-toggle.c-active {
-            background: #11141a;
+            background: #000000;
             color: #fff;
             box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
         .bm-link-dropdown-toggle.c-active img { filter: brightness(0) invert(1); }
-        .bm-link-dropdown-toggle.c-active:hover { background: #11141a; color: #fff; }
+        .bm-link-dropdown-toggle.c-active:hover { background: #000000; color: #fff; }
 
         .bm-dropdown-arrow { transition: transform 0.2s; font-size: 10px; }
         .bm-nav-dropdown.show .bm-dropdown-arrow { transform: rotate(180deg); }
@@ -680,7 +706,9 @@ letter-spacing: 1.4px;">STUDIO</div>
                         </div>
                     </div>
                     <button type="button" class="bm-footer-arrow" id="bm-sidebar-toggle" aria-label="Collapse sidebar">
-                        <i class="fas fa-chevron-left"></i>
+                        <svg id="bm-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
                     </button>
                 </div>
 
@@ -717,12 +745,11 @@ letter-spacing: 1.4px;">STUDIO</div>
 
         if (!toggleBtn || !sidebar) return;
 
-        const toggleIcon = toggleBtn.querySelector('i');
+        const toggleIcon = document.getElementById('bm-sidebar-icon');
 
         const syncToggleUi = (collapsed) => {
             if (toggleIcon) {
-                toggleIcon.classList.toggle('fa-chevron-right', collapsed);
-                toggleIcon.classList.toggle('fa-chevron-left', !collapsed);
+                toggleIcon.classList.toggle('rotated', collapsed);
             }
             toggleBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
         };

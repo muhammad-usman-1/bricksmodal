@@ -86,25 +86,28 @@ margin-bottom: 0;
     }
 
     .add-btn {
-        background: #2C2C2E;
+        background: #000000;
         color: #fff;
         border: none;
-        border-radius: 6px;
-        padding: 10px 14px;
-        font-size: 13px;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+
         text-decoration: none;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
 
     .add-btn:focus, .add-btn:active, .add-btn:hover {
         color: #fff;
-        background: #2C2C2E;
+        background: #111111;
         outline: none;
         text-decoration: none;
+        transform: translateY(-2px);
     }
 
     .shoot-card {
@@ -121,7 +124,7 @@ margin-bottom: 0;
     }
 
     .shoot-table thead th {
-        background: #2C2C2E;
+        background: #000000;
         color: #fff;
         font-weight: 600;
         font-size: 12px;
@@ -426,7 +429,7 @@ margin-bottom: 0;
     .required-icon-square {
         width: 32px;
         height: 32px;
-        background: #1c1c1e;
+         background: #000000;
         border-radius: 8px;
         display: flex;
         align-items: center;

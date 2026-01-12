@@ -137,7 +137,7 @@ line-height: 36px; /* 150% */}
     }
 
     .add-talent-btn {
-        background: #0f172a;
+        background: #000000;
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -152,15 +152,8 @@ line-height: 36px; /* 150% */}
         transition: all 0.2s ease;
     }
 
-    .add-talent-btn.floating {
-        position: fixed;
-        top: 72px;
-        right: 24px;
-        z-index: 40;
-    }
-
     .add-talent-btn:hover {
-        background: #1e293b;
+        background: #111111;
         color: #fff;
         text-decoration: none;
         transform: translateY(-2px);
@@ -168,6 +161,19 @@ line-height: 36px; /* 150% */}
 
     .add-talent-btn i {
         font-size: 16px;
+    }
+
+    .talent-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: flex-end;
+        z-index: 50;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
     }
 </style>
 
@@ -325,9 +331,11 @@ line-height: 36px; /* 150% */}
     @endif
 </div>
 
-<a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn floating">
-    <i class="fas fa-plus"></i> Add Talent
-</a>
+<div class="talent-footer">
+    <a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn">
+        <i class="fas fa-plus"></i> Add Talent
+    </a>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

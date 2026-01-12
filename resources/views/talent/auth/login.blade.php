@@ -44,6 +44,7 @@
             letter-spacing: 0.35em;
             color: #a0a0a0;
             margin-bottom: 10px;
+            font-family: 'Arimo', sans-serif;
         }
         h1 {
             font-family: 'Arimo', sans-serif;
