@@ -36,9 +36,24 @@
             display: none !important;
         }
         
-        /* Hide footer completely */
+        /* Keep footer visible when collapsed so the expand button lives there */
         #sidebar.collapsed .bm-footer {
+            display: block !important;
+        }
+
+        /* Collapse footer content to just the toggle button */
+        #sidebar.collapsed .bm-footer-user,
+        #sidebar.collapsed .bm-footer-dropdown {
             display: none !important;
+        }
+
+        #sidebar.collapsed .bm-footer-card {
+            justify-content: center !important;
+            padding: 10px 0 !important;
+        }
+
+        #sidebar.collapsed .bm-footer-arrow {
+            margin: 0 !important;
         }
         
         /* Style regular links - show only icons */
@@ -664,7 +679,7 @@ letter-spacing: 1.4px;">STUDIO</div>
                             <p class="bm-footer-role">{{ ucfirst($roleLabel) }}</p>
                         </div>
                     </div>
-                    <button type="button" class="bm-footer-arrow" id="bm-sidebar-collapse">
+                    <button type="button" class="bm-footer-arrow" id="bm-sidebar-toggle" aria-label="Collapse sidebar">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
@@ -694,27 +709,45 @@ letter-spacing: 1.4px;">STUDIO</div>
 
 <script>
     (function() {
-        const collapseBtn = document.getElementById('bm-sidebar-collapse');
+        const toggleBtn = document.getElementById('bm-sidebar-toggle');
         const sidebar = document.getElementById('sidebar');
         const footerUser = document.getElementById('bm-footer-user');
         const footerDropdown = document.getElementById('bm-footer-dropdown');
-        if (!collapseBtn || !sidebar) return;
+        const wrapper = document.querySelector('.c-wrapper');
 
-        collapseBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebar.classList.add('collapsed');
-            
-            // Adjust main content
-            const wrapper = document.querySelector('.c-wrapper');
-            if (wrapper) {
-                wrapper.style.marginLeft = '70px';
+        if (!toggleBtn || !sidebar) return;
+
+        const toggleIcon = toggleBtn.querySelector('i');
+
+        const syncToggleUi = (collapsed) => {
+            if (toggleIcon) {
+                toggleIcon.classList.toggle('fa-chevron-right', collapsed);
+                toggleIcon.classList.toggle('fa-chevron-left', !collapsed);
             }
-            
-            // Save state to localStorage
-            localStorage.setItem('sidebarCollapsed', 'true');
-            
-            // Notify header to update button visibility
-            window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: true } }));
+            toggleBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        };
+
+        const setCollapsed = (collapsed) => {
+            sidebar.classList.toggle('collapsed', collapsed);
+            document.body.classList.toggle('sidebar-collapsed', collapsed);
+
+            if (wrapper) {
+                wrapper.style.marginLeft = collapsed ? '70px' : '';
+            }
+
+            localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+            syncToggleUi(collapsed);
+            window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed } }));
+        };
+
+        // initial state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        setCollapsed(isCollapsed);
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const collapsed = sidebar.classList.contains('collapsed');
+            setCollapsed(!collapsed);
         });
 
         if (footerUser && footerDropdown) {

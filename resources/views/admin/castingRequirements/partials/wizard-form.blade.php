@@ -83,6 +83,27 @@
         }
     }
 
+    if (!function_exists('humanizeModelError')) {
+        function humanizeModelError(string $message): string {
+            // Strip array notation like models.0.
+            $message = preg_replace('/models\.\d+\./', '', $message);
+
+            // Required field messages
+            $message = preg_replace_callback('/The\s+([^.]+?)\s+field is required\./i', function ($m) {
+                $field = ucwords(str_replace(['_', '.'], ' ', $m[1]));
+                return "{$field} is required.";
+            }, $message);
+
+            // Invalid selection messages
+            $message = preg_replace_callback('/The selected\s+([^.]+?)\s+is invalid\./i', function ($m) {
+                $field = ucwords(str_replace(['_', '.'], ' ', $m[1]));
+                return "{$field} is invalid.";
+            }, $message);
+
+            return trim($message);
+        }
+    }
+
 
     $outfitImageMap = [];
     foreach($outfits as $cat => $items) {
@@ -276,7 +297,7 @@
                                         @endforeach
                                     </select>
                                     @error('models.' . $index . '.gender')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
 
@@ -289,7 +310,7 @@
                                         @endforeach
                                     </select>
                                     @error('models.' . $index . '.age_range_key')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
 
@@ -308,6 +329,9 @@
                                         >
                                         <span style="color: #4b5563; font-weight: 500;">Hours</span>
                                     </div>
+                                    @error('models.' . $index . '.model_hours')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             @php
@@ -317,11 +341,11 @@
                                 <div class="field-block">
                                     <label class="required">Rate?</label>
                                     <select name="models[{{ $index }}][rate_decision]" class="pill-select" data-rate-decision required>
-                                        <option value="talent_decide" {{ $rateDecision === 'talent_decide' ? 'selected' : '' }}>Talent Decide</option>
-                                        <option value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'selected' : '' }}>Admin Decide</option>
+                                        <option value="talent_decide" {{ $rateDecision === 'talent_decide' ? 'selected' : '' }}>Talent's decide</option>
+                                        <option value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'selected' : '' }}>Pre-defined</option>
                                     </select>
                                     @error('models.' . $index . '.rate_decision')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
                                 <div class="field-block" data-rate-input-wrapper style="{{ $rateDecision === 'admin_decide' ? '' : 'display:none;' }}">
@@ -337,7 +361,7 @@
                                         data-rate-input
                                     >
                                     @error('models.' . $index . '.rate')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -352,6 +376,9 @@
                                         <option value="171-180" {{ ($model['height_range'] ?? '') === '171-180' ? 'selected' : '' }}>171 - 180 cm</option>
                                         <option value="180+" {{ ($model['height_range'] ?? '') === '180+' ? 'selected' : '' }}>180+ cm</option>
                                     </select>
+                                    @error('models.' . $index . '.height_range')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="field-block">
@@ -363,13 +390,16 @@
                                         <option value="61-70" {{ ($model['weight_range'] ?? '') === '61-70' ? 'selected' : '' }}>61 - 70 kg</option>
                                         <option value="71+" {{ ($model['weight_range'] ?? '') === '71+' ? 'selected' : '' }}>71+ kg</option>
                                     </select>
+                                    @error('models.' . $index . '.weight_range')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="field-block">
                                     <label class="required">Others</label>
                                     <input type="text" name="models[{{ $index }}][hair_color]" class="pill-input @error('models.' . $index . '.hair_color') is-invalid @enderror" placeholder="other details" value="{{ $model['hair_color'] ?? '' }}" required>
                                     @error('models.' . $index . '.hair_color')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -385,6 +415,9 @@
                                         <button type="button" class="swatch {{ $skin === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#8b5a2b;"></button>
                                     </div>
                                     <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input required>
+                                    @error('models.' . $index . '.skin_color')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
                                 </div>
                                 <div class="field-block">
                                     <label class="required">Eye Color</label>
@@ -396,6 +429,9 @@
                                         <button type="button" class="swatch {{ $eye === 'black' ? 'active' : '' }}" data-swatch-value="black" style="background:#1b1b1d;"></button>
                                     </div>
                                     <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input required>
+                                    @error('models.' . $index . '.eye_color')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <!-- Removed Reference Photo Section -->
@@ -557,8 +593,8 @@
                         <div class="field-block">
                             <label class="required">Rate?</label>
                             <select name="models[__INDEX__][rate_decision]" class="pill-select" data-rate-decision required>
-                                <option value="talent_decide">Talent Decide</option>
-                                <option value="admin_decide" selected>Admin Decide</option>
+                                <option value="talent_decide">Talent's decide</option>
+                                <option value="admin_decide" selected>Pre-defined</option>
                             </select>
                         </div>
                         <div class="field-block" data-rate-input-wrapper>
@@ -729,7 +765,7 @@
 
             <div class="shoot-step" data-step="3">
                 <div class="shoot-step-card">
-                    <h4>Stage 3 · Shoot Brief/Notes </h4>
+                    <h4>Stage 3 · Shoot Brief </h4>
                     <p class="text-muted mb-4">Share complete detail, and any important instructions.</p>
 
                     <div class="form-group d-none">
@@ -742,7 +778,7 @@
                     <div class="field-block">
                         <label for="notes">Shoot Brief</label>
                         <div class="dark-input has-textarea">
-                             <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4" placeholder="Enter notes...">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
+                             <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4" placeholder="Enter shoot brief...">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
                         </div>
                         @if($errors->has('notes'))
                             <div class="invalid-feedback">{{ $errors->first('notes') }}</div>

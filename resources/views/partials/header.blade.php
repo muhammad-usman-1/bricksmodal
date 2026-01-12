@@ -57,14 +57,6 @@
         margin-left: 20px !important;
     }
 
-    body:not(.sidebar-collapsed) #sidebarCollapseBtn {
-        display: none !important;
-    }
-
-    body.sidebar-collapsed #sidebarCollapseBtn {
-        display: inline-flex !important;
-    }
-
     .header-icon-link {
         margin-left: 18px !important;
         display: inline-flex !important;
@@ -85,17 +77,6 @@
 
     .header-icon-link:hover {
         background: #f3f4f6 !important;
-    }
-
-    /* Collapse button with border */
-    #sidebarCollapseBtn {
-        border: 1px solid #e5e7eb !important;
-        background: #ffffff !important;
-    }
-
-    #sidebarCollapseBtn:hover {
-        background: #f9fafb !important;
-        border-color: #d1d5db !important;
     }
 
     .header-icon-link img {
@@ -151,9 +132,6 @@
 
 <header class="c-header c-header-fixed admin-header" id="admin-main-header">
     <div id="admin-topbar-container">
-        <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Show Sidebar" style="margin-left: 0 !important; margin-right: 12px !important; display: none;">
-            <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
-        </button>
         <div id="admin-search-box">
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
@@ -229,84 +207,3 @@
         </div>
     </div>
 </header>
-
-<script>
-    // Sidebar uncollapse functionality (collapse is now handled by footer button)
-    (function() {
-        const sidebar = document.getElementById('sidebar');
-        const collapseBtn = document.getElementById('sidebarCollapseBtn');
-        const collapseIcon = collapseBtn?.querySelector('i');
-        const wrapper = document.querySelector('.c-wrapper');
-
-        if (!sidebar || !collapseBtn) return;
-
-        // Function to adjust main content
-        const adjustMainContent = (collapsed) => {
-            if (wrapper) {
-                if (collapsed) {
-                    wrapper.style.marginLeft = '70px';
-                } else {
-                    wrapper.style.marginLeft = '';
-                }
-            }
-        };
-
-        // Function to update button visibility
-        const updateButtonVisibility = (collapsed) => {
-            if (collapseBtn) {
-                collapseBtn.style.display = collapsed ? 'inline-flex' : 'none';
-            }
-        };
-
-        const syncFromState = () => {
-            const collapsed = sidebar.classList.contains('collapsed');
-            if (collapsed) {
-                document.body.classList.add('sidebar-collapsed');
-            } else {
-                document.body.classList.remove('sidebar-collapsed');
-            }
-            updateButtonVisibility(collapsed);
-            adjustMainContent(collapsed);
-        };
-
-        // Check localStorage for saved state
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        if (isCollapsed) {
-            sidebar.classList.add('collapsed');
-        } else {
-            sidebar.classList.remove('collapsed');
-        }
-        syncFromState();
-
-        // Only handle uncollapse - collapse is now handled by footer button
-        collapseBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Only uncollapse, never collapse
-            sidebar.classList.remove('collapsed');
-            syncFromState();
-
-            // Save state to localStorage
-            localStorage.setItem('sidebarCollapsed', 'false');
-
-            // Notify other listeners of expanded state
-            window.dispatchEvent(new CustomEvent('sidebar-collapsed', { detail: { collapsed: false } }));
-        });
-
-        // Listen for collapse events from footer button
-        window.addEventListener('sidebar-collapsed', function(e) {
-            const collapsed = e.detail.collapsed;
-            if (collapsed) {
-                sidebar.classList.add('collapsed');
-            } else {
-                sidebar.classList.remove('collapsed');
-            }
-            syncFromState();
-        });
-
-        // Also react to class changes triggered elsewhere
-        const observer = new MutationObserver(syncFromState);
-        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-    })();
-</script>

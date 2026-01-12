@@ -272,7 +272,7 @@
     }
 
     .casting-call-button:hover {
-        background: #374151;
+        
         color: #fff;
         text-decoration: none;
     }

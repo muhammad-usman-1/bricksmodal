@@ -457,6 +457,12 @@
     .calendar-day.selected { background: #1a1a1a; color: #fff; font-weight: 600; }
     .calendar-day.today { color: #101828; font-weight: 700; border: 1px solid #eee; }
     .calendar-day.out-of-month { color: #d0d5dd; cursor: default; }
+    .calendar-day.disabled-day {
+        color: #d0d5dd;
+        cursor: not-allowed;
+        pointer-events: none;
+        background: #fafafa;
+    }
 
     .calendar-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; }
     .btn-clear-date { background: #f2f2f2; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #333; cursor: pointer; }
@@ -504,6 +510,14 @@
     .pill-input.is-invalid {
         border-color: #dc2626 !important;
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+    }
+    /* Keep validation text below inputs (no overlay) */
+    .field-block .invalid-feedback {
+        position: static;
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #dc2626;
     }
 </style>
 <script>
@@ -610,26 +624,88 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    // Helper function to show validation error
+    // Helper: find the right place to render errors (below the input box, not inside it)
+    const getFieldBlock = (field) => field?.closest?.('.field-block') || field?.parentElement;
+
+    const findErrorDiv = (host, key) => {
+        const items = Array.from(host?.querySelectorAll?.('.validation-error') || []);
+        return items.find(el => (el.dataset?.for || '') === key) || null;
+    };
+
+    const getFriendlyLabelForField = (field) => {
+        // Prefer explicit label text from DOM
+        const labelEl = field?.closest?.('.field-block')?.querySelector?.('label');
+        const labelText = labelEl?.textContent?.trim();
+        if (labelText) {
+            // Remove any trailing '*' / "required" markers if present
+            return labelText.replace(/\s*\*?\s*$/g, '').trim();
+        }
+
+        const name = field?.getAttribute?.('name') || '';
+
+        // models[0][eye_color] -> Eye color
+        const modelMatch = name.match(/^models\[\d+\]\[([^\]]+)\]$/);
+        if (modelMatch) {
+            const key = modelMatch[1];
+            const map = {
+                age_range_key: 'Model age',
+                model_hours: 'Hours needed',
+                rate_decision: 'Rate',
+                rate: 'Rate amount',
+                hair_color: 'Others',
+                height_range: 'Height range',
+                weight_range: 'Weight range',
+                skin_color: 'Skin color',
+                eye_color: 'Eye color',
+                gender: 'Gender',
+                labels: 'Labels',
+            };
+            if (map[key]) return map[key];
+            return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        const fallback = field?.getAttribute?.('id') || 'This field';
+        return fallback.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    };
+
+    const requiredMessageForField = (field) => `${getFriendlyLabelForField(field)} is required.`;
+
+    // Helper function to show validation error (below the input wrapper)
     const showFieldError = (field, message) => {
+        if (!field) return;
+
         field.classList.add('is-invalid');
-        let errorDiv = field.parentElement?.querySelector('.validation-error');
+        const wrapper = field.closest?.('.dark-input');
+        wrapper?.classList?.add('is-invalid');
+
+        const host = getFieldBlock(field);
+        if (!host) return;
+
+        const key = field.getAttribute('name') || field.id || '';
+        let errorDiv = findErrorDiv(host, key);
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'validation-error';
-            errorDiv.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 4px;';
-            field.parentElement?.appendChild(errorDiv);
+            errorDiv.dataset.for = key;
+            host.appendChild(errorDiv);
         }
         errorDiv.textContent = message;
     };
 
     // Helper function to clear validation error
     const clearFieldError = (field) => {
+        if (!field) return;
+
         field.classList.remove('is-invalid');
-        const errorDiv = field.parentElement?.querySelector('.validation-error');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
+        const wrapper = field.closest?.('.dark-input');
+        wrapper?.classList?.remove('is-invalid');
+
+        const host = getFieldBlock(field);
+        if (!host) return;
+
+        const key = field.getAttribute('name') || field.id || '';
+        const errorDiv = findErrorDiv(host, key);
+        if (errorDiv) errorDiv.remove();
     };
 
     // Clear all validation errors in a step
@@ -760,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (rateDecisionSelect.value === 'admin_decide') {
                             const numericRate = parseFloat(rateInput.value);
                             if (rateInput.value === '' || Number.isNaN(numericRate) || numericRate < 0) {
-                                showFieldError(rateInput, 'Enter a valid rate for admin-decided models.');
+                                showFieldError(rateInput, 'Enter a valid rate for pre-defined models.');
                                 valid = false;
                             } else {
                                 clearFieldError(rateInput);
@@ -785,8 +861,7 @@ document.addEventListener('DOMContentLoaded', function () {
         stepFields.forEach(field => {
             if (!field.value || (field.type === 'text' && field.value.trim() === '')) {
                 if (!field.classList.contains('is-invalid')) {
-                    const fieldName = field.getAttribute('name') || field.getAttribute('id') || 'This field';
-                    showFieldError(field, `${fieldName} is required.`);
+                    showFieldError(field, requiredMessageForField(field));
                 }
                 valid = false;
             } else {
@@ -1301,6 +1376,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const shootTimeInput = document.getElementById('shoot_time');
     const timeList = document.getElementById('timeList');
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (shootDateInput) {
+        shootDateInput.setAttribute('min', today.toISOString().split('T')[0]);
+    }
+
     let currentCalDate = new Date();
     let selectedDate = shootDateInput?.value ? new Date(shootDateInput.value) : null;
 
@@ -1313,6 +1395,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+        // Disable going to past months entirely
+        const prevMonthLastDay = new Date(year, month, 0);
+        if (btnPrevMonth) {
+            const disablePrev = prevMonthLastDay < today;
+            btnPrevMonth.disabled = disablePrev;
+            btnPrevMonth.style.opacity = disablePrev ? '0.4' : '1';
+            btnPrevMonth.style.cursor = disablePrev ? 'not-allowed' : 'pointer';
+        }
 
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1340,15 +1431,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 dayDiv.classList.add('today');
             }
 
-            dayDiv.addEventListener('click', () => {
-                selectedDate = thisDate;
-                const yyyy = selectedDate.getFullYear();
-                const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                const dd = String(selectedDate.getDate()).padStart(2, '0');
-                shootDateInput.value = `${yyyy}-${mm}-${dd}`;
-                calendarDropdown.classList.remove('show');
-                renderCalendar();
-            });
+            const isPast = thisDate < today;
+            if (isPast) {
+                dayDiv.classList.add('disabled-day');
+            } else {
+                dayDiv.addEventListener('click', () => {
+                    selectedDate = thisDate;
+                    const yyyy = selectedDate.getFullYear();
+                    const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(selectedDate.getDate()).padStart(2, '0');
+                    shootDateInput.value = `${yyyy}-${mm}-${dd}`;
+                    calendarDropdown.classList.remove('show');
+                    renderCalendar();
+                });
+            }
 
             calendarDays.appendChild(dayDiv);
         }

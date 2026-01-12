@@ -8,10 +8,34 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $notifications = Auth::user()->notifications()->paginate(20);
-        return view('admin.notifications.index', compact('notifications'));
+        $user = Auth::user();
+        $filter = $request->get('filter', 'all');
+
+        $query = $user->notifications()->latest();
+
+        if ($filter === 'unread') {
+            $query->whereNull('read_at');
+        } elseif ($filter === 'read') {
+            $query->whereNotNull('read_at');
+        }
+
+        $notifications = $query->paginate(15)->withQueryString();
+
+        $stats = [
+            'total'  => $user->notifications()->count(),
+            'unread' => $user->unreadNotifications()->count(),
+            'read'   => $user->notifications()->whereNotNull('read_at')->count(),
+        ];
+
+        $typeCounts = [
+            'talent_profile'     => $user->notifications()->where('data->type', 'talent_profile')->count(),
+            'casting_application'=> $user->notifications()->where('data->type', 'casting_application')->count(),
+            'payment_requested'  => $user->notifications()->where('data->type', 'payment_requested')->count(),
+        ];
+
+        return view('admin.notifications.index', compact('notifications', 'filter', 'stats', 'typeCounts'));
     }
 
     public function show($id)

@@ -256,6 +256,8 @@ margin-bottom: 0;
         display: grid;
         place-items: center;
         font-size: 12px;
+                    text-decoration: none;
+                    transition: all 0.15s ease;
     }
 
     .pager .btn-page.active {
@@ -263,6 +265,17 @@ margin-bottom: 0;
         color: #fff;
         border-color: #000;
     }
+
+                .pager .btn-page:hover:not(.active):not(.disabled) {
+                    background: #f8f9fc;
+                    color: #0f1524;
+                }
+
+                .pager .btn-page.disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                    pointer-events: none;
+                }
 
     .action-menu {
         position: relative;
@@ -552,7 +565,7 @@ margin-bottom: 0;
                                                 } else {
                                                     $avatarCandidate = $avatarRaw;
                                                 }
-                                                
+
                                                 if ($avatarCandidate) {
                                                     if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
                                                         $src = $avatarCandidate;
@@ -631,12 +644,26 @@ margin-bottom: 0;
                 @endforelse
             </tbody>
         </table>
+        @php
+            $isPaginator = $castingRequirements instanceof \Illuminate\Pagination\AbstractPaginator;
+            $firstItem = $isPaginator ? $castingRequirements->firstItem() : 1;
+            $lastItem = $isPaginator ? $castingRequirements->lastItem() : $castingRequirements->count();
+            $total = $isPaginator ? $castingRequirements->total() : $castingRequirements->count();
+            $currentPage = $isPaginator ? $castingRequirements->currentPage() : 1;
+            $lastPage = $isPaginator ? $castingRequirements->lastPage() : 1;
+            $prevUrl = $isPaginator ? $castingRequirements->previousPageUrl() : null;
+            $nextUrl = $isPaginator ? $castingRequirements->nextPageUrl() : null;
+        @endphp
         <div class="table-foot">
-            <div>Showing 1 to {{ $castingRequirements->count() }} of {{ $castingRequirements->count() }} entries</div>
+            <div>Showing {{ $firstItem ?? 0 }} to {{ $lastItem ?? $castingRequirements->count() }} of {{ $total }} entries</div>
             <div class="pager">
-                <button class="btn-page" type="button">&lt;</button>
-                <button class="btn-page active" type="button">1</button>
-                <button class="btn-page" type="button">&gt;</button>
+                <a class="btn-page {{ $currentPage <= 1 ? 'disabled' : '' }}"
+                   href="{{ $currentPage > 1 && $prevUrl ? $prevUrl : '#' }}"
+                   aria-label="Previous page">&lt;</a>
+                <span class="btn-page active">{{ $currentPage }}</span>
+                <a class="btn-page {{ $currentPage >= $lastPage ? 'disabled' : '' }}"
+                   href="{{ $currentPage < $lastPage && $nextUrl ? $nextUrl : '#' }}"
+                   aria-label="Next page">&gt;</a>
             </div>
         </div>
     </div>
@@ -706,14 +733,14 @@ margin-bottom: 0;
             row.style.cursor = 'pointer';
             row.addEventListener('click', function(e) {
                 // Don't navigate if clicking on interactive elements
-                if (e.target.closest('.no-click') || 
-                    e.target.closest('a') || 
-                    e.target.closest('button') || 
+                if (e.target.closest('.no-click') ||
+                    e.target.closest('a') ||
+                    e.target.closest('button') ||
                     e.target.closest('.action-menu') ||
                     e.target.closest('.action-list')) {
                     return;
                 }
-                
+
                 const showUrl = this.dataset.showUrl;
                 if (showUrl) {
                     window.location.href = showUrl;

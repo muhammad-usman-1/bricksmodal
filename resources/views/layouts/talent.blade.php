@@ -92,9 +92,8 @@
                 border: none !important;
                 background: transparent !important;
             }
-            /* Sidebar toggle hidden by default; we show via JS when collapsed */
+            /* Sidebar expand button no longer lives in the header */
             #sidebarCollapseBtn { display: none !important; }
-            #sidebarCollapseBtn.show-toggle { display: inline-flex !important; }
 
             .header-icon-link:first-child {
                 margin-left: 0 !important;
@@ -168,9 +167,6 @@
 
         <header class="c-header c-header-fixed admin-header" id="admin-main-header">
             <div id="admin-topbar-container">
-                <button type="button" class="header-icon-link" id="sidebarCollapseBtn" aria-label="Toggle Sidebar" style="margin-left: 0 !important; margin-right: 12px !important;">
-                    <i class="fas fa-bars" style="font-size: 18px; color: #374151;"></i>
-                </button>
                 <div id="admin-search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
@@ -236,79 +232,6 @@
                 </div>
             </div>
         </header>
-
-        <script>
-            // Sidebar collapse functionality
-            (function() {
-                const sidebar = document.getElementById('sidebar');
-                const collapseBtn = document.getElementById('sidebarCollapseBtn');
-                const collapseIcon = collapseBtn?.querySelector('i');
-                const wrapper = document.querySelector('.c-wrapper');
-
-                if (!sidebar || !collapseBtn) return;
-
-                // Function to adjust main content
-                const adjustMainContent = (collapsed) => {
-                    if (wrapper) {
-                        if (collapsed) {
-                            wrapper.style.marginLeft = '70px';
-                } else {
-                            wrapper.style.marginLeft = '';
-                }
-                    }
-                };
-
-                const syncToggleVisibility = () => {
-                    const collapsed = sidebar.classList.contains('collapsed');
-                    collapseBtn.classList.toggle('show-toggle', collapsed);
-                };
-
-                // Check localStorage for saved state
-                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                if (isCollapsed) {
-                    sidebar.classList.add('collapsed');
-                    adjustMainContent(true);
-                    syncToggleVisibility();
-                }
-
-                collapseBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    sidebar.classList.remove('collapsed');
-                    const collapsed = false;
-
-                    // Adjust main content
-                    adjustMainContent(collapsed);
-
-                    // Save state to localStorage
-                    localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
-
-                    if (collapseIcon) {
-                        collapseIcon.classList.remove('fa-angle-right', 'fa-angle-left');
-                        collapseIcon.classList.add('fa-bars');
-                    }
-
-                    collapseBtn.setAttribute('aria-label', collapsed ? 'Show Sidebar' : 'Hide Sidebar');
-                    syncToggleVisibility();
-                });
-
-                window.addEventListener('sidebar-collapsed', function(e) {
-                    const collapsed = !!(e.detail && e.detail.collapsed);
-                    if (collapsed) {
-                        sidebar.classList.add('collapsed');
-                        adjustMainContent(true);
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        adjustMainContent(false);
-                    }
-                    syncToggleVisibility();
-                });
-
-                syncToggleVisibility();
-            })();
-        </script>
-
 
         <div class="c-body">
             <main class="c-main">
