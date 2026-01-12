@@ -71,10 +71,17 @@
 
     .pill-select, .pill-input { width: 100%; background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4c5160; outline: none; }
     .pill-select:focus, .pill-input:focus { border-color: #0f1014; box-shadow: 0 0 0 3px rgba(15,16,20,0.08); }
+    .pill-input::placeholder,
+    .duration-value::placeholder {
+        color: #9aa0ac;
+    }
 
     .swatch-row { display: inline-flex; align-items: center; gap: 8px; }
     .swatch { width: 34px; height: 18px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); cursor: pointer; }
     .swatch.active { outline: 2px solid #0f1014; outline-offset: 2px; }
+    .swatch-add { position: relative; display: inline-flex; align-items: center; justify-content: center; color: #0f1014; background: #f9fafc; border-style: dashed; font-weight: 700; font-size: 14px; }
+    .swatch-add.custom { color: #fff; border-style: solid; }
+    .swatch-add .plus-icon { pointer-events: none; }
 
     .dropbox { width: 100%; border: 1px solid #e3e6ec; border-radius: 10px; padding: 18px; display: block; background: #f9fafc; text-align: center; cursor: pointer; color: #6d7280; }
     .dropbox-inner { display: grid; place-items: center; gap: 6px; }
@@ -988,11 +995,30 @@ const initModelCard = (scope) => {
         if (group.dataset.swatchBound === 'true') return;
         group.dataset.swatchBound = 'true';
         const hidden = group.parentElement.querySelector('[data-swatch-input]');
+        const customBtn = group.querySelector('[data-color-picker]');
+        const colorInput = group.querySelector('[data-color-input]');
+        const normalize = (val) => (val || '').toLowerCase();
         const setActive = (value) => {
             group.querySelectorAll('.swatch').forEach(b => {
-                b.classList.toggle('active', b.dataset.swatchValue === value);
+                b.classList.toggle('active', normalize(b.dataset.swatchValue) === normalize(value));
             });
         };
+        const applyCustomColor = (value) => {
+            if (!customBtn) return;
+            const colorVal = value || '#c48b5a';
+            customBtn.dataset.swatchValue = colorVal;
+            customBtn.style.background = colorVal;
+            customBtn.classList.add('custom');
+        };
+        if (customBtn && colorInput) {
+            customBtn.addEventListener('click', () => colorInput.click());
+            colorInput.addEventListener('change', () => {
+                if (!colorInput.value) return;
+                applyCustomColor(colorInput.value);
+                setActive(colorInput.value);
+                if (hidden) hidden.value = colorInput.value;
+            });
+        }
         group.querySelectorAll('[data-swatch-value]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const value = btn.dataset.swatchValue || '';
@@ -1001,6 +1027,9 @@ const initModelCard = (scope) => {
             });
         });
         if (hidden && hidden.value) {
+            if (hidden.value.startsWith('#')) {
+                applyCustomColor(hidden.value);
+            }
             setActive(hidden.value);
         }
     });

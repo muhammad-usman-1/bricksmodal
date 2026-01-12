@@ -237,16 +237,11 @@
                     <tbody>
                         @forelse($recentPayments as $application)
                             @php
-                                $status = $application->payment_status;
-                                $statusLabel =
-                                    \App\Models\CastingApplication::PAYMENT_STATUS_SELECT[$status] ?? ucfirst($status);
-                                $statusClass =
-                                    [
-                                        'requested' => 'status-requested',
-                                        'approved' => 'status-approved',
-                                        'released' => 'status-released',
-                                        'pending' => 'status-pending',
-                                    ][$status] ?? 'status-default';
+                                $status = strtolower($application->payment_status);
+                                $isPaid = in_array($status, ['released', 'approved', 'paid', 'completed', 'settled']);
+                                $isRequested = $status === 'requested';
+                                $statusLabel = $isPaid ? 'Paid' : ($isRequested ? 'Requested' : 'Pending');
+                                $statusClass = $isPaid ? 'status-approved' : ($isRequested ? 'status-requested' : 'status-pending');
                             @endphp
                             <tr>
                                 <td class="talent-name">

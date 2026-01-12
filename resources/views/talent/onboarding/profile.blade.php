@@ -154,6 +154,12 @@
             color: #9ca3af;
         }
 
+        /* Keep DOB and Nationality inputs light grey */
+        .dob-input,
+        .nationality-select {
+            background: #f5f5f5;
+        }
+
         .dob-wrap, .nationality-wrapper {
             position: relative;
         }
@@ -194,9 +200,9 @@
             appearance: none;
             background: var(--control);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 0 12px;
-            height: 42px;
+            height: 48px;
             font-size: 13px;
         }
 
@@ -204,6 +210,33 @@
             display: grid;
             grid-template-columns: 110px 1fr;
             gap: 10px;
+            align-items: stretch;
+        }
+
+        .country-code-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 48px;
+            padding: 0 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f5f5f5;
+            font-size: 14px;
+            color: #1f1f1f;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .country-flag {
+            width: auto;
+            height: 18px;
+            aspect-ratio: 4 / 3;
+            display: inline-block;
+            flex-shrink: 0;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .actions {
@@ -725,9 +758,10 @@
                         <div class="field">
                              <label for="mobile_number">Mobile Number</label>
                              <div class="phone-row" style="margin-bottom: 16px;">
-                                <select class="pill-select" name="country_code_display" disabled style="background-color: #e9ecef; cursor: not-allowed;">
-                                    <option value="kw" {{ (old('country_code', $profile->country_code ?? auth('talent')->user()->phone_country_code ?? 'kw') == 'kw') ? 'selected' : '' }}>KW +965</option>
-                                </select>
+                                <div class="country-code-display" style="background:#e9ecef;">
+                                    <span class="fi fi-kw country-flag" title="Kuwait"></span>
+                                    <span>+965</span>
+                                </div>
                                 <input type="hidden" name="country_code" value="{{ old('country_code', $profile->country_code ?? auth('talent')->user()->phone_country_code ?? 'kw') }}">
                                 <input class="control" id="mobile_number" name="mobile_number" type="tel" 
                                     value="{{ old('mobile_number', $profile->mobile_number ?? auth('talent')->user()->phone_number) }}" 
@@ -746,9 +780,11 @@
                              <div id="whatsapp_number_section" style="display:none; margin-top:12px;">
                                 <label style="font-size: 12px; font-weight:600; margin-bottom:6px;">WhatsApp Number</label>
                                 <div class="phone-row">
-                                     <select class="pill-select" name="whatsapp_country_code">
-                                         <option value="kw" selected>KW +965</option>
-                                     </select>
+                                     <div class="country-code-display">
+                                         <span class="fi fi-kw country-flag" title="Kuwait"></span>
+                                         <span>+965</span>
+                                     </div>
+                                     <input type="hidden" name="whatsapp_country_code" value="kw">
                                      <input class="control" id="whatsapp_number_input" name="whatsapp_number" type="tel" value="{{ old('whatsapp_number', $profile->whatsapp_number) }}">
                                 </div>
                              </div>

@@ -40,6 +40,15 @@ class CastingRequirementModel extends Model implements HasMedia
         'admin_decide'  => 'Admin Decide',
     ];
 
+    public const TIME_SLOT_OPTIONS = [
+        '01:00-05:00' => '01:00 - 05:00',
+        '05:00-09:00' => '05:00 - 09:00',
+        '09:00-13:00' => '09:00 - 13:00',
+        '13:00-17:00' => '13:00 - 17:00',
+        '17:00-21:00' => '17:00 - 21:00',
+        '21:00-01:00' => '21:00 - 01:00',
+    ];
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');

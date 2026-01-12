@@ -9,6 +9,14 @@
     $durationValue = old('duration', $castingRequirement->duration ?? null);
     $ageRanges = $ageRanges ?? \App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS;
     $labels = $labels ?? \App\Models\Label::orderBy('name')->get();
+    $timeSlots = \App\Models\CastingRequirementModel::TIME_SLOT_OPTIONS ?? [
+        '01:00-05:00' => '01:00 - 05:00',
+        '05:00-09:00' => '05:00 - 09:00',
+        '09:00-13:00' => '09:00 - 13:00',
+        '13:00-17:00' => '13:00 - 17:00',
+        '17:00-21:00' => '17:00 - 21:00',
+        '21:00-01:00' => '21:00 - 01:00',
+    ];
 
     if ((! $shootDateValue || ! $shootTimeValue) && $rawShootDateTime) {
         try {
@@ -36,6 +44,7 @@
         'female_bottom_id' => null,
         'child_top_id' => null,
         'child_bottom_id' => null,
+        'time_slot' => null,
     ];
 
     $modelInputs = old('models');
@@ -63,6 +72,7 @@
                     'weight_range' => $model->weight_range,
                     'skin_color' => $model->skin_color,
                     'eye_color' => $model->eye_color,
+                    'time_slot' => $model->time_slot,
                 ];
             })->toArray();
         }
@@ -239,11 +249,11 @@
                                         placeholder="2"
                                         min="0"
                                         step="1"
-                                        style="text-align: center;"
+                                        style="text-align: center; color: #9aa0ac;"
                                     >
                                 </div>
                                 <div class="dark-input" style="width: auto; border: none; background: transparent; padding-left: 0; box-shadow: none;">
-                                    <input type="text" value="Hours" readonly style="color: #6b7280; background: transparent; cursor: default; padding: 0; width: auto; font-weight: 500; ">
+                                    <input type="text" value="hours" readonly style="color: #6b7280; background: transparent; cursor: default; padding: 0; width: auto; font-weight: 500; text-transform: lowercase;">
                                 </div>
                             </div>
                             @if($errors->has('duration'))
@@ -310,6 +320,19 @@
                                         @endforeach
                                     </select>
                                     @error('models.' . $index . '.age_range_key')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="field-block">
+                                    <label class="required">Time Slot (4 hrs)</label>
+                                    <select name="models[{{ $index }}][time_slot]" class="pill-select @error('models.' . $index . '.time_slot') is-invalid @enderror" required>
+                                        <option value="" disabled {{ empty($model['time_slot']) ? 'selected' : '' }}>Select time slot</option>
+                                        @foreach($timeSlots as $value => $label)
+                                            <option value="{{ $value }}" {{ ($model['time_slot'] ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('models.' . $index . '.time_slot')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
@@ -413,6 +436,10 @@
                                         <button type="button" class="swatch {{ $skin === 'golden' ? 'active' : '' }}" data-swatch-value="golden" style="background:#d7a86e;"></button>
                                         <button type="button" class="swatch {{ $skin === 'amber' ? 'active' : '' }}" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                         <button type="button" class="swatch {{ $skin === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#8b5a2b;"></button>
+                                        <button type="button" class="swatch swatch-add {{ $skin && str_starts_with($skin, '#') ? 'active custom' : '' }}" data-color-picker aria-label="Choose custom skin color">
+                                            <span class="plus-icon">+</span>
+                                        </button>
+                                        <input type="color" class="color-picker-input" data-color-input value="{{ $skin && str_starts_with($skin, '#') ? $skin : '#c48b5a' }}" style="display:none;">
                                     </div>
                                     <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input required>
                                     @error('models.' . $index . '.skin_color')
@@ -427,6 +454,10 @@
                                         <button type="button" class="swatch {{ $eye === 'hazel' ? 'active' : '' }}" data-swatch-value="hazel" style="background:#c9a063;"></button>
                                         <button type="button" class="swatch {{ $eye === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#7a5230;"></button>
                                         <button type="button" class="swatch {{ $eye === 'black' ? 'active' : '' }}" data-swatch-value="black" style="background:#1b1b1d;"></button>
+                                        <button type="button" class="swatch swatch-add {{ $eye && str_starts_with($eye, '#') ? 'active custom' : '' }}" data-color-picker aria-label="Choose custom eye color">
+                                            <span class="plus-icon">+</span>
+                                        </button>
+                                        <input type="color" class="color-picker-input" data-color-input value="{{ $eye && str_starts_with($eye, '#') ? $eye : '#7a5230' }}" style="display:none;">
                                     </div>
                                     <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input required>
                                     @error('models.' . $index . '.eye_color')
@@ -588,7 +619,16 @@
                                 <span style="color: #4b5563; font-weight: 500;">Hours</span>
                             </div>
                         </div>
-                    </div>
+                                <div class="field-block">
+                                    <label class="required">Time Slot (4 hrs)</label>
+                                    <select name="models[__INDEX__][time_slot]" class="pill-select" required>
+                                        <option value="" disabled selected>Select time slot</option>
+                                        @foreach($timeSlots as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                        </div>
                     <div class="grid grid-2 condensed">
                         <div class="field-block">
                             <label class="required">Rate?</label>
@@ -647,6 +687,8 @@
                                 <button type="button" class="swatch" data-swatch-value="golden" style="background:#d7a86e;"></button>
                                 <button type="button" class="swatch" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#8b5a2b;"></button>
+                                <button type="button" class="swatch swatch-add" data-color-picker aria-label="Choose custom skin color"><span class="plus-icon">+</span></button>
+                                <input type="color" class="color-picker-input" data-color-input value="#c48b5a" style="display:none;">
                             </div>
                             <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input required>
                         </div>
@@ -657,6 +699,8 @@
                                 <button type="button" class="swatch" data-swatch-value="hazel" style="background:#c9a063;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#7a5230;"></button>
                                 <button type="button" class="swatch" data-swatch-value="black" style="background:#1b1b1d;"></button>
+                                <button type="button" class="swatch swatch-add" data-color-picker aria-label="Choose custom eye color"><span class="plus-icon">+</span></button>
+                                <input type="color" class="color-picker-input" data-color-input value="#7a5230" style="display:none;">
                             </div>
                             <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input required>
                         </div>

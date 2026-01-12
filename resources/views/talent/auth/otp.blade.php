@@ -63,7 +63,7 @@
         .otp-input {
             width: 54px;
             height: 48px;
-            border: 1px solid #e1e5eb;
+            border: 1px solid #202020;
             border-radius: 10px;
             background: #f8f9fa;
             text-align: center;
@@ -75,8 +75,8 @@
         }
 
         .otp-input:focus {
-            border-color: #b7bec6;
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+            border-color: #202020;
+            box-shadow: 0 0 0 3px rgba(32, 32, 32, 0.12);
             background: #ffffff;
         }
 

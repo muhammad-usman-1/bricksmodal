@@ -19,23 +19,23 @@
             gap: 4px;
         }
         .bm-brand img { height: 36px; width: auto; transition: opacity 0.3s ease; }
-        
+
         /* Collapsed state - show only icons */
         #sidebar.collapsed {
             width: 70px !important;
             transition: width 0.3s ease;
         }
-        
+
         #sidebar.collapsed .bm-sidebar {
             padding: 18px 8px;
             align-items: center;
         }
-        
+
         /* Hide brand/logo section completely */
         #sidebar.collapsed .bm-brand {
             display: none !important;
         }
-        
+
         /* Keep footer visible when collapsed so the expand button lives there */
         #sidebar.collapsed .bm-footer {
             display: block !important;
@@ -49,13 +49,13 @@
 
         #sidebar.collapsed .bm-footer-card {
             justify-content: center !important;
-            padding: 10px 0 !important;
+            padding: 0px 0 !important;
         }
 
         #sidebar.collapsed .bm-footer-arrow {
             margin: 0 !important;
         }
-        
+
         /* Style regular links - show only icons */
         #sidebar.collapsed .bm-link {
             justify-content: center !important;
@@ -70,7 +70,7 @@
             margin: 0 auto !important;
             display: flex !important;
         }
-        
+
         /* Hide all text and non-icon elements in links */
         #sidebar.collapsed .bm-link > *:not(img):not(i) {
             display: none !important;
@@ -81,13 +81,13 @@
             overflow: hidden !important;
             font-size: 0 !important;
         }
-        
+
         /* Restore font size for icons */
         #sidebar.collapsed .bm-link img,
         #sidebar.collapsed .bm-link i {
             font-size: initial;
         }
-        
+
         /* Show and style icons/images */
         #sidebar.collapsed .bm-link img,
         #sidebar.collapsed .bm-link i {
@@ -95,17 +95,17 @@
             flex-shrink: 0;
             display: block !important;
         }
-        
+
         #sidebar.collapsed .bm-link img {
             width: 20px !important;
             height: 20px !important;
             object-fit: contain;
         }
-        
+
         #sidebar.collapsed .bm-link i {
             font-size: 18px !important;
         }
-        
+
         /* Style dropdown toggles - show only icons */
         #sidebar.collapsed .bm-link-dropdown-toggle {
             justify-content: center !important;
@@ -118,12 +118,12 @@
             line-height: 0 !important;
             margin: 0 auto !important;
         }
-        
+
         /* Hide dropdown arrow and other non-icon elements */
         #sidebar.collapsed .bm-link-dropdown-toggle > *:not(span) {
             display: none !important;
         }
-        
+
         #sidebar.collapsed .bm-link-dropdown-toggle > span {
             display: flex !important;
             justify-content: center !important;
@@ -133,7 +133,7 @@
             margin: 0 !important;
             padding: 0 !important;
         }
-        
+
         /* Hide text in span, show only image */
         #sidebar.collapsed .bm-link-dropdown-toggle > span > *:not(img) {
             display: none !important;
@@ -143,7 +143,7 @@
             height: 0 !important;
             overflow: hidden !important;
         }
-        
+
         /* Restore font size and style for icons in dropdown */
         #sidebar.collapsed .bm-link-dropdown-toggle > span > img {
             margin: 0 !important;
@@ -154,22 +154,22 @@
             flex-shrink: 0 !important;
             font-size: initial !important;
         }
-        
+
         /* Hide dropdown arrow */
         #sidebar.collapsed .bm-dropdown-arrow {
             display: none !important;
         }
-        
+
         /* Hide dropdown items */
         #sidebar.collapsed .bm-dropdown-items {
             display: none !important;
         }
-        
+
         /* Hide sub-links */
         #sidebar.collapsed .bm-sub-link {
             display: none !important;
         }
-        
+
         /* Center nav items */
         #sidebar.collapsed .c-sidebar-nav-item {
             display: flex;
@@ -178,7 +178,7 @@
             width: 100%;
             margin: 0;
         }
-        
+
         /* Ensure nav list is centered */
         #sidebar.collapsed .bm-nav {
             display: flex;
@@ -186,7 +186,7 @@
             align-items: center;
             width: 100%;
         }
-        
+
         /* Align dropdown container */
         #sidebar.collapsed .bm-nav-dropdown {
             width: 100%;
@@ -194,7 +194,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         /* Ensure all links have consistent alignment */
         #sidebar.collapsed .bm-link,
         #sidebar.collapsed .bm-link-dropdown-toggle {
@@ -203,7 +203,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         /* Adjust main content when sidebar is collapsed */
         @media (min-width: 992px) {
             body:has(#sidebar.collapsed) .c-wrapper,
@@ -409,7 +409,7 @@
             transition: all 0.2s ease;
         }
         .bm-link-dropdown-toggle:hover { background: #eef1f6; color: #0f172a; }
-        
+
         .bm-link-dropdown-toggle.c-active {
             background: #11141a;
             color: #fff;
@@ -432,7 +432,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         .bm-nav-dropdown.show .bm-dropdown-items { display: block; }
-        
+
         .bm-sub-link {
             display: block;
             padding: 8px 12px;
@@ -445,7 +445,7 @@
         }
         .bm-sub-link:hover { color: #000; text-decoration-color: #000; }
 
-       
+
 
     </style>
 
