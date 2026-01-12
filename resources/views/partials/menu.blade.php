@@ -3,7 +3,7 @@
     <style>
         .bm-sidebar {
             padding: 18px 14px;
-            background: #f9fafb;
+            background: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
