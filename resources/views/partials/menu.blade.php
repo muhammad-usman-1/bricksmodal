@@ -566,12 +566,12 @@ letter-spacing: 1.4px;">STUDIO</div>
                     </a>
                     <ul class="bm-dropdown-items">
                         <li>
-                            <a href="{{ route('admin.projects.progress') }}" class="bm-sub-link {{ request()->routeIs('admin.projects.progress') ? 'active-sub' : '' }}">
+                            <a href="{{ route('admin.projects.progress') }}" class="bm-sub-link {{ request()->routeIs('admin.projects.progress') ? 'active-sub' : '' }}" style= "font-size:14px; text-align:left;">
                                 Shoots Progress
                             </a>
                         </li>
                     </ul>
-                </div>
+                </div> 
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))
