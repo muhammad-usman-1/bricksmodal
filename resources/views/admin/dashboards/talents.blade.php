@@ -168,12 +168,12 @@ line-height: 36px; /* 150% */}
         left: 0;
         right: 0;
         bottom: 0;
-        background: #ffffff;
+         
         padding: 12px 24px;
         display: flex;
         justify-content: flex-end;
         z-index: 50;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+         
     }
 </style>
 
