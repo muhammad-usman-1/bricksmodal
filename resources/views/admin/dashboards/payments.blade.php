@@ -126,10 +126,10 @@
         }
 
         .pay-table thead th {
-            color: #667085;
+            color: #4A5565
             text-transform: uppercase;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             padding: 16px 24px;
             border-bottom: 1px solid #f2f4f7;
             text-align: left;
@@ -150,6 +150,8 @@
             color: #101828;
             font-weight: 500;
         }
+        .pay-row-clickable { cursor: pointer; }
+        .pay-row-clickable:hover { background: #f9fafb; }
 
         .status-pill {
             display: inline-flex;
@@ -190,7 +192,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Total Requested Amount</div>
-                            <p class="summary-amount">${{ number_format($financials['total_requested'] ?? 0, 2) }}</p>
+                            <p class="summary-amount">{{ number_format($financials['total_requested'] ?? 0, 2) }} KWD</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -201,7 +203,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Pending Amount</div>
-                            <p class="summary-amount">${{ number_format($financials['total_pending'] ?? 0, 2) }}</p>
+                            <p class="summary-amount">{{ number_format($financials['total_pending'] ?? 0, 2) }} KWD</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -212,7 +214,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Released Amount</div>
-                            <p class="summary-amount">${{ number_format($financials['total_released'] ?? 0, 2) }}</p>
+                            <p class="summary-amount">{{ number_format($financials['total_released'] ?? 0, 2) }} KWD</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -234,7 +236,7 @@
                             <th>Amount</th>
                             <th>Payment Status</th>
                             <th>Requested At</th>
-                            <th></th>
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -246,12 +248,12 @@
                                 $statusLabel = $isPaid ? 'Paid' : ($isRequested ? 'Requested' : 'Pending');
                                 $statusClass = $isPaid ? 'status-approved' : ($isRequested ? 'status-requested' : 'status-pending');
                             @endphp
-                            <tr>
+                            <tr class="pay-row-clickable" data-detail-url="{{ route('admin.payment-requests.show', $application) }}">
                                 <td class="talent-name">
                                     {{ optional($application->talent_profile)->display_name ?? (optional($application->talent_profile)->legal_name ?? 'N/A') }}
                                 </td>
                                 <td>{{ optional($application->casting_requirement)->project_name ?? 'N/A' }}</td>
-                                <td>${{ number_format($application->getPaymentAmount(), 2) }}</td>
+                                <td>{{ number_format($application->getPaymentAmount(), 2) }} KWD</td>
                                 <td><span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span></td>
                                 <td>
                                     @if ($application->payment_requested_at)
@@ -262,7 +264,7 @@
                                         <span class="text-muted">Not requested</span>
                                     @endif
                                 </td>
-                                <td class="action-ellipsis"><i class="fas fa-ellipsis-v"></i></td>
+                          
                             </tr>
                         @empty
                             <tr>
@@ -275,4 +277,20 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+@parent
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('tr.pay-row-clickable[data-detail-url]').forEach(row => {
+            row.addEventListener('click', function (e) {
+                // Don't navigate if clicking on interactive elements
+                if (e.target.closest('a, button, input, select, textarea, label')) return;
+                const url = this.dataset.detailUrl;
+                if (url) window.location.href = url;
+            });
+        });
+    });
+</script>
 @endsection

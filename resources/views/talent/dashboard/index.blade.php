@@ -48,6 +48,7 @@
         font-weight: 700;
         margin: 0 0 8px 0;
         line-height: 1.2;
+        font-family: 'Arimo', sans-serif;
     }
 
     .dashboard-header-content p {
@@ -55,6 +56,7 @@
         font-size: 15px;
         margin: 0;
         line-height: 1.5;
+        font-family: 'Arimo', sans-serif;
     }
 
     .dashboard-header-actions {
@@ -106,7 +108,7 @@
         background: #fff;
         border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
         position: relative;
         overflow: hidden;
     }
@@ -125,6 +127,7 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin: 0;
+         font-family: 'Arimo', sans-serif;
     }
 
     .stat-card-icon {
@@ -145,6 +148,7 @@
         font-weight: 700;
         margin: 0 0 8px 0;
         line-height: 1.2;
+         font-family: 'Arimo', sans-serif;
     }
 
     .stat-card-footer {
@@ -179,6 +183,7 @@
         font-size: 20px;
         font-weight: 700;
         margin: 0;
+         font-family: 'Arimo', sans-serif;
     }
 
     .section-link {
@@ -212,20 +217,22 @@
         position: absolute;
         top: 20px;
         right: 20px;
-        background: #111827;
+        background: black;
         color: #fff;
         padding: 4px 10px;
         border-radius: 4px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
+         font-family: 'Arimo', sans-serif;
     }
 
     .casting-call-title {
-        color: #111827;
+        color: black;
         font-size: 18px;
         font-weight: 700;
         margin: 0 0 8px 0;
+         font-family: 'Arimo', sans-serif;
     }
 
     .casting-call-company {
@@ -269,10 +276,11 @@
         text-decoration: none;
         display: block;
         text-align: center;
+         font-family: 'Arimo', sans-serif;
     }
 
     .casting-call-button:hover {
-        
+
         color: #fff;
         text-decoration: none;
     }

@@ -26,7 +26,7 @@ font-style: normal;
 font-weight: 400;
 line-height: 32px; /* 133.333% */ }
     .admin-sub { margin: 2px 0 0; color: var(--ink-500); font-size: 13px; }
-    .add-btn { background: #0f1524; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.12); cursor: pointer; }
+    .add-btn { background: black; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;cursor: pointer; }
     .add-btn:hover, .add-btn:focus { color: #fff; opacity: 0.9; text-decoration: none; }
 
     .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }

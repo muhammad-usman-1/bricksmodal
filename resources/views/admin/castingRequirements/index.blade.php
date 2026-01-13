@@ -156,7 +156,7 @@ margin-bottom: 0;
         width: 38px;
         height: 38px;
         border-radius: 12px;
-        background: linear-gradient(135deg, #23313f, #0f1524);
+        background:  black;
         color: #fff;
         display: grid;
         place-items: center;
@@ -264,9 +264,9 @@ margin-bottom: 0;
     }
 
     .pager .btn-page.active {
-        background: #000;
+        background: black;
         color: #fff;
-        border-color: #000;
+        border-color: black;
     }
 
                 .pager .btn-page:hover:not(.active):not(.disabled) {
@@ -413,7 +413,7 @@ margin-bottom: 0;
     }
 
     .avatar-more {
-        background: #2C2C2E;
+        background: #000000;
         color: #fff;
         font-size: 14px;
         font-weight: 600;

@@ -14,8 +14,7 @@
         .bm-link-dropdown-toggle,
         .bm-sub-link,
         .bm-dropdown-items a,
-        .bm-footer,
-        .bm-footer * {
+        .bm-footer {
             font-family: 'Arimo', sans-serif;
             font-weight: 400;
             font-style: normal;
@@ -320,6 +319,8 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            text-align: left;
+            align-items: flex-start;
         }
 
         .bm-footer-name {
@@ -327,12 +328,14 @@
             font-weight: 700;
             font-size: 13px;
             margin: 0;
+            text-align: left;
         }
 
         .bm-footer-role {
             color: #6b7280;
             font-size: 11px;
             margin: 0;
+            text-align: left;
         }
 
         .bm-footer-arrow {

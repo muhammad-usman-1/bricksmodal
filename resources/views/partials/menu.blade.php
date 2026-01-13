@@ -266,7 +266,7 @@
             text-decoration: none;
             transition: background 0.15s ease, color 0.15s ease;
         }
-        .bm-link:hover { background: #eef1f6; color: #0f172a;   text-decoration: none;}
+        .bm-link:hover { background: #eef1f6; color: black;   text-decoration: none;}
         .bm-link i { color: #374151; width: 16px; text-align: center; }
         .bm-link.c-active {
             background: #000000;
@@ -492,7 +492,8 @@
             text-decoration: underline;
             text-decoration-color: #d1d5db;
             text-underline-offset: 4px;
-            font-weight: 500;
+            font-weight: 400;
+            text-align: left;
         }
         .bm-sub-link:hover { color: #000; text-decoration-color: #000; }
 

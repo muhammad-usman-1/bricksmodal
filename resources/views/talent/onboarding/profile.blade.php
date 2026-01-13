@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('styles')
     <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
@@ -13,7 +13,7 @@
             --ink-600: #4b5563;
             --ink-500: #6b7280;
             --border: #e5e8ef;
-            --primary: #0f0f0f;
+            --primary: black;
             --control: #fbfcff;
         }
 
@@ -40,11 +40,11 @@
             box-shadow: 0 20px 44px rgba(18, 33, 61, 0.12);
             position: relative;
             overflow: hidden;
-            
+
         }
 
         .wizard-hero {
-            background: #1a1a1a; 
+            background: black;
             padding: 40px 32px 32px;
             color: #fff;
             text-align: left;
@@ -164,6 +164,11 @@
             position: relative;
         }
 
+        /* DOB: use native date picker, disallow future dates */
+        .dob-input {
+            background: #f5f5f5;
+        }
+
         .dob-wrap svg, .nationality-wrapper svg {
             position: absolute;
             right: 12px;
@@ -268,7 +273,7 @@
         }
 
         .btn-primary {
-            background: #1a1a1a;
+            background: black;
             color: white;
             border: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -346,20 +351,20 @@
         }
 
         .seg-btn.is-active {
-            background: #222222;
+            background: black;
             color: #ffffff;
-            border-color: #222222;
+            border-color: black;
         }
 
         /* Icon Inversion Logic to match image exactly */
         /* Inactive buttons (white bg) -> Black icons */
         /* Active buttons (dark bg) -> White icons */
-        
-        .seg-btn:not(.is-active) img { 
+
+        .seg-btn:not(.is-active) img {
             filter: brightness(0); /* Force black */
         }
-        
-        .seg-btn.is-active img { 
+
+        .seg-btn.is-active img {
             filter: brightness(0) invert(1); /* Force white regardless of source color */
         }
 
@@ -371,7 +376,7 @@
         .hijab-group {
             display: inline-flex;
             gap: 32px;
-           
+
             background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
@@ -452,6 +457,10 @@
             align-items: center;
             justify-content: space-between;
             margin-top: 32px;
+        }
+        /* Step 4: when only submit is visible, keep it right */
+        .action-group.step4-right-only {
+            justify-content: flex-end;
         }
 
         .back-link {
@@ -698,16 +707,7 @@
             </div>
 
             <div class="wizard-body">
-                @if ($errors->any())
-                    <div class="alert" role="alert">
-                        <strong>Please fix the errors below:</strong>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                {{-- Removed top stacked error box; field-level errors only --}}
 
                 @if($currentStep == 'step-1')
                 <form method="POST" action="{{ route('talent.onboarding.store', 'step-1') }}" enctype="multipart/form-data">
@@ -738,7 +738,15 @@
                             <div class="field">
                                 <label for="date_of_birth">Date of Birth</label>
                                 <div class="dob-wrap">
-                                    <input id="date_of_birth" name="date_of_birth" class="control dob-input" type="date" value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}" required>
+                                    <input
+                                        id="date_of_birth"
+                                        name="date_of_birth"
+                                        class="control dob-input"
+                                        type="date"
+                                        value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}"
+                                        max="{{ \Carbon\Carbon::now()->subDay()->format('Y-m-d') }}"
+                                        required
+                                    >
                                 </div>
                             </div>
                             <div class="field">
@@ -763,8 +771,8 @@
                                     <span>+965</span>
                                 </div>
                                 <input type="hidden" name="country_code" value="{{ old('country_code', $profile->country_code ?? auth('talent')->user()->phone_country_code ?? 'kw') }}">
-                                <input class="control" id="mobile_number" name="mobile_number" type="tel" 
-                                    value="{{ old('mobile_number', $profile->mobile_number ?? auth('talent')->user()->phone_number) }}" 
+                                <input class="control" id="mobile_number" name="mobile_number" type="tel"
+                                    value="{{ old('mobile_number', $profile->mobile_number ?? auth('talent')->user()->phone_number) }}"
                                     readonly style="background-color: #e9ecef; cursor: not-allowed;" required>
                              </div>
 
@@ -793,14 +801,14 @@
                                     try {
                                         var waSec = document.getElementById('whatsapp_number_section');
                                         var waInp = document.getElementById('whatsapp_number_input');
-                                        
+
                                         function doToggle(forceVal) {
                                             var val = forceVal;
                                             if(!val) {
                                                 var chk = document.querySelector('input[name="whatsapp_choice"]:checked');
                                                 val = chk ? chk.value : 'same';
                                             }
-                                            
+
                                             if(waSec) {
                                                 waSec.style.display = (val === 'alt') ? 'block' : 'none';
                                                 if(waInp) {
@@ -815,7 +823,7 @@
                                         for(var i=0; i<radios.length; i++) {
                                             radios[i].addEventListener('change', function(e) { doToggle(this.value); });
                                         }
-                                        
+
                                         // Init immediately
                                         doToggle();
 
@@ -1011,6 +1019,9 @@
                              <div class="field">
                                  <label for="civil_id_number">Civil ID Number</label>
                                  <input id="civil_id_number" name="civil_id_number" class="control" type="text" placeholder="e.g. 290010101234" value="{{ old('civil_id_number', $profile->civil_id_number) }}">
+                                 @error('civil_id_number')
+                                     <span class="field-error">{{ $message }}</span>
+                                 @enderror
                              </div>
                                  <div class="upload-grid" style="margin-top:12px;">
                                      <div class="field">
@@ -1024,6 +1035,9 @@
                                                  <div class="upload-label" data-file-label="front">Drop files here to upload</div>
                                              </div>
                                          </label>
+                                         @error('id_front')
+                                             <span class="field-error">{{ $message }}</span>
+                                         @enderror
                                      </div>
                                      <div class="field">
                                          <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Back ID</label>
@@ -1036,6 +1050,9 @@
                                                  <div class="upload-label" data-file-label="back">Drop files here to upload</div>
                                              </div>
                                          </label>
+                                         @error('id_back')
+                                             <span class="field-error">{{ $message }}</span>
+                                         @enderror
                                      </div>
                                  </div>
                         </div>
@@ -1056,6 +1073,9 @@
                                              <div class="upload-label" data-file-label="headshot">Drop files here to upload</div>
                                          </div>
                                      </label>
+                                     @error('headshot')
+                                         <span class="field-error">{{ $message }}</span>
+                                     @enderror
                                  </div>
                                  <div class="field">
                                      <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Full Body</label>
@@ -1068,6 +1088,9 @@
                                              <div class="upload-label" data-file-label="fullbody">Drop files here to upload</div>
                                          </div>
                                      </label>
+                                     @error('fullbody')
+                                         <span class="field-error">{{ $message }}</span>
+                                     @enderror
                                  </div>
                                  <div class="field">
                                      <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Profile Video (Optional)</label>
@@ -1080,6 +1103,9 @@
                                              <div class="upload-label" data-file-label="video">Drop files here to upload</div>
                                          </div>
                                      </label>
+                                     @error('video')
+                                         <span class="field-error">{{ $message }}</span>
+                                     @enderror
                                  </div>
                              </div>
                         </div>
@@ -1108,8 +1134,8 @@
                             <div id="additional-photo-previews" class="photo-previews"></div>
                         </div>
 
-                        <div class="action-group">
-                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link">
+                        <div class="action-group" id="step4-action-group">
+                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link" id="step4-back-to-step3">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                 Back
                             </a>
@@ -1148,10 +1174,12 @@
 
             // 1. WhatsApp Logic - Moved inline for reliability
             // See Step 1 HTML block above
-            
+
             // 2. Nationality Flag Logic
             const natSelect = document.getElementById('nationality');
             const natFlag = document.getElementById('nationality_flag');
+
+            // 2b. DOB: native date picker is used; max attribute prevents future dates.
 
             function toggleNationalityFlag() {
                 if (natSelect && natFlag) {
@@ -1229,7 +1257,7 @@
                  document.querySelectorAll('.upload-card').forEach(card => {
                      const input = card.querySelector('input[type="file"]');
                      const label = card.querySelector('.upload-label');
-                     
+
                      if (!input) return;
 
                       const trimFileName = (name, maxLength = 25) => {
@@ -1283,7 +1311,7 @@
                      function handleDrop(e) {
                          const dt = e.dataTransfer;
                          const files = dt.files;
-                         
+
                          if(files.length > 0) {
                              input.files = files;
                              // Trigger change event manually
@@ -1298,6 +1326,8 @@
                   const backToMainBtn = document.getElementById('back-to-main-step4');
                   const mainSection = document.getElementById('step-4-main-section');
                   const additionalSection = document.getElementById('additional-photos-section');
+                  const backToStep3Btn = document.getElementById('step4-back-to-step3');
+                  const step4ActionGroup = document.getElementById('step4-action-group');
                   const multiUploadArea = document.getElementById('multi-upload-area');
                   const multiInput = document.getElementById('additional_photos_input');
                   const previewContainer = document.getElementById('additional-photo-previews');
@@ -1309,6 +1339,10 @@
                           mainSection.style.display = 'none';
                           additionalSection.style.display = 'block';
                           addMoreBtn.style.display = 'none'; // Hide the "Add more" button
+                          // Hide back-to-step-3 while inside "Add More Photos"
+                          if (backToStep3Btn) backToStep3Btn.style.display = 'none';
+                          // Keep submit aligned to the right when only one action is visible
+                          if (step4ActionGroup) step4ActionGroup.classList.add('step4-right-only');
                       });
                   }
 
@@ -1317,6 +1351,9 @@
                           additionalSection.style.display = 'none';
                           mainSection.style.display = 'block';
                           if(addMoreBtn) addMoreBtn.style.display = 'inline-flex'; // Show it back
+                          // Show back-to-step-3 again when returning to main Step 4 sections
+                          if (backToStep3Btn) backToStep3Btn.style.display = '';
+                          if (step4ActionGroup) step4ActionGroup.classList.remove('step4-right-only');
                       });
                   }
 
@@ -1422,7 +1459,7 @@
                     formStep2.addEventListener('submit', function(e) {
                          let isValid = true;
                          let errorMsg = '';
-                        
+
                         // Validate Step 2
                         const height = document.getElementById('height')?.value;
                         const weight = document.getElementById('weight')?.value;
@@ -1435,7 +1472,7 @@
                             isValid = false;
                             errorMsg = 'Please fill in all required fields (Height, Weight, Eye Color, Skin Tone).';
                         }
-                        
+
                         // Check hair color if visible
                         if (isValid && hairColor && hairColor.offsetParent !== null && !hairColor.value) {
                              isValid = false;
@@ -1452,7 +1489,7 @@
                              isValid = false;
                              errorMsg = 'Hair Color and Eye Color must be text only (no numbers).';
                         }
-                        
+
                         // Check radios
                          if (isValid) {
                              const tattoos = document.querySelector('input[name="has_visible_tattoos"]:checked');
@@ -1461,7 +1498,7 @@
                                   errorMsg = 'Please select if you have visible tattoos.';
                              }
                          }
-                         
+
                          if (isValid) {
                              const piercings = document.querySelector('input[name="has_piercings"]:checked');
                              if (!piercings) {
@@ -1469,7 +1506,7 @@
                                   errorMsg = 'Please select if you have piercings.';
                              }
                          }
-                         
+
                          if (!isValid) {
                             e.preventDefault();
                             Swal.fire({
@@ -1481,7 +1518,7 @@
                         }
                     });
                 }
-                
+
                 // Step 3 Form
                 const formStep3 = document.querySelector('form[action*="step-3"]');
                 if(formStep3) {
@@ -1513,7 +1550,7 @@
                     e.preventDefault();
                     e.stopPropagation(); // Stop bubbling
                     console.log('Logout clicked');
-                    
+
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "Even if you log out, all the data filled so far in the completed steps will be saved.",
@@ -1538,7 +1575,7 @@
                 logoutTrigger.addEventListener('mouseenter', () => logoutTrigger.style.opacity = '1');
                 logoutTrigger.addEventListener('mouseleave', () => logoutTrigger.style.opacity = '0.8');
             }
-            
+
         })();
     </script>
 @endsection

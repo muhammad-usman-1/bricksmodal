@@ -215,6 +215,56 @@
     .is-editing .display-mode-only { display: none !important; }
     .top-actions-right-display { display: flex; gap: 10px; }
 
+    /* Actions (3-dot) menu */
+    .actions-menu { position: relative; }
+    .actions-trigger {
+        width: 40px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: var(--ink-700);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .actions-trigger:hover { background: #f9fafb; border-color: #cbd5e1; color: var(--ink-900); }
+    .actions-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        width: 180px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 18px 32px rgba(15,23,42,0.12);
+        padding: 6px 0;
+        display: none;
+        z-index: 50;
+        text-align: left;
+    }
+    .actions-dropdown.show { display: block; }
+    .actions-item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #111827;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .actions-item:hover { background: #f3f4f6; text-decoration: none; color: #111827; }
+    .actions-item i { width: 16px; text-align: center; color: #6b7280; }
+    .actions-item.danger { color: #b91c1c; }
+    .actions-item.danger i { color: #b91c1c; }
+
     .inline-edit-input {
         width: 100%;
         border: 1px solid #cbd5e1;
@@ -413,12 +463,25 @@
             </div>
             <div class="top-actions-right">
                 <div class="display-mode-only top-actions-right-display">
-                    @can('talent_profile_delete')
-                        <button type="submit" form="delete-talent-form" class="btn" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                            <i class="far fa-trash-alt"></i> Delete profile
+                    <button type="button" class="edit-btn" id="startEditBtn" style="display:none;">Edit profile</button>
+
+                    <div class="actions-menu" id="talentActionsMenu">
+                        <button type="button" class="actions-trigger" id="talentActionsBtn" aria-haspopup="true" aria-expanded="false" aria-label="Actions">
+                            <i class="fas fa-ellipsis-v"></i>
                         </button>
-                    @endcan
-                    <button type="button" class="edit-btn" id="startEditBtn">Edit profile</button>
+                        <div class="actions-dropdown" id="talentActionsDropdown" role="menu" aria-label="Talent actions">
+                            @can('talent_profile_edit')
+                                <button type="button" class="actions-item" id="talentActionEdit">
+                                    <i class="far fa-edit"></i> Edit
+                                </button>
+                            @endcan
+                            @can('talent_profile_delete')
+                                <button type="button" class="actions-item danger" id="talentActionDelete">
+                                    <i class="far fa-trash-alt"></i> Delete
+                                </button>
+                            @endcan
+                        </div>
+                    </div>
                 </div>
                 <div class="edit-mode-only">
                     <button type="button" class="cancel-btn" id="cancelEditBtn">Cancel</button>
@@ -653,9 +716,10 @@
     </form> {{-- end talentEditForm --}}
 
     <div class="action-bar display-mode-only">
-        <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;">
+        <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;" id="reject-talent-form">
             @csrf
-            <button type="submit" class="btn-reject"><i class="fas fa-times"></i> Reject</button>
+            <input type="hidden" name="notes" id="rejectNotesInput" value="">
+            <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> Reject</button>
         </form>
         @if(($talentProfile->verification_status ?? '') !== 'approved')
             <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
@@ -957,6 +1021,56 @@
             });
         }
 
+        // Actions dropdown (3-dot)
+        const actionsBtn = document.getElementById('talentActionsBtn');
+        const actionsDropdown = document.getElementById('talentActionsDropdown');
+        const actionEdit = document.getElementById('talentActionEdit');
+        const actionDelete = document.getElementById('talentActionDelete');
+        const deleteForm = document.getElementById('delete-talent-form');
+
+        const closeActions = () => {
+            if (!actionsDropdown || !actionsBtn) return;
+            actionsDropdown.classList.remove('show');
+            actionsBtn.setAttribute('aria-expanded', 'false');
+        };
+        const toggleActions = (e) => {
+            e?.stopPropagation?.();
+            if (!actionsDropdown || !actionsBtn) return;
+            const willShow = !actionsDropdown.classList.contains('show');
+            actionsDropdown.classList.toggle('show', willShow);
+            actionsBtn.setAttribute('aria-expanded', willShow ? 'true' : 'false');
+        };
+
+        if (actionsBtn && actionsDropdown) {
+            actionsBtn.addEventListener('click', toggleActions);
+            document.addEventListener('click', (e) => {
+                if (!actionsDropdown.contains(e.target) && !actionsBtn.contains(e.target)) closeActions();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeActions();
+            });
+        }
+
+        if (actionEdit && startEditBtn) {
+            actionEdit.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeActions();
+                startEditBtn.click();
+            });
+        }
+
+        if (actionDelete && deleteForm) {
+            actionDelete.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeActions();
+                if (typeof deleteForm.requestSubmit === 'function') {
+                    deleteForm.requestSubmit();
+                } else {
+                    deleteForm.submit();
+                }
+            });
+        }
+
         if (cancelEditBtn && form) {
             cancelEditBtn.addEventListener('click', () => {
                 // To properly cancel, we just reload the page to discard unsaved state
@@ -1052,6 +1166,37 @@
             editForm.addEventListener('submit', function(e) {
                 // Let the form submit normally
                 // The success message will be handled by the redirect response
+            });
+        }
+
+        // Reject flow: prompt optional notes then submit
+        const rejectBtn = document.getElementById('rejectTalentBtn');
+        const rejectForm = document.getElementById('reject-talent-form');
+        const rejectNotesInput = document.getElementById('rejectNotesInput');
+
+        if (rejectBtn && rejectForm && typeof Swal !== 'undefined') {
+            rejectBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const result = await Swal.fire({
+                    title: 'Reject talent?',
+                    text: 'Optionally add a reason (visible to admin logs / notifications).',
+                    input: 'textarea',
+                    inputPlaceholder: 'Add notes (optional)',
+                    inputAttributes: { maxlength: 500 },
+                    showCancelButton: true,
+                    confirmButtonText: 'Reject',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#0f1524',
+                    cancelButtonColor: '#9ca3af',
+                    focusConfirm: false
+                });
+
+                if (result.isConfirmed) {
+                    if (rejectNotesInput) {
+                        rejectNotesInput.value = (result.value || '').trim();
+                    }
+                    rejectForm.submit();
+                }
             });
         }
 

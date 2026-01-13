@@ -152,7 +152,9 @@ class TalentProfileController extends Controller
 
         $this->removeTalentProfile($talentProfile, true);
 
-        return back();
+        return redirect()
+            ->route('admin.talents.dashboard')
+            ->with('message', 'Talent deleted successfully.');
     }
 
     public function massDestroy(MassDestroyTalentProfileRequest $request)
@@ -189,16 +191,16 @@ class TalentProfileController extends Controller
         abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $data = $request->validate([
-            'notes' => ['required', 'string', 'max:500'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
         $talentProfile->update([
             'verification_status' => 'rejected',
-            'verification_notes'  => $data['notes'],
+            'verification_notes'  => $data['notes'] ?? null,
             'onboarding_step'     => 'pending-approval',
         ]);
 
-        $this->notifyTalent($talentProfile, 'rejected', trans('notifications.talent_profile_rejected'), $data['notes']);
+        $this->notifyTalent($talentProfile, 'rejected', trans('notifications.talent_profile_rejected'), $data['notes'] ?? null);
 
         return back()->with('message', trans('notifications.status_updated'));
     }

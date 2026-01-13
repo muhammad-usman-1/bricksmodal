@@ -10,13 +10,13 @@
         --ink-500: #667085;
         --border: #eaecf0;
         --shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
-        --head: #2d2d2d;
+        --head: black;
     }
 
-    .pay-shell { 
-        
+    .pay-shell {
+
     }
-    
+
     .pay-title {
         color: #101828;
         font-size: 24px;
@@ -24,10 +24,10 @@
         line-height: 32px;
         margin-bottom: 4px;
     }
-    .pay-sub { 
-        color: #667085; 
-        font-size: 14px; 
-        margin-bottom: 32px; 
+    .pay-sub {
+        color: #667085;
+        font-size: 14px;
+        margin-bottom: 32px;
     }
 
     /* Stat cards redesigned */
@@ -47,89 +47,89 @@
         flex-direction: column;
         justify-content: space-between;
     }
-    .stat-top { 
-        display: flex; 
-        align-items: flex-start; 
+    .stat-top {
+        display: flex;
+        align-items: flex-start;
         justify-content: space-between;
         margin-bottom: 8px;
     }
-    .stat-label { 
-        color: #667085; 
-        font-size: 14px; 
+    .stat-label {
+        color: #667085;
+        font-size: 14px;
         font-weight: 400;
-        margin: 0; 
+        margin: 0;
     }
-    .stat-value { 
+    .stat-value {
         font-size: 24px;
-        font-weight:400; 
-        color: #101828; 
-        margin: 0 0 12px 0; 
+        font-weight:400;
+        color: #101828;
+        margin: 0 0 12px 0;
     }
-    .stat-trend { 
-        font-size: 14px; 
-        color: #12b76a; 
+    .stat-trend {
+        font-size: 14px;
+        color: #12b76a;
         font-weight: 500;
-        margin: 0; 
-        display: flex; 
-        align-items: center; 
-        gap: 4px; 
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
-    .stat-icon { 
-        width: 40px; 
-        height: 40px; 
-        border-radius: 8px; 
-        display: grid; 
-        place-items: center; 
-        background: #f2f4f7; 
-        color: #344054; 
-        font-size: 18px; 
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: #f2f4f7;
+        color: #344054;
+        font-size: 18px;
     }
     .stat-icon i { color: #344054; }
 
-    .panel { 
-        background: #fff; 
-        border: 1px solid var(--border); 
-        border-radius: 12px; 
-        box-shadow: var(--shadow); 
-        overflow: hidden; 
+    .panel {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
     }
     .panel-header-section {
         padding: 24px;
         border-bottom: 1px solid var(--border);
     }
-    .panel-title { 
-        margin: 0 0 16px 0; 
-        color: #101828; 
-        font-weight: 600; 
+    .panel-title {
+        margin: 0 0 16px 0;
+        color: #101828;
+        font-weight: 600;
         font-size: 18px;
     }
-    
+
     .filter-dropdown { position: relative; }
-    .filter-toggle { 
-        border: 1px solid var(--border); 
-        background: #fff; 
-        border-radius: 8px; 
-        padding: 10px 16px; 
-        font-size: 14px; 
-        color: #344054; 
-        display: inline-flex; 
-        align-items: center; 
+    .filter-toggle {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #344054;
+        display: inline-flex;
+        align-items: center;
         gap: 8px;
         font-weight: 500;
         box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
     }
-    .filter-menu { 
-        position: absolute; 
-        left: 0; 
-        top: 110%; 
-        min-width: 200px; 
-        background: #fff; 
-        border: 1px solid var(--border); 
-        border-radius: 8px; 
-        box-shadow: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03); 
-        padding: 4px 0; 
-        z-index: 100; 
-        display: none; 
+    .filter-menu {
+        position: absolute;
+        left: 0;
+        top: 110%;
+        min-width: 200px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+        padding: 4px 0;
+        z-index: 100;
+        display: none;
     }
     .filter-menu a { display: block; padding: 10px 16px; font-size: 14px; color: #344054; text-decoration: none; }
     .filter-menu a:hover { background: #f9fafb; }
@@ -137,62 +137,62 @@
 
     .table-wrap { overflow-x: auto; }
     .pay-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .pay-table thead th { 
-        background: #323232; 
-        color: #fff; 
-        padding: 16px; 
-        font-weight: 500; 
-        border: none; 
-        white-space: nowrap; 
+    .pay-table thead th {
+        background: black;
+        color: #fff;
+        padding: 16px;
+        font-weight: 500;
+        border: none;
+        white-space: nowrap;
         text-align: left;
     }
-    .pay-table tbody td { 
-        padding: 16px; 
-        border-bottom: 1px solid var(--border); 
-        color: #475467; 
-        vertical-align: middle; 
+    .pay-table tbody td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        color: #475467;
+        vertical-align: middle;
     }
 
     .talent-cell { display: flex; flex-direction: column; gap: 2px; }
     .talent-name { color: #101828; font-weight: 500; margin: 0; font-size: 14px; }
     .talent-sub { color: #667085; font-size: 13px; margin: 0; }
     .project-name { color: #475467; font-weight: 400; }
-    
+
     .rating-stars { color: #101828; font-size: 10px; margin-top: 2px; }
-    
+
     .amount { color: #12b76a; font-weight: 600; }
 
     .action-row { display: flex; gap: 8px; align-items: center; }
-    .btn-pill { 
-        border: none; 
-        border-radius: 8px; 
-        padding: 8px 14px; 
-        font-size: 13px; 
-        font-weight: 600; 
-        color: #fff; 
-        cursor: pointer; 
+    .btn-pill {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 6px;
         transition: all 0.2s;
         text-decoration: none !important;
     }
-    .btn-pill:hover { 
-        color: #fff !important; 
+    .btn-pill:hover {
+        color: #fff !important;
         text-decoration: none;
         opacity: 0.9;
     }
-    .btn-approve { background: #12b76a; }
-    .btn-approve:hover { background: #12b76a; }
-    .btn-release { background: #12b76a; }
-    .btn-release:hover { background: #12b76a; }
-    .btn-reject { background: #f04438; }
-    .btn-reject:hover { background: #f04438; }
+    .btn-approve { background: #10B981; }
+    .btn-approve:hover { background: #10B981 }
+    .btn-release { background: #10B981 }
+    .btn-release:hover { background: #10B981 }
+    .btn-reject { background: #EF4444 }
+    .btn-reject:hover { background: #EF4444 }
     .btn-view { background: #f2f4f7; color: #344054; }
     .btn-view:hover { background: #e5e7eb; color: #344054 !important; }
 
     .table-foot { padding: 16px 24px; color: #667085; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); }
-    
+
     /* Responsive tweaks */
     @media (max-width: 1024px) {
         .stat-col { margin-bottom: 16px; }
@@ -256,7 +256,7 @@
                     <p class="stat-label">Total Pending Amount</p>
                     <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                 </div>
-                <p class="stat-value">${{ number_format($stats['total_amount_pending'], 2) }}</p>
+                <p class="stat-value">{{ number_format($stats['total_amount_pending'], 2) }} KWD</p>
                 <p class="stat-trend"><i class="fas fa-arrow-up"></i> +23% vs last month</p>
             </div>
         </div>
@@ -346,7 +346,7 @@
                                     <span class="talent-sub">No feedback</span>
                                 @endif
                             </td>
-                            <td data-label="Amount" class="amount">${{ number_format($amount, 2) }}</td>
+                            <td data-label="Amount" class="amount">{{ number_format($amount, 2) }} KWD</td>
                             <td data-label="Requested Date">
                                 @if($requestedAt)
                                     {{ $requestedAt->format('M d, Y') }}<br>

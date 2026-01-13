@@ -55,8 +55,7 @@
     .project-show-page {
         background: #f3f4f6;
         min-height: 100vh;
-        padding: 32px 0;
-        font-family: 'Inter', sans-serif;
+      font-family: 'Arimo', sans-serif;
     }
 
     .project-show-container {
@@ -387,6 +386,75 @@
         font-weight: 600;
     }
 
+    /* Applied state (Application Status card) */
+    .apply-status-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0 0 10px 0;
+        color: #fff;
+    }
+    .apply-status-subtitle {
+        color: #9ca3af;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 0 0 18px 0;
+    }
+    .status-steps {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 18px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .status-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #d1d5db;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .status-circle {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        border: 2px solid #4b5563;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        color: #111827;
+        background: transparent;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 900;
+    }
+    .status-step.done {
+        color: #e5e7eb;
+    }
+    .status-step.done .status-circle {
+        background: #fff;
+        border-color: #fff;
+    }
+    .apply-status-note {
+        color: #9ca3af;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0 0 18px 0;
+    }
+    .apply-btn-success {
+        background: #10b981 !important;
+        color: #fff !important;
+        opacity: 1 !important;
+        cursor: default !important;
+        margin-bottom: 18px;
+    }
+    .apply-divider {
+        border-top: 1px solid #374151;
+        margin: 18px 0 18px 0;
+    }
+
     /* Modal Styles */
     .apply-modal-overlay {
         position: fixed;
@@ -405,10 +473,19 @@
         max-width: 500px;
         width: 100%;
         max-height: 90vh;
-        overflow-y: auto;
+        overflow: hidden; /* prevent visible scrollbar on container */
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
+        min-height: 0; /* allow children to shrink for scrolling */
+    }
+
+    /* Make the form fill the modal so body can scroll */
+    .apply-modal-container form {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
     }
 
     .modal-header {
@@ -417,6 +494,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        flex: 0 0 auto;
     }
 
     .modal-title {
@@ -453,6 +531,14 @@
     .modal-body {
         padding: 24px;
         overflow-y: auto;
+        flex: 1 1 auto;
+        min-height: 0; /* critical for flexbox scroll containers */
+        scrollbar-width: none;       /* Firefox */
+        -ms-overflow-style: none;    /* IE/Edge legacy */
+    }
+    .modal-body::-webkit-scrollbar { /* Chrome/Safari */
+        width: 0;
+        height: 0;
     }
 
     .section-label {
@@ -515,10 +601,15 @@
     /* Form Elements */
     .input-group {
         margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .rate-input-wrapper {
         position: relative;
+        display: flex;
+        align-items: center;
     }
 
     .rate-input {
@@ -530,6 +621,16 @@
         color: #111827;
         outline: none;
         transition: border-color 0.2s;
+    }
+    /* Remove number spinners / stepper controls */
+    .rate-input::-webkit-outer-spin-button,
+    .rate-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .rate-input {
+        -moz-appearance: textfield;
+        appearance: textfield;
     }
     .rate-input:focus {
         border-color: #d1d5db;
@@ -563,6 +664,7 @@
         display: flex;
         align-items: flex-start;
         gap: 12px;
+        border: 1px solid #fde68a;
     }
 
     .checkbox-custom {
@@ -654,6 +756,7 @@
         display: flex;
         justify-content: flex-end;
         gap: 12px;
+        flex: 0 0 auto;
     }
 
     .btn-cancel {
@@ -678,6 +781,10 @@
         display: flex;
         align-items: center;
         gap: 6px;
+    }
+    .btn-submit:disabled {
+        opacity: 1;
+        cursor: not-allowed;
     }
 
     /* Active submit state */
@@ -774,7 +881,7 @@
                     <h2 class="section-heading">Shoot Brief</h2>
                     <div class="brief-card">
                         <p class="brief-text">
-                            {{ $castingRequirement->description ?? 'We are looking for diverse, confident models to showcase our new summer collection in a vibrant beach setting. The shoot will capture the essence of summer freedom and style, featuring flowing fabrics, bright colors, and natural lighting. Models should be comfortable with outdoor shooting conditions and able to convey energy and joy through their poses. Previous experience with fashion photography is preferred but not required. We value authenticity and natural beauty over conventional standards.' }}
+                            {{ $castingRequirement->notes ?? $castingRequirement->description ?? 'We are looking for diverse, confident models to showcase our new summer collection in a vibrant beach setting. The shoot will capture the essence of summer freedom and style, featuring flowing fabrics, bright colors, and natural lighting. Models should be comfortable with outdoor shooting conditions and able to convey energy and joy through their poses. Previous experience with fashion photography is preferred but not required. We value authenticity and natural beauty over conventional standards.' }}
                         </p>
                     </div>
                 </div>
@@ -798,28 +905,103 @@
             <!-- Right Column (Apply) -->
             <div class="right-col">
                 <div class="apply-card">
-                    <h3 class="apply-title">Ready to Apply?</h3>
-                    <p class="apply-subtitle">Submit your profile for review by the casting team.</p>
-
                     @if(isset($existingApplication) && $existingApplication)
-                        <button class="apply-btn" disabled>APPLIED</button>
+                        @php
+                            // CastingApplication::STATUS_SELECT values are:
+                            // applied, shortlisted, rejected, selected, did_not_show
+                            // UI steps (per design): Applied, Shortlisted, Backup, Selected, Denied
+                            $rawStatus = $existingApplication->status ?? 'applied';
+                            $statusToUiStep = [
+                                'applied'      => 'applied',
+                                'shortlisted'  => 'shortlisted',
+                                'selected'     => 'selected',
+                                'rejected'     => 'rejected',     // shown as "Denied"
+                                'did_not_show' => 'backup',       // closest match in UI
+                            ];
+                            $activeStep = $statusToUiStep[$rawStatus] ?? 'applied';
+
+                            $statusSteps = [
+                                'applied'     => 'Applied',
+                                'shortlisted' => 'Shortlisted',
+                                'backup'      => 'Backup',
+                                'selected'    => 'Selected',
+                                'rejected'    => 'Denied',
+                            ];
+                            $orderedKeys = array_keys($statusSteps);
+
+                            // Completed steps: always Applied + the current active step (if different)
+                            $completedSteps = array_values(array_unique(array_filter([
+                                'applied',
+                                $activeStep,
+                            ])));
+
+                            $activeIndex = array_search($activeStep, $orderedKeys, true);
+
+                            // Dynamic card copy based on status
+                            $statusSubtitle = 'Your profile has been submitted';
+                            $statusNote = 'Your application is under review by the casting team.';
+                            if ($activeStep === 'selected') {
+                                $statusNote = 'Congratulations! You have been selected by the casting team.';
+                            } elseif ($activeStep === 'rejected') {
+                                $statusNote = 'Your application has been denied by the casting team.';
+                            } elseif ($activeStep === 'backup') {
+                                $statusNote = 'You are marked as backup for this shoot.';
+                            }
+                        @endphp
+
+                        <h3 class="apply-status-title">Application Status</h3>
+                        <p class="apply-status-subtitle">{{ $statusSubtitle }}</p>
+
+                        <ul class="status-steps">
+                            @foreach($statusSteps as $key => $label)
+                                @php
+                                    $isDone = in_array($key, $completedSteps, true);
+                                @endphp
+                                <li class="status-step {{ $isDone ? 'done' : '' }}">
+                                    <span class="status-circle">{{ $isDone ? '✓' : '' }}</span>
+                                    <span>
+                                        {{ $label }}
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p class="apply-status-note">{{ $statusNote }}</p>
+                        <button class="apply-btn apply-btn-success" disabled>APPLIED!</button>
+                        <div class="apply-divider"></div>
+
+                        <div class="apply-meta">
+                            <span class="meta-label">Duration:</span>
+                            <span class="meta-value">{{ $duration }}</span>
+                        </div>
+                        <div class="apply-meta">
+                            <span class="meta-label">Apply Before:</span>
+                            <span class="meta-value">{{ $applicationDeadline }}</span>
+                        </div>
+                        <div class="apply-meta" style="margin-bottom: 0;">
+                            <span class="meta-label">Location:</span>
+                            <span class="meta-value">{{ $castingRequirement->location ?? 'Location' }}</span>
+                        </div>
                     @else
+                        <h3 class="apply-title">Ready to Apply?</h3>
+                        <p class="apply-subtitle">Submit your profile for review by the casting team.</p>
+
                         <!-- Trigger Modal -->
                         <button type="button" class="apply-btn" id="openApplyModal">APPLY NOW ></button>
+
+                        <div class="apply-terms">
+                            By applying, you agree to our terms and conditions. Response time is typically 2-3 business days.
+                        </div>
+
+                        <div class="apply-meta">
+                            <span class="meta-label">Duration:</span>
+                            <span class="meta-value">{{ $duration }}</span>
+                        </div>
+                        <div class="apply-meta">
+                            <span class="meta-label">Apply Before:</span>
+                            <span class="meta-value">{{ $applicationDeadline }}</span>
+                        </div>
                     @endif
-
-                    <div class="apply-terms">
-                        By applying, you agree to our terms and conditions. Response time is typically 2-3 business days.
-                    </div>
-
-                    <div class="apply-meta">
-                        <span class="meta-label">Duration:</span>
-                        <span class="meta-value">{{ $duration }}</span>
-                    </div>
-                    <div class="apply-meta">
-                        <span class="meta-label">Apply Before:</span>
-                        <span class="meta-value">{{ $applicationDeadline }}</span>
-                    </div>
                 </div>
             </div>
 
@@ -868,11 +1050,22 @@
                 </div>
 
                 <!-- Rate Input -->
-                <div class="input-group" style="align-items: flex-start;">
-                    <label class="section-label" style="margin-top: 10px;">Enter Your Shoot Rate (KWD)</label>
-                    <div class="rate-input-wrapper" style="align-items: center;">
-                        <input type="number" name="rate" class="rate-input" placeholder="Enter your rate (KWD)" step="0.01" required>
-
+                <div class="input-group">
+                    <label class="section-label">Enter Your Shoot Rate</label>
+                    <div class="rate-input-wrapper">
+                        <input
+                            type="text"
+                            name="rate"
+                            class="rate-input"
+                            placeholder="Enter your rate"
+                            inputmode="decimal"
+                            autocomplete="off"
+                            required
+                            id="rateInput"
+                            pattern="^\d+(\.\d{1,2})?$"
+                            title="Please enter a valid number (up to 2 decimals)."
+                        >
+                        <span class="currency-symbol">KWD</span>
                     </div>
                 </div>
 
@@ -922,8 +1115,8 @@
                             <div class="checkbox-bg"></div>
                         </div>
                         <div>
-                            <span class="checkbox-text">I confirm my profile is accurate, I have no undisclosed injuries...</span>
-                            <span class="checkbox-subtext">Please read <a href="#" style="color:#2563eb;">terms and polices</a></span>
+                            <span class="checkbox-text">I confirm my profile is accurate, I have no undisclosed injuries or physical limitations, and I accept all terms and policies.</span>
+                            <span class="checkbox-subtext">Please read <a href="#" style="color:#2563eb;">terms and policies</a></span>
                         </div>
                     </div>
                 </div>
@@ -939,7 +1132,7 @@
             <!-- Footer -->
             <div class="modal-footer">
                 <button type="button" class="btn-cancel" id="cancelApply">Cancel</button>
-                <button type="submit" class="btn-submit active">APPLY NOW ></button>
+                <button type="submit" class="btn-submit" id="submitApplyBtn" disabled>APPLY NOW ></button>
             </div>
         </form>
     </div>
@@ -954,6 +1147,9 @@
         const cancelBtn = document.getElementById('cancelApply');
         const messageBox = document.getElementById('messageBox');
         const charCount = document.getElementById('charCount');
+        const rateInput = document.getElementById('rateInput');
+        const submitBtn = document.getElementById('submitApplyBtn');
+        const applyForm = document.getElementById('applyForm');
 
         function openModal() {
             if(modal) {
@@ -989,6 +1185,49 @@
                 charCount.textContent = this.value.length;
             });
         }
+
+        // Enable submit only when form is valid (checkboxes + rate)
+        function updateSubmitState() {
+            if (!applyForm || !submitBtn) return;
+            const isValid = applyForm.checkValidity();
+            submitBtn.disabled = !isValid;
+            submitBtn.classList.toggle('active', isValid);
+        }
+
+        // Rate: allow only numbers + optional decimal (2dp), remove spinner behavior
+        function sanitizeRate(value) {
+            if (!value) return '';
+            // keep digits and dots only
+            let v = value.replace(/[^\d.]/g, '');
+            // keep only first dot
+            const firstDot = v.indexOf('.');
+            if (firstDot !== -1) {
+                v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+                // limit decimals to 2
+                const parts = v.split('.');
+                if (parts[1] && parts[1].length > 2) {
+                    v = parts[0] + '.' + parts[1].slice(0, 2);
+                }
+            }
+            return v;
+        }
+
+        if (applyForm) {
+            applyForm.addEventListener('input', updateSubmitState);
+            applyForm.addEventListener('change', updateSubmitState);
+        }
+        if (rateInput) {
+            rateInput.addEventListener('input', function() {
+                const cleaned = sanitizeRate(this.value);
+                if (cleaned !== this.value) this.value = cleaned;
+                updateSubmitState();
+            });
+            // prevent mouse wheel from changing values / scrolling the input
+            rateInput.addEventListener('wheel', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+        }
+        updateSubmitState();
 
         // Close on Escape key
         document.addEventListener('keydown', function(e) {
