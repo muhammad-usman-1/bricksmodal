@@ -308,7 +308,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #0f0f11;
+            background: black;
             color: #fff;
             display: grid;
             place-items: center;
