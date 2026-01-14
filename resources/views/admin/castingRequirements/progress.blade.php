@@ -10,7 +10,11 @@
         --primary: #000;
         --accent: #22c55e;
     }
-    body { background: var(--bg); font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); }
+
+    .dashboard-container {
+        font-family: 'Inter', 'Arial', sans-serif;
+    }
 
     /* Main Container */
     .dashboard-container {

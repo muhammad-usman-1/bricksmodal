@@ -16,6 +16,9 @@
 
     body {
         background: var(--bg);
+    }
+
+    .dash-shell {
         font-family: 'Inter', 'Arial', sans-serif;
     }
 
