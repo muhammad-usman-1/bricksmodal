@@ -122,11 +122,11 @@ margin-bottom: 0;
 
     .add-btn:focus, .add-btn:active, .add-btn:hover {
         color: #fff;
-        background: #111111;
+        background: black;
         outline: none;
         text-decoration: none;
         transform: translateY(-2px);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        
     }
 
     .shoot-card {
