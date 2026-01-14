@@ -444,7 +444,7 @@ line-height: 36px;
                     </thead>
                     <tbody>
                         @php
-                            $talentRows = $talents instanceof \Illuminate\Support\Collection ? $talents->take(4) : collect($talents)->take(4);
+                            $talentRows = $talents instanceof \Illuminate\Support\Collection ? $talents : collect($talents);
                         @endphp
                         @forelse($talentRows as $talent)
                             @php
@@ -460,18 +460,31 @@ line-height: 36px;
                                         $phoneNumber = $phone;
                                     }
                                 }
+                                
+                                // Image loading logic using Storage for S3 support
+                                $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
                                 $avatar = null;
+                                
                                 if (!empty($talent->headshot_center_path)) {
-                                    $publicPath = public_path('storage/' . ltrim($talent->headshot_center_path, '/'));
-                                    if (file_exists($publicPath)) {
-                                        $avatar = asset('storage/' . ltrim($talent->headshot_center_path, '/'));
+                                    $path = $talent->headshot_center_path;
+                                    // Check if it's already a full URL
+                                    if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
+                                        $avatar = $path;
                                     } else {
-                                        $avatar = $talent->headshot_center_path;
+                                        // Use Storage to get the URL (works for both S3 and local)
+                                        $cleanPath = ltrim($path, '/');
+                                        try {
+                                            $avatar = $storageDisk->url($cleanPath);
+                                        } catch (\Exception $e) {
+                                            $avatar = asset('storage/' . $cleanPath);
+                                        }
                                     }
                                 }
+                                
                                 if (empty($avatar)) {
                                     $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=eff2f7&color=0f1524&rounded=true&size=64';
                                 }
+                                
                                 $status = $talent->verification_status ?? 'pending';
                             @endphp
                             <tr>

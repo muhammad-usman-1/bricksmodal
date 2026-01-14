@@ -10,7 +10,7 @@ class HomeController
 {
     public function index(Request $request)
     {
-        // Base query to filter out admin users and only show complete talent profiles
+        // Base query to filter out admin users and only show talents who completed onboarding
         $baseQuery = TalentProfile::with('user')
             ->whereHas('user', function ($query) {
                 // Exclude users with admin, superadmin, or creative roles
@@ -18,10 +18,7 @@ class HomeController
                     $roleQuery->whereIn('title', ['admin', 'superadmin', 'creative']);
                 });
             })
-            ->whereNotNull('date_of_birth') // Age is required
-            ->whereNotNull('height') // Height is required
-            ->whereNotNull('id_front_path') // ID front document is required
-            ->whereNotNull('id_back_path'); // ID back document is required
+            ->where('onboarding_steps_completed', '>=', 3); // Only show talents who completed at least step 3
 
         // Calculate stats with the same filters
         $total = (clone $baseQuery)->count();
@@ -36,8 +33,8 @@ class HomeController
             'active_campaigns' => $activeCampaigns,
         ];
 
-        // Get recent talents with the same filters
-        $talents = (clone $baseQuery)->latest()->take(7)->get();
+        // Get recent 4 talents with the same filters
+        $talents = (clone $baseQuery)->latest()->take(4)->get();
 
         return view('home', compact('stats', 'talents'));
     }
