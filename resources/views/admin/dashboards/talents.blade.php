@@ -34,7 +34,7 @@ line-height: 36px; /* 150% */}
     .search-input { min-width: 240px; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--ink-700); background: #fff; }
     .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
     .pill-btn { border: 1px solid var(--border); background: #fff; color: var(--ink-700); border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; transition: all .15s ease; }
-    .pill-btn.active { background: #0f1524; color: #fff; border-color: #0f1524; }
+    .pill-btn.active { background: black; color: #fff; border-color: #0f1524; }
 
     .talent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.2s ease; cursor: pointer; }
