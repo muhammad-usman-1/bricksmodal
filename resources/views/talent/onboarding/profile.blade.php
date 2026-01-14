@@ -894,11 +894,35 @@
                         <div class="field-grid" style="margin-top:20px;">
                             <div class="field" id="hair_color_field">
                                 <label for="hair_color">Hair Color</label>
-                                <input id="hair_color" name="hair_color" class="control" type="text" placeholder="e.g. Brown" value="{{ old('hair_color', $profile->hair_color) }}">
+                                <div style="position:relative;">
+                                    @php
+                                        $hairOptions = ['Black','Brown','Blonde','Auburn','Red','Grey','White','Bald','Dyed / Colored'];
+                                        $hairSelected = old('hair_color', $profile->hair_color);
+                                    @endphp
+                                    <select id="hair_color" name="hair_color" class="control" style="appearance:none;" required>
+                                        <option value="">Select hair color</option>
+                                        @foreach($hairOptions as $option)
+                                            <option value="{{ $option }}" {{ $hairSelected === $option ? 'selected' : '' }}>{{ $option }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                </div>
                             </div>
                             <div class="field">
                                 <label for="eye_color">Eye Color</label>
-                                <input id="eye_color" name="eye_color" class="control" type="text" placeholder="e.g. Blue" value="{{ old('eye_color', $profile->eye_color) }}" required>
+                                <div style="position:relative;">
+                                    @php
+                                        $eyeOptions = ['Brown','Hazel','Blue','Green','Gray','Amber'];
+                                        $eyeSelected = old('eye_color', $profile->eye_color);
+                                    @endphp
+                                    <select id="eye_color" name="eye_color" class="control" style="appearance:none;" required>
+                                        <option value="">Select eye color</option>
+                                        @foreach($eyeOptions as $option)
+                                            <option value="{{ $option }}" {{ $eyeSelected === $option ? 'selected' : '' }}>{{ $option }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                </div>
                             </div>
                         </div>
 
@@ -1442,15 +1466,6 @@
                 }
             });
 
-            // 2. Hair & Eye Color: Text only (no numbers)
-            const textFields = ['hair_color', 'eye_color'];
-            textFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    restrictInput(el, null, /[0-9]/g);
-                }
-            });
-
             // 3. Form Submission Validation - Specific Targeting
             function attachValidation() {
                 // Step 2 Form
@@ -1474,20 +1489,15 @@
                         }
 
                         // Check hair color if visible
-                        if (isValid && hairColor && hairColor.offsetParent !== null && !hairColor.value) {
+                            if (isValid && hairColor && hairColor.offsetParent !== null && !hairColor.value) {
                              isValid = false;
-                             errorMsg = 'Please enter your Hair Color.';
+                                errorMsg = 'Please select your Hair Color.';
                         }
 
                         // Validate specific formats again
-                        if (isValid && (/[^0-9.]/.test(height) || /[^0-9.]/.test(weight))) {
+                            if (isValid && (/[^0-9.]/.test(height) || /[^0-9.]/.test(weight))) {
                             isValid = false;
                              errorMsg = 'Height and Weight must be numbers.';
-                        }
-
-                        if (isValid && (/[0-9]/.test(eyeColor) || (hairColor && /[0-9]/.test(hairColor.value)))) {
-                             isValid = false;
-                             errorMsg = 'Hair Color and Eye Color must be text only (no numbers).';
                         }
 
                         // Check radios
