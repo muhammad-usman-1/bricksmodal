@@ -137,7 +137,7 @@ line-height: 36px; /* 150% */}
     }
 
     .add-talent-btn {
-        background: #000000;
+        background: black;
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -147,7 +147,7 @@ line-height: 36px; /* 150% */}
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 10px 20px rgba(15,23,42,0.15);
+       
         text-decoration: none;
         transition: all 0.2s ease;
     }
