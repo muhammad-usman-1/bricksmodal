@@ -70,7 +70,7 @@ line-height: 32px; /* 133.333% */ }
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="text-align:center;">ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
@@ -90,7 +90,7 @@ line-height: 32px; /* 133.333% */ }
                             }));
                         @endphp
                         <tr>
-                            <td data-label="ID">{{ $admin->id }}</td>
+                            <td data-label="ID" style="text-align:center;">{{ $admin->id }}</td>
                             <td data-label="Name">{{ $admin->name }}</td>
                             <td data-label="Email">{{ $admin->email }}</td>
                             <td data-label="Role"><span class="pill {{ $pillClass }}">{{ $roleTitle }}</span></td>
