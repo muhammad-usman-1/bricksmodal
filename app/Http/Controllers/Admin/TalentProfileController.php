@@ -113,8 +113,8 @@ class TalentProfileController extends Controller
 
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
-        $path = $file->store("talent/{$profile->id}/{$folder}", 'public');
-        return Storage::url($path);
+        $disk = config('filesystems.default', 'public');
+        return $file->store("talent/{$profile->id}/{$folder}", $disk);
     }
 
     public function show(TalentProfile $talentProfile)
