@@ -268,9 +268,9 @@
         .bm-link:hover { background: #eef1f6; color: #0f172a;   text-decoration: none;}
         .bm-link i { color: #374151; width: 16px; text-align: center; }
         .bm-link.c-active {
-            background: #000000;
+            background: black;
             color: #fff;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+           
         }
         .bm-link.c-active i { color: #fff; }
         .bm-link.c-active img {
