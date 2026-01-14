@@ -130,7 +130,7 @@ line-height: 36px;
     .stat-pill {
 
         font-size: 11px;
-        
+
         border-radius: 999px;
         padding: 4px 8px;
         display: inline-block;
@@ -278,6 +278,7 @@ line-height: 36px;
     .badge-rejected { background: #fde8e8; color: #b91c1c; border: 1px solid #f8cccc; }
 
     .actions-btn {
+        text-decoration: none;
         width: 30px;
         height: 30px;
         border-radius: 8px;
@@ -290,10 +291,11 @@ line-height: 36px;
         cursor: pointer;
         transition: all 0.2s ease;
     }
-    .actions-btn:hover { background: #f3f5f9; border-color: #cbd5e1; }
+    .actions-btn:hover { background: #f3f5f9; border-color: #cbd5e1;text-decoration: none; }
 
     .actions-dropdown-container { position: relative; display: inline-block; }
     .actions-dropdown-menu {
+        text-decoration: none;
         position: absolute;
         right: 0;
         top: 100%;
@@ -315,6 +317,7 @@ line-height: 36px;
     }
 
     .actions-dropdown-item {
+      text-decoration: none;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -329,7 +332,7 @@ line-height: 36px;
         text-align: left;
         cursor: pointer;
     }
-    .actions-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); }
+    .actions-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); text-decoration: none;}
     .actions-dropdown-item.text-danger { color: #dc2626; }
     .actions-dropdown-item.text-danger:hover { background: #fef2f2; }
 
@@ -460,11 +463,11 @@ line-height: 36px;
                                         $phoneNumber = $phone;
                                     }
                                 }
-                                
+
                                 // Image loading logic using Storage for S3 support
                                 $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
                                 $avatar = null;
-                                
+
                                 if (!empty($talent->headshot_center_path)) {
                                     $path = $talent->headshot_center_path;
                                     // Check if it's already a full URL
@@ -480,11 +483,11 @@ line-height: 36px;
                                         }
                                     }
                                 }
-                                
+
                                 if (empty($avatar)) {
                                     $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=eff2f7&color=0f1524&rounded=true&size=64';
                                 }
-                                
+
                                 $status = $talent->verification_status ?? 'pending';
                             @endphp
                             <tr>

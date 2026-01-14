@@ -20,7 +20,7 @@
     body { background: var(--bg); }
 
     .casting-shell {
-        background: var(--bg);
+
         padding: 8px 0 18px;
     }
 
@@ -85,8 +85,26 @@ margin-bottom: 0;
         background-size: 10px 6px;
     }
 
+    .sticky-btn-container {
+        position: sticky;
+        top: 76px; /* offset below fixed header */
+        display: flex;
+        justify-content: flex-end;
+        z-index: 999;
+
+    }
+
+    @media (max-width: 768px) {
+        .sticky-btn-container {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            left: auto;
+        }
+    }
+
     .add-btn {
-        background: #000000;
+        background: black;
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -108,6 +126,7 @@ margin-bottom: 0;
         outline: none;
         text-decoration: none;
         transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
     }
 
     .shoot-card {
@@ -468,10 +487,13 @@ margin-bottom: 0;
             <h5>Casting Requirement List</h5>
             <div class="sub">Manage all shoots from here.</div>
         </div>
-        @can('casting_requirement_create')
-            <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
-        @endcan
     </div>
+
+    @can('casting_requirement_create')
+        <div class="sticky-btn-container">
+            <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
+        </div>
+    @endcan
 
     <div class="filters-row">
         <div class="filter-wrapper">
