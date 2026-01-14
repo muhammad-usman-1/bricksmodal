@@ -75,7 +75,7 @@ line-height: 32px; /* 133.333% */ }
                         <th>Email</th>
                         <th>Role</th>
                         <th>Permissions</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th style="text-align:center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
