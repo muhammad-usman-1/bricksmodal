@@ -16,7 +16,7 @@
 
     body { background: var(--bg); }
 
-    .talents-shell { padding: 8px 0 22px; position: relative; }
+    .talents-shell { position: relative; }
     .talents-head {
         display: flex;
         justify-content: space-between;
