@@ -33,7 +33,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
+         
         font-weight: 600;
 
     }
