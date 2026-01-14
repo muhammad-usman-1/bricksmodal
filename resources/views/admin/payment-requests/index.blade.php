@@ -182,6 +182,12 @@
         text-decoration: none;
         opacity: 0.9;
     }
+    .btn-pill:focus,
+    .btn-pill:active {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: transparent !important;
+    }
     .btn-approve { background: #10B981; }
     .btn-approve:hover { background: #10B981 }
     .btn-release { background: #10B981 }
@@ -190,6 +196,9 @@
     .btn-reject:hover { background: #EF4444 }
     .btn-view { background: #f2f4f7; color: #344054; }
     .btn-view:hover { background: #e5e7eb; color: #344054 !important; }
+
+    .pay-row-clickable { cursor: pointer; }
+    .pay-row-clickable:hover td { background: #f9fafb; }
 
     .table-foot { padding: 16px 24px; color: #667085; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); }
 
@@ -203,21 +212,7 @@
     <h1 class="pay-title">Payment Requests Management</h1>
     <p class="pay-sub">Approve and release payments to talents.</p>
 
-    @if(session('message'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('message') }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show">
-            @foreach($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    @endif
+    {{-- alerts handled via SweetAlert below --}}
 
     <div class="row stat-row">
         <div class="col-md-3 stat-col">
@@ -310,7 +305,7 @@
                             $requestedAt = $application->payment_requested_at;
                             $statusKey = $application->payment_status;
                         @endphp
-                        <tr data-status="{{ $statusKey }}">
+                        <tr data-status="{{ $statusKey }}" class="pay-row-clickable" data-detail-url="{{ route('admin.payment-requests.show', $application) }}">
                             <td data-label="Talent">
                                 <div class="talent-cell">
                                     <span class="talent-name">{{ $talentName }}</span>
@@ -376,9 +371,6 @@
                                 @else
                                     <span class="btn-pill btn-view">No action needed</span>
                                 @endif
-                                <div style="margin-top:8px;">
-                                    <a class="btn-pill btn-view" href="{{ route('admin.payment-requests.show', $application) }}">View Details</a>
-                                </div>
                             </td>
                         </tr>
 
@@ -441,6 +433,28 @@
                 if (menu) menu.style.display = 'none';
             }
         });
+
+        document.querySelectorAll('.pay-row-clickable').forEach(row => {
+            const url = row.dataset.detailUrl;
+            if (!url) return;
+            row.addEventListener('click', function (e) {
+                if (e.target.closest('a, button, input, select, textarea, label, form')) return;
+                window.location = url;
+            });
+        });
+
+        // SweetAlert flashes
+        @if(session('message'))
+            if (window.Swal && typeof window.Swal.fire === 'function') {
+                Swal.fire({ icon: 'success', title: 'Success', text: @json(session('message')), timer: 2000, showConfirmButton: false });
+            }
+        @endif
+
+        @if($errors->any())
+            if (window.Swal && typeof window.Swal.fire === 'function') {
+                Swal.fire({ icon: 'error', title: 'Error', html: @json(implode('<br>', $errors->all())), confirmButtonText: 'OK' });
+            }
+        @endif
     });
 </script>
 @endsection

@@ -203,34 +203,36 @@
                             </a>
                         </div>
                     @endif
-                    @if(session('message'))
-                        <div class="row mb-2">
-                            <div class="col-lg-12">
-                                <div class="alert alert-success" role="alert">{{ session('message') }}</div>
+                    @unless(request()->routeIs('admin.payment-requests.index'))
+                        @if(session('message'))
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <div class="alert alert-success" role="alert">{{ session('message') }}</div>
+                                </div>
                             </div>
-                        </div>
-                    @endif
-                    @if(session('success'))
-                        <div class="row mb-2">
-                            <div class="col-lg-12">
-                                <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+                        @endif
+                        @if(session('success'))
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+                                </div>
                             </div>
-                        </div>
-                    @endif
-                    @if(session('warning'))
-                        <div class="row mb-2">
-                            <div class="col-lg-12">
-                                <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
+                        @endif
+                        @if(session('warning'))
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
+                                </div>
                             </div>
-                        </div>
-                    @endif
-                    @if(session('error'))
-                        <div class="row mb-2">
-                            <div class="col-lg-12">
-                                <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+                        @endif
+                        @if(session('error'))
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+                                </div>
                             </div>
-                        </div>
-                    @endif
+                        @endif
+                    @endunless
                     @if($errors->count() > 0)
                         <div class="alert alert-danger">
                             <ul class="list-unstyled">
