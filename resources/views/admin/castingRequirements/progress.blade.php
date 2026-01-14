@@ -733,7 +733,7 @@
         @endif
     @else
         <!-- Empty State -->
-        <div style="text-align: center; padding: 100px 20px; background: #fff; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <div style="text-align: center; padding: 100px 20px;   border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div style="font-size: 60px; color: #cbd5e1; margin-bottom: 20px;">
                 <i class="fas fa-calendar-times"></i>
             </div>
