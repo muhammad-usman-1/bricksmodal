@@ -95,7 +95,7 @@ line-height: 32px; /* 133.333% */ }
                             <td data-label="Email">{{ $admin->email }}</td>
                             <td data-label="Role"><span class="pill {{ $pillClass }}">{{ $roleTitle }}</span></td>
                             <td data-label="Permissions">{{ $permissionCount }} permissions</td>
-                            <td data-label="Actions" style="text-align:right;">
+                            <td data-label="Actions" style="text-align:center;">
                                 <div class="actions">
 
                                     @if(!$isSuperAdmin)
