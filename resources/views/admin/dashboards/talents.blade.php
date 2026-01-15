@@ -59,6 +59,12 @@ line-height: 36px; /* 150% */}
     .badge-active::before {
         content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%;
     }
+    .badge-pending {
+        background: #fffbeb; color: #f59e0b;
+    }
+    .badge-pending::before {
+        background: #f59e0b;
+    }
 
     .card-ellipsis { position: absolute; top: 12px; right: 15px; z-index: 30; }
     .dropdown-toggle-btn { color: #111; font-size: 16px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
@@ -289,7 +295,7 @@ line-height: 36px; /* 150% */}
                             <img class="talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
                         @endforeach
                     </div>
-                    <span class="badge-active">{{ $isVerified ? 'Active' : 'Pending' }}</span>
+                    <span class="badge-active {{ $isVerified ? '' : 'badge-pending' }}">{{ $isVerified ? 'Active' : 'Pending' }}</span>
                     <div class="card-ellipsis actions-dropdown-container">
                         <span class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></span>
                         <div class="actions-dropdown-menu">

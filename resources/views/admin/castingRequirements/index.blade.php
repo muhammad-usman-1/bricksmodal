@@ -549,8 +549,10 @@ margin-bottom: 0;
                             ?? 0;
                         $requiredCount = $castingRequirement->count ?? 0;
 
+                        $shootLogo = $castingRequirement->getFirstMediaUrl('shoot_logo') ?: null;
+
                         $instaAvatar = null;
-                        if (!empty($castingRequirement->instagram_url)) {
+                        if (!$shootLogo && !empty($castingRequirement->instagram_url)) {
                             // Extract username from URL - matches instagram.com/username or instagram.com/username/
                             if (preg_match('/(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9_\.]+)/', $castingRequirement->instagram_url, $matches)) {
                                 $username = $matches[1];
@@ -562,7 +564,12 @@ margin-bottom: 0;
                         <td data-label="Shoot Name">
                             <div class="shoot-name">
                                 <div class="logo-circle">
-                                    @if($instaAvatar)
+                                    @if($shootLogo)
+                                        <img src="{{ $shootLogo }}" 
+                                             alt="{{ $initials }}" 
+                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                                        >
+                                    @elseif($instaAvatar)
                                         <img src="{{ $instaAvatar }}" 
                                              alt="{{ $initials }}" 
                                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"

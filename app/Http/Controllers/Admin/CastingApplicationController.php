@@ -178,6 +178,33 @@ class CastingApplicationController extends Controller
     }
 
     /**
+     * Shortlist a casting application
+     */
+    public function shortlist(Request $request, CastingApplication $castingApplication)
+    {
+        abort_if(Gate::denies('casting_application_manage'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        // Validate that application is in 'applied' status (or maybe 'rejected' if we want to allow reconsideration?)
+        // Let's allow 'applied' and 'rejected' to be shortlisted.
+        if ($castingApplication->status === 'selected') {
+             return back()->withErrors(['error' => 'Application is already selected.']);
+        }
+        
+        if ($castingApplication->status === 'shortlisted') {
+            return back()->withErrors(['error' => 'Application is already shortlisted.']);
+        }
+
+        $castingApplication->update([
+            'status' => 'shortlisted',
+        ]);
+
+        // Optional: Notify talent? 
+        // For now, no notification as per plan unless requested.
+        
+        return back()->with('message', 'Application shortlisted successfully.');
+    }
+
+    /**
      * Request payment approval from super admin (for regular admins)
      */
     public function requestPayment(Request $request, CastingApplication $castingApplication)

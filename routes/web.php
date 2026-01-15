@@ -69,6 +69,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
             // Casting Application approve/reject (inside project_management)
             Route::post('casting-applications/{casting_application}/approve', [CastingApplicationController::class, 'approve'])->name('casting-applications.approve');
             Route::post('casting-applications/{casting_application}/reject', [CastingApplicationController::class, 'reject'])->name('casting-applications.reject');
+            Route::post('casting-applications/{casting_application}/shortlist', [CastingApplicationController::class, 'shortlist'])->name('casting-applications.shortlist');
         });
 
         // Talents Dashboard (requires talent_management permission)

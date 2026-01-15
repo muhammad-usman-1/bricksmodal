@@ -18,6 +18,7 @@ use App\Support\EmailTemplateManager;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -133,7 +134,8 @@ class CastingRequirementController extends Controller
             Media::whereIn('id', $media)->update(['model_id' => $castingRequirement->id]);
         }
 
-        $castingRequirement->load('modelRequirements.labels');
+        // Attempt to scrape Instagram image logic
+        $this->fetchAndSaveInstagramImage($castingRequirement);
 
         $this->notifyApprovedTalents($castingRequirement);
 
@@ -249,6 +251,9 @@ class CastingRequirementController extends Controller
             }
         }
 
+        // Attempt to scrape Instagram image logic
+        $this->fetchAndSaveInstagramImage($castingRequirement);
+
         return redirect()->route('admin.casting-requirements.index');
     }
 
@@ -341,5 +346,37 @@ class CastingRequirementController extends Controller
             'castingRequirement' => $castingRequirement,
             'applications'       => $castingRequirement->castingApplications,
         ]);
+    }
+
+    private function fetchAndSaveInstagramImage(CastingRequirement $castingRequirement)
+    {
+        if (empty($castingRequirement->instagram_url)) {
+            return;
+        }
+
+        // Try to fetch og:image from the URL
+        try {
+            $response = Http::timeout(5)
+                ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
+                ->get($castingRequirement->instagram_url);
+
+            if ($response->successful()) {
+                $html = $response->body();
+                // Look for og:image
+                if (preg_match('/meta property="og:image" content="([^"]+)"/', $html, $matches)) {
+                    $imageUrl = html_entity_decode($matches[1]);
+                    
+                    // Clear existing shoot logo
+                    $castingRequirement->clearMediaCollection('shoot_logo');
+                    
+                    // Add new one
+                    $castingRequirement->addMediaFromUrl($imageUrl)
+                        ->toMediaCollection('shoot_logo');
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail if scraping fails, fallback to initials will handle it
+            Log::error('Failed to scrape Instagram image: ' . $e->getMessage());
+        }
     }
 }

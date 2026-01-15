@@ -14,7 +14,7 @@
 
     body { background: var(--bg); }
 
-    .talent-shell { padding: 8px 0 22px; }
+    .talent-shell { padding: 8px 0 80px; }
     .top-actions {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -137,9 +137,21 @@
     .info-table td:last-child { color: var(--ink-700); }
     .info-table .not-set { color: #3b82f6; }
 
-    .action-bar { margin-top: 12px; display: flex; justify-content: flex-end; gap: 10px; }
-    .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 10px 38px; font-size: 18px; margin-bottom:10px; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-approve { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 10px 38px; font-size: 18px;  margin-bottom:10px; display: inline-flex; align-items: center; gap: 8px; }
+    .action-bar { 
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 24px;
+        display: flex; 
+        justify-content: flex-end; 
+        gap: 10px; 
+        z-index: 50;
+        pointer-events: none; /* Let clicks pass through empty space */
+    }
+    .action-bar button, .action-bar form { pointer-events: auto; } /* Re-enable clicks on buttons */
+    .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 10px 38px; font-size: 18px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-approve { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 10px 38px; font-size: 18px;  display: inline-flex; align-items: center; gap: 8px; }
 
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -716,11 +728,13 @@
     </form> {{-- end talentEditForm --}}
 
     <div class="action-bar display-mode-only">
-        <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;" id="reject-talent-form">
-            @csrf
-            <input type="hidden" name="notes" id="rejectNotesInput" value="">
-            <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> Reject</button>
-        </form>
+        @if(($talentProfile->verification_status ?? '') !== 'approved')
+            <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;" id="reject-talent-form">
+                @csrf
+                <input type="hidden" name="notes" id="rejectNotesInput" value="">
+                <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> Reject</button>
+            </form>
+        @endif
         @if(($talentProfile->verification_status ?? '') !== 'approved')
             <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
                 @csrf
