@@ -326,7 +326,7 @@
                     @endif
                     <div class="field">
                         <label>Upload Background Image</label>
-                        <input type="file" id="background_image" name="background_image" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" style="padding: 8px; border: 1px solid #e1e4ea; border-radius: 8px; font-size: 12px; width: 100%;">
+                        <input type="file" id="background_image" name="background_image" style="padding: 8px; border: 1px solid #e1e4ea; border-radius: 8px; font-size: 12px; width: 100%;">
                         <p style="margin: 6px 0 0; font-size: 11px; color: #8b8f99;">JPG, PNG, GIF, or WebP</p>
                     </div>
                 </div>
@@ -380,31 +380,11 @@
             }
         @endif
 
-        // Client-side file validation
+        // Client-side file validation removed as per request
         const backgroundImageInput = document.getElementById('background_image');
         if (backgroundImageInput) {
             backgroundImageInput.addEventListener('change', function(e) {
-                const file = this.files && this.files[0];
-                if (!file) {
-                    return;
-                }
-
-                // Check file type
-                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-                if (!validTypes.includes(file.type)) {
-                    this.value = '';
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid File Type',
-                            text: 'Please upload a JPG, PNG, GIF, or WebP image.',
-                            confirmButtonColor: '#3085d6',
-                        });
-                    } else {
-                        alert('Please upload a JPG, PNG, GIF, or WebP image.');
-                    }
-                    return;
-                }
+                // Validation removed
             });
         }
 

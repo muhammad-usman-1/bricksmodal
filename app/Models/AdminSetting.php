@@ -41,12 +41,19 @@ class AdminSetting extends Model
     }
 
     /**
-     * Get the background image URL, falling back to default if not set
+     * Get the background image URL, falling back to default if not set.
+     * Includes cache-busting timestamp for browser caching.
      */
     public function getBackgroundImageUrlAttribute(): string
     {
-        return $this->background_image_path 
+        $baseUrl = $this->background_image_path 
             ? asset('storage/' . $this->background_image_path)
             : asset('images/models_bg.png');
+        
+        // Add cache-bust parameter based on last update time
+        // This allows browser caching while invalidating cache when image changes
+        $timestamp = $this->updated_at ? $this->updated_at->timestamp : time();
+        
+        return $baseUrl . '?v=' . $timestamp;
     }
 }

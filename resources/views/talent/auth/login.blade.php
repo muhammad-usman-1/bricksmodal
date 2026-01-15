@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Arimo:wght@400&display=swap" rel="stylesheet">
     <link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
+    @php
+        $bgImageUrl = isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png');
+    @endphp
+    <link rel="preload" href="{{ $bgImageUrl }}" as="image">
     <style>
         :root {
             color-scheme: light only;
@@ -18,7 +22,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
+            background: #ffffff url('{{ $bgImageUrl }}') center center / cover no-repeat fixed;
             font-family: 'Space Grotesk', sans-serif;
             display: flex;
             align-items: flex-start;

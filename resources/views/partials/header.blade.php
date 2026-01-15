@@ -57,12 +57,8 @@
         margin-left: 20px !important;
     }
 
-    body:not(.sidebar-collapsed) #sidebarCollapseBtn {
+    #sidebarCollapseBtn {
         display: none !important;
-    }
-
-    body.sidebar-collapsed #sidebarCollapseBtn {
-        display: inline-flex !important;
     }
 
     .header-icon-link {

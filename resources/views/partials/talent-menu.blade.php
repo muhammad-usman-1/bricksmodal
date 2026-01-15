@@ -57,8 +57,11 @@
             border-bottom: 1px solid #e8ebef;
             margin-bottom: 12px;
             gap: 4px;
+            min-height: 80px;
         }
         .bm-brand img { height: 36px; width: auto; transition: opacity 0.3s ease; }
+        .bm-brand .bm-logo-regular { display: block !important; }
+        .bm-brand .bm-logo-collapsed { display: none !important; }
 
         /* Collapsed state - show only icons */
         #sidebar.collapsed {
@@ -71,14 +74,30 @@
             align-items: center;
         }
 
-        /* Hide brand/logo section completely */
+        /* Hide brand/logo content but keep the space when collapsed */
         #sidebar.collapsed .bm-brand {
+            display: flex !important;
+            padding: 10px 0 14px !important;
+            margin-bottom: 12px !important;
+            min-height: 80px !important;
+            visibility: hidden !important;
+            border-bottom: none !important;
+        }
+        #sidebar.collapsed .bm-brand .bm-logo-regular {
+            display: none !important;
+        }
+        #sidebar.collapsed .bm-brand .bm-logo-collapsed {
+            display: none !important;
+        }
+        #sidebar.collapsed .bm-brand div {
             display: none !important;
         }
 
-        /* Keep footer visible when collapsed so the expand button lives there */
+        /* Keep footer visible and in position when collapsed */
         #sidebar.collapsed .bm-footer {
             display: block !important;
+            margin-top: auto !important;
+            padding-top: 14px !important;
         }
 
         /* Collapse footer content to just the toggle button */
@@ -89,18 +108,18 @@
 
         #sidebar.collapsed .bm-footer-card {
             justify-content: center !important;
-            padding: 0px 0 !important;
+            padding: 10px !important;
         }
 
         #sidebar.collapsed .bm-footer-arrow {
             margin: 0 !important;
         }
 
-        /* Style regular links - show only icons */
+        /* Style regular links - show only icons, maintain vertical position */
         #sidebar.collapsed .bm-link {
             justify-content: center !important;
             align-items: center !important;
-            padding: 10px !important;
+            padding: 10px 12px !important;
             position: relative;
             gap: 0 !important;
             min-width: 54px !important;
@@ -146,11 +165,11 @@
             font-size: 18px !important;
         }
 
-        /* Style dropdown toggles - show only icons */
+        /* Style dropdown toggles - show only icons, maintain vertical position */
         #sidebar.collapsed .bm-link-dropdown-toggle {
             justify-content: center !important;
             align-items: center !important;
-            padding: 10px !important;
+            padding: 10px 12px !important;
             gap: 0 !important;
             min-width: 54px !important;
             width: 54px !important;
@@ -210,13 +229,14 @@
             display: none !important;
         }
 
-        /* Center nav items */
+        /* Center nav items horizontally, maintain vertical spacing */
         #sidebar.collapsed .c-sidebar-nav-item {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            margin: 0;
+            margin-top: 10px;
+            margin-bottom: 0;
         }
 
         /* Ensure nav list is centered */
@@ -235,10 +255,9 @@
             align-items: center;
         }
 
-        /* Ensure all links have consistent alignment */
+        /* Ensure all links have consistent alignment, no vertical shift */
         #sidebar.collapsed .bm-link,
         #sidebar.collapsed .bm-link-dropdown-toggle {
-            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -251,7 +270,7 @@
                 margin-left: 70px !important;
             }
         }
-        .bm-nav { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .bm-nav { list-style: none; padding: 0; margin: 0; flex: 1; display: flex; flex-direction: column; }
         .bm-item { margin-bottom: 6px; }
         .bm-link {
             display: flex;
@@ -495,8 +514,11 @@
 
     <div class="bm-sidebar">
         <div class="bm-brand">
-            <a href="{{ route('talent.dashboard') }}" style="text-align:center; display:block;">
+            <a href="{{ route('talent.dashboard') }}" style="text-align:center; display:block;" class="bm-logo-regular">
                 <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Studio">
+            </a>
+            <a href="{{ route('talent.dashboard') }}" style="text-align:center; display:block;" class="bm-logo-collapsed">
+                <img src="{{ asset('images/logo1.gif') }}" alt="BRICKS" style="height: 42px; width: auto;">
             </a>
             <div style="color: #6A7282;
             margin-top: 10px;

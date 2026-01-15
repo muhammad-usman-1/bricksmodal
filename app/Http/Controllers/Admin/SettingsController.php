@@ -122,7 +122,7 @@ class SettingsController extends Controller
                 'date_format' => ['nullable', 'string', 'max:50'],
                 'time_format' => ['nullable', 'string', 'max:50'],
                 'appearance' => ['nullable', 'string', 'max:50'],
-                'background_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp'],
+                'background_image' => ['nullable', 'file'],
                 'remove_background_image' => ['sometimes', 'boolean'],
             ]);
 

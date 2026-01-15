@@ -21,6 +21,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 
+    @php
+        $adminSettings = $adminSettings ?? \App\Models\AdminSetting::singleton();
+        $bgImageUrl = $adminSettings->background_image_url;
+    @endphp
+    <link rel="preload" href="{{ $bgImageUrl }}" as="image">
+
     @yield('styles')
 </head>
 
