@@ -51,9 +51,10 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'string',
                 'nullable',
             ],
-            'description' => [
+            'instagram_url' => [
                 'string',
                 'nullable',
+                'url',
                 'max:255',
             ],
             'shoot_date_time' => [

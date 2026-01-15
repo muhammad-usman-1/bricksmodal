@@ -176,12 +176,12 @@
                         </div>
 
                         <div class="field-block">
-                            <label for="description">Description</label>
+                            <label for="instagram_url">Instagram URL</label>
                             <div class="dark-input">
-                                <input class="{{ $errors->has('description') ? 'is-invalid' : '' }}" type="text" name="description" id="description" value="{{ old('description', $castingRequirement->description ?? '') }}" placeholder="Enter description...">
+                                <input class="{{ $errors->has('instagram_url') ? 'is-invalid' : '' }}" type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://instagram.com/username">
                             </div>
-                            @if($errors->has('description'))
-                                <div class="invalid-feedback d-block">{{ $errors->first('description') }}</div>
+                            @if($errors->has('instagram_url'))
+                                <div class="invalid-feedback d-block">{{ $errors->first('instagram_url') }}</div>
                             @endif
                         </div>
                     </div>

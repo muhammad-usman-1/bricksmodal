@@ -548,11 +548,30 @@ margin-bottom: 0;
                             ?? optional($castingRequirement->castingApplications)->count()
                             ?? 0;
                         $requiredCount = $castingRequirement->count ?? 0;
+
+                        $instaAvatar = null;
+                        if (!empty($castingRequirement->instagram_url)) {
+                            // Extract username from URL - matches instagram.com/username or instagram.com/username/
+                            if (preg_match('/(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9_\.]+)/', $castingRequirement->instagram_url, $matches)) {
+                                $username = $matches[1];
+                                $instaAvatar = "https://unavatar.io/instagram/{$username}";
+                            }
+                        }
                     @endphp
                     <tr data-status="{{ $statusKey }}" data-location="{{ $location }}" data-show-url="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" class="clickable-row">
                         <td data-label="Shoot Name">
                             <div class="shoot-name">
-                                <div class="logo-circle">{{ $initials }}</div>
+                                <div class="logo-circle">
+                                    @if($instaAvatar)
+                                        <img src="{{ $instaAvatar }}" 
+                                             alt="{{ $initials }}" 
+                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                                             onerror="this.style.display='none'; this.parentNode.innerHTML='{{ $initials }}';"
+                                        >
+                                    @else
+                                        {{ $initials }}
+                                    @endif
+                                </div>
                                 <a href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" style="text-decoration: none; color: inherit;">{{ $projectName }}</a>
                             </div>
                         </td>
