@@ -175,6 +175,7 @@
             background-color: #252932 !important;
         }
     </style>
+    @stack('styles')
     @yield('styles')
 </head>
 

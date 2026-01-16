@@ -33,7 +33,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-         
+
         font-weight: 600;
 
     }
@@ -137,15 +137,15 @@
     .info-table td:last-child { color: var(--ink-700); }
     .info-table .not-set { color: #3b82f6; }
 
-    .action-bar { 
+    .action-bar {
         position: fixed;
         left: 0;
         right: 0;
         bottom: 0;
         padding: 12px 24px;
-        display: flex; 
-        justify-content: flex-end; 
-        gap: 10px; 
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
         z-index: 50;
         pointer-events: none; /* Let clicks pass through empty space */
     }
@@ -405,8 +405,7 @@
     $accountFields = [
         ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
         ['label' => 'Mobile number', 'name' => 'mobile_number', 'value' => $talentProfile->mobile_number, 'type' => 'text'],
-        ['label' => 'Daily rate', 'name' => 'daily_rate', 'value' => $talentProfile->daily_rate, 'type' => 'number', 'required' => true],
-        ['label' => 'Hourly rate', 'name' => 'hourly_rate', 'value' => $talentProfile->hourly_rate, 'type' => 'number'],
+        ['label' => 'Rate', 'name' => 'rate', 'value' => $talentProfile->rate, 'type' => 'number'],
         ['label' => 'Verification status', 'name' => 'verification_status', 'value' => $talentProfile->verification_status, 'type' => 'select', 'options' => \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT],
         ['label' => 'Verification notes', 'name' => 'verification_notes', 'value' => $talentProfile->verification_notes, 'type' => 'textarea'],
         ['label' => 'Card holder name', 'name' => 'card_holder_name', 'value' => $talentProfile->card_holder_name, 'type' => 'text'],

@@ -29,7 +29,7 @@
                 @endif
                 <span class="help-block">{{ trans('cruds.talentProfile.fields.display_name_helper') }}</span>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -82,8 +82,8 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="required" for="daily_rate">{{ trans('cruds.talentProfile.fields.daily_rate') }}</label>
-                        <input class="form-control {{ $errors->has('daily_rate') ? 'is-invalid' : '' }}" type="number" name="daily_rate" id="daily_rate" value="{{ old('daily_rate', $talentProfile->daily_rate) }}" step="0.01" required>
+                        <label for="daily_rate">{{ trans('cruds.talentProfile.fields.daily_rate') }}</label>
+                        <input class="form-control {{ $errors->has('daily_rate') ? 'is-invalid' : '' }}" type="number" name="daily_rate" id="daily_rate" value="{{ old('daily_rate', $talentProfile->daily_rate) }}" step="0.01">
                         @if($errors->has('daily_rate'))
                             <div class="invalid-feedback">
                                 {{ $errors->first('daily_rate') }}
@@ -94,14 +94,14 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="hourly_rate">{{ trans('cruds.talentProfile.fields.hourly_rate') }}</label>
-                        <input class="form-control {{ $errors->has('hourly_rate') ? 'is-invalid' : '' }}" type="number" name="hourly_rate" id="hourly_rate" value="{{ old('hourly_rate', $talentProfile->hourly_rate) }}" step="0.01">
-                        @if($errors->has('hourly_rate'))
+                        <label for="rate">{{ trans('cruds.talentProfile.fields.rate') }}</label>
+                        <input class="form-control {{ $errors->has('rate') ? 'is-invalid' : '' }}" type="number" name="rate" id="rate" value="{{ old('rate', $talentProfile->rate) }}" step="0.01">
+                        @if($errors->has('rate'))
                             <div class="invalid-feedback">
-                                {{ $errors->first('hourly_rate') }}
+                                {{ $errors->first('rate') }}
                             </div>
                         @endif
-                        <span class="help-block">{{ trans('cruds.talentProfile.fields.hourly_rate_helper') }}</span>
+                        <span class="help-block">{{ trans('cruds.talentProfile.fields.rate_helper') }}</span>
                     </div>
                 </div>
             </div>

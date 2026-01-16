@@ -31,7 +31,7 @@
                             {{ trans('cruds.talentProfile.fields.daily_rate') }}
                         </th>
                         <th>
-                            {{ trans('cruds.talentProfile.fields.hourly_rate') }}
+                            {{ trans('cruds.talentProfile.fields.rate') }}
                         </th>
 
 
@@ -65,7 +65,7 @@
                                 {{ $talentProfile->daily_rate ?? '' }}
                             </td>
                             <td>
-                                {{ $talentProfile->hourly_rate ?? '' }}
+                                {{ $talentProfile->rate ?? '' }}
                             </td>
 
                             <td>

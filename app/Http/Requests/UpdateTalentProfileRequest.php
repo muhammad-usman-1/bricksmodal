@@ -33,10 +33,11 @@ class UpdateTalentProfileRequest extends FormRequest
             ],
             'daily_rate' => [
                 'numeric',
-                'required',
+                'nullable',
             ],
-            'hourly_rate' => [
+            'rate' => [
                 'numeric',
+                'nullable',
             ],
             'height' => [
                 'nullable',

@@ -46,8 +46,9 @@ class StoreTalentProfileRequest extends FormRequest
                 'numeric',
                 'nullable',
             ],
-            'hourly_rate' => [
+            'rate' => [
                 'numeric',
+                'nullable',
             ],
             'height' => [
                 'nullable',

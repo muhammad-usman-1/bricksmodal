@@ -32,7 +32,7 @@
         'title' => '',
         'quantity' => 1,
         'rate' => 0,
-        'rate_decision' => 'admin_decide',
+        'rate_decision' => 'talent_decide',
         'gender' => 'male',
         'age_range_key' => array_key_first($ageRanges),
         'hair_color' => '',
@@ -360,13 +360,19 @@
                             @php
                                 $rateDecision = $model['rate_decision'] ?? 'admin_decide';
                             @endphp
-                            <div class="grid grid-2 condensed">
-                                <div class="field-block">
+                            <div class="grid grid-2 condensed" data-rate-container>
+                                <div class="field-block" data-rate-choice-group>
                                     <label class="required">Rate?</label>
-                                    <select name="models[{{ $index }}][rate_decision]" class="pill-select" data-rate-decision required>
-                                        <option value="talent_decide" {{ $rateDecision === 'talent_decide' ? 'selected' : '' }}>Talent's decide</option>
-                                        <option value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'selected' : '' }}>Pre-defined</option>
-                                    </select>
+                                    <div class="rate-options">
+                                        <label class="rate-option">
+                                            <input type="radio" name="models[{{ $index }}][rate_decision]" value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'checked' : '' }}>
+                                            <span>Predefined</span>
+                                        </label>
+                                        <label class="rate-option">
+                                            <input type="radio" name="models[{{ $index }}][rate_decision]" value="talent_decide" {{ $rateDecision !== 'admin_decide' ? 'checked' : '' }}>
+                                            <span>Talent Decides</span>
+                                        </label>
+                                    </div>
                                     @error('models.' . $index . '.rate_decision')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -420,7 +426,7 @@
                             </div>
 
                             <div class="grid grid-2 condensed">
-                                 <div class="field-block">
+                                <div class="field-block">
                                     <label class="required">Skin Color</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $skin = $model['skin_color'] ?? ''; @endphp
@@ -428,12 +434,11 @@
                                         <button type="button" class="swatch {{ $skin === 'golden' ? 'active' : '' }}" data-swatch-value="golden" style="background:#d7a86e;"></button>
                                         <button type="button" class="swatch {{ $skin === 'amber' ? 'active' : '' }}" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                         <button type="button" class="swatch {{ $skin === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#8b5a2b;"></button>
-                                        <button type="button" class="swatch swatch-add {{ $skin && str_starts_with($skin, '#') ? 'active custom' : '' }}" data-color-picker aria-label="Choose custom skin color">
-                                            <span class="plus-icon">+</span>
+                                        <button type="button" class="swatch swatch-any {{ $skin === '' ? 'active' : '' }}" data-swatch-value="" aria-label="Any skin color">
+                                            <span class="phi-icon">Φ</span>
                                         </button>
-                                        <input type="color" class="color-picker-input" data-color-input value="{{ $skin && str_starts_with($skin, '#') ? $skin : '#c48b5a' }}" style="display:none;">
                                     </div>
-                                    <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input required>
+                                    <input type="hidden" name="models[{{ $index }}][skin_color]" value="{{ $skin }}" data-swatch-input>
                                     @error('models.' . $index . '.skin_color')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -446,12 +451,11 @@
                                         <button type="button" class="swatch {{ $eye === 'hazel' ? 'active' : '' }}" data-swatch-value="hazel" style="background:#c9a063;"></button>
                                         <button type="button" class="swatch {{ $eye === 'brown' ? 'active' : '' }}" data-swatch-value="brown" style="background:#7a5230;"></button>
                                         <button type="button" class="swatch {{ $eye === 'black' ? 'active' : '' }}" data-swatch-value="black" style="background:#1b1b1d;"></button>
-                                        <button type="button" class="swatch swatch-add {{ $eye && str_starts_with($eye, '#') ? 'active custom' : '' }}" data-color-picker aria-label="Choose custom eye color">
-                                            <span class="plus-icon">+</span>
+                                        <button type="button" class="swatch swatch-any {{ $eye === '' ? 'active' : '' }}" data-swatch-value="" aria-label="Any eye color">
+                                            <span class="phi-icon">Φ</span>
                                         </button>
-                                        <input type="color" class="color-picker-input" data-color-input value="{{ $eye && str_starts_with($eye, '#') ? $eye : '#7a5230' }}" style="display:none;">
                                     </div>
-                                    <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input required>
+                                    <input type="hidden" name="models[{{ $index }}][eye_color]" value="{{ $eye }}" data-swatch-input>
                                     @error('models.' . $index . '.eye_color')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -621,15 +625,21 @@
                                     </select>
                                 </div>
                         </div>
-                    <div class="grid grid-2 condensed">
-                        <div class="field-block">
+                    <div class="grid grid-2 condensed" data-rate-container>
+                        <div class="field-block" data-rate-choice-group>
                             <label class="required">Rate?</label>
-                            <select name="models[__INDEX__][rate_decision]" class="pill-select" data-rate-decision required>
-                                <option value="talent_decide">Talent's decide</option>
-                                <option value="admin_decide" selected>Pre-defined</option>
-                            </select>
+                            <div class="rate-options">
+                                <label class="rate-option">
+                                    <input type="radio" name="models[__INDEX__][rate_decision]" value="admin_decide">
+                                    <span>Predefined</span>
+                                </label>
+                                <label class="rate-option">
+                                    <input type="radio" name="models[__INDEX__][rate_decision]" value="talent_decide" checked>
+                                    <span>Talent Decides</span>
+                                </label>
+                            </div>
                         </div>
-                        <div class="field-block" data-rate-input-wrapper>
+                        <div class="field-block" data-rate-input-wrapper style="display:none;">
                             <label class="required">Rate Amount (KWD)</label>
                             <input
                                 class="pill-input"
@@ -675,10 +685,9 @@
                                 <button type="button" class="swatch" data-swatch-value="golden" style="background:#d7a86e;"></button>
                                 <button type="button" class="swatch" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#8b5a2b;"></button>
-                                <button type="button" class="swatch swatch-add" data-color-picker aria-label="Choose custom skin color"><span class="plus-icon">+</span></button>
-                                <input type="color" class="color-picker-input" data-color-input value="#c48b5a" style="display:none;">
+                                <button type="button" class="swatch swatch-any active" data-swatch-value="" aria-label="Any skin color"><span class="phi-icon">Φ</span></button>
                             </div>
-                            <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input required>
+                            <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input>
                         </div>
                         <div class="field-block">
                             <label class="required">Eye Color</label>
@@ -687,10 +696,9 @@
                                 <button type="button" class="swatch" data-swatch-value="hazel" style="background:#c9a063;"></button>
                                 <button type="button" class="swatch" data-swatch-value="brown" style="background:#7a5230;"></button>
                                 <button type="button" class="swatch" data-swatch-value="black" style="background:#1b1b1d;"></button>
-                                <button type="button" class="swatch swatch-add" data-color-picker aria-label="Choose custom eye color"><span class="plus-icon">+</span></button>
-                                <input type="color" class="color-picker-input" data-color-input value="#7a5230" style="display:none;">
+                                <button type="button" class="swatch swatch-any active" data-swatch-value="" aria-label="Any eye color"><span class="phi-icon">Φ</span></button>
                             </div>
-                            <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input required>
+                            <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input>
                         </div>
                     </div>
                     <!-- Reference Photo Removed from Template -->

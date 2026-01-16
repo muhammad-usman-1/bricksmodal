@@ -405,7 +405,7 @@ class OnboardingController extends Controller
                 'legal_name'       => $user->name ?? '',
                 'display_name'     => $user->name ?? '',
                 'daily_rate'       => 0,
-                'hourly_rate'      => 0,
+                'rate'             => 0,
                 'verification_status' => 'pending',
                 'whatsapp_number'  => null,
                 'onboarding_step'  => 'profile',

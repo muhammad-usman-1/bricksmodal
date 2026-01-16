@@ -550,12 +550,12 @@
             <div class="edit-section-title">Rates & Bio</div>
             <div class="edit-grid">
                 <div class="form-field">
-                    <label for="daily_rate">Daily rate (required)</label>
-                    <input id="daily_rate" type="number" min="0" step="0.01" name="daily_rate" class="form-control-lite" value="{{ old('daily_rate', $profile->daily_rate) }}" required>
+                    <label for="daily_rate">Daily rate</label>
+                    <input id="daily_rate" type="number" min="0" step="0.01" name="daily_rate" class="form-control-lite" value="{{ old('daily_rate', $profile->daily_rate) }}">
                 </div>
                 <div class="form-field">
-                    <label for="hourly_rate">Hourly rate</label>
-                    <input id="hourly_rate" type="number" min="0" step="0.01" name="hourly_rate" class="form-control-lite" value="{{ old('hourly_rate', $profile->hourly_rate) }}">
+                    <label for="rate">Rate</label>
+                    <input id="rate" type="number" min="0" step="0.01" name="rate" class="form-control-lite" value="{{ old('rate', $profile->rate) }}">
                 </div>
                 <div class="form-field" style="grid-column: 1 / -1;">
                     <label for="bio">Bio</label>
@@ -844,8 +844,8 @@
         <!-- Footer / Rates -->
         <div class="rates-container">
             <div class="rate-block">
-                <span class="rate-label">Hourly Rate</span>
-                <span class="rate-amount">${{ $profile->hourly_rate ? number_format($profile->hourly_rate, 2) : '0.00' }}/hr</span>
+                <span class="rate-label">Rate</span>
+                <span class="rate-amount">${{ $profile->rate ? number_format($profile->rate, 2) : '0.00' }}</span>
             </div>
             <div class="rate-block" style="text-align:right;">
                 <span class="rate-label">Daily Rate</span>

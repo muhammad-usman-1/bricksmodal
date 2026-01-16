@@ -576,11 +576,11 @@
 
     <!-- Notes & References -->
     <div class="detail-card">
-        <div class="detail-section-title">Notes & References</div>
-        
+        <div class="detail-section-title">Shoot Brief</div>
+
         @if($castingRequirement->notes)
             <div>
-                <div class="model-detail-label" style="margin-bottom: 8px;">Notes</div>
+                <div class="model-detail-label" style="margin-bottom: 8px;">Shoot Brief</div>
                 <div class="notes-box">{{ $castingRequirement->notes }}</div>
             </div>
         @endif

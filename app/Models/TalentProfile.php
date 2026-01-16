@@ -64,7 +64,7 @@ class TalentProfile extends Model
         'verification_notes',
         'bio',
         'daily_rate',
-        'hourly_rate',
+        'rate',
         'date_of_birth',
         'gender',
         'height',
@@ -117,7 +117,7 @@ class TalentProfile extends Model
         'hips'                    => 'float',
         'shoe_size'               => 'float',
         'daily_rate'              => 'float',
-        'hourly_rate'             => 'float',
+        'rate'                    => 'float',
     ];
 
     public function hasCompletedOnboarding(): bool

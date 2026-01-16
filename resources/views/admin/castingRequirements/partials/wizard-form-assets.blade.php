@@ -1,6 +1,8 @@
 @php
     $isEdit = $isEdit ?? false;
 @endphp
+@once
+@push('styles')
 <style>
     .shoot-page {  padding: 10px 0 22px; }
     .shoot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -77,11 +79,13 @@
     }
 
     .swatch-row { display: inline-flex; align-items: center; gap: 8px; }
-    .swatch { width: 34px; height: 18px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); cursor: pointer; }
+    .swatch { width: 34px; height: 18px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
     .swatch.active { outline: 2px solid #0f1014; outline-offset: 2px; }
-    .swatch-add { position: relative; display: inline-flex; align-items: center; justify-content: center; color: #0f1014; background: #f9fafc; border-style: dashed; font-weight: 700; font-size: 14px; }
-    .swatch-add.custom { color: #fff; border-style: solid; }
-    .swatch-add .plus-icon { pointer-events: none; }
+    .swatch-any { background: transparent !important; border: none !important; box-shadow: none !important; color: #0f1014; font-weight: 700; font-size: 14px; }
+    .swatch-any .phi-icon { font-size: 14px; line-height: 1; opacity: 0.9; display: inline-flex; align-items: center; justify-content: center; width: 100%; }
+
+    .rate-options { display: flex; gap: 150px; align-items: center; flex-wrap: wrap; }
+    .rate-option { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #475467; font-weight: 600; }
 
     .dropbox { width: 100%; border: 1px solid #e3e6ec; border-radius: 10px; padding: 18px; display: block; background: #f9fafc; text-align: center; cursor: pointer; color: #6d7280; }
     .dropbox-inner { display: grid; place-items: center; gap: 6px; }
@@ -527,6 +531,8 @@
         color: #dc2626;
     }
 </style>
+@endpush
+@endonce
 <script>
     var uploadedReferenceMap = {}
 Dropzone.options.referenceDropzone = {
@@ -836,13 +842,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
 
-                    const rateDecisionSelect = card.querySelector('[data-rate-decision]');
+                    const rateGroup = card.querySelector('[data-rate-choice-group]');
                     const rateInput = card.querySelector('[data-rate-input]');
-                    if (rateDecisionSelect && rateInput) {
-                        if (rateDecisionSelect.value === 'admin_decide') {
+                    if (rateGroup && rateInput) {
+                        const selected = rateGroup.querySelector('input[type="radio"]:checked');
+                        const decision = selected?.value || '';
+                        if (decision === 'admin_decide') {
                             const numericRate = parseFloat(rateInput.value);
                             if (rateInput.value === '' || Number.isNaN(numericRate) || numericRate < 0) {
-                                showFieldError(rateInput, 'Enter a valid rate for pre-defined models.');
+                                showFieldError(rateInput, 'Enter a valid rate for predefined models.');
                                 valid = false;
                             } else {
                                 clearFieldError(rateInput);
@@ -905,6 +913,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (defaultStatus && !form.querySelector('input[name="status"]')) {
             form.insertAdjacentHTML('beforeend', '<input type="hidden" name="status" value="' + defaultStatus + '">');
         }
+
+        // If "any" is selected for swatches, drop the field so it persists as null server-side
+        form.querySelectorAll('[data-swatch-input]').forEach(input => {
+            if (!input.value) {
+                input.disabled = true;
+            }
+        });
     }, { once: true });
 
     showStep(currentStep);
@@ -1033,28 +1048,30 @@ const initModelCard = (scope) => {
         }
     });
 
-    scope.querySelectorAll('[data-rate-decision]').forEach(select => {
-        if (select.dataset.rateBound === 'true') return;
-        select.dataset.rateBound = 'true';
+    scope.querySelectorAll('[data-rate-choice-group]').forEach(group => {
+        if (group.dataset.rateBound === 'true') return;
+        group.dataset.rateBound = 'true';
 
-        const card = select.closest('[data-model-card]');
-        const wrapper = card?.querySelector('[data-rate-input-wrapper]');
-        const input = card?.querySelector('[data-rate-input]');
+        const container = group.closest('[data-rate-container]');
+        const wrapper = container?.querySelector('[data-rate-input-wrapper]');
+        const input = container?.querySelector('[data-rate-input]');
+        const radios = Array.from(group.querySelectorAll('input[type="radio"]'));
 
         const syncRateFields = () => {
-            if (!wrapper || !input) {
-                return;
-            }
-
-            if (select.value === 'admin_decide') {
-                wrapper.style.display = '';
+            if (!wrapper || !input) return;
+            const selected = radios.find(r => r.checked);
+            const show = selected?.value === 'admin_decide';
+            wrapper.style.display = show ? '' : 'none';
+            if (show) {
+                input.removeAttribute('disabled');
+                input.setAttribute('required', 'required');
             } else {
-                wrapper.style.display = 'none';
-                input.value = 0;
+                input.setAttribute('disabled', 'disabled');
+                input.removeAttribute('required');
             }
         };
 
-        select.addEventListener('change', syncRateFields);
+        radios.forEach(radio => radio.addEventListener('change', syncRateFields));
         syncRateFields();
     });
 

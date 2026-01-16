@@ -62,8 +62,8 @@ class ProfileController extends Controller
             'email'            => ['required', 'email', 'max:255'],
             'date_of_birth'    => ['nullable', 'date'],
             'gender'           => ['nullable', 'string', 'max:20'],
-            'daily_rate'       => ['required', 'numeric', 'min:0'],
-            'hourly_rate'      => ['nullable', 'numeric', 'min:0'],
+            'daily_rate'       => ['nullable', 'numeric', 'min:0'],
+            'rate'             => ['nullable', 'numeric', 'min:0'],
             'height'           => ['nullable', 'numeric', 'between:0,300'],
             'weight'           => ['nullable', 'numeric', 'between:0,500'],
             'chest'            => ['nullable', 'numeric', 'between:0,300'],
@@ -98,7 +98,7 @@ class ProfileController extends Controller
             'legal_name'        => $data['legal_name'],
             'display_name'      => $data['display_name'] ?: $data['legal_name'],
             'daily_rate'        => Arr::get($data, 'daily_rate'),
-            'hourly_rate'       => Arr::get($data, 'hourly_rate'),
+            'rate'              => Arr::get($data, 'rate'),
             'date_of_birth'     => Arr::get($data, 'date_of_birth'),
             'gender'            => Arr::get($data, 'gender'),
             'height'            => Arr::get($data, 'height'),
@@ -175,7 +175,7 @@ class ProfileController extends Controller
             'display_name'      => $user->name ?? '',
             'verification_status' => 'pending',
             'daily_rate'        => 0,
-            'hourly_rate'       => 0,
+            'rate'              => 0,
             'onboarding_step'   => 'profile',
         ]);
     }
