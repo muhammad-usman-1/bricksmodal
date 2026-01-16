@@ -93,6 +93,13 @@
     .drop-title { font-size: 12px; color: #3b4150; font-weight: 600; }
     .drop-sub { font-size: 11px; color: #8a8f9b; }
 
+    .reference-upload { margin-top: 10px; padding: 14px; border: 1px dashed #e5e7eb; border-radius: 10px; background: #fdfdfd; }
+    .reference-upload-title { font-size: 13px; font-weight: 700; color: #101828; margin-bottom: 4px; }
+    .reference-upload-sub { font-size: 12px; color: #667085; margin-bottom: 10px; }
+    .reference-preview-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+    .reference-preview-item { border: 1px solid #e4e7ed; border-radius: 8px; overflow: hidden; background: #fff; height: 96px; display: flex; align-items: center; justify-content: center; }
+    .reference-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+
     .model-card {  border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); }
 
     .shoot-builder__footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }

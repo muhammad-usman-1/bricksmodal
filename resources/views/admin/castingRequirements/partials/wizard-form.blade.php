@@ -45,6 +45,7 @@
         'child_top_id' => null,
         'child_bottom_id' => null,
         'time_slot' => null,
+        'reference_photos' => [],
     ];
 
     $modelInputs = old('models');
@@ -73,6 +74,7 @@
                     'skin_color' => $model->skin_color,
                     'eye_color' => $model->eye_color,
                     'time_slot' => $model->time_slot,
+                    'reference_photos' => $model->getMedia('reference_photo')->map->getUrl()->all(),
                 ];
             })->toArray();
         }
@@ -461,7 +463,41 @@
                                     @enderror
                                 </div>
                             </div>
-                            <!-- Removed Reference Photo Section -->
+                            <div class="reference-upload" data-reference-block>
+                                <div class="reference-upload-title">Reference Photos</div>
+                                <div class="reference-upload-sub">Optional. Share example poses or looks for this model.</div>
+                                <label class="dropbox" data-file-drop>
+                                    <div class="dropbox-inner">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <div class="drop-title" data-file-label>Upload Reference Photos</div>
+                                        <div class="drop-sub">JPG or PNG · Max 10 MB each</div>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        name="models[{{ $index }}][reference_photo][]"
+                                        class="d-none"
+                                        data-file-input
+                                        accept="image/*"
+                                        multiple
+                                    >
+                                </label>
+                                @error('models.' . $index . '.reference_photo')
+                                    <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                @enderror
+                                @error('models.' . $index . '.reference_photo.*')
+                                    <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                @enderror
+
+                                @if(!empty($model['reference_photos']))
+                                    <div class="reference-preview-grid">
+                                        @foreach($model['reference_photos'] as $photoUrl)
+                                            <div class="reference-preview-item">
+                                                <img src="{{ $photoUrl }}" alt="Reference photo">
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
 
                             <div class="outfit-selection-container">
                                 <div class="outfit-section-title">Outfit Selection</div>
@@ -701,7 +737,25 @@
                             <input type="hidden" name="models[__INDEX__][eye_color]" value="" data-swatch-input>
                         </div>
                     </div>
-                    <!-- Reference Photo Removed from Template -->
+                    <div class="reference-upload" data-reference-block>
+                        <div class="reference-upload-title">Reference Photos</div>
+                        <div class="reference-upload-sub">Optional. Share example poses or looks for this model.</div>
+                        <label class="dropbox" data-file-drop>
+                            <div class="dropbox-inner">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="drop-title" data-file-label>Upload Reference Photos</div>
+                                <div class="drop-sub">JPG or PNG · Max 10 MB each</div>
+                            </div>
+                            <input
+                                type="file"
+                                name="models[__INDEX__][reference_photo][]"
+                                class="d-none"
+                                data-file-input
+                                accept="image/*"
+                                multiple
+                            >
+                        </label>
+                    </div>
 
                     <div class="outfit-selection-container">
                         <div class="outfit-section-title">Outfit Selection</div>
