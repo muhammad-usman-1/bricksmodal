@@ -1516,8 +1516,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!timeList) return;
         timeList.innerHTML = '';
         const times = [];
-        for (let h = 0; h < 24; h++) {
+        for (let h = 9; h <= 17; h++) {
             for (let m = 0; m < 60; m += 30) {
+                if (h === 17 && m > 0) continue; // stop at 5:00 PM
                 const h12 = h % 12 || 12;
                 const ampm = h >= 12 ? 'PM' : 'AM';
                 const timeStr = `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
