@@ -3,13 +3,14 @@
 @section('content')
 <style>
     .my-shoots-page {
+          margin-top: 20px;
 
     }
 
     .my-shoots-container {
 
         margin: 0 auto;
-        
+
     }
 
     .my-shoots-header {
@@ -133,6 +134,19 @@
 
     .shoot-info-separator {
         color: #9ca3af;
+    }
+
+    /* Pagination tweaks */
+    .pagination { margin-bottom: 0; }
+    .pagination .page-link {
+        background: transparent;
+        color: #1f2937;
+        border-radius: 8px;
+    }
+    .pagination .page-item.active .page-link {
+        background: #000;
+        border-color: #000;
+        color: #fff;
     }
 
     .shoot-right {
@@ -341,8 +355,8 @@
         </div>
 
         @if($filteredProjects->count() > 0 && method_exists($projects, 'links'))
-            <div class="d-flex justify-content-start mt-4">
-                {{ $projects->onEachSide(1)->withQueryString()->links() }}
+            <div class="d-flex justify-content-end mt-4 mb-4">
+                {{ $projects->onEachSide(1)->withQueryString()->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>

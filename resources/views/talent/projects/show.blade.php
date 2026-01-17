@@ -49,6 +49,13 @@
     $googleMapsUrl = $locationQuery ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($locationQuery) : null;
 
     $moodboardImages = $castingRequirement->reference;
+
+    // Determine rate decision and predefined rate (if any)
+    $primaryModel = $castingRequirement->modelRequirements->firstWhere('rate_decision', 'admin_decide')
+        ?? $castingRequirement->modelRequirements->first();
+
+    $rateDecision = $primaryModel->rate_decision ?? 'talent_decide';
+    $predefinedRate = $rateDecision === 'admin_decide' ? ($primaryModel->rate ?? null) : null;
 @endphp
 
 <style>
@@ -56,6 +63,7 @@
         background: #f3f4f6;
         min-height: 100vh;
       font-family: 'Arimo', sans-serif;
+      margin-top: 20px;
     }
 
     .project-show-container {
@@ -90,25 +98,42 @@
     }
 
     .map-panel {
-        background: #e5e7eb;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        
         position: relative;
-        min-height: 250px;
+        min-height: 280px;
+        flex: 1;
+        margin: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: stretch;
+    }
+
+    .map-frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #e5e7eb;
         flex: 1;
     }
 
-    .map-panel iframe {
+    .map-frame iframe {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         border: 0;
-        position: absolute;
-        top: 0;
-        left: 0;
     }
 
     .map-overlay-btn {
         position: absolute;
-        bottom: 20px;
-        right: 20px;
+        bottom: 16px;
+        right: 16px;
         background: #111827;
         color: #fff;
         padding: 10px 16px;
@@ -645,6 +670,26 @@
         font-weight: 600;
     }
 
+    .rate-display {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #111827;
+        font-weight: 700;
+        background: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rate-display .rate-currency {
+        color: #6b7280;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
     /* Confirmation Box */
     .confirmation-box {
         background: #fffbeb;
@@ -826,10 +871,12 @@
 
             <div class="map-panel">
                 @if($mapSrc)
-                    <iframe src="{{ $mapSrc }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    @if($googleMapsUrl)
-                        <a href="{{ $googleMapsUrl }}" target="_blank" class="map-overlay-btn">Open Google Maps</a>
-                    @endif
+                    <div class="map-frame">
+                        <iframe src="{{ $mapSrc }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        @if($googleMapsUrl)
+                            <a href="{{ $googleMapsUrl }}" target="_blank" class="map-overlay-btn">Open Google Maps</a>
+                        @endif
+                    </div>
                 @else
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#9ca3af;">
                         No Location Data
@@ -1051,22 +1098,33 @@
 
                 <!-- Rate Input -->
                 <div class="input-group">
-                    <label class="section-label">Enter Your Shoot Rate</label>
-                    <div class="rate-input-wrapper">
-                        <input
-                            type="text"
-                            name="rate"
-                            class="rate-input"
-                            placeholder="Enter your rate"
-                            inputmode="decimal"
-                            autocomplete="off"
-                            required
-                            id="rateInput"
-                            pattern="^\d+(\.\d{1,2})?$"
-                            title="Please enter a valid number (up to 2 decimals)."
-                        >
-                        <span class="currency-symbol">KWD</span>
-                    </div>
+                    @if($rateDecision === 'admin_decide')
+                        <label class="section-label">Predefined Rate</label>
+                        <div class="rate-input-wrapper">
+                            <div class="rate-display">
+                                <span>{{ $predefinedRate ? number_format($predefinedRate, 2) : 'Rate to be provided' }}</span>
+                                <span class="rate-currency">KWD</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="rate" value="{{ $predefinedRate ?? '' }}">
+                    @else
+                        <label class="section-label">Enter Your Shoot Rate</label>
+                        <div class="rate-input-wrapper">
+                            <input
+                                type="text"
+                                name="rate"
+                                class="rate-input"
+                                placeholder="Enter your rate"
+                                inputmode="decimal"
+                                autocomplete="off"
+                                required
+                                id="rateInput"
+                                pattern="^\d+(\.\d{1,2})?$"
+                                title="Please enter a valid number (up to 2 decimals)."
+                            >
+                            <span class="currency-symbol">KWD</span>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Confirmation Box -->
