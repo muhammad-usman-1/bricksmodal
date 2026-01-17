@@ -162,7 +162,7 @@
     .overview-title { margin: 0; font-weight: 600; color: #0f172a; font-size: 14px; }
     .overview-sub { margin: 0; color: #6b7280; font-size: 12px; }
     .review-list { display: flex; flex-direction: column; gap: 12px; }
-    .review-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .review-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; background: #fff; display: grid; grid-template-columns: 1fr auto; align-items: flex-start; gap: 12px; }
     .review-text { display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .review-title { margin: 0; color: #0f172a; font-weight: 600; font-size: 14px; }
     .star-row { display: flex; gap: 2px; margin: 2px 0; }
@@ -174,7 +174,7 @@
     .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
     .status-reviewed { background: #d1fae5; color: #065f46; }
     .status-pending { background: #fed7aa; color: #c2410c; }
-    .review-action { display: inline-flex; align-items: center; justify-content: center; background: #2C2C2E; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; text-decoration: none; min-width: 110px; white-space: nowrap; }
+    .review-action { display: inline-flex; align-items: center; justify-content: center; background: #2C2C2E; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 600; text-decoration: none; min-width: 110px; white-space: nowrap; align-self: center; }
     .review-action:hover { text-decoration: none; background: #1a1a1c; color: #fff; }
 
     /* Shoot & billing */
@@ -774,17 +774,32 @@
                                         <i class="fas fa-star star {{ $i <= $rating ? 'filled' : '' }}"></i>
                                     @endfor
                                 </div>
-                                <div class="review-meta">
-                                    <span>{{ $client }}</span>
+                                <div class="review-meta" style="margin-bottom:8px;">
+
                                     @if($date)
-                                        <span class="meta-separator">•</span>
+                                         
                                         <span>{{ $date }}</span>
                                     @endif
                                     <span class="meta-separator">•</span>
                                     <span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
                                 </div>
+                                @if($isReviewed)
+                                    @php $reviewText = trim($application->reviews ?? ''); @endphp
+                                    <div class="review-details" style="margin:6px 0 0; color:#374151; line-height:1.6;">
+                                        {{ $reviewText !== '' ? $reviewText : 'No review text provided.' }}
+                                    </div>
+                                @endif
                             </div>
-                            <a class="review-action" href="{{ route('admin.casting-applications.show', $application) }}">{{ $actionLabel }}</a>
+                            @if(! $isReviewed)
+                                <button class="review-action" type="button"
+                                    data-toggle="modal"
+                                    data-target="#requestPaymentModal"
+                                    data-route="{{ route('admin.casting-applications.request-payment', $application) }}"
+                                    data-name="{{ $project }}"
+                                    data-rating="0">
+                                    {{ $actionLabel }}
+                                </button>
+                            @endif
                         </div>
                     @empty
                         <div class="review-item" style="justify-content:center; text-align:center;">
@@ -833,14 +848,9 @@
                                 <p class="shoot-name">{{ $project }}</p>
                                 <span class="pill {{ $pill['class'] }}">{{ $pill['label'] }}</span>
                             </div>
-                            <p class="shoot-role">{{ $client }}</p>
+
                             <div class="shoot-meta">
-                                @if($date)
-                                    <span class="shoot-meta-item"><i class="far fa-calendar"></i> {{ $date }}</span>
-                                @endif
-                                @if($date && $projectNumber)
-                                    <span class="meta-separator">•</span>
-                                @endif
+
                                 @if($projectNumber)
                                     <span class="shoot-meta-item">Project # {{ $projectNumber }}</span>
                                 @endif
@@ -908,6 +918,8 @@
     </div>
 </div>
 </div>
+
+@include('admin.castingRequirements.partials.application-modals')
 <script>
     function previewImage(input) {
         if (input.files && input.files[0]) {
@@ -1366,6 +1378,38 @@
                 }, 300);
             });
         });
+
+        // Review modal (reuse creative/admin form)
+        const updateStarClasses = function(container, value) {
+            container.find('label').each(function () {
+                $(this).toggleClass('active', $(this).data('value') <= value)
+            })
+        }
+
+        $('#requestPaymentModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget)
+            const route = button.data('route')
+            const name = button.data('name') || ''
+            const rating = Number(button.data('rating')) || 0
+            const modal = $(this)
+            const starContainer = modal.find('[data-star-rating]')
+            modal.find('form').attr('action', route)
+            starContainer.find('input').prop('checked', false)
+            if (rating > 0) {
+                starContainer.find(`input[value="${rating}"]`).prop('checked', true)
+            }
+            updateStarClasses(starContainer, rating)
+            modal.find('.modal-title').text(name ? `{{ __('Add Review') }}` + ' — ' + name : `{{ __('Add Review') }}`)
+            modal.find('#request_reviews').val('')
+        })
+
+        $(document).on('click', '[data-star-rating] label', function () {
+            const label = $(this)
+            const container = label.closest('[data-star-rating]')
+            const value = label.data('value')
+            container.find(`input[value="${value}"]`).prop('checked', true).trigger('change')
+            updateStarClasses(container, value)
+        })
     });
 </script>
 @endsection

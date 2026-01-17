@@ -126,7 +126,7 @@ margin-bottom: 0;
         outline: none;
         text-decoration: none;
         transform: translateY(-2px);
-        
+
     }
 
     .shoot-card {
@@ -135,11 +135,62 @@ margin-bottom: 0;
         box-shadow: var(--shadow);
         /* overflow: hidden; -- Removed to allow dropdowns to pop out */
         position: relative;
+        overflow: visible;
     }
 
     .shoot-table {
         width: 100%;
         border-collapse: collapse;
+        table-layout: fixed;
+        overflow: visible;
+    }
+
+    .shoot-table thead th,
+    .shoot-table tbody td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+    }
+
+    .shoot-table tbody tr {
+        position: relative;
+        z-index: 1;
+    }
+
+    .shoot-table tbody tr.row-open {
+        z-index: 5;
+    }
+
+    /* Column widths: widen Shoot Name, shrink ending columns, equalize the rest */
+    .shoot-table thead th:nth-child(1),
+    .shoot-table tbody td:nth-child(1) { width: 22%; }
+
+    .shoot-table thead th:nth-child(2),
+    .shoot-table tbody td:nth-child(2),
+    .shoot-table thead th:nth-child(3),
+    .shoot-table tbody td:nth-child(3),
+    .shoot-table thead th:nth-child(4),
+    .shoot-table tbody td:nth-child(4) { width: 17.5%; }
+
+    .shoot-table thead th:nth-child(5),
+    .shoot-table tbody td:nth-child(5) { width: 6.5%; }
+
+    .shoot-table thead th:nth-child(6),
+    .shoot-table tbody td:nth-child(6) { width: 12%; }
+
+    .shoot-table thead th:nth-child(7),
+    .shoot-table tbody td:nth-child(7) { width: 7%; }
+
+    .shoot-table tbody td.actions-cell,
+    .shoot-table tbody td.actions-cell * {
+        overflow: visible;
+    }
+
+    .shoot-table tbody,
+    .shoot-table tr,
+    .actions-cell,
+    .action-menu {
+        overflow: visible;
     }
 
     .shoot-table thead th {
@@ -302,6 +353,7 @@ margin-bottom: 0;
     .action-menu {
         position: relative;
         display: inline-block;
+        z-index: 2;
     }
 
     .action-toggle {
@@ -335,9 +387,13 @@ margin-bottom: 0;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
         padding: 8px;
         display: none;
-        z-index: 1000; /* Ensure it stays above everything */
+        z-index: 3000; /* Keep above neighboring rows */
         transform-origin: top right;
         animation: dropFade 0.2s ease-out;
+    }
+
+    .action-toggle.hide-sibling {
+        visibility: hidden;
     }
 
     @keyframes dropFade {
@@ -446,19 +502,20 @@ margin-bottom: 0;
     }
 
     .required-icon-square {
-        width: 32px;
-        height: 32px;
-         background: #000000;
-        border-radius: 8px;
-        display: flex;
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
     }
 
     .required-icon-square img {
         width: 16px;
         height: 16px;
-        filter: brightness(0) invert(1);
+        filter: brightness(0);
     }
 
     .required-number {
@@ -553,10 +610,32 @@ margin-bottom: 0;
 
                         $instaAvatar = null;
                         if (!$shootLogo && !empty($castingRequirement->instagram_url)) {
-                            // Extract username from URL - matches instagram.com/username or instagram.com/username/
-                            if (preg_match('/(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9_\.]+)/', $castingRequirement->instagram_url, $matches)) {
+                            // Try Instagram oEmbed first (needs INSTAGRAM_OEMBED_TOKEN in env), fallback to unavatar
+                            if (preg_match('/(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9_\.]+)(?:[\/?#].*)?$/', trim($castingRequirement->instagram_url), $matches)) {
                                 $username = $matches[1];
-                                $instaAvatar = "https://unavatar.io/instagram/{$username}";
+
+                                $oembedToken = env('INSTAGRAM_OEMBED_TOKEN');
+                                if ($oembedToken) {
+                                    $cacheKey = 'insta_oembed_thumb_' . md5($castingRequirement->instagram_url);
+                                    $instaAvatar = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($castingRequirement, $oembedToken) {
+                                        try {
+                                            $resp = \Illuminate\Support\Facades\Http::get('https://graph.facebook.com/v19.0/instagram_oembed', [
+                                                'url' => $castingRequirement->instagram_url,
+                                                'access_token' => $oembedToken,
+                                            ]);
+                                            if ($resp->successful()) {
+                                                return $resp->json('thumbnail_url') ?: null;
+                                            }
+                                        } catch (\Throwable $e) {
+                                            return null;
+                                        }
+                                        return null;
+                                    });
+                                }
+
+                                if (!$instaAvatar) {
+                                    $instaAvatar = "https://unavatar.io/https://www.instagram.com/{$username}";
+                                }
                             }
                         }
                     @endphp
@@ -565,13 +644,13 @@ margin-bottom: 0;
                             <div class="shoot-name">
                                 <div class="logo-circle">
                                     @if($shootLogo)
-                                        <img src="{{ $shootLogo }}" 
-                                             alt="{{ $initials }}" 
+                                        <img src="{{ $shootLogo }}"
+                                             alt="{{ $initials }}"
                                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
                                         >
                                     @elseif($instaAvatar)
-                                        <img src="{{ $instaAvatar }}" 
-                                             alt="{{ $initials }}" 
+                                        <img src="{{ $instaAvatar }}"
+                                             alt="{{ $initials }}"
                                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
                                              onerror="this.style.display='none'; this.parentNode.innerHTML='{{ $initials }}';"
                                         >
@@ -653,14 +732,6 @@ margin-bottom: 0;
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="action-list">
-                                    <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
-                                        <i class="fas fa-bullseye"></i> Shoot
-                                    </a>
-                                    @can('casting_requirement_show')
-                                        <a class="action-item" href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    @endcan
                                     @can('casting_requirement_edit')
                                         <a class="action-item" href="{{ route('admin.casting-requirements.edit', $castingRequirement->id) }}">
                                             <i class="fas fa-edit"></i> Edit
@@ -814,17 +885,39 @@ margin-bottom: 0;
         `;
         document.head.appendChild(style);
 
-        document.querySelectorAll('.action-toggle').forEach(toggle => {
+        const actionToggles = Array.from(document.querySelectorAll('.action-toggle'));
+
+        actionToggles.forEach(toggle => {
             toggle.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const list = this.nextElementSibling;
+                const row = this.closest('tr');
+                if (!list || !row) return;
+
+                const isOpen = list.classList.contains('show');
+
                 document.querySelectorAll('.action-list').forEach(l => l.classList.remove('show'));
-                list.classList.toggle('show');
+                rows.forEach(r => r.classList.remove('row-open'));
+                actionToggles.forEach(t => t.classList.remove('hide-sibling'));
+
+                if (!isOpen) {
+                    list.classList.add('show');
+                    row.classList.add('row-open');
+                    actionToggles.forEach(t => { if (t !== this) t.classList.add('hide-sibling'); });
+                }
+            });
+        });
+
+        document.querySelectorAll('.action-list').forEach(list => {
+            list.addEventListener('click', function (e) {
+                e.stopPropagation();
             });
         });
 
         document.addEventListener('click', function () {
             document.querySelectorAll('.action-list').forEach(l => l.classList.remove('show'));
+            rows.forEach(r => r.classList.remove('row-open'));
+            actionToggles.forEach(t => t.classList.remove('hide-sibling'));
         });
 
         const shareLinkInput = document.getElementById('shareProjectLink');
