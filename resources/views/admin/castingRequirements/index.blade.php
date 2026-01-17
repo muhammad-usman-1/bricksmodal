@@ -163,7 +163,7 @@ margin-bottom: 0;
 
     /* Column widths: widen Shoot Name, shrink ending columns, equalize the rest */
     .shoot-table thead th:nth-child(1),
-    .shoot-table tbody td:nth-child(1) { width: 22%; }
+    .shoot-table tbody td:nth-child(1) { width: 21%; }
 
     .shoot-table thead th:nth-child(2),
     .shoot-table tbody td:nth-child(2),
@@ -173,7 +173,7 @@ margin-bottom: 0;
     .shoot-table tbody td:nth-child(4) { width: 17.5%; }
 
     .shoot-table thead th:nth-child(5),
-    .shoot-table tbody td:nth-child(5) { width: 6.5%; }
+    .shoot-table tbody td:nth-child(5) { width: 7.5%; }
 
     .shoot-table thead th:nth-child(6),
     .shoot-table tbody td:nth-child(6) { width: 12%; }
