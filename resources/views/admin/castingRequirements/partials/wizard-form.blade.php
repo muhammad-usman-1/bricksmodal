@@ -327,7 +327,7 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Time Slot Start (4 hrs)</label>
+                                    <label class="required">Time Slot Start</label>
                                     <input
                                         type="time"
                                         name="models[{{ $index }}][time_slot]"
@@ -336,7 +336,7 @@
                                         required
                                         style="width: 100%;"
                                     >
-                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Select start time (automatically 4-hour duration)</small>
+                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Time must be within the shoot window (cannot be before start time, cannot extend beyond shoot duration). Must be added manually.</small>
                                     @error('models.' . $index . '.time_slot')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -357,6 +357,7 @@
                                         >
                                         <span style="color: #4b5563; font-weight: 500;">hours</span>
                                     </div>
+                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Cannot exceed the total shoot duration</small>
                                     @error('models.' . $index . '.model_hours')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror

@@ -881,6 +881,33 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
 
+                    // Validate Hours Needed (must not exceed shoot duration from step 1)
+                    const hoursNeededInput = card.querySelector('input[name*="[model_hours]"]');
+                    const durationFromStep1 = steps[0].querySelector('#duration');
+                    if (hoursNeededInput) {
+                        const hoursValue = hoursNeededInput.value;
+                        if (!hoursValue || hoursValue.trim() === '') {
+                            showFieldError(hoursNeededInput, 'Hours needed is required.');
+                            valid = false;
+                        } else if (!durationFromStep1 || !durationFromStep1.value) {
+                            showFieldError(hoursNeededInput, 'Please set the shoot duration in step 1 first.');
+                            valid = false;
+                        } else {
+                            const hoursNeeded = parseFloat(hoursValue);
+                            const shootDuration = parseFloat(durationFromStep1.value);
+                            
+                            if (isNaN(hoursNeeded) || hoursNeeded <= 0) {
+                                showFieldError(hoursNeededInput, 'Hours needed must be a valid number greater than 0.');
+                                valid = false;
+                            } else if (hoursNeeded > shootDuration) {
+                                showFieldError(hoursNeededInput, `Hours needed (${hoursNeeded}h) cannot exceed shoot duration (${shootDuration}h).`);
+                                valid = false;
+                            } else {
+                                clearFieldError(hoursNeededInput);
+                            }
+                        }
+                    }
+
                     const rateGroup = card.querySelector('[data-rate-choice-group]');
                     const rateInput = card.querySelector('[data-rate-input]');
                     if (rateGroup && rateInput) {
