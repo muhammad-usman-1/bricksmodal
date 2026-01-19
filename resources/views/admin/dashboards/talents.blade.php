@@ -40,10 +40,10 @@ line-height: 36px; /* 150% */}
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img-container { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
-    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; transform: scale(1.05); z-index: 1; }
-    .talent-img.active { opacity: 1; transform: scale(1); z-index: 1; }
-    .talent-card:hover .talent-img:not(.active) { opacity: 0; }
-    .talent-card:hover .talent-img.active { opacity: 1; transform: scale(1); }
+    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 1; }
+    .talent-img.active { display: block; z-index: 1; }
+    .talent-card:hover .talent-img:not(.active) { display: none; }
+    .talent-card:hover .talent-img.active { display: block; }
 
     .badge-active {
         position: absolute; top: 15px; left: 15px;
@@ -153,7 +153,7 @@ line-height: 36px; /* 150% */}
         display: inline-flex;
         align-items: center;
         gap: 8px;
-       
+
         text-decoration: none;
         transition: all 0.2s ease;
     }
@@ -174,12 +174,12 @@ line-height: 36px; /* 150% */}
         left: 0;
         right: 0;
         bottom: 0;
-         
+
         padding: 12px 24px;
         display: flex;
         justify-content: flex-end;
         z-index: 50;
-         
+
     }
 </style>
 

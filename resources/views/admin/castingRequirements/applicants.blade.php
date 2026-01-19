@@ -1,136 +1,301 @@
 @extends('layouts.admin')
 @section('content')
-<link href="{{ asset('css/flag-icons.min.css') }}" rel="stylesheet">
 <style>
-    :root {
-        --bg: #f7f8fb;
-        --card: #ffffff;
-        --ink-900: #0f1524;
-        --ink-700: #3b4150;
-        --ink-500: #7b8191;
-        --border: #e5e7eb;
-        --shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
-        --pill-green: #e6f7ed;
-        --pill-green-text: #15803d;
+    .applicants-page {
+        background: #f9fafb;
+        min-height: 100vh;
+margin-top:20px;
+margin-bottom:10px;
     }
 
-    /* Override admin layout background if needed, or just style the container */
-    
-    .talents-head {
+    .page-header {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .header-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding: 10px 0 12px;
-        margin-bottom: 20px;
-    }
-    .talents-head h5 { 
-        color: #101828;
-        font-size: 24px;
-        font-weight: 400;
-        line-height: 36px;
-        margin: 0;
-    }
-    .talents-head .meta { margin: 4px 0; color: var(--ink-500); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    
-    .talent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-    .talent-card { 
-        position: relative; 
-        background: #f0f1f3; 
-        border-radius: 10px; 
-        overflow: visible; /* Changed to visible for dropdown to work if it hangs out, but card design usually expects hidden. 
-                             If dropdown is inside relative container, we need to be careful. 
-                             talents.blade.php uses overflow: hidden on talent-card but dropdown is absolute? 
-                             Wait, in talents.blade.php: .talent-card { overflow: hidden; } 
-                             But .actions-dropdown-menu has z-index: 100.
-                             If container has overflow:hidden, absolute child CANNOT go outside.
-                             Let's check talents.blade.php again. 
-                             It has .card-ellipsis inside .talent-card.
-                             If .talent-card has overflow:hidden, the menu will be cut off.
-                             Maybe the user's reference implementation in talents.blade.php actually cuts it off?
-                             Or maybe the menu is small enough to fit inside?
-                             Or maybe they use Popper? No, custom script.
-                             I will set overflow: visible just in case, or manage border radius on the image/overlay.
-                          */
-        overflow: visible; 
-        height: 400px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
-        border: 1px solid var(--border); 
-        transition: transform 0.2s ease; 
-        /* To clip image with border radius while keeping overflow visible for dropdowns */
-    }
-    .talent-card-inner {
-        position: absolute; top:0; left:0; right:0; bottom:0;
-        border-radius: 10px;
-        overflow: hidden; /* Clip image and overlay */
-        z-index: 0;
+        gap: 16px;
+        flex-wrap: wrap;
     }
 
-    .talent-card:hover { transform: translateY(-4px); z-index: 5; } /* z-index bump on hover */
-
-    .talent-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    
-    .badge-active {
-        position: absolute; top: 15px; left: 15px;
-        background: #e6f7ed; color: #15803d;
-        border-radius: 20px; padding: 4px 12px;
-        font-size: 11px; font-weight: 700;
-        display: inline-flex; align-items: center; gap: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        z-index: 20;
-        pointer-events: none;
-    }
-    .badge-active.status-pending { background: #fffbeb; color: #f59e0b; }
-    .badge-active.status-rejected { background: #fef2f2; color: #ef4444; }
-    
-    .badge-active::before {
-        content: ''; width: 6px; height: 6px; background: currentColor; border-radius: 50%;
+    .header-info {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
     }
 
-    .actions-dropdown-container { position: relative; display: inline-block; }
-    
-    .card-ellipsis { 
-        position: absolute !important; 
-        top: 12px; 
-        right: 15px; 
-        z-index: 30; 
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
     }
 
-    .dropdown-toggle-btn { 
-        color: #111; 
-        font-size: 16px; 
-        cursor: pointer; 
-        width: 32px;
-        height: 32px;
-        background: rgba(255,255,255,0.8); /* Slight background for visibility */
-        border-radius: 50%;
+    .info-item i {
+        color: #6b7280;
+        font-size: 18px;
+        margin-top: 2px;
+    }
+
+    .info-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        color: #111827;
+        font-weight: 500;
+    }
+
+    .export-btn {
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: background 0.2s;
+        gap: 8px;
+        transition: all 0.2s;
     }
-    .dropdown-toggle-btn:hover { background: #fff; }
+
+    .export-btn:hover {
+        background: #1f2937;
+        transform: translateY(-1px);
+    }
+
+    .applicants-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 20px;
+    }
+
+    .applicants-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .applicant-card {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fff;
+        transition: all 0.2s;
+        gap: 16px;
+    }
+
+    .applicant-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: #d1d5db;
+    }
+
+    .applicant-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .applicant-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .applicant-name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .applicant-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .star-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .star-rating i {
+        color: #fbbf24;
+        font-size: 13px;
+    }
+
+    .rating-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        margin-left: 4px;
+    }
+
+    .applicant-details {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+
+    .detail-separator {
+        margin: 0 4px;
+    }
+
+    .applicant-applied {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .applicant-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-accepted {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .status-shortlisted {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .applicant-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-btn.accept-btn {
+        color: #059669;
+        border-color: #059669;
+    }
+
+    .action-btn.accept-btn:hover {
+        background: #d1fae5;
+    }
+
+    .action-btn.reject-btn {
+        color: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .action-btn.reject-btn:hover {
+        background: #fee2e2;
+    }
+
+    .more-actions-btn {
+        padding: 8px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #6b7280;
+        font-size: 16px;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .more-actions-btn:hover {
+        color: #111827;
+    }
+
+    .actions-dropdown-container {
+        position: relative;
+        display: inline-block;
+    }
 
     .actions-dropdown-menu {
         position: absolute;
         right: 0;
-        top: 100%;
-        margin-top: 8px;
+        top: calc(100% + 4px);
         background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         z-index: 100;
         min-width: 180px;
         display: none;
         overflow: hidden;
     }
-    .actions-dropdown-menu.active { display: block; animation: dropdownFade 0.2s ease; }
+
+    .actions-dropdown-menu.active {
+        display: block;
+        animation: dropdownFade 0.2s ease;
+    }
 
     @keyframes dropdownFade {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .actions-dropdown-item {
@@ -139,78 +304,105 @@
         gap: 10px;
         padding: 10px 14px;
         font-size: 13px;
-        color: var(--ink-700);
+        color: #374151;
         text-decoration: none;
-        transition: background 0.12s ease;
+        transition: background 0.15s ease;
         border: none;
         background: none;
         width: 100%;
         text-align: left;
         cursor: pointer;
     }
-    .actions-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); text-decoration: none; }
-    .actions-dropdown-item.text-danger { color: #dc2626; }
-    .actions-dropdown-item.text-danger:hover { background: #fef2f2; }
-    .actions-dropdown-item.text-success { color: #10b981; }
-    .actions-dropdown-item.text-success:hover { background: #ecfdf5; }
 
-    .card-overlay {
-        position: absolute; left: 0; right: 0; bottom: 0;
-        height: 50%;
-        padding: 20px 18px 15px;
-        background: rgba(0, 0, 0, 0.5); /* Plain light black as requested */
-        color: #fff;
-        display: flex; flex-direction: column;
-        justify-content: flex-end;
-        z-index: 10;
-        pointer-events: none;
+    .actions-dropdown-item:hover {
+        background: #f9fafb;
+        color: #111827;
     }
 
-    .overlay-top { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
-    .overlay-flag { position: absolute; left: 0; top: 0; width: auto; height: 14px; display: block; }
-    
-    .overlay-meta-info { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.9); font-weight: 500; }
+    .actions-dropdown-item.text-danger {
+        color: #dc2626;
+    }
 
-    .talent-name { font-weight: 600; font-size: 16px; margin: 4px 0 12px; text-align: center; }
+    .actions-dropdown-item.text-danger:hover {
+        background: #fef2f2;
+    }
 
-    .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; }
+    .actions-dropdown-item.text-success {
+        color: #059669;
+    }
 
-    .overlay-bottom { display: flex; justify-content: start; align-items: flex-end; }
-    .joined-info { display: flex; flex-direction: column; gap: 2px; }
-    .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; }
-    .joined-date { font-size: 12px; font-weight: 500; color: #fff; }
+    .actions-dropdown-item.text-success:hover {
+        background: #d1fae5;
+    }
 
+    .actions-dropdown-item.text-primary {
+        color: #2563eb;
+    }
+
+    .actions-dropdown-item.text-primary:hover {
+        background: #eff6ff;
+    }
 </style>
 
-<div class="talents-shell">
-    <div class="talents-head">
-        <div>
-            <h5>{{ $castingRequirement->project_name }} - Applicants</h5>
-            <div class="meta">
-                <strong>{{ $applications->count() }} total applicants</strong>
-                <span>•</span>
-                <span>Manage and review casting applications</span>
+<div class="applicants-page">
+    <div class="page-header">
+        <div class="header-top">
+            <div class="header-info">
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="info-content">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">{{ $castingRequirement->location ?? 'Not specified' }}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="info-content">
+                        <span class="info-label">Date</span>
+                        <span class="info-value">{{ $castingRequirement->shoot_date ? $castingRequirement->shoot_date->format('d M Y') : 'Not specified' }}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div class="info-content">
+                        <span class="info-label">Time & Duration</span>
+                        <span class="info-value">{{ $castingRequirement->shoot_time ?? '00:00' }} • {{ $castingRequirement->duration ?? 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <div class="info-content">
+                        <span class="info-label">Applicants</span>
+                        <span class="info-value">{{ $applications->count() }} Application{{ $applications->count() !== 1 ? 's' : '' }}</span>
+                    </div>
+                </div>
             </div>
+            <button class="export-btn" onclick="exportApplicants()">
+                <i class="fas fa-download"></i>
+                Export All
+            </button>
         </div>
-        <a href="{{ route('admin.casting-requirements.index') }}" class="btn btn-outline-secondary btn-sm">
-            {{ trans('global.back_to_list') }}
-        </a>
     </div>
 
     @if(session('message'))
-        <div class="alert alert-success mb-4">{{ session('message') }}</div>
+        <div class="alert alert-success mb-3">{{ session('message') }}</div>
     @endif
 
-    @if($applications->isEmpty())
-        <div class="alert alert-info">{{ trans('global.no_applicants_found') }}</div>
-    @else
-        <div class="talent-grid">
-            @foreach($applications as $application)
+    <div class="applicants-section">
+        @if($applications->isEmpty())
+            <div class="alert alert-info">{{ trans('global.no_applicants_found') }}</div>
+        @else
+            <div class="section-title">Applicants ({{ $applications->count() }})</div>
+
+            <div class="applicants-list">
+                @foreach($applications as $application)
                 @php
                     $profile = $application->talent_profile;
-                    $displayName = $profile?->display_name ?? $profile?->legal_name ?? trans('global.not_set');
-                    $avatarFallback = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#f3f1f5"/><circle cx="60" cy="50" r="26" fill="#d9d3de"/><rect x="24" y="82" width="72" height="22" rx="11" fill="#e3dde8"/></svg>');
-                    
+                    $user = $profile?->user;
+                    $displayName = $profile?->display_name ?? $profile?->legal_name ?? $user?->name ?? trans('global.not_set');
+
+                    $avatarFallback = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="#e5e7eb"/><circle cx="60" cy="50" r="26" fill="#9ca3af"/><rect x="24" y="82" width="72" height="22" rx="11" fill="#d1d5db"/></svg>');
+
                     $avatarRaw = $profile?->headshot_center_path ?? ($profile?->headshot_left_path ?? $profile?->headshot_right_path);
                     if (is_array($avatarRaw)) {
                         $avatarCandidate = $avatarRaw['url'] ?? ($avatarRaw['path'] ?? ($avatarRaw[0] ?? null));
@@ -241,117 +433,116 @@
                     // Status Logic
                     $statusKey = $application->status;
                     $statusLabel = App\Models\CastingApplication::STATUS_SELECT[$statusKey] ?? ucfirst($statusKey);
-                    
-                    // Override 'did_not_show' to display as 'Pending'
+
                     if ($statusKey === 'did_not_show') {
-                        $statusLabel = 'Pending'; // Or use trans('global.pending') if available, but hardcoding for exact compliance
+                        $statusLabel = 'Pending';
                     }
 
-                    // Map status to classes for the badge
+                    // Map status to classes
                     $badgeClass = 'status-pending';
-                    if ($statusKey === 'selected') $badgeClass = 'status-selected';
+                    if ($statusKey === 'selected') $badgeClass = 'status-accepted';
                     if ($statusKey === 'rejected') $badgeClass = 'status-rejected';
+                    if ($statusKey === 'shortlisted') $badgeClass = 'status-shortlisted';
 
-                    $gender = $profile?->gender ? strtoupper($profile->gender) : 'N/A';
-                    $age = $profile?->date_of_birth ? $profile->date_of_birth->age . ' YEARS' : '';
-                    $joinedDate = $application->created_at ? $application->created_at->format('d M Y') : 'N/A';
-                    
-                    $flagCode = $profile?->country_code ?? null;
-                    $flagUrl = $flagCode ? "https://flagcdn.com/24x18/" . strtolower($flagCode) . ".png" : null;
+                    // Get applicant details
+                    $age = $profile?->date_of_birth ? $profile->date_of_birth->age . ' years' : 'N/A';
+                    $height = $profile?->height ? $profile->height . '"' : 'N/A';
+                    $experience = $profile?->experience_years ? $profile->experience_years . ' years experience' : 'No experience listed';
+
+                    // Applied date
+                    $appliedDate = $application->created_at ? $application->created_at->format('d M Y') : 'N/A';
+
+
                 @endphp
 
-                <div class="talent-card" data-url="{{ route('admin.talent-profiles.show', $profile->id) }}">
-                    <div class="talent-card-inner">
-                        <img src="{{ $avatarSrc }}" alt="{{ $displayName }}" class="talent-img">
-                        <span class="badge-active {{ $badgeClass }}">{{ $statusLabel }}</span>
-                        
-                        <div class="card-overlay">
-                            <div class="overlay-top">
-                                @if($flagUrl)
-                                    <img src="{{ $flagUrl }}" alt="Flag" class="overlay-flag">
-                                @endif
-                                <span class="overlay-meta-info">{{ $gender }} @if($age) • {{ $age }} @endif</span>
-                            </div>
-                            <p class="talent-name">{{ $displayName }}</p>
-                            <div class="card-divider"></div>
-                            <div class="overlay-bottom">
-                                <div class="joined-info">
-                                    <span class="joined-label">Joined</span>
-                                    <span class="joined-date">{{ $joinedDate }}</span>
-                                </div>
-                            </div>
+                <div class="applicant-card">
+                    <img src="{{ $avatarSrc }}" alt="{{ $displayName }}" class="applicant-avatar">
+
+                    <div class="applicant-info">
+                        <div class="applicant-name-row">
+                            <span class="applicant-name">{{ $displayName }}</span>
+
+                        </div>
+
+                        <div class="applicant-details">
+                            {{ $age }}<span class="detail-separator">•</span>{{ $height }}<span class="detail-separator">•</span>{{ $experience }}
+                        </div>
+
+                        <div class="applicant-applied">
+                            Applied on {{ $appliedDate }}
                         </div>
                     </div>
 
-                    <div class="card-ellipsis actions-dropdown-container">
-                        <div class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></div>
-                        <div class="actions-dropdown-menu">
+                    <div class="applicant-right">
+                        <span class="status-badge {{ $badgeClass }}">{{ $statusLabel }}</span>
+
+                        <div class="applicant-actions">
                             @if($application->status !== 'selected')
-                                <button class="actions-dropdown-item text-success"
+                                <button class="action-btn accept-btn"
                                     data-toggle="modal"
                                     data-target="#approveApplicationModal"
                                     data-route="{{ route('admin.casting-applications.approve', $application) }}"
                                     data-name="{{ $displayName }}">
-                                    <i class="fas fa-check"></i> {{ trans('global.approve') }}
+                                    <i class="fas fa-check"></i> Accept
                                 </button>
                             @endif
 
-                            @if($application->status !== 'shortlisted' && $application->status !== 'selected')
-                                <form action="{{ route('admin.casting-applications.shortlist', $application) }}" method="POST" style="margin:0;">
-                                    @csrf
-                                    <button type="submit" class="actions-dropdown-item text-primary" style="width: 100%; text-align: left;">
-                                        <i class="fas fa-list"></i> Shortlist
-                                    </button>
-                                </form>
-                            @endif
-
                             @if($application->status !== 'rejected')
-                                <button class="actions-dropdown-item text-danger"
+                                <button class="action-btn reject-btn"
                                     data-toggle="modal"
                                     data-target="#rejectApplicationModal"
                                     data-route="{{ route('admin.casting-applications.reject', $application) }}"
                                     data-name="{{ $displayName }}">
-                                    <i class="fas fa-times"></i> {{ trans('global.reject') }}
+                                    <i class="fas fa-times"></i> Reject
                                 </button>
                             @endif
 
-                            @if($application->status === 'selected')
-                                @php
-                                    $paymentPending = in_array($application->payment_status, ['pending', 'rejected', 'requested']);
-                                    $isRequest = $application->payment_status === 'requested';
-                                    $byAdmin = isset($application->requestedByAdmin);
-                                    $isSuper = auth('admin')->user()->isSuperAdmin();
-                                    $showPayment = $paymentPending && !($isRequest && $byAdmin && !$isSuper);
-                                @endphp
-                                @if($showPayment)
-                                    <button class="actions-dropdown-item"
-                                        data-toggle="modal"
-                                        data-target="#requestPaymentModal"
-                                        data-route="{{ route('admin.casting-applications.request-payment', $application) }}"
-                                        data-name="{{ $displayName }}"
-                                        data-rating="{{ is_numeric($application->rating) ? (int) $application->rating : 5 }}">
-                                        <i class="fas fa-dollar-sign"></i> Request Payment
-                                    </button>
-                                @endif
-                            @endif
-
-                            @if(optional($profile)->whatsapp_number)
-                                <button class="actions-dropdown-item text-success"
-                                    data-toggle="modal"
-                                    data-target="#applicationWhatsAppModal"
-                                    data-number="{{ $profile->whatsapp_number }}"
-                                    data-name="{{ $displayName }}"
-                                    data-project="{{ optional($application->casting_requirement)->project_name }}"
-                                    data-status="{{ $application->status }}">
-                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                            <div class="actions-dropdown-container">
+                                <button class="more-actions-btn dropdown-toggle-btn">
+                                    <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                            @endif
+                                <div class="actions-dropdown-menu">
+                                    <a href="{{ route('admin.talent-profiles.show', $profile->id) }}" class="actions-dropdown-item">
+                                        <i class="fas fa-eye"></i> View Profile
+                                    </a>
+
+                                    @if($application->status !== 'shortlisted' && $application->status !== 'selected')
+                                        <form action="{{ route('admin.casting-applications.shortlist', $application) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            <button type="submit" class="actions-dropdown-item text-primary">
+                                                <i class="fas fa-list"></i> Shortlist
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    @if($application->status === 'selected')
+                                        @php
+                                            $paymentPending = in_array($application->payment_status, ['pending', 'rejected', 'requested']);
+                                            $isRequest = $application->payment_status === 'requested';
+                                            $byAdmin = isset($application->requestedByAdmin);
+                                            $isSuper = auth('admin')->user()->isSuperAdmin();
+                                            $showPayment = $paymentPending && !($isRequest && $byAdmin && !$isSuper);
+                                        @endphp
+                                        @if($showPayment)
+                                            <button class="actions-dropdown-item"
+                                                data-toggle="modal"
+                                                data-target="#requestPaymentModal"
+                                                data-route="{{ route('admin.casting-applications.request-payment', $application) }}"
+                                                data-name="{{ $displayName }}"
+                                                data-rating="{{ is_numeric($application->rating) ? (int) $application->rating : 5 }}">
+                                                <i class="fas fa-dollar-sign"></i> Request Payment
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             @endforeach
-        </div>
-    @endif
+            </div>
+        @endif
+    </div>
 </div>
 
 @include('admin.castingRequirements.partials.application-modals')
@@ -360,47 +551,72 @@
 @section('scripts')
 @parent
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Card Click Navigation
-        const cards = document.querySelectorAll('.talent-card');
-        cards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Ignore if clicking on dropdown or modals
-                if (e.target.closest('.card-ellipsis') || e.target.closest('.modal')) {
-                    return;
-                }
-                const url = this.getAttribute('data-url');
-                if (url) {
-                    window.location.href = url;
-                }
-            });
-        });
-        
-        // Add cursor pointer style
-        cards.forEach(card => card.style.cursor = 'pointer');
+    function exportApplicants() {
+        // Create CSV content
+        const applications = @json($applications);
+        let csv = 'Name,Age,Height,Experience,Applied On,Status\n';
 
+        applications.forEach(app => {
+            const profile = app.talent_profile;
+            const name = profile?.display_name || profile?.legal_name || 'N/A';
+            const age = profile?.date_of_birth ? calculateAge(profile.date_of_birth) : 'N/A';
+            const height = profile?.height || 'N/A';
+            const experience = profile?.experience_years ? profile.experience_years + ' years' : 'N/A';
+            const appliedOn = app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A';
+            const status = app.status || 'N/A';
+
+            csv += `"${name}","${age}","${height}","${experience}","${appliedOn}","${status}"\n`;
+        });
+
+        // Download CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'applicants_export_' + new Date().getTime() + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    function calculateAge(birthDate) {
+        const birth = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age + ' years';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         // Dropdown toggle logic
         const dropdownBtns = document.querySelectorAll('.dropdown-toggle-btn');
         dropdownBtns.forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                const menu = this.nextElementSibling;
-                
+                const container = this.closest('.actions-dropdown-container');
+                const menu = container.querySelector('.actions-dropdown-menu');
+
                 // Close other menus
                 document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
                     if (m !== menu) m.classList.remove('active');
                 });
-                
+
                 menu.classList.toggle('active');
             });
         });
 
         // Close when clicking outside
-        document.addEventListener('click', function() {
-            document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
-                menu.classList.remove('active');
-            });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.actions-dropdown-container')) {
+                document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+            }
         });
 
         // Modal Scripts

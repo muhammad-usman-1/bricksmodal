@@ -3,7 +3,7 @@
     <style>
         .bm-sidebar {
             padding: 18px 14px;
-            background: white;
+            background: #FFFFFF;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -290,7 +290,7 @@
         .bm-link.c-active {
             background: black;
             color: #fff;
-           
+
         }
         .bm-link.c-active i { color: #fff; }
         .bm-link.c-active img {
@@ -311,10 +311,10 @@
             align-items: center;
             justify-content: space-between;
             background: #fff;
-            border: 1px solid #edf0f3;
-            border-radius: 12px;
+
+
             padding: 10px 12px;
-            box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+
         }
 
         .bm-footer-user {
@@ -356,6 +356,7 @@
         }
 
         .bm-footer-arrow {
+            border:none;
             width: 30px;
             height: 30px;
             border-radius: 8px;
@@ -593,7 +594,7 @@ letter-spacing: 1.4px;">STUDIO</div>
                             </a>
                         </li>
                     </ul>
-                </div> 
+                </div>
             </li>
         @endif
         @if($adminUser && ($adminUser->isSuperAdmin() || $adminUser->hasModulePermission('payment_management')))

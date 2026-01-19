@@ -327,13 +327,16 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Time Slot (4 hrs)</label>
-                                    <select name="models[{{ $index }}][time_slot]" class="pill-select @error('models.' . $index . '.time_slot') is-invalid @enderror" required>
-                                        <option value="" disabled {{ empty($model['time_slot']) ? 'selected' : '' }}>Select time slot</option>
-                                        @foreach($timeSlots as $value => $label)
-                                            <option value="{{ $value }}" {{ ($model['time_slot'] ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="required">Time Slot Start (4 hrs)</label>
+                                    <input
+                                        type="time"
+                                        name="models[{{ $index }}][time_slot]"
+                                        class="pill-input time-slot-input @error('models.' . $index . '.time_slot') is-invalid @enderror"
+                                        value="{{ $model['time_slot'] ?? '' }}"
+                                        required
+                                        style="width: 100%;"
+                                    >
+                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Select start time (automatically 4-hour duration)</small>
                                     @error('models.' . $index . '.time_slot')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -652,13 +655,16 @@
                             </div>
                         </div>
                                 <div class="field-block">
-                                    <label class="required">Time Slot (4 hrs)</label>
-                                    <select name="models[__INDEX__][time_slot]" class="pill-select" required>
-                                        <option value="" disabled selected>Select time slot</option>
-                                        @foreach($timeSlots as $value => $label)
-                                            <option value="{{ $value }}">{{ $label }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="required">Time Slot Start (4 hrs)</label>
+                                    <input
+                                        type="time"
+                                        name="models[__INDEX__][time_slot]"
+                                        class="pill-input time-slot-input"
+                                        value=""
+                                        required
+                                        style="width: 100%;"
+                                    >
+                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Select start time (automatically 4-hour duration)</small>
                                 </div>
                         </div>
                     <div class="grid grid-2 condensed" data-rate-container>

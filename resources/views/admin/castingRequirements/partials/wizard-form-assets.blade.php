@@ -826,6 +826,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('At least one model requirement is required.');
                 valid = false;
             } else {
+                // Get start time from step 1 for validation
+                const startTimeField = steps[0].querySelector('#shoot_time');
+                const startTime = startTimeField ? startTimeField.value : null;
+
                 modelCards.forEach((card, cardIndex) => {
                     // Validate Gender (required)
                     const genderSelect = card.querySelector('select[name*="[gender]"]');
@@ -846,6 +850,34 @@ document.addEventListener('DOMContentLoaded', function () {
                             valid = false;
                         } else {
                             clearFieldError(ageRangeSelect);
+                        }
+                    }
+
+                    // Validate Time Slot (must be after or equal to start time from step 1)
+                    const timeSlotInput = card.querySelector('input[name*="[time_slot]"]');
+                    if (timeSlotInput) {
+                        const timeSlotValue = timeSlotInput.value;
+                        if (!timeSlotValue || timeSlotValue.trim() === '') {
+                            showFieldError(timeSlotInput, 'Time slot start time is required.');
+                            valid = false;
+                        } else if (!startTime) {
+                            showFieldError(timeSlotInput, 'Please select a start time in step 1 first.');
+                            valid = false;
+                        } else {
+                            // Convert time strings to comparable format (HH:MM)
+                            const normalizeTime = (time) => {
+                                const parts = time.split(':');
+                                return parts.length === 2 ? time : `${parts[0]}:${parts[1] || '00'}`;
+                            };
+                            const normalizedSlotTime = normalizeTime(timeSlotValue);
+                            const normalizedStartTime = normalizeTime(startTime);
+
+                            if (normalizedSlotTime < normalizedStartTime) {
+                                showFieldError(timeSlotInput, `Time slot must start at or after the shoot start time (${startTime}).`);
+                                valid = false;
+                            } else {
+                                clearFieldError(timeSlotInput);
+                            }
                         }
                     }
 
@@ -961,6 +993,28 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('change', function(e) {
         if (e.target.classList.contains('is-invalid')) {
             clearFieldError(e.target);
+        }
+
+        // Real-time validation for time slot fields
+        if (e.target.classList.contains('time-slot-input')) {
+            const startTimeField = steps[0].querySelector('#shoot_time');
+            const startTime = startTimeField ? startTimeField.value : null;
+            const timeSlotValue = e.target.value;
+
+            if (timeSlotValue && startTime) {
+                const normalizeTime = (time) => {
+                    const parts = time.split(':');
+                    return parts.length === 2 ? time : `${parts[0]}:${parts[1] || '00'}`;
+                };
+                const normalizedSlotTime = normalizeTime(timeSlotValue);
+                const normalizedStartTime = normalizeTime(startTime);
+
+                if (normalizedSlotTime < normalizedStartTime) {
+                    showFieldError(e.target, `Time slot must start at or after the shoot start time (${startTime}).`);
+                } else {
+                    clearFieldError(e.target);
+                }
+            }
         }
     });
 
@@ -1516,9 +1570,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!timeList) return;
         timeList.innerHTML = '';
         const times = [];
-        for (let h = 9; h <= 17; h++) {
+
+        // Start from 9:00 AM and go through to 8:00 AM next day
+        // 9 AM to 11:30 PM (same day)
+        for (let h = 9; h <= 23; h++) {
             for (let m = 0; m < 60; m += 30) {
-                if (h === 17 && m > 0) continue; // stop at 5:00 PM
+                const h12 = h % 12 || 12;
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const timeStr = `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+                const valueStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                times.push({ label: timeStr, value: valueStr });
+            }
+        }
+
+        // 12:00 AM to 8:00 AM (next day)
+        for (let h = 0; h <= 8; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                if (h === 8 && m > 0) continue; // stop at 8:00 AM
                 const h12 = h % 12 || 12;
                 const ampm = h >= 12 ? 'PM' : 'AM';
                 const timeStr = `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
