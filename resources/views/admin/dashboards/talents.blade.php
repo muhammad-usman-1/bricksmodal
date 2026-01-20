@@ -65,6 +65,12 @@ line-height: 36px; /* 150% */}
     .badge-pending::before {
         background: #f59e0b;
     }
+    .badge-rejected {
+        background: #fee2e2; color: #dc2626;
+    }
+    .badge-rejected::before {
+        background: #dc2626;
+    }
 
     .card-ellipsis { position: absolute; top: 12px; right: 15px; z-index: 30; }
     .dropdown-toggle-btn { color: #111; font-size: 16px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
@@ -239,6 +245,7 @@ line-height: 36px; /* 150% */}
                     $gender = strtolower($talent->gender ?? '');
                     $status = strtolower($talent->verification_status ?? 'pending');
                     $isVerified = $status === 'approved';
+                    $isRejected = $status === 'rejected';
                     $dob = optional($talent->date_of_birth);
                     $age = $dob ? $dob->age : null;
                     $ageText = $age ? "• $age YEARS" : '';
@@ -295,7 +302,7 @@ line-height: 36px; /* 150% */}
                             <img class="talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
                         @endforeach
                     </div>
-                    <span class="badge-active {{ $isVerified ? '' : 'badge-pending' }}">{{ $isVerified ? 'Active' : 'Pending' }}</span>
+                    <span class="badge-active {{ $isVerified ? '' : ($isRejected ? 'badge-rejected' : 'badge-pending') }}">{{ $isVerified ? 'Active' : ($isRejected ? 'Rejected' : 'Pending') }}</span>
                     <div class="card-ellipsis actions-dropdown-container">
                         <span class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></span>
                         <div class="actions-dropdown-menu">

@@ -30,7 +30,7 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('project_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $castingRequirements = CastingRequirement::with(['user', 'media'])->get();
+        $castingRequirements = CastingRequirement::with(['user', 'media'])->orderBy('id', 'desc')->get();
 
         return view('admin.castingRequirements.index', compact('castingRequirements'));
     }
@@ -173,7 +173,7 @@ class CastingRequirementController extends Controller
 
         $existingModelIds = $castingRequirement->modelRequirements->pluck('id')->toArray();
         $payloadModelIds = collect($models)->pluck('id')->filter()->toArray();
-        
+
         // Delete models that are not in the payload
         $modelsToDelete = array_diff($existingModelIds, $payloadModelIds);
         if (!empty($modelsToDelete)) {
@@ -186,7 +186,7 @@ class CastingRequirementController extends Controller
             $rateValue = $rateDecision === 'admin_decide'
                 ? (isset($modelPayload['rate']) ? (float) $modelPayload['rate'] : null)
                 : 0;
-            
+
             $modelData = [
                 'title' => $modelPayload['title'] ?? __('Model :number', ['number' => $index + 1]),
                 'quantity' => $modelPayload['quantity'],
@@ -365,10 +365,10 @@ class CastingRequirementController extends Controller
                 // Look for og:image
                 if (preg_match('/meta property="og:image" content="([^"]+)"/', $html, $matches)) {
                     $imageUrl = html_entity_decode($matches[1]);
-                    
+
                     // Clear existing shoot logo
                     $castingRequirement->clearMediaCollection('shoot_logo');
-                    
+
                     // Add new one
                     $castingRequirement->addMediaFromUrl($imageUrl)
                         ->toMediaCollection('shoot_logo');

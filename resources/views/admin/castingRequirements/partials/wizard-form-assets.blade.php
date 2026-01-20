@@ -71,7 +71,7 @@
     .icon-btn.danger { color: #c53030; }
     .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .pill-select, .pill-input { width: 100%; background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4c5160; outline: none; }
+    .pill-select, .pill-input { width: 100%; background: #fff; border: 1px solid #e3e6ec; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4c5160; outline: none; }
     .pill-select:focus, .pill-input:focus { border-color: #0f1014; box-shadow: 0 0 0 3px rgba(15,16,20,0.08); }
     .pill-input::placeholder,
     .duration-value::placeholder {
@@ -87,11 +87,12 @@
     .rate-options { display: flex; gap: 150px; align-items: center; flex-wrap: wrap; }
     .rate-option { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #475467; font-weight: 600; }
 
-    .dropbox { width: 100%; border: 1px solid #e3e6ec; border-radius: 10px; padding: 18px; display: block; background: #f9fafc; text-align: center; cursor: pointer; color: #6d7280; }
+    .dropbox { width: 100%; border: 1px solid #e3e6ec; border-radius: 10px; padding: 18px; display: block; background: #fff; text-align: center; cursor: pointer; color: #6d7280; }
     .dropbox-inner { display: grid; place-items: center; gap: 6px; }
     .dropbox i { color: #6d7280; font-size: 16px; }
     .drop-title { font-size: 12px; color: #3b4150; font-weight: 600; }
     .drop-sub { font-size: 11px; color: #8a8f9b; }
+    .dropbox.is-dragover { border-color: #0f1014; background: #eef2ff; }
 
     .reference-upload { margin-top: 10px; padding: 14px; border: 1px dashed #e5e7eb; border-radius: 10px; background: #fdfdfd; }
     .reference-upload-title { font-size: 13px; font-weight: 700; color: #101828; margin-bottom: 4px; }
@@ -305,7 +306,7 @@
         flex-direction: row;
         align-items: flex-start;
         gap: 14px;
-        background: #F9FAFB;
+        background: #fff;
         padding: 14px;
         border-radius: 12px;
         border: 1px solid #F2F4F7;
@@ -615,10 +616,90 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (cleaned !== durationInput.value) {
                     durationInput.value = cleaned;
                 }
+                applyTimeSlotBounds();
+                applyHoursMax();
+            });
+        }
+
+        const shootTimeInput = document.getElementById('shoot_time');
+        if (shootTimeInput) {
+            shootTimeInput.addEventListener('change', () => {
+                applyTimeSlotBounds();
             });
         }
 
     let currentStep = 0;
+
+    // Helpers for shoot window calculations
+    const parseTimeToMinutes = (timeStr) => {
+        if (!timeStr) return null;
+        const [h, m] = timeStr.split(':').map(Number);
+        if (Number.isNaN(h) || Number.isNaN(m)) return null;
+        return h * 60 + m;
+    };
+
+    const minutesToTimeString = (mins) => {
+        const total = Math.max(0, Math.min(24 * 60 - 1, Math.floor(mins)));
+        const h = Math.floor(total / 60) % 24;
+        const m = total % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    const getShootWindow = () => {
+        const startInput = steps[0].querySelector('#shoot_time');
+        const durationInputEl = steps[0].querySelector('#duration');
+        const startVal = startInput?.value;
+        const durationVal = durationInputEl?.value;
+        const durationHours = durationVal ? parseFloat(durationVal) : null;
+        if (!startVal || Number.isNaN(durationHours) || durationHours <= 0) return null;
+        const startMins = parseTimeToMinutes(startVal);
+        if (startMins === null) return null;
+        const endMins = startMins + durationHours * 60;
+        return { startMins, endMins };
+    };
+
+    const applyTimeSlotBounds = (scope = document) => {
+        const window = getShootWindow();
+        scope.querySelectorAll('.time-slot-input').forEach(input => {
+            if (!window) {
+                input.removeAttribute('min');
+                input.removeAttribute('max');
+                return;
+            }
+
+            const minStr = minutesToTimeString(window.startMins);
+            // Clamp to same-day upper bound; if shoot spans past midnight, cap at 23:59
+            const maxStr = minutesToTimeString(Math.min(window.endMins, (24 * 60) - 1));
+            input.min = minStr;
+            input.max = maxStr;
+
+            // If current value is outside bounds, clear it so user re-selects
+            const currentVal = input.value;
+            if (currentVal) {
+                const currentMins = parseTimeToMinutes(currentVal);
+                if (currentMins === null || currentMins < window.startMins || currentMins > window.endMins) {
+                    input.value = '';
+                }
+            }
+        });
+    };
+    // Expose for calls from other initializers
+    window.applyTimeSlotBounds = applyTimeSlotBounds;
+
+    const applyHoursMax = (scope = document) => {
+        const durationInputEl = steps[0].querySelector('#duration');
+        const durationVal = durationInputEl?.value;
+        const durationHours = durationVal ? parseFloat(durationVal) : null;
+        scope.querySelectorAll('input[name*="[model_hours]"]').forEach(input => {
+            if (!Number.isNaN(durationHours) && durationHours > 0) {
+                input.max = durationHours;
+            } else {
+                input.removeAttribute('max');
+            }
+        });
+    };
+    // Expose for calls from other initializers
+    window.applyHoursMax = applyHoursMax;
 
     const showStep = (index) => {
         steps.forEach((step, idx) => {
@@ -642,6 +723,10 @@ document.addEventListener('DOMContentLoaded', function () {
             line.classList.toggle('active', complete);
             line.classList.toggle('done', complete);
         });
+
+        // Keep Step 2 inputs constrained when moving between steps
+        applyTimeSlotBounds();
+        applyHoursMax();
     };
 
     // Helper: find the right place to render errors (below the input box, not inside it)
@@ -826,9 +911,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('At least one model requirement is required.');
                 valid = false;
             } else {
-                // Get start time from step 1 for validation
-                const startTimeField = steps[0].querySelector('#shoot_time');
-                const startTime = startTimeField ? startTimeField.value : null;
+                // Get shoot window from step 1 for validation
+                const shootWindow = getShootWindow();
 
                 modelCards.forEach((card, cardIndex) => {
                     // Validate Gender (required)
@@ -853,27 +937,25 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
 
-                    // Validate Time Slot (must be after or equal to start time from step 1)
+                    // Validate Time Slot (must be within shoot window)
                     const timeSlotInput = card.querySelector('input[name*="[time_slot]"]');
                     if (timeSlotInput) {
                         const timeSlotValue = timeSlotInput.value;
                         if (!timeSlotValue || timeSlotValue.trim() === '') {
                             showFieldError(timeSlotInput, 'Time slot start time is required.');
                             valid = false;
-                        } else if (!startTime) {
-                            showFieldError(timeSlotInput, 'Please select a start time in step 1 first.');
+                        } else if (!shootWindow) {
+                            showFieldError(timeSlotInput, 'Please set start time and duration in step 1 first.');
                             valid = false;
                         } else {
-                            // Convert time strings to comparable format (HH:MM)
-                            const normalizeTime = (time) => {
-                                const parts = time.split(':');
-                                return parts.length === 2 ? time : `${parts[0]}:${parts[1] || '00'}`;
-                            };
-                            const normalizedSlotTime = normalizeTime(timeSlotValue);
-                            const normalizedStartTime = normalizeTime(startTime);
-
-                            if (normalizedSlotTime < normalizedStartTime) {
-                                showFieldError(timeSlotInput, `Time slot must start at or after the shoot start time (${startTime}).`);
+                            const slotMins = parseTimeToMinutes(timeSlotValue);
+                            if (slotMins === null) {
+                                showFieldError(timeSlotInput, 'Invalid time selected.');
+                                valid = false;
+                            } else if (slotMins < shootWindow.startMins || slotMins > shootWindow.endMins) {
+                                const minStr = minutesToTimeString(shootWindow.startMins);
+                                const maxStr = minutesToTimeString(Math.min(shootWindow.endMins, (24 * 60) - 1));
+                                showFieldError(timeSlotInput, `Time slot must be within the shoot window (${minStr} - ${maxStr}).`);
                                 valid = false;
                             } else {
                                 clearFieldError(timeSlotInput);
@@ -895,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             const hoursNeeded = parseFloat(hoursValue);
                             const shootDuration = parseFloat(durationFromStep1.value);
-                            
+
                             if (isNaN(hoursNeeded) || hoursNeeded <= 0) {
                                 showFieldError(hoursNeededInput, 'Hours needed must be a valid number greater than 0.');
                                 valid = false;
@@ -1022,22 +1104,33 @@ document.addEventListener('DOMContentLoaded', function () {
             clearFieldError(e.target);
         }
 
-        // Real-time validation for time slot fields
+        // Real-time validation for time slot fields (must stay within shoot window)
         if (e.target.classList.contains('time-slot-input')) {
-            const startTimeField = steps[0].querySelector('#shoot_time');
-            const startTime = startTimeField ? startTimeField.value : null;
+            const window = getShootWindow();
             const timeSlotValue = e.target.value;
+            if (timeSlotValue && window) {
+                const slotMins = parseTimeToMinutes(timeSlotValue);
+                if (slotMins === null || slotMins < window.startMins || slotMins > window.endMins) {
+                    const minStr = minutesToTimeString(window.startMins);
+                    const maxStr = minutesToTimeString(Math.min(window.endMins, (24 * 60) - 1));
+                    showFieldError(e.target, `Time slot must be within the shoot window (${minStr} - ${maxStr}).`);
+                } else {
+                    clearFieldError(e.target);
+                }
+            }
+        }
 
-            if (timeSlotValue && startTime) {
-                const normalizeTime = (time) => {
-                    const parts = time.split(':');
-                    return parts.length === 2 ? time : `${parts[0]}:${parts[1] || '00'}`;
-                };
-                const normalizedSlotTime = normalizeTime(timeSlotValue);
-                const normalizedStartTime = normalizeTime(startTime);
-
-                if (normalizedSlotTime < normalizedStartTime) {
-                    showFieldError(e.target, `Time slot must start at or after the shoot start time (${startTime}).`);
+        // Real-time enforcement for Hours Needed
+        if (e.target.name && e.target.name.includes('[model_hours]')) {
+            const durationInputEl = steps[0].querySelector('#duration');
+            const durationVal = durationInputEl?.value;
+            const durationHours = durationVal ? parseFloat(durationVal) : null;
+            const hoursVal = e.target.value ? parseFloat(e.target.value) : null;
+            if (!Number.isNaN(durationHours) && durationHours > 0 && !Number.isNaN(hoursVal)) {
+                if (hoursVal > durationHours) {
+                    showFieldError(e.target, `Hours needed (${hoursVal}h) cannot exceed shoot duration (${durationHours}h).`);
+                } else if (hoursVal <= 0) {
+                    showFieldError(e.target, 'Hours needed must be greater than 0.');
                 } else {
                     clearFieldError(e.target);
                 }
@@ -1168,14 +1261,78 @@ const initModelCard = (scope) => {
         drop.dataset.fileBound = 'true';
         const input = drop.querySelector('[data-file-input]');
         const label = drop.querySelector('[data-file-label]');
+
+        const renderPreviews = (files) => {
+            const names = files.map(f => f.name).join(', ');
+            if (label) {
+                label.textContent = files.length ? `${files.length} file(s) selected` : 'Upload Reference Photos';
+            }
+
+            const referenceBlock = drop.closest('[data-reference-block]');
+            if (!referenceBlock) return;
+
+            let previewGrid = referenceBlock.querySelector('.reference-preview-grid');
+            if (!previewGrid) {
+                previewGrid = document.createElement('div');
+                previewGrid.className = 'reference-preview-grid';
+                // Place previews right after the dropbox so they are clearly visible
+                drop.insertAdjacentElement('afterend', previewGrid);
+            }
+
+            previewGrid.innerHTML = '';
+            files.forEach(file => {
+                if (!file || !(file instanceof File)) return;
+                if (file.type && !file.type.startsWith('image/')) return;
+                const url = URL.createObjectURL(file);
+                const item = document.createElement('div');
+                item.className = 'reference-preview-item';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Reference photo';
+                img.onload = () => URL.revokeObjectURL(url);
+                item.appendChild(img);
+                previewGrid.appendChild(item);
+            });
+        };
         drop.addEventListener('click', (event) => {
             if (event.target === input) return;
             input?.click();
         });
         input?.addEventListener('change', () => {
-            const names = Array.from(input.files || []).map(f => f.name).join(', ');
-            if (label) {
-                label.textContent = names || 'Upload Reference Photos';
+            const files = Array.from(input.files || []);
+            renderPreviews(files);
+        });
+
+        // Drag & Drop support
+        ;['dragenter', 'dragover'].forEach(evt => {
+            drop.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                drop.classList.add('is-dragover');
+            });
+        });
+        ;['dragleave', 'dragend'].forEach(evt => {
+            drop.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                drop.classList.remove('is-dragover');
+            });
+        });
+        drop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            drop.classList.remove('is-dragover');
+            const dropped = Array.from(e.dataTransfer?.files || []).filter(f => f && f.type && f.type.startsWith('image/'));
+            if (!dropped.length) return;
+
+            if (input && typeof DataTransfer !== 'undefined') {
+                const dt = new DataTransfer();
+                dropped.forEach(f => dt.items.add(f));
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change'));
+            } else {
+                // Fallback: render previews without altering input
+                renderPreviews(dropped);
             }
         });
     });
@@ -1280,6 +1437,10 @@ const initModelCard = (scope) => {
             }
         });
     });
+
+    // Constrain time slot inputs and hours-needed to the shoot window
+    if (window.applyTimeSlotBounds) window.applyTimeSlotBounds(scope);
+    if (window.applyHoursMax) window.applyHoursMax(scope);
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1632,7 +1793,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             item.textContent = t.label;
             item.addEventListener('click', () => {
-                shootTimeInput.value = t.value;
+                const shootTimeDisplay = document.getElementById('shoot_time');
+                const shootTimeValue = document.getElementById('shoot_time_value');
+                if (shootTimeDisplay) shootTimeDisplay.value = t.label; // Display 12h format with AM/PM
+                if (shootTimeValue) shootTimeValue.value = t.value; // Store 24h format in hidden input
+                shootTimeDisplay?.setAttribute('data-time-24h', t.value);
                 const headerText = document.getElementById('selectedTimeHeader');
                 if (headerText) headerText.textContent = t.label;
                 timeDropdown.classList.remove('show');
@@ -1701,7 +1866,151 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial render
     renderCalendar();
     renderTimeList();
+
+    // Ensure input shows time in 12h AM/PM format
+    (function syncTimeDisplayFromValue() {
+        const shootTimeInput = document.getElementById('shoot_time');
+        const shootTimeValue = document.getElementById('shoot_time_value');
+        if (!shootTimeInput || !shootTimeValue.value) return;
+        // Convert 24h time to 12h format with AM/PM
+        const [hStr, mStr] = shootTimeValue.value.split(':');
+        const h = parseInt(hStr, 10);
+        const m = parseInt(mStr, 10);
+        if (!isNaN(h) && !isNaN(m)) {
+            const h12 = (h % 12) || 12;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            shootTimeInput.value = `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+            shootTimeInput.setAttribute('data-time-24h', `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+        }
+    })();
 });
+
+// --- Time Slot Generation for Model Cards ---
+function generateTimeSlots(startTimeStr, durationHours) {
+    if (!startTimeStr || !durationHours) {
+        return [];
+    }
+
+    const slots = [];
+    const [startH, startM] = startTimeStr.split(':').map(Number);
+
+    if (isNaN(startH) || isNaN(startM)) {
+        return [];
+    }
+
+    // Start from the given time and generate slots until 8:00 AM next day
+    let currentH = startH;
+    let currentM = startM;
+    let dayOffset = 0; // 0 = same day, 1 = next day
+
+    // Generate slots
+    while (true) {
+        // End time of this slot
+        let endH = currentH + Math.floor(durationHours);
+        let endM = currentM + ((durationHours % 1) * 60);
+
+        // Handle minute overflow
+        if (endM >= 60) {
+            endH += Math.floor(endM / 60);
+            endM = endM % 60;
+        }
+
+        // Handle hour overflow to next day
+        let endDayOffset = dayOffset;
+        if (endH >= 24) {
+            endDayOffset += Math.floor(endH / 24);
+            endH = endH % 24;
+        }
+
+        // Check if we've passed 8:00 AM on the next day
+        if (endDayOffset > 1 || (endDayOffset === 1 && (endH > 8 || (endH === 8 && endM > 0)))) {
+            // Stop generating slots - we've gone past 8:00 AM next day
+            break;
+        }
+
+        // Format time display with AM/PM
+        const startDisplay = formatTimeWithAMPM(currentH, currentM);
+        const endDisplay = formatTimeWithAMPM(endH, endM);
+        const slotLabel = `${startDisplay} – ${endDisplay}`;
+
+        // Store value as start time in 24h format
+        const slotValue = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
+
+        slots.push({
+            label: slotLabel,
+            value: slotValue,
+            startH: currentH,
+            startM: currentM,
+            endH: endH,
+            endM: endM,
+            endDayOffset: endDayOffset
+        });
+
+        // Move to next slot (start where the previous one ended)
+        currentH = endH;
+        currentM = endM;
+        dayOffset = endDayOffset;
+    }
+
+    return slots;
+}
+
+function formatTimeWithAMPM(h, m) {
+    const h12 = h % 12 || 12;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function populateTimeSlotSelect(selectElement, slots, currentValue) {
+    selectElement.innerHTML = '<option value="">-- Select a time slot --</option>';
+
+    slots.forEach(slot => {
+        const option = document.createElement('option');
+        option.value = slot.value;
+        option.textContent = slot.label;
+        if (currentValue === slot.value) {
+            option.selected = true;
+        }
+        selectElement.appendChild(option);
+    });
+}
+
+function updateAllTimeSlotSelects() {
+    const shootTimeValue = document.getElementById('shoot_time_value');
+    const durationInput = document.getElementById('duration');
+
+    if (!shootTimeValue || !durationInput) {
+        return;
+    }
+
+    const startTime = shootTimeValue.value; // Read from hidden input with 24h format
+    const duration = parseFloat(durationInput.value);
+
+    const slots = generateTimeSlots(startTime, duration);
+
+    // Update all time slot selects in the form
+    document.querySelectorAll('[data-slot-index]').forEach(select => {
+        const currentValue = select.value;
+        populateTimeSlotSelect(select, slots, currentValue);
+    });
+}
+
+// Wire up Step 1 changes to regenerate time slots
+document.addEventListener('DOMContentLoaded', function() {
+    const shootTimeValue = document.getElementById('shoot_time_value');
+    const durationInput = document.getElementById('duration');
+
+    if (shootTimeValue) {
+        shootTimeValue.addEventListener('change', updateAllTimeSlotSelects);
+    }
+    if (durationInput) {
+        durationInput.addEventListener('change', updateAllTimeSlotSelects);
+    }
+
+    // Initial population on page load
+    setTimeout(updateAllTimeSlotSelects, 100);
+});
+
 </script>
 @php
     $googlePlacesKey = config('services.google.places_api_key');

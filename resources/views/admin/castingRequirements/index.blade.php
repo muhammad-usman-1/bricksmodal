@@ -20,8 +20,7 @@
     body { background: var(--bg); }
 
     .casting-shell {
-
-        padding: 8px 0 18px;
+        padding: 8px 0 90px; /* leave room for fixed footer button */
     }
 
     .top-row {
@@ -85,22 +84,15 @@ margin-bottom: 0;
         background-size: 10px 6px;
     }
 
-    .sticky-btn-container {
-        position: sticky;
-        top: 76px; /* offset below fixed header */
+    .shoot-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 24px;
         display: flex;
         justify-content: flex-end;
-        z-index: 999;
-
-    }
-
-    @media (max-width: 768px) {
-        .sticky-btn-container {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            left: auto;
-        }
+        z-index: 50;
     }
 
     .add-btn {
@@ -546,12 +538,6 @@ margin-bottom: 0;
         </div>
     </div>
 
-    @can('casting_requirement_create')
-        <div class="sticky-btn-container">
-            <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
-        </div>
-    @endcan
-
     <div class="filters-row">
         <div class="filter-wrapper">
             <i class="fas fa-filter filter-icon"></i>
@@ -790,6 +776,11 @@ margin-bottom: 0;
         </div>
     </div>
 </div>
+@can('casting_requirement_create')
+    <div class="shoot-footer">
+        <button class="add-btn" type="button" id="addNewShootBtn"><i class="fas fa-plus"></i> Add New Shoot</button>
+    </div>
+@endcan
 <div class="modal fade" id="shareProjectModal" tabindex="-1" role="dialog" aria-labelledby="shareProjectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow">

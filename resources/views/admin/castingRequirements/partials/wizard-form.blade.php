@@ -221,7 +221,8 @@
                         <div class="field-block">
                             <label for="shoot_time">Start Time</label>
                             <div class="dark-input has-picker" id="timePickerTrigger">
-                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--/--/--">
+                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time_display" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--:-- --" data-time-24h="">
+                                <input type="hidden" name="shoot_time" id="shoot_time_value" value="{{ $shootTimeValue }}">
                                 <span class="picker-icon"><i class="far fa-clock"></i></span>
                             </div>
                             <div class="custom-picker-dropdown" id="timeDropdown">
@@ -327,16 +328,15 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Time Slot Start</label>
-                                    <input
-                                        type="time"
+                                    <label class="required">Time Slot</label>
+                                    <select
                                         name="models[{{ $index }}][time_slot]"
-                                        class="pill-input time-slot-input @error('models.' . $index . '.time_slot') is-invalid @enderror"
-                                        value="{{ $model['time_slot'] ?? '' }}"
+                                        class="pill-select time-slot-select @error('models.' . $index . '.time_slot') is-invalid @enderror"
                                         required
-                                        style="width: 100%;"
+                                        data-slot-index="{{ $index }}"
                                     >
-                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Time must be within the shoot window (cannot be before start time, cannot extend beyond shoot duration). Must be added manually.</small>
+                                        <option value="">-- Select a time slot --</option>
+                                    </select>
                                     @error('models.' . $index . '.time_slot')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -357,7 +357,6 @@
                                         >
                                         <span style="color: #4b5563; font-weight: 500;">hours</span>
                                     </div>
-                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Cannot exceed the total shoot duration</small>
                                     @error('models.' . $index . '.model_hours')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
@@ -654,18 +653,17 @@
                                 >
                                 <span style="color: #4b5563; font-weight: 500;">Hours</span>
                             </div>
-                        </div>
+                                </div>
                                 <div class="field-block">
-                                    <label class="required">Time Slot Start (4 hrs)</label>
-                                    <input
-                                        type="time"
+                                    <label class="required">Time Slot</label>
+                                    <select
                                         name="models[__INDEX__][time_slot]"
-                                        class="pill-input time-slot-input"
-                                        value=""
+                                        class="pill-select time-slot-select"
                                         required
-                                        style="width: 100%;"
+                                        data-slot-index="__INDEX__"
                                     >
-                                    <small style="color: #667085; font-size: 11px; margin-top: 4px; display: block;">Select start time (automatically 4-hour duration)</small>
+                                        <option value="">-- Select a time slot --</option>
+                                    </select>
                                 </div>
                         </div>
                     <div class="grid grid-2 condensed" data-rate-container>
