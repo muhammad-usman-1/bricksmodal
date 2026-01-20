@@ -128,8 +128,9 @@
             display: block;
             font-size: 14px;
             font-weight: 500;
-            color: #666666;
+            color: black;
             margin-bottom: 12px;
+             font-family: 'Arimo', sans-serif;
         }
 
         .control {
@@ -140,7 +141,7 @@
             border-radius: 12px;
             background: #ffffff;
             font-size: 15px;
-            color: #1a1a1a;
+            color: #838181;
             transition: all 0.2s;
         }
 
@@ -891,7 +892,7 @@
                             </div>
                         </div>
 
-                        <div class="field-grid" style="margin-top:20px;">
+                        <div class="field-grid" style="margin-top:20px; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
                             <div class="field" id="hair_color_field">
                                 <label for="hair_color">Hair Color</label>
                                 <div style="position:relative;">
@@ -924,18 +925,17 @@
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="field" style="margin-top: 20px;">
-                            <label for="skin_tone">Skin Tone</label>
-                            <div style="position:relative;">
-                                <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;" required>
-                                    <option value="">e.g. Fair, Medium, Olive, Dark</option>
-                                    @foreach(['Fair','Light','Medium','Olive','Brown','Dark'] as $tone)
-                                        <option value="{{$tone}}" {{ old('skin_tone', $profile->skin_tone) == $tone ? 'selected' : '' }}>{{$tone}}</option>
-                                    @endforeach
-                                </select>
-                                <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            <div class="field">
+                                <label for="skin_tone">Skin Tone</label>
+                                <div style="position:relative;">
+                                    <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;" required>
+                                        <option value="">Select skin color</option>
+                                        @foreach(['Fair','Light','Medium','Olive','Brown','Dark'] as $tone)
+                                            <option value="{{$tone}}" {{ old('skin_tone', $profile->skin_tone) == $tone ? 'selected' : '' }}>{{$tone}}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                </div>
                             </div>
                         </div>
 

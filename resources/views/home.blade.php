@@ -141,8 +141,8 @@ line-height: 36px;
     }
 
     .stat-icon {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
         border-radius: 10px;
         background: #f1f4f8;
         display: inline-flex;
@@ -395,7 +395,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% vs last month</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <img src="{{ asset('images/talent.png') }}" alt="Total Talents" style="width: 20px; height: 20px;">
+                <img src="{{ asset('images/talent.png') }}" alt="Total Talents" ">
             </div>
         </div>
         <div class="stat-card">
@@ -405,7 +405,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% new requests</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <img src="{{ asset('images/pending.png') }}" alt="Pending Verification" style="width: 20px; height: 20px;">
+                <img src="{{ asset('images/pending.png') }}" alt="Pending Verification" ">
             </div>
         </div>
         <div class="stat-card">
@@ -415,7 +415,7 @@ line-height: 36px;
                 <span class="stat-pill">+32% ongoing now</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <img src="{{ asset('images/camera.png') }}" alt="Active Shoots" style="width: 20px; height: 20px;">
+                <img src="{{ asset('images/camera.png') }}" alt="Active Shoots" ">
             </div>
         </div>
         <div class="stat-card">
@@ -425,7 +425,7 @@ line-height: 36px;
                 <span class="stat-pill">+12% this week</span>
             </div>
             <div class="stat-icon" aria-hidden="true">
-                <img src="{{ asset('images/recent.png') }}" alt="Recent Sign-ups" style="width: 20px; height: 20px;">
+                <img src="{{ asset('images/recent.png') }}" alt="Recent Sign-ups" ">
             </div>
         </div>
     </div>

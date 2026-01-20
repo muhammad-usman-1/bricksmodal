@@ -95,9 +95,9 @@
     }
 
     .header-icon-link img {
-        width: 20px !important;
-        height: 20px !important;
-        display: block !important;
+width: auto;
+height:auto;
+
     }
 
     .noti-badge {
