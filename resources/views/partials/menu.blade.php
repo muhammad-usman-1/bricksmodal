@@ -470,9 +470,9 @@
             gap: 10px;
             padding: 10px 12px;
             border-radius: 10px;
-            color: #0f172a;
-            font-weight: 600;
-            font-size: 13px;
+            color: black;
+            
+            font-size: 14px;
             text-decoration: none;
             cursor: pointer;
             width: 100%;
