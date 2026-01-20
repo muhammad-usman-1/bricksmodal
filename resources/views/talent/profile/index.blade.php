@@ -457,13 +457,63 @@
     }
 </style>
 
+@php
+    $resolveMediaUrl = function ($path) {
+        if (! $path) {
+            return null;
+        }
+
+        if (is_array($path)) {
+            $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+        }
+
+        if (! $path) {
+            return null;
+        }
+
+        $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+        $awsUrl = rtrim((string) env('AWS_URL'), '/');
+        $storage = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+
+        if ($isAbsolute) {
+            if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+                $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
+                try {
+                    return $storage->temporaryUrl($relative, now()->addMinutes(60));
+                } catch (\Exception $e) {
+                    try {
+                        return $storage->url($relative);
+                    } catch (\Exception $e2) {
+                        return $path;
+                    }
+                }
+            }
+
+            return $path;
+        }
+
+        $clean = ltrim($path, '/');
+        try {
+            return $storage->url($clean);
+        } catch (\Exception $e) {
+            try {
+                return $storage->temporaryUrl($clean, now()->addMinutes(60));
+            } catch (\Exception $e2) {
+                return null;
+            }
+        }
+    };
+
+    $primaryAvatar = $resolveMediaUrl($profile->headshot_center_path ?? null);
+@endphp
+
 <div class="profile-dashboard">
 
     <!-- Top Card: Header -->
     <div class="dash-card profile-header">
         <div class="profile-info-wrap">
-            <div class="profile-avatar" style="{{ $profile->headshot_center_path ? 'background-image: url('.$profile->headshot_center_path.')' : '' }}">
-                @if(!$profile->headshot_center_path)
+            <div class="profile-avatar" style="{{ $primaryAvatar ? 'background-image: url('.e($primaryAvatar).')' : '' }}">
+                @if(! $primaryAvatar)
                     <span>{{ substr($profile->legal_name, 0, 1) }}</span>
                 @endif
             </div>
@@ -641,56 +691,56 @@
                     <label for="headshot_center">Headshot (center)</label>
                     <input id="headshot_center" type="file" name="headshot_center" class="form-control-file">
                     @if($profile->headshot_center_path)
-                        <div class="file-note">Current: <a href="{{ $profile->headshot_center_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->headshot_center_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="headshot_left">Headshot (left)</label>
                     <input id="headshot_left" type="file" name="headshot_left" class="form-control-file">
                     @if($profile->headshot_left_path)
-                        <div class="file-note">Current: <a href="{{ $profile->headshot_left_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->headshot_left_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="headshot_right">Headshot (right)</label>
                     <input id="headshot_right" type="file" name="headshot_right" class="form-control-file">
                     @if($profile->headshot_right_path)
-                        <div class="file-note">Current: <a href="{{ $profile->headshot_right_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->headshot_right_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="full_body_front">Full body (front)</label>
                     <input id="full_body_front" type="file" name="full_body_front" class="form-control-file">
                     @if($profile->full_body_front_path)
-                        <div class="file-note">Current: <a href="{{ $profile->full_body_front_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->full_body_front_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="full_body_right">Full body (right)</label>
                     <input id="full_body_right" type="file" name="full_body_right" class="form-control-file">
                     @if($profile->full_body_right_path)
-                        <div class="file-note">Current: <a href="{{ $profile->full_body_right_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->full_body_right_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="full_body_back">Full body (back)</label>
                     <input id="full_body_back" type="file" name="full_body_back" class="form-control-file">
                     @if($profile->full_body_back_path)
-                        <div class="file-note">Current: <a href="{{ $profile->full_body_back_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->full_body_back_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="id_front">ID - Front</label>
                     <input id="id_front" type="file" name="id_front" class="form-control-file">
                     @if($profile->id_front_path)
-                        <div class="file-note">Current: <a href="{{ $profile->id_front_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->id_front_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
                 <div class="form-field">
                     <label for="id_back">ID - Back</label>
                     <input id="id_back" type="file" name="id_back" class="form-control-file">
                     @if($profile->id_back_path)
-                        <div class="file-note">Current: <a href="{{ $profile->id_back_path }}" target="_blank">View</a></div>
+                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->id_back_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
             </div>
@@ -783,7 +833,7 @@
                 <!-- Center -->
                 <div class="photo-item">
                     @if($profile->headshot_center_path)
-                        <img src="{{ $profile->headshot_center_path }}" alt="Center Headshot">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_center_path) }}" alt="Center Headshot">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -791,7 +841,7 @@
                 <!-- Left -->
                 <div class="photo-item">
                     @if($profile->headshot_left_path)
-                        <img src="{{ $profile->headshot_left_path }}" alt="Left Headshot">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_left_path) }}" alt="Left Headshot">
                     @else
                          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -799,7 +849,7 @@
                 <!-- Right -->
                 <div class="photo-item">
                     @if($profile->headshot_right_path)
-                        <img src="{{ $profile->headshot_right_path }}" alt="Right Headshot">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_right_path) }}" alt="Right Headshot">
                     @else
                          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -817,7 +867,7 @@
                  <!-- Front -->
                  <div class="photo-item">
                     @if($profile->full_body_front_path)
-                        <img src="{{ $profile->full_body_front_path }}" alt="Full Body Front">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_front_path) }}" alt="Full Body Front">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -825,7 +875,7 @@
                 <!-- Right -->
                  <div class="photo-item">
                     @if($profile->full_body_right_path)
-                        <img src="{{ $profile->full_body_right_path }}" alt="Full Body Right">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_right_path) }}" alt="Full Body Right">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -833,7 +883,7 @@
                 <!-- Back -->
                  <div class="photo-item">
                     @if($profile->full_body_back_path)
-                        <img src="{{ $profile->full_body_back_path }}" alt="Full Body Back">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_back_path) }}" alt="Full Body Back">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif

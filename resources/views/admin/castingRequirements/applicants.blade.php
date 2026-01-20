@@ -344,6 +344,54 @@ margin-bottom:10px;
     }
 </style>
 
+@php
+    $resolveMediaUrl = function ($path) {
+        if (! $path) {
+            return null;
+        }
+
+        if (is_array($path)) {
+            $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+        }
+
+        if (! $path) {
+            return null;
+        }
+
+        $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+        $awsUrl = rtrim((string) env('AWS_URL'), '/');
+        $storage = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+
+        if ($isAbsolute) {
+            if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+                $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
+                try {
+                    return $storage->temporaryUrl($relative, now()->addMinutes(60));
+                } catch (\Exception $e) {
+                    try {
+                        return $storage->url($relative);
+                    } catch (\Exception $e2) {
+                        return $path;
+                    }
+                }
+            }
+
+            return $path;
+        }
+
+        $clean = ltrim($path, '/');
+        try {
+            return $storage->url($clean);
+        } catch (\Exception $e) {
+            try {
+                return $storage->temporaryUrl($clean, now()->addMinutes(60));
+            } catch (\Exception $e2) {
+                return null;
+            }
+        }
+    };
+@endphp
+
 <div class="applicants-page">
     <div class="page-header">
         <div class="header-top">
@@ -404,31 +452,7 @@ margin-bottom:10px;
                     $avatarFallback = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="#e5e7eb"/><circle cx="60" cy="50" r="26" fill="#9ca3af"/><rect x="24" y="82" width="72" height="22" rx="11" fill="#d1d5db"/></svg>');
 
                     $avatarRaw = $profile?->headshot_center_path ?? ($profile?->headshot_left_path ?? $profile?->headshot_right_path);
-                    if (is_array($avatarRaw)) {
-                        $avatarCandidate = $avatarRaw['url'] ?? ($avatarRaw['path'] ?? ($avatarRaw[0] ?? null));
-                    } else {
-                        $avatarCandidate = $avatarRaw;
-                    }
-                    $avatarSrc = null;
-                    if ($avatarCandidate) {
-                        if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
-                            $avatarSrc = $avatarCandidate;
-                        } else {
-                            $normalized = ltrim($avatarCandidate, '/');
-                            $storageRelative = \Illuminate\Support\Str::startsWith($normalized, 'storage/')
-                                ? substr($normalized, strlen('storage/'))
-                                : $normalized;
-                            $storagePath = 'storage/' . $storageRelative;
-                            if (file_exists(public_path($storagePath))) {
-                                $avatarSrc = asset($storagePath);
-                            } elseif (file_exists(public_path($normalized))) {
-                                $avatarSrc = asset($normalized);
-                            } else {
-                                $avatarSrc = asset($storagePath);
-                            }
-                        }
-                    }
-                    $avatarSrc = $avatarSrc ?: $avatarFallback;
+                    $avatarSrc = $resolveMediaUrl($avatarRaw) ?: $avatarFallback;
 
                     // Status Logic
                     $statusKey = $application->status;

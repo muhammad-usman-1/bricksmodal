@@ -530,6 +530,52 @@ margin-bottom: 0;
     @php
         $statusOptions = collect($castingRequirements)->pluck('status')->filter()->unique()->values();
         $locationOptions = collect($castingRequirements)->pluck('location')->filter()->unique()->values();
+
+        $resolveMediaUrl = function ($path) {
+            if (! $path) {
+                return null;
+            }
+
+            if (is_array($path)) {
+                $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
+            }
+
+            if (! $path) {
+                return null;
+            }
+
+            $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+            $awsUrl = rtrim((string) env('AWS_URL'), '/');
+            $storage = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+
+            if ($isAbsolute) {
+                if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+                    $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
+                    try {
+                        return $storage->temporaryUrl($relative, now()->addMinutes(60));
+                    } catch (\Exception $e) {
+                        try {
+                            return $storage->url($relative);
+                        } catch (\Exception $e2) {
+                            return $path;
+                        }
+                    }
+                }
+
+                return $path;
+            }
+
+            $clean = ltrim($path, '/');
+            try {
+                return $storage->url($clean);
+            } catch (\Exception $e) {
+                try {
+                    return $storage->temporaryUrl($clean, now()->addMinutes(60));
+                } catch (\Exception $e2) {
+                    return null;
+                }
+            }
+        };
     @endphp
     <div class="top-row">
         <div class="title-block">
@@ -672,31 +718,8 @@ margin-bottom: 0;
                                 @foreach($displayApps as $app)
                                     @php
                                         $p = $app->talent_profile;
-                                        $src = null;
-                                        if ($p) {
-                                            $avatarRaw = $p->headshot_center_path ?? ($p->headshot_left_path ?? $p->headshot_right_path);
-                                            if ($avatarRaw) {
-                                                if (is_array($avatarRaw)) {
-                                                    $avatarCandidate = $avatarRaw['url'] ?? ($avatarRaw['path'] ?? ($avatarRaw[0] ?? null));
-                                                } else {
-                                                    $avatarCandidate = $avatarRaw;
-                                                }
-
-                                                if ($avatarCandidate) {
-                                                    if (\Illuminate\Support\Str::startsWith($avatarCandidate, ['http://', 'https://', 'data:'])) {
-                                                        $src = $avatarCandidate;
-                                                    } else {
-                                                        $normalized = ltrim($avatarCandidate, '/');
-                                                        if (\Illuminate\Support\Str::startsWith($normalized, 'storage/')) {
-                                                            $src = asset($normalized);
-                                                        } else {
-                                                            $src = asset('storage/' . $normalized);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        $src = $src ?: $avatarFallback;
+                                        $avatarRaw = $p->headshot_center_path ?? ($p->headshot_left_path ?? $p->headshot_right_path);
+                                        $src = $resolveMediaUrl($avatarRaw) ?: $avatarFallback;
                                     @endphp
                                     <div class="avatar-circle">
                                         <img src="{{ $src }}" alt="Applicant">
