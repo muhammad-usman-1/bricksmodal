@@ -59,7 +59,7 @@
         border: 1px solid #cbd5e1;
         border-radius: 12px;
         width: 100%;
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 9 / 16;
         min-height: 280px;
         display: grid;
         place-items: center;
@@ -68,9 +68,7 @@
 
         position: relative;
         overflow: hidden;
-        transition: all 0.2s ease;
     }
-    .upload-tile.is-editable:hover { border-color: #0f172a; background: #f1f5f9; cursor: pointer; }
     .upload-tile.is-editable.drag-over { border-color: #10B981; background: #d1fae5; border-width: 2px; }
     .remove-image-btn {
         position: absolute;
@@ -95,11 +93,8 @@
         background: rgba(15, 23, 42, 1);
         transform: scale(1.1);
     }
-    .is-editing .upload-tile .remove-image-btn {
-        display: flex;
-    }
     .upload-tile .remove-image-btn {
-        display: none;
+        display: none !important;
     }
     .upload-tile img {
         width: 100%;
