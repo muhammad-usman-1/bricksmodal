@@ -564,6 +564,7 @@
             </div>
         </div>
 
+        @if(auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin()))
         <div class="section-card">
             <div class="section-title">ID Documents</div>
             <div class="upload-grid">
@@ -591,6 +592,7 @@
                 @endforeach
             </div>
         </div>
+        @endif
 
         @if($muxPlaybackId)
         <div class="section-card">

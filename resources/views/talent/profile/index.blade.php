@@ -729,21 +729,7 @@
                         <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->full_body_back_path) }}" target="_blank">View</a></div>
                     @endif
                 </div>
-                <div class="form-field">
-                    <label for="id_front">ID - Front</label>
-                    <input id="id_front" type="file" name="id_front" class="form-control-file">
-                    @if($profile->id_front_path)
-                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->id_front_path) }}" target="_blank">View</a></div>
-                    @endif
-                </div>
-                <div class="form-field">
-                    <label for="id_back">ID - Back</label>
-                    <input id="id_back" type="file" name="id_back" class="form-control-file">
-                    @if($profile->id_back_path)
-                        <div class="file-note">Current: <a href="{{ $resolveMediaUrl($profile->id_back_path) }}" target="_blank">View</a></div>
-                    @endif
-                </div>
-            </div>
+                        </div>
 
             <div class="file-note" style="margin-top: 8px;">
                 Max upload size: 6 MB for photos, 4 MB for ID images.
