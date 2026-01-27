@@ -299,7 +299,7 @@
                             <input type="hidden" name="models[{{ $index }}][title]" value="{{ $modelLabel }}">
                             <input type="hidden" name="models[{{ $index }}][quantity]" value="{{ $model['quantity'] ?? 1 }}">
 
-                            <div class="grid grid-3 condensed">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                                 <div class="field-block">
                                     <label class="required">Gender</label>
                                     <select name="models[{{ $index }}][gender]" class="pill-select @error('models.' . $index . '.gender') is-invalid @enderror" data-gender-select required>
@@ -327,6 +327,27 @@
                                     @enderror
                                 </div>
 
+                                <div class="field-block" style="margin-right: 30px;">
+                                    <label class="required">Hours Needed</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input
+                                            class="pill-input model-hours-input"
+                                            type="number"
+                                            name="models[{{ $index }}][model_hours]"
+                                            value="{{ $model['model_hours'] ?? '' }}"
+                                            placeholder="4"
+                                            min="1"
+                                            required
+                                            style="width: 80px; text-align: center;"
+                                            data-model-index="{{ $index }}"
+                                        >
+                                        <span style="color: #4b5563; font-weight: 500;">hours</span>
+                                    </div>
+                                    @error('models.' . $index . '.model_hours')
+                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="field-block">
                                     <label class="required">Time Slot</label>
                                     <select
@@ -338,26 +359,6 @@
                                         <option value="">-- Select a time slot --</option>
                                     </select>
                                     @error('models.' . $index . '.time_slot')
-                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="field-block">
-                                    <label class="required">Hours Needed</label>
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input
-                                            class="pill-input"
-                                            type="number"
-                                            name="models[{{ $index }}][model_hours]"
-                                            value="{{ $model['model_hours'] ?? '' }}"
-                                            placeholder="4"
-                                            min="1"
-                                            required
-                                            style="width: 80px; text-align: center;"
-                                        >
-                                        <span style="color: #4b5563; font-weight: 500;">hours</span>
-                                    </div>
-                                    @error('models.' . $index . '.model_hours')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
                                     @enderror
                                 </div>
@@ -404,8 +405,7 @@
                                 <div class="field-block">
                                     <label class="required">Height Range</label>
                                     <select name="models[{{ $index }}][height_range]" class="pill-select" required>
-                                        <option value="" disabled {{ ($model['height_range'] ?? '') === '' ? 'selected' : '' }}>Choose height range</option>
-                                        <option value="150-160" {{ ($model['height_range'] ?? '') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
+                                        <option value="150-160" {{ ($model['height_range'] ?? '150-160') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
                                         <option value="161-170" {{ ($model['height_range'] ?? '') === '161-170' ? 'selected' : '' }}>161 - 170 cm</option>
                                         <option value="171-180" {{ ($model['height_range'] ?? '') === '171-180' ? 'selected' : '' }}>171 - 180 cm</option>
                                         <option value="180+" {{ ($model['height_range'] ?? '') === '180+' ? 'selected' : '' }}>180+ cm</option>
@@ -418,8 +418,7 @@
                                 <div class="field-block">
                                     <label class="required">Weight Range</label>
                                     <select name="models[{{ $index }}][weight_range]" class="pill-select" required>
-                                        <option value="" disabled {{ ($model['weight_range'] ?? '') === '' ? 'selected' : '' }}>Choose weight range</option>
-                                        <option value="40-50" {{ ($model['weight_range'] ?? '') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
+                                        <option value="40-50" {{ ($model['weight_range'] ?? '40-50') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
                                         <option value="51-60" {{ ($model['weight_range'] ?? '') === '51-60' ? 'selected' : '' }}>51 - 60 kg</option>
                                         <option value="61-70" {{ ($model['weight_range'] ?? '') === '61-70' ? 'selected' : '' }}>61 - 70 kg</option>
                                         <option value="71+" {{ ($model['weight_range'] ?? '') === '71+' ? 'selected' : '' }}>71+ kg</option>
@@ -618,7 +617,7 @@
                     <input type="hidden" name="models[__INDEX__][title]" value="Model __INDEX_DISPLAY__">
                     <input type="hidden" name="models[__INDEX__][quantity]" value="1">
 
-                    <div class="grid grid-3 condensed">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                         <div class="field-block">
                             <label class="required">Gender</label>
                             <select name="models[__INDEX__][gender]" class="pill-select" data-gender-select required>
@@ -638,11 +637,11 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="field-block">
+                        <div class="field-block" style="margin-right: 30px;">
                             <label class="required">Hours Needed</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <input
-                                    class="pill-input"
+                                    class="pill-input model-hours-input"
                                     type="number"
                                     name="models[__INDEX__][model_hours]"
                                     placeholder="4"
@@ -650,6 +649,7 @@
                                     min="1"
                                     required
                                     style="width: 80px; text-align: center;"
+                                    data-model-index="__INDEX__"
                                 >
                                 <span style="color: #4b5563; font-weight: 500;">Hours</span>
                             </div>
@@ -699,8 +699,7 @@
                         <div class="field-block">
                             <label class="required">Height Range</label>
                             <select name="models[__INDEX__][height_range]" class="pill-select" required>
-                                <option value="" disabled selected>Choose height range</option>
-                                <option value="150-160">150 - 160 cm</option>
+                                <option value="150-160" selected>150 - 160 cm</option>
                                 <option value="161-170">161 - 170 cm</option>
                                 <option value="171-180">171 - 180 cm</option>
                                 <option value="180+">180+ cm</option>
@@ -709,8 +708,7 @@
                         <div class="field-block">
                             <label class="required">Weight Range</label>
                             <select name="models[__INDEX__][weight_range]" class="pill-select" required>
-                                <option value="" disabled selected>Choose weight range</option>
-                                <option value="40-50">40 - 50 kg</option>
+                                <option value="40-50" selected>40 - 50 kg</option>
                                 <option value="51-60">51 - 60 kg</option>
                                 <option value="61-70">61 - 70 kg</option>
                                 <option value="71+">71+ kg</option>

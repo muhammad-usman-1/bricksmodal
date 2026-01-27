@@ -500,14 +500,11 @@
             padding: 20px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            background: #f9fafc;
+            
+            
         }
 
-        .upload-card:hover, .upload-card.drag-over {
-            border-color: #8b5cf6;
-            background: #f5f3ff;
-        }
+        
 
         .upload-inner {
             display: flex;
@@ -1023,8 +1020,7 @@
                 <form method="POST" action="{{ route('talent.onboarding.store', 'step-4') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="step-panel is-active" data-step="4">
-                        <div id="step-4-main-section">
-                            <div class="info-box">
+                        <div class="info-box">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -1033,11 +1029,10 @@
                                 <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
                             <div class="info-box-content">
-                                We need a copy of your Civil ID or Passport and your headshot to verify your identity.
+                                We need a copy of your Civil ID or Passport to verify your identity.
                                 <br>This information is kept strictly confidential.
                             </div>
                         </div>
-
 
                         <div id="id-documents-section">
                              <div class="field">
@@ -1047,134 +1042,96 @@
                                      <span class="field-error">{{ $message }}</span>
                                  @enderror
                              </div>
-                                 <div class="upload-grid" style="margin-top:12px;">
-                                     <div class="field">
-                                         <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Front ID</label>
-                                         <label class="upload-card" for="upload_front" style="width:100%; margin:0;">
-                                             <input id="upload_front" name="id_front" type="file" accept="image/*" style="display:none;">
-                                             <div class="upload-inner">
-                                                 <div class="upload-icon">
-                                                     <img src="{{ asset('images/upload.png') }}" alt="Upload">
-                                                 </div>
-                                                 <div class="upload-label" data-file-label="front">Drop files here to upload</div>
-                                             </div>
-                                         </label>
-                                         @error('id_front')
-                                             <span class="field-error">{{ $message }}</span>
-                                         @enderror
+                             <div class="field" style="margin-top:12px;">
+                                 <label>ID Document (Front & Back)</label>
+                                 <label class="upload-card" for="upload_id_documents" style="width:100%; margin:0;">
+                                     <input id="upload_id_documents" name="id_documents[]" type="file" accept="image/*" multiple style="display:none;">
+                                     <div class="upload-inner">
+                                         <div class="upload-icon">
+                                             <img src="{{ asset('images/upload.png') }}" alt="Upload">
+                                         </div>
+                                         <div class="upload-label" data-file-label="id_documents">Drop files here to upload</div>
                                      </div>
-                                     <div class="field">
-                                         <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Back ID</label>
-                                         <label class="upload-card" for="upload_back" style="width:100%; margin:0;">
-                                             <input id="upload_back" name="id_back" type="file" accept="image/*" style="display:none;">
-                                             <div class="upload-inner">
-                                                 <div class="upload-icon">
-                                                     <img src="{{ asset('images/upload.png') }}" alt="Upload">
-                                                 </div>
-                                                 <div class="upload-label" data-file-label="back">Drop files here to upload</div>
-                                             </div>
-                                         </label>
-                                         @error('id_back')
-                                             <span class="field-error">{{ $message }}</span>
-                                         @enderror
-                                     </div>
-                                 </div>
-                        </div>
-
-                        <div id="profile-photos-section" style="margin-top: 24px;">
-                             <div style="margin-bottom:12px;">
-                                 <strong>Profile Photos & Video</strong>
-                             </div>
-                              <div class="upload-grid grid-3">
-                                 <div class="field">
-                                     <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Headshot</label>
-                                     <label class="upload-card" for="upload_headshot" style="width:100%; margin:0;">
-                                         <input id="upload_headshot" name="headshot" type="file" accept="image/*" style="display:none;">
-                                         <div class="upload-inner">
-                                             <div class="upload-icon">
-                                                 <img src="{{ asset('images/upload.png') }}" alt="Upload">
-                                             </div>
-                                             <div class="upload-label" data-file-label="headshot">Drop files here to upload</div>
-                                         </div>
-                                     </label>
-                                     @error('headshot')
-                                         <span class="field-error">{{ $message }}</span>
-                                     @enderror
-                                 </div>
-                                 <div class="field">
-                                     <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Full Body</label>
-                                     <label class="upload-card" for="upload_fullbody" style="width:100%; margin:0;">
-                                         <input id="upload_fullbody" name="fullbody" type="file" accept="image/*" style="display:none;">
-                                         <div class="upload-inner">
-                                             <div class="upload-icon">
-                                                 <img src="{{ asset('images/upload.png') }}" alt="Upload">
-                                             </div>
-                                             <div class="upload-label" data-file-label="fullbody">Drop files here to upload</div>
-                                         </div>
-                                     </label>
-                                     @error('fullbody')
-                                         <span class="field-error">{{ $message }}</span>
-                                     @enderror
-                                 </div>
-                                 <div class="field">
-                                     <label style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; display: block;">Profile Video (Optional)</label>
-                                     <label class="upload-card" for="upload_video" style="width:100%; margin:0;">
-                                         <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;">
-                                         <div class="upload-inner">
-                                             <div class="upload-icon">
-                                                 <img src="{{ asset('images/upload.png') }}" alt="Upload">
-                                             </div>
-                                             <div class="upload-label" data-file-label="video">Drop files here to upload</div>
-                                         </div>
-                                     </label>
-                                     @error('video')
-                                         <span class="field-error">{{ $message }}</span>
-                                     @enderror
-                                 </div>
+                                 </label>
+                                 @error('id_documents')
+                                     <span class="field-error">{{ $message }}</span>
+                                 @enderror
+                                 @error('id_documents.*')
+                                     <span class="field-error">{{ $message }}</span>
+                                 @enderror
                              </div>
                         </div>
-                        </div>
 
-                        <div id="additional-photos-section" style="display: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <strong style="font-size: 16px;">Additional Portfolio Photos</strong>
-                                <a id="back-to-main-step4" class="add-more-link" style="margin-bottom: 0; color: #6b7280;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                                    Back
-                                </a>
+                        <div id="portfolio-photos-section" style="margin-top: 24px;">
+                            <div style="margin-bottom:12px; display: flex; justify-content: space-between; align-items: center;">
+                                <label style="margin-bottom: 0;">Add Photos</label>
+                                <button type="button" id="camera-capture-btn" style="background: none; border: none; outline: none; box-shadow: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Take photo with camera">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </button>
+                                <input type="file" id="camera_capture_input" accept="image/*" capture="environment" style="display: none;">
                             </div>
-
-                            <div id="multi-upload-area" class="additional-photos-area">
-                                <input type="file" id="additional_photos_input" name="additional_photos[]" multiple accept="image/*" style="display: none;">
-                                <div class="upload-inner">
-                                    <div class="upload-icon">
-                                        <img src="{{ asset('images/upload.png') }}" alt="Upload">
+                            <div class="field">
+                                <label class="upload-card" for="additional_photos_input" style="width:100%; margin:0;">
+                                    <input type="file" id="additional_photos_input" name="additional_photos[]" multiple accept="image/*" style="display: none;">
+                                    <div class="upload-inner">
+                                        <div class="upload-icon">
+                                            <img src="{{ asset('images/upload.png') }}" alt="Upload">
+                                        </div>
+                                        <div class="upload-label">Drop multiple photos here or click to browse</div>
+                                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">You can select multiple files at once</p>
                                     </div>
-                                    <div class="upload-label">Drop multiple photos here or click to browse</div>
-                                    <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">You can select multiple files at once</p>
-                                </div>
+                                </label>
                             </div>
-
                             <div id="additional-photo-previews" class="photo-previews"></div>
                         </div>
 
+                        <div id="video-upload-section" style="margin-top: 24px;">
+                            <div style="margin-bottom:12px;">
+                                <label>Profile Video (Optional)</label>
+                            </div>
+                            <div class="field">
+                                <label class="upload-card" for="upload_video" style="width:100%; margin:0;">
+                                    <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;">
+                                    <div class="upload-inner">
+                                        <div class="upload-icon">
+                                            <img src="{{ asset('images/upload.png') }}" alt="Upload">
+                                        </div>
+                                        <div class="upload-label" data-file-label="video">Drop files here to upload</div>
+                                    </div>
+                                </label>
+                                @error('video')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="action-group" id="step4-action-group">
-                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link" id="step4-back-to-step3">
+                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                 Back
                             </a>
-                            <div style="display: flex; align-items: center; gap: 24px;">
-                                <a id="add-more-photos-btn" class="add-more-link" style="margin-bottom: 0;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    Add More Photos
-                                </a>
-                                <button type="submit" class="btn-primary btn-submit" style="padding: 0 32px;">
-                                    Submit Application
-                                </button>
-                            </div>
+                            <button type="submit" class="btn-primary btn-submit" style="padding: 0 32px;">
+                                Submit Application
+                            </button>
                         </div>
                     </div>
                 </form>
+
+                <!-- Camera Modal -->
+                <div id="camera-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+                    <div style="position: relative; width: 90%; max-width: 640px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <video id="camera-feed" autoplay playsinline style="width: 100%; height: auto; display: block; background: #000;"></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        
+                        <div style="padding: 16px; background: #fff; display: flex; justify-content: center; gap: 16px;">
+                            <button type="button" id="camera-cancel-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #d1d5db; background: #fff; cursor: pointer;">Cancel</button>
+                            <button type="button" id="camera-shutter-btn" class="btn-primary" style="padding: 8px 24px; border-radius: 4px; border: none; background: #10b981; color: #fff; font-weight: 600; cursor: pointer;">Capture Photo</button>
+                        </div>
+                    </div>
+                </div>
                 @endif
             </div>
         </div>
@@ -1291,8 +1248,14 @@
 
                       // File Input Change
                       input.addEventListener('change', () => {
-                          if(input.files[0]) {
-                              if(label) label.textContent = trimFileName(input.files[0].name);
+                          if(input.files.length > 0) {
+                              if(label) {
+                                  if(input.files.length === 1) {
+                                      label.textContent = trimFileName(input.files[0].name);
+                                  } else {
+                                      label.textContent = `${input.files.length} files selected`;
+                                  }
+                              }
                               card.style.borderColor = '#10b981';
                               card.style.background = '#f0fdf9';
                           }
@@ -1306,28 +1269,6 @@
                      function preventDefaults(e) {
                          e.preventDefault();
                          e.stopPropagation();
-                     }
-
-                     ['dragenter', 'dragover'].forEach(eventName => {
-                         card.addEventListener(eventName, highlight, false);
-                     });
-
-                     ['dragleave', 'drop'].forEach(eventName => {
-                         card.addEventListener(eventName, unhighlight, false);
-                     });
-
-                     function highlight(e) {
-                         card.classList.add('drag-over');
-                         card.style.borderColor = '#8b5cf6';
-                         card.style.background = '#f5f3ff';
-                     }
-
-                     function unhighlight(e) {
-                         card.classList.remove('drag-over');
-                         if (!input.files[0]) { // Reset only if no file selected
-                             card.style.borderColor = '#d1d5db';
-                             card.style.background = '#f9fafc';
-                         }
                      }
 
                      card.addEventListener('drop', handleDrop, false);
@@ -1345,45 +1286,77 @@
                      }
                   });
 
-                  // Additional Photos Logic
-                  const addMoreBtn = document.getElementById('add-more-photos-btn');
-                  const backToMainBtn = document.getElementById('back-to-main-step4');
-                  const mainSection = document.getElementById('step-4-main-section');
-                  const additionalSection = document.getElementById('additional-photos-section');
-                  const backToStep3Btn = document.getElementById('step4-back-to-step3');
-                  const step4ActionGroup = document.getElementById('step4-action-group');
-                  const multiUploadArea = document.getElementById('multi-upload-area');
+                  // Portfolio Photos Multi-Upload Logic
                   const multiInput = document.getElementById('additional_photos_input');
+                  const multiUploadArea = multiInput ? multiInput.closest('.upload-card') : null;
                   const previewContainer = document.getElementById('additional-photo-previews');
 
                   let selectedFiles = [];
 
-                  if (addMoreBtn && additionalSection && mainSection) {
-                      addMoreBtn.addEventListener('click', () => {
-                          mainSection.style.display = 'none';
-                          additionalSection.style.display = 'block';
-                          addMoreBtn.style.display = 'none'; // Hide the "Add more" button
-                          // Hide back-to-step-3 while inside "Add More Photos"
-                          if (backToStep3Btn) backToStep3Btn.style.display = 'none';
-                          // Keep submit aligned to the right when only one action is visible
-                          if (step4ActionGroup) step4ActionGroup.classList.add('step4-right-only');
+                  // Camera Capture Logic
+                  const cameraBtn = document.getElementById('camera-capture-btn');
+                  const cameraInput = document.getElementById('camera_capture_input');
+                  const cameraModal = document.getElementById('camera-modal');
+                  const cameraVideo = document.getElementById('camera-feed');
+                  const cameraCanvas = document.getElementById('camera-canvas');
+                  const shutterBtn = document.getElementById('camera-shutter-btn');
+                  const cancelBtn = document.getElementById('camera-cancel-btn');
+                  let stream = null;
+
+                  if (cameraBtn) {
+                      cameraBtn.addEventListener('click', async () => {
+                          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                          
+                          if (isMobile && cameraInput) {
+                              cameraInput.click();
+                          } else if (cameraModal && cameraVideo) {
+                              try {
+                                  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                                  cameraVideo.srcObject = stream;
+                                  cameraModal.style.display = 'flex';
+                              } catch (err) {
+                                  console.error("Camera access denied or error:", err);
+                                  if(cameraInput) cameraInput.click(); // Fallback
+                              }
+                          }
                       });
                   }
 
-                  if (backToMainBtn && additionalSection && mainSection) {
-                      backToMainBtn.addEventListener('click', () => {
-                          additionalSection.style.display = 'none';
-                          mainSection.style.display = 'block';
-                          if(addMoreBtn) addMoreBtn.style.display = 'inline-flex'; // Show it back
-                          // Show back-to-step-3 again when returning to main Step 4 sections
-                          if (backToStep3Btn) backToStep3Btn.style.display = '';
-                          if (step4ActionGroup) step4ActionGroup.classList.remove('step4-right-only');
+                  if (cameraInput) {
+                      cameraInput.addEventListener('change', (e) => {
+                          addFiles(e.target.files);
+                          cameraInput.value = '';
                       });
+                  }
+
+                  // Webcam Modal Logic
+                  if (shutterBtn && cameraVideo && cameraCanvas) {
+                      shutterBtn.addEventListener('click', () => {
+                          const context = cameraCanvas.getContext('2d');
+                          cameraCanvas.width = cameraVideo.videoWidth;
+                          cameraCanvas.height = cameraVideo.videoHeight;
+                          context.drawImage(cameraVideo, 0, 0, cameraVideo.videoWidth, cameraVideo.videoHeight);
+                          
+                          cameraCanvas.toBlob(blob => {
+                              const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+                              addFiles([file]);
+                              stopCamera();
+                          }, 'image/jpeg');
+                      });
+                  }
+
+                  if (cancelBtn) {
+                      cancelBtn.addEventListener('click', stopCamera);
+                  }
+
+                  function stopCamera() {
+                      if (stream) {
+                          stream.getTracks().forEach(track => track.stop());
+                      }
+                      if (cameraModal) cameraModal.style.display = 'none';
                   }
 
                   if (multiUploadArea && multiInput) {
-                      multiUploadArea.addEventListener('click', () => multiInput.click());
-
                       multiInput.addEventListener('change', (e) => {
                           addFiles(e.target.files);
                           // Clear the input so selecting the same file again triggers change
@@ -1395,14 +1368,6 @@
                               e.preventDefault();
                               e.stopPropagation();
                           }, false);
-                      });
-
-                      ['dragenter', 'dragover'].forEach(eventName => {
-                          multiUploadArea.addEventListener(eventName, () => multiUploadArea.classList.add('drag-over'), false);
-                      });
-
-                      ['dragleave', 'drop'].forEach(eventName => {
-                          multiUploadArea.addEventListener(eventName, () => multiUploadArea.classList.remove('drag-over'), false);
                       });
 
                       multiUploadArea.addEventListener('drop', e => {
@@ -1427,7 +1392,8 @@
                       // 2. Render previews
                       previewContainer.innerHTML = '';
                       if (selectedFiles.length > 0) {
-                          multiUploadArea.querySelector('.upload-label').textContent = `${selectedFiles.length} photos selected`;
+                          const uploadLabel = multiUploadArea.querySelector('.upload-label');
+                          if (uploadLabel) uploadLabel.textContent = `${selectedFiles.length} photos selected`;
                           selectedFiles.forEach((file, index) => {
                               const reader = new FileReader();
                               reader.onload = (e) => {
@@ -1440,7 +1406,8 @@
                               reader.readAsDataURL(file);
                           });
                       } else {
-                          multiUploadArea.querySelector('.upload-label').textContent = 'Drop multiple photos here or click to browse';
+                          const uploadLabel = multiUploadArea.querySelector('.upload-label');
+                          if (uploadLabel) uploadLabel.textContent = 'Drop multiple photos here or click to browse';
                       }
                   }
             }

@@ -257,10 +257,8 @@ class OnboardingController extends Controller
                 try {
                     $data = $request->validate([
                         'civil_id_number'   => ['required', 'string', 'max:50'],
-                        'id_front'          => [$profile->id_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
-                        'id_back'           => [$profile->id_back_path ? 'nullable' : 'required', 'image', 'max:4096'],
-                        'headshot'          => [$profile->headshot_center_path ? 'nullable' : 'required', 'image', 'max:4096'],
-                        'fullbody'          => [$profile->full_body_front_path ? 'nullable' : 'required', 'image', 'max:4096'],
+                        'id_documents'      => [$profile->id_front_path && $profile->id_back_path ? 'nullable' : 'required', 'array', 'min:1', 'max:2'],
+                        'id_documents.*'    => ['image', 'max:4096'],
                         'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
                         'additional_photos' => ['nullable', 'array'],
                         'additional_photos.*' => ['image', 'max:4096'],
@@ -313,12 +311,25 @@ class OnboardingController extends Controller
                     }
                 }
 
+                // Handle ID documents array (front and back)
+                $idFrontPath = $profile->id_front_path;
+                $idBackPath = $profile->id_back_path;
+                
+                if ($request->hasFile('id_documents')) {
+                    $idDocuments = $request->file('id_documents');
+                    // Store first document as front, second as back
+                    if (isset($idDocuments[0])) {
+                        $idFrontPath = $this->storeTalentFile($profile, $idDocuments[0], 'id/front');
+                    }
+                    if (isset($idDocuments[1])) {
+                        $idBackPath = $this->storeTalentFile($profile, $idDocuments[1], 'id/back');
+                    }
+                }
+
                 $profile->update([
                     'civil_id_number'   => Arr::get($data, 'civil_id_number'),
-                    'id_front_path'     => Arr::get($data, 'id_front') ? $this->storeTalentFile($profile, $data['id_front'], 'id/front') : $profile->id_front_path,
-                    'id_back_path'      => Arr::get($data, 'id_back') ? $this->storeTalentFile($profile, $data['id_back'], 'id/back') : $profile->id_back_path,
-                    'headshot_center_path' => Arr::get($data, 'headshot') ? $this->storeTalentFile($profile, $data['headshot'], 'photos/headshot') : $profile->headshot_center_path,
-                    'full_body_front_path' => Arr::get($data, 'fullbody') ? $this->storeTalentFile($profile, $data['fullbody'], 'photos/fullbody') : $profile->full_body_front_path,
+                    'id_front_path'     => $idFrontPath,
+                    'id_back_path'      => $idBackPath,
                     'mux_video_asset_id' => $muxVideoAssetId,
                     'onboarding_step'   => 'step-4',
                     'onboarding_steps_completed' => 4,

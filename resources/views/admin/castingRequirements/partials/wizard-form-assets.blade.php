@@ -1438,6 +1438,26 @@ const initModelCard = (scope) => {
         });
     });
 
+    // Add event listeners to Hours Needed inputs to regenerate time slots
+    scope.querySelectorAll('.model-hours-input').forEach(input => {
+        if (input.dataset.hoursListenerBound === 'true') return;
+        input.dataset.hoursListenerBound = 'true';
+
+        input.addEventListener('input', function() {
+            const modelCard = this.closest('[data-model-card]');
+            if (modelCard && window.updateTimeSlotForCard) {
+                window.updateTimeSlotForCard(modelCard);
+            }
+        });
+
+        input.addEventListener('change', function() {
+            const modelCard = this.closest('[data-model-card]');
+            if (modelCard && window.updateTimeSlotForCard) {
+                window.updateTimeSlotForCard(modelCard);
+            }
+        });
+    });
+
     // Constrain time slot inputs and hours-needed to the shoot window
     if (window.applyTimeSlotBounds) window.applyTimeSlotBounds(scope);
     if (window.applyHoursMax) window.applyHoursMax(scope);
@@ -1886,8 +1906,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // --- Time Slot Generation for Model Cards ---
-function generateTimeSlots(startTimeStr, durationHours) {
-    if (!startTimeStr || !durationHours) {
+function generateTimeSlots(startTimeStr, hoursNeeded) {
+    if (!startTimeStr || !hoursNeeded) {
         return [];
     }
 
@@ -1906,8 +1926,8 @@ function generateTimeSlots(startTimeStr, durationHours) {
     // Generate slots
     while (true) {
         // End time of this slot
-        let endH = currentH + Math.floor(durationHours);
-        let endM = currentM + ((durationHours % 1) * 60);
+        let endH = currentH + Math.floor(hoursNeeded);
+        let endM = currentM + ((hoursNeeded % 1) * 60);
 
         // Handle minute overflow
         if (endM >= 60) {
@@ -1975,36 +1995,53 @@ function populateTimeSlotSelect(selectElement, slots, currentValue) {
     });
 }
 
-function updateAllTimeSlotSelects() {
+function updateTimeSlotForCard(modelCard) {
     const shootTimeValue = document.getElementById('shoot_time_value');
-    const durationInput = document.getElementById('duration');
-
-    if (!shootTimeValue || !durationInput) {
+    if (!shootTimeValue || !shootTimeValue.value) {
         return;
     }
 
     const startTime = shootTimeValue.value; // Read from hidden input with 24h format
-    const duration = parseFloat(durationInput.value);
+    
+    // Find the Hours Needed input for this specific model card
+    const hoursInput = modelCard.querySelector('.model-hours-input');
+    if (!hoursInput || !hoursInput.value) {
+        return;
+    }
 
-    const slots = generateTimeSlots(startTime, duration);
+    const hoursNeeded = parseFloat(hoursInput.value);
+    if (isNaN(hoursNeeded) || hoursNeeded <= 0) {
+        return;
+    }
 
-    // Update all time slot selects in the form
-    document.querySelectorAll('[data-slot-index]').forEach(select => {
-        const currentValue = select.value;
-        populateTimeSlotSelect(select, slots, currentValue);
+    // Generate slots based on this model's hours needed
+    const slots = generateTimeSlots(startTime, hoursNeeded);
+
+    // Update the time slot select for this model card
+    const timeSlotSelect = modelCard.querySelector('.time-slot-select');
+    if (timeSlotSelect) {
+        const currentValue = timeSlotSelect.value;
+        populateTimeSlotSelect(timeSlotSelect, slots, currentValue);
+    }
+}
+
+function updateAllTimeSlotSelects() {
+    // Update time slots for all existing model cards
+    document.querySelectorAll('[data-model-card]').forEach(card => {
+        updateTimeSlotForCard(card);
     });
 }
 
-// Wire up Step 1 changes to regenerate time slots
+// Expose functions globally
+window.updateTimeSlotForCard = updateTimeSlotForCard;
+window.updateAllTimeSlotSelects = updateAllTimeSlotSelects;
+
+// Wire up Step 1 changes to regenerate time slots for all cards
 document.addEventListener('DOMContentLoaded', function() {
     const shootTimeValue = document.getElementById('shoot_time_value');
-    const durationInput = document.getElementById('duration');
 
     if (shootTimeValue) {
         shootTimeValue.addEventListener('change', updateAllTimeSlotSelects);
-    }
-    if (durationInput) {
-        durationInput.addEventListener('change', updateAllTimeSlotSelects);
     }
 
     // Initial population on page load
