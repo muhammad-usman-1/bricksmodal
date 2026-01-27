@@ -78,6 +78,8 @@ class TalentProfile extends Model
         'has_piercings',
         'hair_color',
         'eye_color',
+        't_shirt_size',
+        'dress_size',
         'shoe_size',
         'civil_id_number',
         'whatsapp_number',

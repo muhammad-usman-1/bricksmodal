@@ -981,20 +981,30 @@
                     <div class="step-panel is-active" data-step="3">
                         <p style="font-size: 14px; color: #888; margin-bottom: 32px;">Please provide accurate measurements to help us match you with fitting outfits.</p>
 
-                        <div class="field-grid">
+                        <div class="field-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
                             <div class="field">
-                                <label for="chest">Chest / Bust (cm)</label>
-                                <input id="chest" name="chest" class="control" type="number" step="0.1" placeholder="e.g. 90" value="{{ old('chest', $profile->chest) }}" required>
+                                <label for="t_shirt_size">T-Shirt Size</label>
+                                <div style="position:relative;">
+                                    <select id="t_shirt_size" name="t_shirt_size" class="control" style="appearance:none;" required>
+                                        <option value="">Select size</option>
+                                        @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
+                                            <option value="{{ $size }}" {{ old('t_shirt_size', $profile->t_shirt_size) == $size ? 'selected' : '' }}>{{ $size }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                </div>
                             </div>
                             <div class="field">
-                                <label for="waist">Waist (cm)</label>
-                                <input id="waist" name="waist" class="control" type="number" step="0.1" placeholder="e.g. 70" value="{{ old('waist', $profile->waist) }}" required>
-                            </div>
-                        </div>
-                        <div class="field-grid">
-                            <div class="field">
-                                <label for="hips">Hips (cm)</label>
-                                <input id="hips" name="hips" class="control" type="number" step="0.1" placeholder="e.g. 95" value="{{ old('hips', $profile->hips) }}" required>
+                                <label for="dress_size">Dress Size</label>
+                                <div style="position:relative;">
+                                    <select id="dress_size" name="dress_size" class="control" style="appearance:none;" required>
+                                        <option value="">Select size</option>
+                                        @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
+                                            <option value="{{ $size }}" {{ old('dress_size', $profile->dress_size) == $size ? 'selected' : '' }}>{{ $size }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                </div>
                             </div>
                             <div class="field">
                                 <label for="shoe_size">Shoe Size (EU)</label>
@@ -1425,7 +1435,7 @@
             }
 
             // 1. Weight & Height: Numbers only (prevent non-numeric input)
-            const numberFields = ['height', 'weight', 'chest', 'waist', 'hips', 'shoe_size'];
+            const numberFields = ['height', 'weight', 'shoe_size'];
             numberFields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1500,17 +1510,16 @@
                 const formStep3 = document.querySelector('form[action*="step-3"]');
                 if(formStep3) {
                      formStep3.addEventListener('submit', function(e) {
-                        const chest = document.getElementById('chest')?.value;
-                        const waist = document.getElementById('waist')?.value;
-                        const hips = document.getElementById('hips')?.value;
+                        const tShirtSize = document.getElementById('t_shirt_size')?.value;
+                        const dressSize = document.getElementById('dress_size')?.value;
                         const shoeSize = document.getElementById('shoe_size')?.value;
 
-                        if (!chest || !waist || !hips || !shoeSize) {
+                        if (!tShirtSize || !dressSize || !shoeSize) {
                             e.preventDefault();
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Missing Information',
-                                text: 'Please fill in all measurement fields.',
+                                text: 'Please fill in all size fields.',
                                 confirmButtonColor: '#1a1a1a'
                             });
                         }

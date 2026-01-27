@@ -232,16 +232,14 @@ class OnboardingController extends Controller
 
             case 'step-3':
                 $data = $request->validate([
-                    'chest'             => ['required', 'numeric', 'between:0,300'],
-                    'waist'             => ['required', 'numeric', 'between:0,300'],
-                    'hips'              => ['required', 'numeric', 'between:0,300'],
+                    't_shirt_size'      => ['required', 'string', 'max:20'],
+                    'dress_size'        => ['required', 'string', 'max:20'],
                     'shoe_size'         => ['required', 'numeric', 'between:0,100'],
                 ]);
 
                 $profile->update([
-                    'chest'             => Arr::get($data, 'chest'),
-                    'waist'             => Arr::get($data, 'waist'),
-                    'hips'              => Arr::get($data, 'hips'),
+                    't_shirt_size'      => Arr::get($data, 't_shirt_size'),
+                    'dress_size'        => Arr::get($data, 'dress_size'),
                     'shoe_size'         => Arr::get($data, 'shoe_size'),
                     'onboarding_step'   => 'step-4',
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 3),
