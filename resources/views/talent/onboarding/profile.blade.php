@@ -1544,7 +1544,7 @@
                         showCancelButton: true,
                         confirmButtonColor: '#1a1a1a',
                         cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, log me out',
+                        confirmButtonText: 'Yes, Log me out',
                         cancelButtonText: 'Cancel'
                     }).then((result) => {
                         if (result.isConfirmed) {
