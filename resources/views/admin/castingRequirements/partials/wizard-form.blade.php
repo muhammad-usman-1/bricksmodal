@@ -349,17 +349,19 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Time Slot</label>
+                                    <label>Time Slot</label>
                                     <select
                                         name="models[{{ $index }}][time_slot]"
                                         class="pill-select time-slot-select @error('models.' . $index . '.time_slot') is-invalid @enderror"
-                                        required
                                         data-slot-index="{{ $index }}"
                                     >
-                                        <option value="">-- Select a time slot --</option>
+                                        <option value="">-- Select a time slot (optional) --</option>
+                                        @foreach($timeSlots as $key => $label)
+                                            <option value="{{ $key }}" {{ (old('models.' . $index . '.time_slot') ?? $model['time_slot'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                     @error('models.' . $index . '.time_slot')
-                                        <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
+                                        <div class="invalid-feedback d-block">Invalid time slot selected.</div>
                                     @enderror
                                 </div>
                             </div>
@@ -655,14 +657,16 @@
                             </div>
                                 </div>
                                 <div class="field-block">
-                                    <label class="required">Time Slot</label>
+                                    <label>Time Slot</label>
                                     <select
                                         name="models[__INDEX__][time_slot]"
                                         class="pill-select time-slot-select"
-                                        required
                                         data-slot-index="__INDEX__"
                                     >
-                                        <option value="">-- Select a time slot --</option>
+                                        <option value="">-- Select a time slot (optional) --</option>
+                                        @foreach($timeSlots as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                         </div>

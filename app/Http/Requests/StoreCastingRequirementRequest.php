@@ -137,11 +137,6 @@ class StoreCastingRequirementRequest extends FormRequest
                 'string',
                 'max:120',
             ],
-            'models.*.time_slot' => [
-                'required',
-                'string',
-                Rule::in(array_keys(CastingRequirementModel::TIME_SLOT_OPTIONS)),
-            ],
             'models.*.weight_range' => [
                 'nullable',
                 'string',
