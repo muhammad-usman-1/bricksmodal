@@ -22,6 +22,7 @@ class OnboardingController extends Controller
         'step-2',
         'step-3',
         'step-4',
+        'step-5',
     ];
 
     public function start(Request $request): RedirectResponse
@@ -248,22 +249,61 @@ class OnboardingController extends Controller
                 return redirect()->route('talent.onboarding.show', 'step-4');
 
             case 'step-4':
+                // Only require documents if they haven't been uploaded yet
+                $requireDocs = !($profile->id_front_path && $profile->id_back_path);
+
+                $data = $request->validate([
+                    'id_documents'      => [$requireDocs ? 'required' : 'nullable', 'array', 'min:1', 'max:2'],
+                    'id_documents.*'    => ['image', 'max:4096'],
+                ]);
+
+                // Handle ID documents array (front and back)
+                $idFrontPath = $profile->id_front_path;
+                $idBackPath = $profile->id_back_path;
+
+                if ($request->hasFile('id_documents')) {
+                    $idDocuments = $request->file('id_documents');
+                    // Store first document as front, second as back
+                    if (isset($idDocuments[0])) {
+                        $idFrontPath = $this->storeTalentFile($profile, $idDocuments[0], 'id/front');
+                    }
+                    if (isset($idDocuments[1])) {
+                        $idBackPath = $this->storeTalentFile($profile, $idDocuments[1], 'id/back');
+                    }
+                }
+
+                // Update the profile with new or existing paths
+                $updateData = [
+                    'onboarding_step'   => 'step-5',
+                    'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 4),
+                ];
+
+                // Only update paths if they are not null
+                if ($idFrontPath) {
+                    $updateData['id_front_path'] = $idFrontPath;
+                }
+                if ($idBackPath) {
+                    $updateData['id_back_path'] = $idBackPath;
+                }
+
+                $profile->update($updateData);
+
+                return redirect()->route('talent.onboarding.show', 'step-5');
+
+            case 'step-5':
                 set_time_limit(600); // 10 minutes
                 ini_set('memory_limit', '1024M'); // 1GB
 
-                Log::info('Starting validation for Step 4...');
+                Log::info('Starting validation for Step 5 (Photos & Video)...');
                 try {
                     $data = $request->validate([
-                        'civil_id_number'   => ['required', 'string', 'max:50'],
-                        'id_documents'      => [$profile->id_front_path && $profile->id_back_path ? 'nullable' : 'required', 'array', 'min:1', 'max:2'],
-                        'id_documents.*'    => ['image', 'max:4096'],
                         'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
                         'additional_photos' => ['nullable', 'array'],
                         'additional_photos.*' => ['image', 'max:4096'],
                     ]);
-                    Log::info('Validation passed.');
+                    Log::info('Validation passed for Step 5.');
                 } catch (\Illuminate\Validation\ValidationException $e) {
-                    Log::error('Validation failed:', $e->errors());
+                    Log::error('Validation failed for Step 5:', $e->errors());
                     throw $e;
                 }
 
@@ -309,28 +349,10 @@ class OnboardingController extends Controller
                     }
                 }
 
-                // Handle ID documents array (front and back)
-                $idFrontPath = $profile->id_front_path;
-                $idBackPath = $profile->id_back_path;
-                
-                if ($request->hasFile('id_documents')) {
-                    $idDocuments = $request->file('id_documents');
-                    // Store first document as front, second as back
-                    if (isset($idDocuments[0])) {
-                        $idFrontPath = $this->storeTalentFile($profile, $idDocuments[0], 'id/front');
-                    }
-                    if (isset($idDocuments[1])) {
-                        $idBackPath = $this->storeTalentFile($profile, $idDocuments[1], 'id/back');
-                    }
-                }
-
                 $profile->update([
-                    'civil_id_number'   => Arr::get($data, 'civil_id_number'),
-                    'id_front_path'     => $idFrontPath,
-                    'id_back_path'      => $idBackPath,
                     'mux_video_asset_id' => $muxVideoAssetId,
-                    'onboarding_step'   => 'step-4',
-                    'onboarding_steps_completed' => 4,
+                    'onboarding_step'   => 'step-5',
+                    'onboarding_steps_completed' => 5,
                     'onboarding_completed_at' => now(),
                     'verification_status'     => 'pending',
                 ]);

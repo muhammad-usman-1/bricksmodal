@@ -203,7 +203,7 @@
         .cta {
             width: 100%;
             border: none;
-            background: #111111;
+            background: black
             color: #ffffff;
             height: 46px;
             border-radius: 10px;
@@ -214,13 +214,9 @@
             justify-content: center;
             gap: 8px;
             text-decoration: none;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
 
-        .cta:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
         }
+ 
 
         .subtle-link {
             display: block;
@@ -284,6 +280,13 @@
                     <span class="needs-text">
                         <strong>ID Verification</strong>
                         <span>Upload front and back of your government-issued ID</span>
+                    </span>
+                </li>
+                <li class="needs-item">
+                    <span class="badge-num">5</span>
+                    <span class="needs-text">
+                        <strong>Photos & Video</strong>
+                        <span>Upload additional photos and a short video to showcase yourself</span>
                     </span>
                 </li>
             </ul>

@@ -296,6 +296,38 @@ line-height: 36px;
     }
     .actions-btn:hover { background: #f3f5f9; border-color: #cbd5e1;text-decoration: none; }
 
+    .accept-btn, .reject-btn {
+        border: none;
+        background: transparent;
+        transition: none;
+        outline: none;
+    }
+
+    .accept-btn:hover, .reject-btn:hover {
+        background: transparent;
+        transform: none;
+    }
+
+    .accept-btn:focus, .reject-btn:focus,
+    .accept-btn:active, .reject-btn:active {
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* SweetAlert Button Styling */
+    .swal2-confirm, .swal2-cancel {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .swal2-confirm:focus, .swal2-cancel:focus {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
     .actions-dropdown-container { position: relative; display: inline-block; }
     .actions-dropdown-menu {
         text-decoration: none;
@@ -518,25 +550,21 @@ line-height: 36px;
                                     @endif
                                 </td>
                                 <td style="text-align:right;">
-                                    <div class="actions-dropdown-container">
-                                        <button type="button" class="actions-btn dropdown-toggle-btn" aria-label="More actions">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                                    @if(!in_array($status, ['approved','verified']))
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <button type="button" class="actions-btn accept-btn" data-talent-id="{{ $talent->id }}" aria-label="Accept talent" title="Accept">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00b87c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
                                             </svg>
                                         </button>
-                                        <div class="actions-dropdown-menu">
-                                            <a href="{{ route('admin.talent-profiles.show', $talent) }}" class="actions-dropdown-item">
-                                                <i class="far fa-eye"></i> View Profile
-                                            </a>
-                                            <form action="{{ route('admin.talent-profiles.destroy', $talent) }}" method="POST" data-swal-confirm="Are you sure you want to delete this talent? All the data will be deleted.">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="actions-dropdown-item text-danger">
-                                                    <i class="far fa-trash-alt"></i> Delete
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <button type="button" class="actions-btn reject-btn" data-talent-id="{{ $talent->id }}" aria-label="Reject talent" title="Reject">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
                                     </div>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -550,27 +578,103 @@ line-height: 36px;
         </div>
     </div>
 </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const dropdownBtns = document.querySelectorAll('.dropdown-toggle-btn');
+            // Show SweetAlert if there's a success message from server
+            @if(session('sweetalert_success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('sweetalert_success') }}',
+                    timer: 2500,
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
+            @endif
 
-            dropdownBtns.forEach(btn => {
+            // Handle Accept button clicks
+            const acceptBtns = document.querySelectorAll('.accept-btn');
+            acceptBtns.forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const menu = this.nextElementSibling;
+                    e.preventDefault();
+                    const talentId = this.getAttribute('data-talent-id');
+                    const talentName = this.closest('tr').querySelector('.talent-name').innerText;
 
-                    // Close other menus
-                    document.querySelectorAll('.actions-dropdown-menu').forEach(m => {
-                        if (m !== menu) m.classList.remove('active');
+                    Swal.fire({
+                        title: 'Accept Talent?',
+                        html: `<p>Are you sure you want to <strong>accept</strong> <br><strong>${talentName}</strong>?</p>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#00b87c',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="far fa-check"></i> Yes, Accept',
+                        cancelButtonText: 'Cancel',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Create and submit form
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/admin/talent-profiles/${talentId}/approve`;
+
+                            const csrfToken = document.createElement('input');
+                            csrfToken.type = 'hidden';
+                            csrfToken.name = '_token';
+                            csrfToken.value = '{{ csrf_token() }}';
+                            form.appendChild(csrfToken);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
                     });
-
-                    menu.classList.toggle('active');
                 });
             });
 
-            document.addEventListener('click', function() {
-                document.querySelectorAll('.actions-dropdown-menu').forEach(menu => {
-                    menu.classList.remove('active');
+            // Handle Reject button clicks
+            const rejectBtns = document.querySelectorAll('.reject-btn');
+            rejectBtns.forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const talentId = this.getAttribute('data-talent-id');
+                    const talentName = this.closest('tr').querySelector('.talent-name').innerText;
+
+                    const result = await Swal.fire({
+                        title: 'Reject Talent?',
+                        text: 'Optionally add a reason (visible to admin logs / notifications).',
+                        input: 'textarea',
+                        inputPlaceholder: 'Add notes (optional)',
+                        inputAttributes: { maxlength: 500 },
+                        showCancelButton: true,
+                        confirmButtonText: 'Reject',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        focusConfirm: false
+                    });
+
+                    if (result.isConfirmed) {
+                        // Create and submit form
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/admin/talent-profiles/${talentId}/reject`;
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfToken);
+
+                        const notesInput = document.createElement('input');
+                        notesInput.type = 'hidden';
+                        notesInput.name = 'notes';
+                        notesInput.value = (result.value || '').trim();
+                        form.appendChild(notesInput);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
                 });
             });
         });

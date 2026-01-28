@@ -85,7 +85,7 @@
             height: 52px;
             border: none;
             border-radius: 10px;
-            background: #111111;
+            background: black;
             color: #ffffff;
             font-size: 14px;
             font-weight: 500;
@@ -94,13 +94,10 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
         }
 
-        .submit-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-        }
+       
 
         .meta {
             font-size: 12px;

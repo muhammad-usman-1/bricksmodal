@@ -500,11 +500,11 @@
             padding: 20px 10px;
             text-align: center;
             cursor: pointer;
-            
-            
+
+
         }
 
-        
+
 
         .upload-inner {
             display: flex;
@@ -695,12 +695,13 @@
                 <form id="logout-form" action="{{ route('talent.logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
-                <div class="hero-sub">Step <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, default => 1 } }}</span> of 4</div>
+                <div class="hero-sub">Step <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, 'step-5' => 5, default => 1 } }}</span> of 5</div>
                 <div class="progress-track" aria-hidden="true">
                     <span class="progress-bar {{ $currentStep == 'step-1' ? 'is-active' : ($profile->onboarding_steps_completed >= 1 ? 'is-complete' : '') }}" data-progress-index="0"></span>
                     <span class="progress-bar {{ $currentStep == 'step-2' ? 'is-active' : ($profile->onboarding_steps_completed >= 2 ? 'is-complete' : '') }}" data-progress-index="1"></span>
                     <span class="progress-bar {{ $currentStep == 'step-3' ? 'is-active' : ($profile->onboarding_steps_completed >= 3 ? 'is-complete' : '') }}" data-progress-index="2"></span>
                     <span class="progress-bar {{ $currentStep == 'step-4' ? 'is-active' : ($profile->onboarding_steps_completed >= 4 ? 'is-complete' : '') }}" data-progress-index="3"></span>
+                    <span class="progress-bar {{ $currentStep == 'step-5' ? 'is-active' : ($profile->onboarding_steps_completed >= 5 ? 'is-complete' : '') }}" data-progress-index="4"></span>
                 </div>
             </div>
 
@@ -1045,15 +1046,53 @@
                         </div>
 
                         <div id="id-documents-section">
-                             <div class="field">
-                                 <label for="civil_id_number">Civil ID Number</label>
-                                 <input id="civil_id_number" name="civil_id_number" class="control" type="text" placeholder="e.g. 290010101234" value="{{ old('civil_id_number', $profile->civil_id_number) }}">
-                                 @error('civil_id_number')
-                                     <span class="field-error">{{ $message }}</span>
-                                 @enderror
+                             @php
+                                $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+                                $hasFront = !empty($profile->id_front_path);
+                                $hasBack = !empty($profile->id_back_path);
+                                $frontUrl = null;
+                                $backUrl = null;
+
+                                if ($hasFront) {
+                                    try {
+                                        $frontUrl = $storageDisk->url($profile->id_front_path);
+                                    } catch (\Exception $e) {
+                                        $frontUrl = asset('storage/' . $profile->id_front_path);
+                                    }
+                                }
+
+                                if ($hasBack) {
+                                    try {
+                                        $backUrl = $storageDisk->url($profile->id_back_path);
+                                    } catch (\Exception $e) {
+                                        $backUrl = asset('storage/' . $profile->id_back_path);
+                                    }
+                                }
+                             @endphp
+
+                             @if($hasFront || $hasBack)
+                             <div class="field" style="margin-bottom: 16px;">
+                                 <label style="margin-bottom: 8px; display: block;">Current ID Documents</label>
+                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                                     @if($hasFront)
+                                     <div style="position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f9fafb;">
+                                         <img src="{{ $frontUrl }}" alt="ID Front" style="width: 100%; height: 150px; object-fit: cover;">
+                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Front</div>
+                                     </div>
+                                     @endif
+                                     @if($hasBack)
+                                     <div style="position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f9fafb;">
+                                         <img src="{{ $backUrl }}" alt="ID Back" style="width: 100%; height: 150px; object-fit: cover;">
+                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Back</div>
+                                     </div>
+                                     @endif
+                                 </div>
+                                 <p style="font-size: 13px; color: #6b7280; margin: 0;">You can upload new documents to replace the existing ones.</p>
                              </div>
-                             <div class="field" style="margin-top:12px;">
-                                 <label>ID Document (Front & Back)</label>
+                             @endif
+
+                             <div class="field">
+                                 <label>{{ $hasFront || $hasBack ? 'Upload New ID Documents (Optional)' : 'ID Document (Front & Back)' }}</label>
                                  <label class="upload-card" for="upload_id_documents" style="width:100%; margin:0;">
                                      <input id="upload_id_documents" name="id_documents[]" type="file" accept="image/*" multiple style="display:none;">
                                      <div class="upload-inner">
@@ -1072,7 +1111,25 @@
                              </div>
                         </div>
 
-                        <div id="portfolio-photos-section" style="margin-top: 24px;">
+                        <div class="action-group" id="step4-action-group">
+                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                Back
+                            </a>
+                            <button type="submit" class="btn-primary" style="padding: 0 32px;">
+                                Next
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                @endif
+
+                @if($currentStep == 'step-5')
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-5') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="step-panel is-active" data-step="5">
+                        <div id="portfolio-photos-section" style="margin-top: 0;">
                             <div style="margin-bottom:12px; display: flex; justify-content: space-between; align-items: center;">
                                 <label style="margin-bottom: 0;">Add Photos</label>
                                 <button type="button" id="camera-capture-btn" style="background: none; border: none; outline: none; box-shadow: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Take photo with camera">
@@ -1118,8 +1175,8 @@
                             </div>
                         </div>
 
-                        <div class="action-group" id="step4-action-group">
-                            <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link">
+                        <div class="action-group" id="step5-action-group">
+                            <a href="{{ route('talent.onboarding.show', 'step-4') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                 Back
                             </a>
@@ -1135,7 +1192,7 @@
                     <div style="position: relative; width: 90%; max-width: 640px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                         <video id="camera-feed" autoplay playsinline style="width: 100%; height: auto; display: block; background: #000;"></video>
                         <canvas id="camera-canvas" style="display: none;"></canvas>
-                        
+
                         <div style="padding: 16px; background: #fff; display: flex; justify-content: center; gap: 16px;">
                             <button type="button" id="camera-cancel-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #d1d5db; background: #fff; cursor: pointer;">Cancel</button>
                             <button type="button" id="camera-shutter-btn" class="btn-primary" style="padding: 8px 24px; border-radius: 4px; border: none; background: #10b981; color: #fff; font-weight: 600; cursor: pointer;">Capture Photo</button>
@@ -1239,10 +1296,10 @@
             document.querySelectorAll('input[name="hijab_preference"]').forEach(r => r.addEventListener('change', toggleGenderBasedFields));
             setTimeout(toggleGenderBasedFields, 100);
 
-            // 4. File Upload Features (Step 4)
-            function initStep4() {
-                 const step4 = document.querySelector('[data-step="4"]');
-                 if(!step4) return;
+            // 4. File Upload Features (Step 4 and Step 5)
+            function initFileUploadSteps() {
+                 const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
+                 if(steps.length === 0) return;
 
                  // File Labels & Drag-and-Drop
                  document.querySelectorAll('.upload-card').forEach(card => {
@@ -1316,7 +1373,7 @@
                   if (cameraBtn) {
                       cameraBtn.addEventListener('click', async () => {
                           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                          
+
                           if (isMobile && cameraInput) {
                               cameraInput.click();
                           } else if (cameraModal && cameraVideo) {
@@ -1346,7 +1403,7 @@
                           cameraCanvas.width = cameraVideo.videoWidth;
                           cameraCanvas.height = cameraVideo.videoHeight;
                           context.drawImage(cameraVideo, 0, 0, cameraVideo.videoWidth, cameraVideo.videoHeight);
-                          
+
                           cameraCanvas.toBlob(blob => {
                               const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
                               addFiles([file]);
@@ -1421,7 +1478,7 @@
                       }
                   }
             }
-            initStep4();
+            initFileUploadSteps();
 
             // --- VALIDATION LOGIC ---
 

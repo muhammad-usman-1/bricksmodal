@@ -84,7 +84,7 @@ class TalentProfileController extends Controller
             'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
             'id_front_path', 'id_back_path'
         ]);
-        
+
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
 
         // Handle file uploads
@@ -183,6 +183,10 @@ class TalentProfileController extends Controller
 
         $this->notifyTalent($talentProfile, 'approved', trans('notifications.talent_profile_approved'), $notes);
 
+        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('home')) {
+            return redirect()->route('home')->with('sweetalert_success', 'Talent approved successfully!');
+        }
+
         return back()->with('message', trans('notifications.status_updated'));
     }
 
@@ -201,6 +205,10 @@ class TalentProfileController extends Controller
         ]);
 
         $this->notifyTalent($talentProfile, 'rejected', trans('notifications.talent_profile_rejected'), $data['notes'] ?? null);
+
+        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('home')) {
+            return redirect()->route('home')->with('sweetalert_success', 'Talent rejected successfully!');
+        }
 
         return back()->with('message', trans('notifications.status_updated'));
     }
@@ -254,7 +262,7 @@ class TalentProfileController extends Controller
 
             $talentProfile->languages()->detach();
             $talentProfile->labels()->detach();
-            
+
             // Force delete related records to satisfy foreign key constraints
             CastingApplication::where('talent_profile_id', $talentProfile->id)->forceDelete();
             BankDetail::where('talent_profile_id', $talentProfile->id)->forceDelete();

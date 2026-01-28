@@ -135,7 +135,7 @@
             height: 52px;
             border: none;
             border-radius: 14px;
-            background: #111111;
+            background: black;
             color: #ffffff;
             font-size: 14px;
             font-weight: 500;
@@ -144,13 +144,11 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
             margin-top: 6px;
             margin-bottom: 14px;
         }
-        .submit-btn:hover {
-            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
-        }
+        
         .alert {
             text-align: left;
         }
