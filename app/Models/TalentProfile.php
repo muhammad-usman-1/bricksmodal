@@ -88,6 +88,7 @@ class TalentProfile extends Model
         'card_number',
         'card_holder_name',
         'user_id',
+        'id_document_front',
         'id_front_path',
         'id_back_path',
         'headshot_center_path',

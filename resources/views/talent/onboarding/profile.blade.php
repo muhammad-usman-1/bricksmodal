@@ -1047,65 +1047,45 @@
 
                         <div id="id-documents-section">
                              @php
-                                $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
-                                $hasFront = !empty($profile->id_front_path);
-                                $hasBack = !empty($profile->id_back_path);
-                                $frontUrl = null;
-                                $backUrl = null;
+                                $docDisk = config('filesystems.cloud', config('filesystems.default', 'public'));
+                                $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
+                                $hasDoc = !empty($profile->id_document_front);
+                                $docUrl = null;
 
-                                if ($hasFront) {
+                                if ($hasDoc) {
                                     try {
-                                        $frontUrl = $storageDisk->url($profile->id_front_path);
+                                        $docUrl = $storageDisk->url($profile->id_document_front);
                                     } catch (\Exception $e) {
-                                        $frontUrl = asset('storage/' . $profile->id_front_path);
-                                    }
-                                }
-
-                                if ($hasBack) {
-                                    try {
-                                        $backUrl = $storageDisk->url($profile->id_back_path);
-                                    } catch (\Exception $e) {
-                                        $backUrl = asset('storage/' . $profile->id_back_path);
+                                        $docUrl = asset('storage/' . $profile->id_document_front);
                                     }
                                 }
                              @endphp
 
-                             @if($hasFront || $hasBack)
+                             @if($hasDoc)
                              <div class="field" style="margin-bottom: 16px;">
-                                 <label style="margin-bottom: 8px; display: block;">Current ID Documents</label>
+                                 <label style="margin-bottom: 8px; display: block;">Current ID Document</label>
                                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
-                                     @if($hasFront)
                                      <div style="position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f9fafb;">
-                                         <img src="{{ $frontUrl }}" alt="ID Front" style="width: 100%; height: 150px; object-fit: cover;">
-                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Front</div>
+                                         <img src="{{ $docUrl }}" alt="ID Document" style="width: 100%; height: 150px; object-fit: cover;">
+                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Document</div>
                                      </div>
-                                     @endif
-                                     @if($hasBack)
-                                     <div style="position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f9fafb;">
-                                         <img src="{{ $backUrl }}" alt="ID Back" style="width: 100%; height: 150px; object-fit: cover;">
-                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Back</div>
-                                     </div>
-                                     @endif
                                  </div>
-                                 <p style="font-size: 13px; color: #6b7280; margin: 0;">You can upload new documents to replace the existing ones.</p>
+                                 <p style="font-size: 13px; color: #6b7280; margin: 0;">You can upload a new document to replace the existing one.</p>
                              </div>
                              @endif
 
                              <div class="field">
-                                 <label>{{ $hasFront || $hasBack ? 'Upload New ID Documents (Optional)' : 'ID Document (Front & Back)' }}</label>
-                                 <label class="upload-card" for="upload_id_documents" style="width:100%; margin:0;">
-                                     <input id="upload_id_documents" name="id_documents[]" type="file" accept="image/*" multiple style="display:none;">
+                                 <label>{{ $hasDoc ? 'Upload New ID Document (Optional)' : 'ID Document' }}</label>
+                                 <label class="upload-card" for="upload_id_document_front" style="width:100%; margin:0;">
+                                     <input id="upload_id_document_front" name="id_document_front" type="file" accept="image/*" style="display:none;">
                                      <div class="upload-inner">
                                          <div class="upload-icon">
                                              <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                          </div>
-                                         <div class="upload-label" data-file-label="id_documents">Drop files here to upload</div>
+                                         <div class="upload-label" data-file-label="id_document_front">Drop file here to upload</div>
                                      </div>
                                  </label>
-                                 @error('id_documents')
-                                     <span class="field-error">{{ $message }}</span>
-                                 @enderror
-                                 @error('id_documents.*')
+                                 @error('id_document_front')
                                      <span class="field-error">{{ $message }}</span>
                                  @enderror
                              </div>
@@ -1425,9 +1405,8 @@
 
                   if (multiUploadArea && multiInput) {
                       multiInput.addEventListener('change', (e) => {
-                          addFiles(e.target.files);
-                          // Clear the input so selecting the same file again triggers change
-                          multiInput.value = '';
+                          selectedFiles = Array.from(e.target.files || []);
+                          renderPreviews();
                       });
 
                       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1447,16 +1426,18 @@
                       Array.from(files).forEach(file => {
                           selectedFiles.push(file);
                       });
-                      syncAndRender();
+                      syncInputFiles();
+                      renderPreviews();
                   }
 
-                  function syncAndRender() {
-                      // 1. Sync with hidden input
+                  function syncInputFiles() {
+                      if (!multiInput) return;
                       const dt = new DataTransfer();
                       selectedFiles.forEach(file => dt.items.add(file));
                       multiInput.files = dt.files;
+                  }
 
-                      // 2. Render previews
+                  function renderPreviews() {
                       previewContainer.innerHTML = '';
                       if (selectedFiles.length > 0) {
                           const uploadLabel = multiUploadArea.querySelector('.upload-label');

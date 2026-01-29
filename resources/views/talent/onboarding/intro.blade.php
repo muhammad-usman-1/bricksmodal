@@ -203,7 +203,7 @@
         .cta {
             width: 100%;
             border: none;
-            background: black
+            background: black;
             color: #ffffff;
             height: 46px;
             border-radius: 10px;
@@ -216,7 +216,7 @@
             text-decoration: none;
 
         }
- 
+
 
         .subtle-link {
             display: block;

@@ -109,7 +109,7 @@
         inset: 0;
         background: rgba(15, 23, 42, 0.6);
         color: #fff;
-        display: none;
+        display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -118,12 +118,13 @@
         font-weight: 600;
         backdrop-filter: blur(2px);
     }
-    .is-editing .upload-tile.is-editable .upload-overlay { display: flex; }
+    .upload-overlay { display: none !important; }
+    .is-editing .upload-tile.is-editable .upload-overlay { display: flex !important; }
     .upload-tile.is-editable input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
 
-    .upload-placeholder { display: grid; place-items: center; gap: 8px; }
+    .upload-placeholder { display: grid; place-items: center; gap: 8px; text-align: center; }
     .upload-placeholder i { font-size: 22px; color: #9ca3af; }
-    .upload-support { font-size: 10px; color: #9ca3af; }
+    .upload-support { font-size: 10px; color: #9ca3af; text-align: center; }
 
     .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .info-table { width: 100%; font-size: 12px; color: var(--ink-700); }
@@ -288,6 +289,23 @@
     .save-btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
     .cancel-btn { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
+    .add-more-btn {
+        background: #3b82f6;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s ease;
+    }
+    .add-more-btn:hover { background: #2563eb; }
+    .add-more-btn i { font-size: 14px; }
+
     @media (max-width: 640px) {
         .top-actions { display: flex; flex-direction: column; gap: 12px; }
         .top-actions-left, .top-actions-center, .top-actions-right { justify-self: stretch; width: 100%; display: flex; justify-content: center; }
@@ -341,8 +359,7 @@
     ];
 
     $idDocs = [
-        'id_front_path' => 'ID Front',
-        'id_back_path'  => 'ID Back',
+        'id_document_front' => 'ID Document',
     ];
 
     $resolveUrl = function ($path) {
@@ -503,7 +520,7 @@
     </div>
 
     <div id="tab-profile" class="tab-panel active">
-        <div class="section-card">
+        {{-- <div class="section-card">
             <div class="section-title">Headshots</div>
             <div class="upload-grid">
                 @foreach($headshots as $field => $label)
@@ -517,8 +534,7 @@
                         @else
                             <div class="upload-placeholder">
                                 <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                <div style="font-size:12px;">Drop files here to upload</div>
-                                <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                                <div style="font-size:12px;">No image</div>
                             </div>
                         @endif
                         <div class="upload-overlay">
@@ -529,63 +545,82 @@
                     </div>
                 @endforeach
             </div>
-        </div>
+        </div> --}}
 
         <div class="section-card">
-            <div class="section-title">Full-Body Shots</div>
-            <div class="upload-grid">
-                @foreach($fullBody as $field => $label)
-                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
-                    <div class="upload-tile is-editable" data-field="{{ $field }}">
-                        @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
-                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        @else
-                            <div class="upload-placeholder">
-                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                <div style="font-size:12px;">Drop files here to upload</div>
-                                <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
-                            </div>
-                        @endif
-                        <div class="upload-overlay">
-                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                            <span>{{ $img ? 'Change Photo' : 'Upload Photo' }}</span>
+            <div class="section-title">Profile Images</div>
+            <div id="profileImagesContainer">
+                <div class="upload-grid" id="profileImagesGrid">
+                    @php
+                        $mediaImages = $talentProfile->media()->get();
+                        $minBoxes = 3;
+                        $totalBoxes = max($mediaImages->count(), $minBoxes);
+                    @endphp
+                    @for($i = 0; $i < $totalBoxes; $i++)
+                        @php $media = $mediaImages->get($i); @endphp
+                        <div class="upload-tile is-editable" data-media-id="{{ $media?->id ?? '' }}">
+                            @if($media)
+                                @php $img = $resolveUrl($media->file_path); @endphp
+                                @if($img)
+                                    <img src="{{ $img }}" alt="Profile Image" class="preview-img">
+                                    <button type="button" class="remove-image-btn display-mode-only" onclick="removeMediaImage(this, event)" title="Remove image">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                @else
+                                    <div class="upload-placeholder">
+                                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
+                                        <div style="font-size:12px;">Drop files here to upload</div>
+                                        <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="upload-placeholder">
+                                    <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
+                                    <div style="font-size:12px;">Drop files here to upload</div>
+                                    <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                                </div>
+                                <div class="upload-overlay edit-mode-only" style="display: none;">
+                                    <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                                    <span>Upload Photo</span>
+                                </div>
+                                <input type="file" class="media-file-input" accept="image/*" style="display:none" onchange="previewMediaImage(this)">
+                            @endif
                         </div>
-                        <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
-                    </div>
-                @endforeach
+                    @endfor
+                </div>
+                <div class="edit-mode-only" style="margin-top: 12px; display: none;">
+                    <button type="button" class="add-more-btn" id="addMorePhotosBtn" onclick="addMorePhotoSlots(event)">
+                        <i class="fas fa-plus"></i> Add More Photos
+                    </button>
+                </div>
             </div>
         </div>
 
         @if(auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin()))
         <div class="section-card">
-            <div class="section-title">ID Documents</div>
-            <div class="upload-grid">
-                @foreach($idDocs as $field => $label)
-                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
-                    <div class="upload-tile is-editable" data-field="{{ $field }}">
-                        @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
-                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        @else
-                            <div class="upload-placeholder">
-                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                <div style="font-size:12px;">Drop files here to upload</div>
-                                <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
-                            </div>
-                        @endif
-                        <div class="upload-overlay">
-                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                            <span>{{ $img ? 'Update Document' : 'Upload Document' }}</span>
+            <div class="section-title">ID Document</div>
+            @foreach($idDocs as $field => $label)
+                @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
+                <div class="upload-tile is-editable" data-field="{{ $field }}" style="width: 100%; aspect-ratio: 16/9; max-height: 400px;">
+                    @if($img)
+                        <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                        <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    @else
+                        <div class="upload-placeholder">
+                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
+                            <div style="font-size:12px;">Drop files here to upload</div>
+                            <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
                         </div>
-                        <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
+                    @endif
+                    <div class="upload-overlay">
+                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                        <span>{{ $img ? 'Update Document' : 'Upload Document' }}</span>
                     </div>
-                @endforeach
-            </div>
+                    <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
+                </div>
+            @endforeach
         </div>
         @endif
 
@@ -774,7 +809,7 @@
                                 <div class="review-meta" style="margin-bottom:8px;">
 
                                     @if($date)
-                                         
+
                                         <span>{{ $date }}</span>
                                     @endif
                                     <span class="meta-separator">•</span>
@@ -1040,6 +1075,8 @@
                 form.classList.add('is-editing');
                 // Trigger gender-based field visibility when entering edit mode
                 setTimeout(toggleGenderBasedFields, 100);
+                // Update media images edit mode
+                setTimeout(updateMediaImageEditMode, 100);
             });
         }
 
@@ -1097,6 +1134,13 @@
             cancelEditBtn.addEventListener('click', () => {
                 // To properly cancel, we just reload the page to discard unsaved state
                 window.location.reload();
+            });
+        }
+
+        // Handle talent profile form submission with media upload
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                handleMediaImageUpload(e);
             });
         }
 
@@ -1407,6 +1451,251 @@
             container.find(`input[value="${value}"]`).prop('checked', true).trigger('change')
             updateStarClasses(container, value)
         })
+
+        // Initialize edit mode toggle for media images visibility
+        const originalStartEditListener = startEditBtn ? startEditBtn.onclick : null;
+        if (startEditBtn) {
+            startEditBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    updateMediaImageEditMode();
+                }, 100);
+            });
+        }
+
+        if (cancelEditBtn) {
+            const originalCancelListener = cancelEditBtn.onclick;
+            cancelEditBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    updateMediaImageEditMode();
+                }, 100);
+            });
+        }
     });
+
+    function updateMediaImageEditMode() {
+        const shell = document.querySelector('.talent-shell');
+        const isEditing = shell && shell.classList.contains('is-editing');
+        const profileImagesContainer = document.getElementById('profileImagesContainer');
+
+        if (profileImagesContainer) {
+            const tiles = profileImagesContainer.querySelectorAll('.upload-tile');
+            tiles.forEach((tile, index) => {
+                if (isEditing) {
+                    // In edit mode: add file input to empty tiles
+                    if (!tile.querySelector('.media-file-input') && !tile.querySelector('input[type="file"]')) {
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'file';
+                        fileInput.className = 'media-file-input';
+                        fileInput.accept = 'image/*';
+                        fileInput.style.display = 'none';
+                        fileInput.onchange = function() { previewMediaImage(this); };
+                        tile.appendChild(fileInput);
+
+                        // Add upload overlay
+                        const overlay = document.createElement('div');
+                        overlay.className = 'upload-overlay';
+                        overlay.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);"><span>Upload Photo</span>';
+                        overlay.style.display = 'none';
+                        tile.appendChild(overlay);
+                    }
+
+                    // Show overlay for empty tiles
+                    const placeholder = tile.querySelector('.upload-placeholder');
+                    const overlay = tile.querySelector('.upload-overlay');
+                    if (placeholder && !tile.querySelector('.preview-img')) {
+                        placeholder.style.display = 'none';
+                        if (overlay) overlay.style.display = 'grid';
+                    }
+
+                    // Add click handler for file selection
+                    const fileInput = tile.querySelector('input[type="file"]');
+                    if (fileInput && !tile.dataset.clickHandlerAdded) {
+                        tile.addEventListener('click', function(e) {
+                            if (e.target === this || e.target.classList.contains('upload-placeholder') || e.target.closest('.upload-placeholder') || e.target.classList.contains('upload-overlay') || e.target.closest('.upload-overlay')) {
+                                fileInput.click();
+                            }
+                        });
+                        tile.style.cursor = 'pointer';
+                        tile.dataset.clickHandlerAdded = 'true';
+                    }
+                }
+            });
+        }
+    }
+
+    function previewMediaImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            const tile = input.closest('.upload-tile');
+            const placeholder = tile.querySelector('.upload-placeholder');
+            const overlay = tile.querySelector('.upload-overlay');
+            let preview = tile.querySelector('.preview-img');
+            let removeBtn = tile.querySelector('.remove-image-btn');
+
+            reader.onload = function(e) {
+                // Hide placeholder and overlay
+                if (placeholder) placeholder.style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
+
+                // Remove existing preview image if any
+                if (preview && preview.tagName === 'IMG') {
+                    preview.remove();
+                }
+
+                // Create new preview image
+                const newImg = document.createElement('img');
+                newImg.src = e.target.result;
+                newImg.classList.add('preview-img');
+                newImg.style.position = 'relative';
+                newImg.style.zIndex = '1';
+                tile.insertBefore(newImg, tile.firstChild);
+
+                // Add/show remove button
+                if (!removeBtn) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'remove-image-btn';
+                    btn.innerHTML = '<i class="fa fa-times"></i>';
+                    btn.title = 'Remove image';
+                    btn.style.zIndex = '20';
+                    btn.onclick = function(e) {
+                        removeMediaImage(this, e);
+                    };
+                    tile.appendChild(btn);
+                } else {
+                    removeBtn.style.display = 'flex';
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function removeMediaImage(btn, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const tile = btn.closest('.upload-tile');
+        const fileInput = tile.querySelector('input[type="file"].media-file-input');
+        const preview = tile.querySelector('.preview-img');
+        const placeholder = tile.querySelector('.upload-placeholder');
+        const overlay = tile.querySelector('.upload-overlay');
+
+        // Remove preview image
+        if (preview) {
+            preview.remove();
+        }
+
+        // Hide remove button
+        btn.style.display = 'none';
+
+        // Show placeholder and overlay if tile is empty
+        if (placeholder) placeholder.style.display = 'grid';
+        if (overlay) overlay.style.display = 'grid';
+
+        // Clear file input
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    }
+
+    function addMorePhotoSlots(event) {
+        event.preventDefault();
+        const profileImagesGrid = document.getElementById('profileImagesGrid');
+
+        // Add 3 more photo slots
+        for (let i = 0; i < 3; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'upload-tile is-editable';
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'upload-placeholder';
+            placeholder.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px;"><div style="font-size:12px;">No image</div>';
+
+            const overlay = document.createElement('div');
+            overlay.className = 'upload-overlay';
+            overlay.style.display = 'grid';
+            overlay.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);"><span>Upload Photo</span>';
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.className = 'media-file-input';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.onchange = function() { previewMediaImage(this); };
+
+            tile.appendChild(placeholder);
+            tile.appendChild(overlay);
+            tile.appendChild(fileInput);
+
+            // Add click handler to tile for file selection
+            tile.addEventListener('click', function(e) {
+                if (e.target === this || e.target.classList.contains('upload-placeholder') || e.target.closest('.upload-placeholder') || e.target.classList.contains('upload-overlay') || e.target.closest('.upload-overlay')) {
+                    fileInput.click();
+                }
+            });
+
+            profileImagesGrid.appendChild(tile);
+        }
+    }
+
+    function handleMediaImageUpload(event) {
+        event.preventDefault();
+
+        const talentEditForm = document.getElementById('talentEditForm');
+        const talentId = '{{ $talentProfile->id }}';
+        const profileImagesGrid = document.getElementById('profileImagesGrid');
+        const mediaFiles = [];
+
+        // Collect all file inputs with files
+        const fileInputs = profileImagesGrid.querySelectorAll('input[type="file"].media-file-input');
+        fileInputs.forEach((input, index) => {
+            if (input.files && input.files[0]) {
+                mediaFiles.push({
+                    file: input.files[0],
+                    tile: input.closest('.upload-tile')
+                });
+            }
+        });
+
+        if (mediaFiles.length === 0) {
+            // No media files to upload, just submit the form normally
+            // Remove this event listener temporarily to avoid recursion
+            talentEditForm.onsubmit = null;
+            talentEditForm.submit();
+            return;
+        }
+
+        // Upload media files via AJAX
+        const uploadFormData = new FormData();
+        mediaFiles.forEach((item, index) => {
+            uploadFormData.append('media_files[]', item.file);
+        });
+
+        fetch(`/admin/talent-profiles/${talentId}/upload-media`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            },
+            body: uploadFormData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear the media file inputs and submit form without re-triggering media upload
+                fileInputs.forEach(input => input.value = '');
+                // Remove this event listener to prevent infinite recursion
+                talentEditForm.onsubmit = null;
+                talentEditForm.submit();
+            } else {
+                alert('Error uploading images: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error uploading images');
+        });
+    }
 </script>
 @endsection

@@ -249,41 +249,26 @@ class OnboardingController extends Controller
                 return redirect()->route('talent.onboarding.show', 'step-4');
 
             case 'step-4':
-                // Only require documents if they haven't been uploaded yet
-                $requireDocs = !($profile->id_front_path && $profile->id_back_path);
+                // Only require document if it hasn't been uploaded yet
+                $requireDoc = empty($profile->id_document_front);
 
                 $data = $request->validate([
-                    'id_documents'      => [$requireDocs ? 'required' : 'nullable', 'array', 'min:1', 'max:2'],
-                    'id_documents.*'    => ['image', 'max:4096'],
+                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'image', 'max:4096'],
                 ]);
 
-                // Handle ID documents array (front and back)
-                $idFrontPath = $profile->id_front_path;
-                $idBackPath = $profile->id_back_path;
-
-                if ($request->hasFile('id_documents')) {
-                    $idDocuments = $request->file('id_documents');
-                    // Store first document as front, second as back
-                    if (isset($idDocuments[0])) {
-                        $idFrontPath = $this->storeTalentFile($profile, $idDocuments[0], 'id/front');
-                    }
-                    if (isset($idDocuments[1])) {
-                        $idBackPath = $this->storeTalentFile($profile, $idDocuments[1], 'id/back');
-                    }
-                }
-
-                // Update the profile with new or existing paths
                 $updateData = [
                     'onboarding_step'   => 'step-5',
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 4),
                 ];
 
-                // Only update paths if they are not null
-                if ($idFrontPath) {
-                    $updateData['id_front_path'] = $idFrontPath;
-                }
-                if ($idBackPath) {
-                    $updateData['id_back_path'] = $idBackPath;
+                if ($request->hasFile('id_document_front')) {
+                    $s3Disk = config('filesystems.cloud', 's3');
+                    $updateData['id_document_front'] = $this->storeTalentFile(
+                        $profile,
+                        $request->file('id_document_front'),
+                        'id/front',
+                        $s3Disk
+                    );
                 }
 
                 $profile->update($updateData);
@@ -340,11 +325,13 @@ class OnboardingController extends Controller
                 }
 
                 if ($request->hasFile('additional_photos')) {
+                    $profile->media()->where('type', 'profile')->delete();
+                    $s3Disk = config('filesystems.cloud', 's3');
                     foreach ($request->file('additional_photos') as $photo) {
-                        $path = $this->storeTalentFile($profile, $photo, 'photos/additional');
+                        $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk);
                         $profile->media()->create([
                             'file_path' => $path,
-                            'type' => 'photo',
+                            'type' => 'profile',
                         ]);
                     }
                 }
@@ -364,11 +351,24 @@ class OnboardingController extends Controller
         }
     }
 
-    private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
+    private function storeTalentFile(TalentProfile $profile, $file, string $folder, ?string $disk = null): string
     {
-        $disk = config('filesystems.default', 'public');
-        // Store and return the relative path so we can build URLs consistently
-        return $file->store("talent/{$profile->id}/{$folder}", $disk);
+        $disk = $disk ?: config('filesystems.default', 'public');
+        $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
+
+        // If storing to cloud disk, return full URL (e.g., CloudFront/S3) for DB storage
+        $cloudDisk = config('filesystems.cloud', 's3');
+        if ($disk === $cloudDisk) {
+            try {
+                return Storage::disk($disk)->url($path);
+            } catch (\Exception $e) {
+                // Fallback to stored path if URL generation fails
+                return $path;
+            }
+        }
+
+        // Return relative path for non-cloud disks
+        return $path;
     }
 
     private function currentStep(TalentProfile $profile): string

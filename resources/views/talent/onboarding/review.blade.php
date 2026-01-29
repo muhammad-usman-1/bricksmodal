@@ -336,20 +336,37 @@
     {{-- ONLY THIS BOX SCROLLS --}}
     <div class="pr-photos-box">
         <div class="pr-photos">
-            @foreach ([
-        'id_front_path' => trans('global.id_front'),
-        'id_back_path' => trans('global.id_back'),
-        'headshot_center_path' => trans('global.headshot_center'),
-        'headshot_left_path' => trans('global.headshot_left'),
-        'headshot_right_path' => trans('global.headshot_right'),
-        'full_body_front_path' => trans('global.full_body_front'),
-        'full_body_right_path' => trans('global.full_body_right'),
-        'full_body_back_path' => trans('global.full_body_back'),
-    ] as $field => $label)
-                @if ($profile->{$field})
+            @php
+                $docDisk = config('filesystems.cloud', config('filesystems.default', 'public'));
+                $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
+                $idDocUrl = null;
+                if ($profile->id_document_front) {
+                    try {
+                        $idDocUrl = $storageDisk->url($profile->id_document_front);
+                    } catch (\Exception $e) {
+                        $idDocUrl = asset('storage/' . $profile->id_document_front);
+                    }
+                }
+            @endphp
+            @if ($idDocUrl)
+                <div class="pr-photo">
+                    <small>{{ trans('global.id_front') }}</small>
+                    <img src="{{ $idDocUrl }}" alt="{{ trans('global.id_front') }}" class="img-fluid rounded">
+                </div>
+            @endif
+
+            @foreach ($profile->media()->where('type', 'profile')->get() as $media)
+                @if ($media->file_path)
+                    @php
+                        try {
+                            $mediaUrl = $storageDisk->url($media->file_path);
+                        } catch (\Exception $e) {
+                            $mediaUrl = asset('storage/' . $media->file_path);
+                        }
+                    @endphp
                     <div class="pr-photo">
-                        <small>{{ $label }}</small>
-                        <img src="{{ $profile->{$field} }}" alt="{{ $label }}" class="img-fluid rounded">
+                        <small>Profile Photo</small>
+                        <img src="{{ $mediaUrl }}" alt="Profile Photo" class="img-fluid rounded">
                     </div>
                 @endif
             @endforeach

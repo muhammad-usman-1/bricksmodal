@@ -82,7 +82,7 @@ class TalentProfileController extends Controller
         $data = $request->except([
             'headshot_center_path', 'headshot_left_path', 'headshot_right_path',
             'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
-            'id_front_path', 'id_back_path'
+            'id_document_front'
         ]);
 
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
@@ -95,8 +95,7 @@ class TalentProfileController extends Controller
             'full_body_front_path' => 'full-body-front',
             'full_body_right_path' => 'full-body-right',
             'full_body_back_path'  => 'full-body-back',
-            'id_front_path'        => 'id/front',
-            'id_back_path'         => 'id/back',
+            'id_document_front'    => 'id/document',
         ];
 
         foreach ($fileFields as $field => $folder) {
@@ -113,8 +112,11 @@ class TalentProfileController extends Controller
 
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
-        $disk = config('filesystems.default', 'public');
-        return $file->store("talent/{$profile->id}/{$folder}", $disk);
+        $disk = config('filesystems.cloud', 's3');
+        $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
+        
+        // Return full URL for cloud storage
+        return \Storage::disk($disk)->url($path);
     }
 
     public function show(TalentProfile $talentProfile)
@@ -183,8 +185,8 @@ class TalentProfileController extends Controller
 
         $this->notifyTalent($talentProfile, 'approved', trans('notifications.talent_profile_approved'), $notes);
 
-        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('home')) {
-            return redirect()->route('home')->with('sweetalert_success', 'Talent approved successfully!');
+        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
+            return redirect()->route('admin.home')->with('sweetalert_success', 'Talent approved successfully!');
         }
 
         return back()->with('message', trans('notifications.status_updated'));
@@ -206,8 +208,8 @@ class TalentProfileController extends Controller
 
         $this->notifyTalent($talentProfile, 'rejected', trans('notifications.talent_profile_rejected'), $data['notes'] ?? null);
 
-        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('home')) {
-            return redirect()->route('home')->with('sweetalert_success', 'Talent rejected successfully!');
+        if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
+            return redirect()->route('admin.home')->with('sweetalert_success', 'Talent rejected successfully!');
         }
 
         return back()->with('message', trans('notifications.status_updated'));
@@ -276,6 +278,43 @@ class TalentProfileController extends Controller
                 $user->forceDelete();
             }
         });
+    }
+
+
+    public function uploadMedia(TalentProfile $talentProfile, Request $request)
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $request->validate([
+            'media_files' => 'array',
+            'media_files.*' => 'file|image|max:10240', // 10MB max per file
+        ]);
+
+        $uploadedMedia = [];
+
+        if ($request->hasFile('media_files')) {
+            foreach ($request->file('media_files') as $file) {
+                $filePath = $this->storeTalentFile($talentProfile, $file, 'profile-photos');
+
+                // Create TalentMedia record
+                $media = TalentMedia::create([
+                    'talent_profile_id' => $talentProfile->id,
+                    'file_path' => $filePath,
+                    'type' => 'profile',
+                ]);
+
+                $uploadedMedia[] = [
+                    'id' => $media->id,
+                    'file_path' => $filePath,
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Media files uploaded successfully',
+            'media' => $uploadedMedia,
+        ]);
     }
 
     protected function sanitizePhoneNumber(?string $number): ?string

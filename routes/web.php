@@ -29,10 +29,10 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/talent/login');
 Route::view('/welcome', 'landing')->name('landing');
 
-Route::get('/test-s3', function () {
-    \Storage::disk('s3')->put('test/ok.txt', 'It works!');
-    return 'S3 connected';
-});
+// Route::get('/test-s3', function () {
+//     \Storage::disk('s3')->put('test/ok.txt', 'It works!');
+//     return 'S3 connected';
+// });
 
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
@@ -81,6 +81,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::post('talent-profiles/{talent_profile}/approve', [TalentProfileController::class, 'approve'])->name('talent-profiles.approve');
             Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
             Route::post('talent-profiles/{talent_profile}/reactivate', [TalentProfileController::class, 'reactivate'])->name('talent-profiles.reactivate');
+            Route::post('talent-profiles/{talent_profile}/upload-media', [TalentProfileController::class, 'uploadMedia'])->name('talent-profiles.upload-media');
             Route::resource('talent-profiles', TalentProfileController::class);
         });
 
