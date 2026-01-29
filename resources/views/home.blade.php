@@ -552,12 +552,12 @@ line-height: 36px;
                                 <td style="text-align:right;">
                                     @if(!in_array($status, ['approved','verified']))
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                        <button type="button" class="actions-btn accept-btn" data-talent-id="{{ $talent->id }}" aria-label="Accept talent" title="Accept">
+                                        <button type="button" class="actions-btn accept-btn" data-talent-id="{{ $talent->id }}" data-route="{{ route('admin.talent-profiles.approve', $talent) }}" aria-label="Accept talent" title="Accept">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00b87c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <polyline points="20 6 9 17 4 12"></polyline>
                                             </svg>
                                         </button>
-                                        <button type="button" class="actions-btn reject-btn" data-talent-id="{{ $talent->id }}" aria-label="Reject talent" title="Reject">
+                                        <button type="button" class="actions-btn reject-btn" data-talent-id="{{ $talent->id }}" data-route="{{ route('admin.talent-profiles.reject', $talent) }}" aria-label="Reject talent" title="Reject">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -617,7 +617,7 @@ line-height: 36px;
                             // Create and submit form
                             const form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = `/admin/talent-profiles/${talentId}/approve`;
+                            form.action = this.getAttribute('data-route');
 
                             const csrfToken = document.createElement('input');
                             csrfToken.type = 'hidden';
@@ -658,7 +658,7 @@ line-height: 36px;
                         // Create and submit form
                         const form = document.createElement('form');
                         form.method = 'POST';
-                        form.action = `/admin/talent-profiles/${talentId}/reject`;
+                        form.action = this.getAttribute('data-route');
 
                         const csrfToken = document.createElement('input');
                         csrfToken.type = 'hidden';

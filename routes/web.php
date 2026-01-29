@@ -162,6 +162,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Bank Detail
         Route::delete('bank-details/destroy', [BankDetailController::class, 'massDestroy'])->name('bank-details.massDestroy');
         Route::resource('bank-details', BankDetailController::class);
+
+        // Talent Media
+        Route::delete('talent-media/{talentMedia}', [TalentProfileController::class, 'destroyMedia'])->name('talent-media.destroy');
     });
 });
 
