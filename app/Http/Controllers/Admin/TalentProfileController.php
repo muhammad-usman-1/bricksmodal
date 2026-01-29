@@ -114,7 +114,7 @@ class TalentProfileController extends Controller
     {
         $disk = config('filesystems.cloud', 's3');
         $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
-        
+
         // Return full URL for cloud storage
         return \Storage::disk($disk)->url($path);
     }

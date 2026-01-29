@@ -1047,16 +1047,25 @@
 
                         <div id="id-documents-section">
                              @php
-                                $docDisk = config('filesystems.cloud', config('filesystems.default', 'public'));
-                                $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
+                                // Retrieve ID document from S3 bucket
                                 $hasDoc = !empty($profile->id_document_front);
                                 $docUrl = null;
 
                                 if ($hasDoc) {
-                                    try {
-                                        $docUrl = $storageDisk->url($profile->id_document_front);
-                                    } catch (\Exception $e) {
-                                        $docUrl = asset('storage/' . $profile->id_document_front);
+                                    // Check if it's already a full URL from S3/CloudFront (starts with http:// or https://)
+                                    if (filter_var($profile->id_document_front, FILTER_VALIDATE_URL)) {
+                                        // Direct S3/CloudFront URL
+                                        $docUrl = $profile->id_document_front;
+                                    } else {
+                                        // Relative path - build the full S3 URL
+                                        $docDisk = config('filesystems.cloud', 's3');
+                                        $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
+                                        try {
+                                            $docUrl = $storageDisk->url($profile->id_document_front);
+                                        } catch (\Exception $e) {
+                                            // Fallback for local storage
+                                            $docUrl = asset('storage/' . $profile->id_document_front);
+                                        }
                                     }
                                 }
                              @endphp
