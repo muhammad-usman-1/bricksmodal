@@ -11,7 +11,7 @@ class HomeController
     public function index(Request $request)
     {
         // Base query to filter out admin users and only show talents who completed onboarding
-        $baseQuery = TalentProfile::with('user')
+        $baseQuery = TalentProfile::with(['user', 'media'])
             ->whereHas('user', function ($query) {
                 // Exclude users with admin, superadmin, or creative roles
                 $query->whereDoesntHave('roles', function ($roleQuery) {

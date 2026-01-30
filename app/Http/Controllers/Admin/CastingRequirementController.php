@@ -30,7 +30,11 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('project_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $castingRequirements = CastingRequirement::with(['user', 'media'])->orderBy('id', 'desc')->get();
+        $castingRequirements = CastingRequirement::with([
+            'user',
+            'media',
+            'castingApplications.talent_profile.media'
+        ])->orderBy('id', 'desc')->get();
 
         return view('admin.castingRequirements.index', compact('castingRequirements'));
     }
@@ -342,7 +346,7 @@ class CastingRequirementController extends Controller
     {
         abort_if(Gate::denies('casting_requirement_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $castingRequirement->load(['castingApplications.talent_profile.user']);
+        $castingRequirement->load(['castingApplications.talent_profile.user', 'castingApplications.talent_profile.media']);
 
         return view('admin.castingRequirements.applicants', [
             'castingRequirement' => $castingRequirement,

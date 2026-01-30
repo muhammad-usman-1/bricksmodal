@@ -718,7 +718,8 @@ margin-bottom: 0;
                                 @foreach($displayApps as $app)
                                     @php
                                         $p = $app->talent_profile;
-                                        $avatarRaw = $p->headshot_center_path ?? ($p->headshot_left_path ?? $p->headshot_right_path);
+                                        $mediaPhoto = $p->media ? $p->media->first() : null;
+                                        $avatarRaw = $mediaPhoto ? $mediaPhoto->file_path : ($p->headshot_center_path ?? ($p->headshot_left_path ?? $p->headshot_right_path));
                                         $src = $resolveMediaUrl($avatarRaw) ?: $avatarFallback;
                                     @endphp
                                     <div class="avatar-circle">

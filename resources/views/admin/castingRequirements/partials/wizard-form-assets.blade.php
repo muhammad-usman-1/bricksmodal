@@ -692,8 +692,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const getFieldBlock = (field) => field?.closest?.('.field-block') || field?.parentElement;
 
     const findErrorDiv = (host, key) => {
-        const items = Array.from(host?.querySelectorAll?.('.validation-error') || []);
-        return items.find(el => (el.dataset?.for || '') === key) || null;
+        if (!host) return null;
+        const items = Array.from(host.querySelectorAll('.validation-error, .invalid-feedback') || []);
+        return items.find(el => (el.dataset?.for || '') === key || el.classList.contains('invalid-feedback')) || null;
     };
 
     const getFriendlyLabelForField = (field) => {
@@ -1019,9 +1020,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Clear validation errors when user types/changes values
     form.addEventListener('input', function(e) {
-        if (e.target.classList.contains('is-invalid')) {
-            clearFieldError(e.target);
-        }
+        clearFieldError(e.target);
 
         // Real-time validation for description field - only allow letters and spaces
         if (e.target.id === 'description') {
@@ -1045,9 +1044,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     form.addEventListener('change', function(e) {
-        if (e.target.classList.contains('is-invalid')) {
-            clearFieldError(e.target);
-        }
+        clearFieldError(e.target);
 
         // Real-time validation for time slot fields (must stay within shoot window)
         if (e.target.classList.contains('time-slot-select')) {
@@ -1702,6 +1699,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(selectedDate.getDate()).padStart(2, '0');
                     shootDateInput.value = `${yyyy}-${mm}-${dd}`;
+                    // Trigger input event to clear validation errors
+                    shootDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                     calendarDropdown.classList.remove('show');
                     renderCalendar();
                 });
@@ -1760,11 +1759,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             item.textContent = t.label;
             item.addEventListener('click', () => {
-                const shootTimeDisplay = document.getElementById('shoot_time');
                 const shootTimeValue = document.getElementById('shoot_time_value');
-                if (shootTimeDisplay) shootTimeDisplay.value = t.label; // Display 12h format with AM/PM
-                if (shootTimeValue) shootTimeValue.value = t.value; // Store 24h format in hidden input
-                shootTimeDisplay?.setAttribute('data-time-24h', t.value);
+                if (shootTimeInput) {
+                    shootTimeInput.value = t.label;
+                    // Trigger input event to clear validation errors
+                    shootTimeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                if (shootTimeValue) {
+                    shootTimeValue.value = t.value;
+                    shootTimeValue.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                shootTimeInput?.setAttribute('data-time-24h', t.value);
                 const headerText = document.getElementById('selectedTimeHeader');
                 if (headerText) headerText.textContent = t.label;
                 timeDropdown.classList.remove('show');

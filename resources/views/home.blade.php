@@ -503,14 +503,17 @@ line-height: 36px;
                                 $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
                                 $avatar = null;
 
-                                if (!empty($talent->headshot_center_path)) {
-                                    $path = $talent->headshot_center_path;
+                                // 1. Try to get any photo from talent_media relationship
+                                $mediaPhoto = $talent->media ? $talent->media->first() : null;
+                                $candidatePath = $mediaPhoto ? $mediaPhoto->file_path : ($talent->headshot_center_path ?? null);
+
+                                if (!empty($candidatePath)) {
                                     // Check if it's already a full URL
-                                    if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
-                                        $avatar = $path;
+                                    if (\Illuminate\Support\Str::startsWith($candidatePath, ['http://', 'https://', 'data:'])) {
+                                        $avatar = $candidatePath;
                                     } else {
                                         // Use Storage to get the URL (works for both S3 and local)
-                                        $cleanPath = ltrim($path, '/');
+                                        $cleanPath = ltrim($candidatePath, '/');
                                         try {
                                             $avatar = $storageDisk->url($cleanPath);
                                         } catch (\Exception $e) {

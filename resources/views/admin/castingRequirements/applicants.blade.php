@@ -451,7 +451,8 @@ margin-bottom:10px;
 
                     $avatarFallback = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="#e5e7eb"/><circle cx="60" cy="50" r="26" fill="#9ca3af"/><rect x="24" y="82" width="72" height="22" rx="11" fill="#d1d5db"/></svg>');
 
-                    $avatarRaw = $profile?->headshot_center_path ?? ($profile?->headshot_left_path ?? $profile?->headshot_right_path);
+                    $mediaPhoto = $profile?->media ? $profile->media->first() : null;
+                    $avatarRaw = $mediaPhoto ? $mediaPhoto->file_path : ($profile?->headshot_center_path ?? ($profile?->headshot_left_path ?? $profile?->headshot_right_path));
                     $avatarSrc = $resolveMediaUrl($avatarRaw) ?: $avatarFallback;
 
                     // Status Logic
