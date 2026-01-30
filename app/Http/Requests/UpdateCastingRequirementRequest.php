@@ -155,6 +155,21 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'string',
                 'max:120',
             ],
+            'models.*.time_slot' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'models.*.model_hours' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'models.*.traditional_mode' => [
+                'nullable',
+                'string',
+                Rule::in(['true', 'false']),
+            ],
             'models.*.male_top_id' => [
                 'nullable',
                 'integer',

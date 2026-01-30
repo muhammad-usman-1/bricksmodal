@@ -2,606 +2,599 @@
 @section('content')
 <style>
     :root {
-        --bg: #f8f9fc;
+        --bg: #f5f7fa;
         --card: #ffffff;
-        --ink-900: #0f1524;
-        --ink-700: #3b4150;
-        --ink-500: #7b8191;
-        --muted: #a0a3aa;
-        --border: #e6e7eb;
-        --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-        --badge-orange: #fbe7cf;
-        --badge-orange-text: #c26f13;
-        --badge-green: #c9f2d8;
-        --badge-green-text: #2b9a50;
-        --badge-gray: #e6e7eb;
-        --badge-gray-text: #4b5563;
+        --ink-900: #0f172a;
+        --ink-700: #334155;
+        --ink-500: #64748b;
+        --ink-400: #94a3b8;
+        --border: #e2e8f0;
+        --primary: #2563eb;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --badge-blue: #dbeafe;
+        --badge-blue-text: #1e40af;
+        --radius: 12px;
     }
 
-    body { background: var(--bg); }
+    body { background: var(--bg); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 
-    .shoot-detail-shell {
-        background: var(--bg);
-        padding: 8px 0 22px;
+    .show-container {
+        
+        margin: 0 auto;
+        padding: 24px 10px 60px;
     }
 
-    .top-row {
+    /* Header Styling */
+    .show-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 18px;
+        margin-bottom: 32px;
     }
 
-    .title-block h5 {
-        color: #101828;
-        font-size: 24px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 36px;
-        margin-bottom: 0;
+    .header-title h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--ink-900);
+        margin: 0;
+        letter-spacing: -0.02em;
     }
 
-    .title-block .sub {
-        margin: 2px 0 0;
+    .header-title p {
         color: var(--ink-500);
-        font-size: 13px;
+        margin: 4px 0 0;
+        font-size: 15px;
     }
 
-    .back-link {
-        color: var(--ink-700);
-        font-size: 13px;
-        text-decoration: none;
+    .btn-back {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
-        font-weight: 600;
-        border: 1px solid var(--border);
-        border-radius: 8px;
         background: #fff;
-    }
-
-    .back-link:hover {
-        background: #f9fafb;
-        color: var(--ink-900);
-        text-decoration: none;
-        border-color: #cbd5e1;
-    }
-
-    .detail-card {
-        background: var(--card);
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-        padding: 20px 24px;
         border: 1px solid var(--border);
-        margin-bottom: 16px;
-    }
-
-    .detail-section-title {
-        color: #101828;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 16px;
-    }
-
-    .detail-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .detail-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--ink-500);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .detail-value {
+        padding: 10px 18px;
+        border-radius: 10px;
         font-size: 14px;
         font-weight: 600;
-        color: var(--ink-900);
+        color: var(--ink-700);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
     }
 
-    .detail-value a {
-        color: #2C2C2E;
+    .btn-back:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--ink-900);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
         text-decoration: none;
     }
 
-    .detail-value a:hover {
-        text-decoration: underline;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 10px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 12px;
-    }
-
-    .status-advertised { background: var(--badge-green); color: var(--badge-green-text); }
-    .status-processing { background: var(--badge-orange); color: var(--badge-orange-text); }
-    .status-completed { background: var(--badge-gray); color: var(--badge-gray-text); }
-
-    .model-card {
-        background: #fff;
+    /* Section Styling */
+    .section-card {
+        background: var(--card);
+        border-radius: var(--radius);
         border: 1px solid var(--border);
-        border-left: 4px solid #2C2C2E;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        box-shadow: var(--shadow);
+        margin-bottom: 32px;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
     }
 
-    .model-header {
+    .section-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+        background: #fafafa;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-header i {
+        color: var(--primary);
+        font-size: 18px;
+    }
+
+    .section-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ink-900);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .section-body {
+        padding: 28px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ink-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .info-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink-900);
+        line-height: 1.4;
+    }
+
+    .info-value.empty { color: var(--ink-400); font-weight: 400; font-style: italic; }
+
+    .status-pill {
+        display: inline-flex;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-advertised { background: #dcfce7; color: #166534; }
+    .status-processing { background: #fef9c3; color: #854d0e; }
+    .status-completed { background: #f1f5f9; color: #475569; }
+
+    /* Model Card Specifics */
+    .model-requirement-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 24px;
+        background: #fff;
+    }
+
+    .model-requirement-card:last-child { margin-bottom: 0; }
+
+    .model-card-header {
+        padding: 16px 24px;
+       
+        border-bottom: 1px dotted var(--border);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border);
     }
 
-    .model-title {
+    .model-index {
         font-size: 16px;
         font-weight: 700;
         color: var(--ink-900);
     }
 
-    .model-quantity {
-        background: #2C2C2E;
-        color: #fff;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
+    .model-card-body {
+        padding: 24px;
     }
 
-    .model-details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 12px;
-        margin-bottom: 14px;
-    }
-
-    .model-detail-item {
+    .model-tags {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
     }
 
-    .model-detail-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--ink-500);
-        text-transform: uppercase;
-    }
-
-    .model-detail-value {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--ink-900);
-    }
-
-    .label-badge {
-        display: inline-block;
-        background: #f3f4f6;
-        color: var(--ink-700);
+    .tag {
+        background: #f1f5f9;
+        color: #475569;
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 12px;
         font-weight: 600;
-        margin-right: 6px;
-        margin-bottom: 6px;
     }
 
-    .outfit-section {
-        margin-top: 16px;
-        padding-top: 16px;
+    /* Outfits Grid */
+    .outfits-container {
+        margin-top: 24px;
+        padding-top: 20px;
         border-top: 1px solid var(--border);
     }
 
-    .outfit-section-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--ink-700);
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .outfit-grid {
+    .outfits-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 12px;
-    }
-
-    .outfit-item {
-        background: #f9fafb;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
-        transition: all 0.2s ease;
-    }
-
-    .outfit-item:hover {
-        border-color: #2C2C2E;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .outfit-image {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        background: #f2f4f7;
-    }
-
-    .outfit-name {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--ink-900);
-        margin-bottom: 4px;
-    }
-
-    .outfit-category {
-        font-size: 11px;
-        color: var(--ink-500);
-        text-transform: capitalize;
-    }
-
-    .reference-photos-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
         margin-top: 12px;
     }
 
-    .reference-photo-item {
-        position: relative;
+    .outfit-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        background: #fafafa;
+    }
+
+    .outfit-image-wrapper {
+        aspect-ratio: 3/4;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f1f5f9;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .outfit-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .outfit-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink-900);
+        margin-bottom: 2px;
+    }
+
+    .outfit-sub {
+        font-size: 11px;
+        color: var(--ink-500);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    /* Reference Photos */
+    .ref-photos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .ref-photo {
+        aspect-ratio: 1;
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid var(--border);
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: transform 0.2s ease;
     }
 
-    .reference-photo-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-    }
+    .ref-photo:hover { transform: scale(1.05); }
 
-    .reference-photo-item img {
+    .ref-photo img {
         width: 100%;
-        height: 120px;
+        height: 100%;
         object-fit: cover;
     }
 
-    .reference-files-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
-        margin-top: 12px;
-    }
-
-    .reference-file-item {
-        background: #f9fafb;
+    /* Brief Box */
+    .brief-content {
+        
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: var(--ink-900);
-        transition: all 0.2s ease;
-    }
-
-    .reference-file-item:hover {
-        background: #f3f4f6;
-        border-color: #2C2C2E;
-        text-decoration: none;
-        color: var(--ink-900);
-    }
-
-    .reference-file-icon {
-        width: 40px;
-        height: 40px;
-        background: #2C2C2E;
-        color: #fff;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-    }
-
-    .reference-file-name {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .notes-box {
-        background: #f9fafb;
-        border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 14px;
-        margin-top: 12px;
-        font-size: 13px;
+        font-size: 15px;
+        line-height: 1.8;
         color: var(--ink-700);
-        line-height: 1.6;
+       
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 24px;
-        color: var(--ink-500);
-        font-size: 13px;
+    @media (max-width: 992px) {
+        .info-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 768px) {
-        .detail-grid {
-            grid-template-columns: 1fr;
-        }
-        .model-details-grid {
-            grid-template-columns: 1fr;
-        }
-        .outfit-grid {
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        }
+    @media (max-width: 640px) {
+        .info-grid { grid-template-columns: 1fr; }
+        .header-title h1 { font-size: 24px; }
     }
 </style>
 
-<div class="shoot-detail-shell">
-    <div class="top-row">
-        <div class="title-block">
-            <h5>{{ $castingRequirement->project_name }}</h5>
-            <div class="sub">Shoot Details & Requirements</div>
+<div class="show-container">
+    <div class="show-header">
+        <div class="header-title">
+            <h1>{{ $castingRequirement->project_name }}</h1>
+            <p>Ref: CR-{{ $castingRequirement->id }} · Created on {{ $castingRequirement->created_at->format('M d, Y') }}</p>
         </div>
-        <a class="back-link" href="{{ route('admin.casting-requirements.index') }}">
-            <i class="fas fa-arrow-left"></i> Back to List
+        <a href="{{ route('admin.casting-requirements.index') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 
-    <!-- Basic Details -->
-    <div class="detail-card">
-        <div class="detail-section-title">Basic Information</div>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <div class="detail-label">Client / Brand</div>
-                <div class="detail-value">{{ $castingRequirement->client_name ?? 'Not set' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Location</div>
-                <div class="detail-value">{{ $castingRequirement->location ?? 'Not set' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Description</div>
-                <div class="detail-value">{{ $castingRequirement->description ?? 'Not set' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Shoot Date & Time</div>
-                <div class="detail-value">{{ $castingRequirement->shoot_date_display ?? 'Not set' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Duration</div>
-                <div class="detail-value">
-                    @if($castingRequirement->duration)
-                        {{ preg_replace('/[^0-9]/', '', $castingRequirement->duration) }} Hours
-                    @else
-                        Not set
-                    @endif
+    {{-- SECTION 1: Basic Information --}}
+    <div class="section-card">
+        <div class="section-header">
+             
+            <h2>Section 1: Basic Information</h2>
+        </div>
+        <div class="section-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Shoot Title</span>
+                    <span class="info-value">{{ $castingRequirement->project_name }}</span>
                 </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Status</div>
-                <div class="detail-value">
-                    <span class="status-badge status-{{ $castingRequirement->status }}">
-                        {{ App\Models\CastingRequirement::STATUS_SELECT[$castingRequirement->status] ?? $castingRequirement->status }}
+                <div class="info-item">
+                    <span class="info-label">Location</span>
+                    <span class="info-value">{{ $castingRequirement->location ?: 'Not specified' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Instagram URL</span>
+                    <span class="info-value">
+                        @if($castingRequirement->instagram_url)
+                            <a href="{{ $castingRequirement->instagram_url }}" target="_blank" style="color: var(--primary); text-decoration: none;">
+                                {{ str_replace(['https://', 'http://'], '', $castingRequirement->instagram_url) }}
+                                <i class="fas fa-external-link-alt" style="font-size: 10px; margin-left: 2px;"></i>
+                            </a>
+                        @else
+                            <span class="empty">None</span>
+                        @endif
                     </span>
                 </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Total Talents Required</div>
-                <div class="detail-value">{{ $castingRequirement->count }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Created By</div>
-                <div class="detail-value">{{ $castingRequirement->user->name ?? 'N/A' }}</div>
+                <div class="info-item">
+                    <span class="info-label">Shoot Date</span>
+                    <span class="info-value">
+                        @if($castingRequirement->getRawOriginal('shoot_date_time'))
+                            {{ \Carbon\Carbon::parse($castingRequirement->getRawOriginal('shoot_date_time'))->format('l, M d, Y') }}
+                        @else
+                            <span class="empty">Not set</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Start Time</span>
+                    <span class="info-value">
+                        @if($castingRequirement->getRawOriginal('shoot_date_time'))
+                            {{ \Carbon\Carbon::parse($castingRequirement->getRawOriginal('shoot_date_time'))->format('h:i A') }}
+                        @else
+                            <span class="empty">Not set</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Duration</span>
+                    <span class="info-value">
+                        @if($castingRequirement->duration)
+                            {{ preg_replace('/[^0-9.]/', '', $castingRequirement->duration) }} Hours
+                        @else
+                            <span class="empty">Not set</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <div class="info-value">
+                        <span class="status-pill status-{{ $castingRequirement->status }}">
+                            {{ App\Models\CastingRequirement::STATUS_SELECT[$castingRequirement->status] ?? $castingRequirement->status }}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Talents Required</span>
+                    <span class="info-value">{{ $castingRequirement->count }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Created By</span>
+                    <span class="info-value">{{ $castingRequirement->user->name ?? 'Admin' }}</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Model Requirements -->
-    @php
-        $modelRequirements = $castingRequirement->modelRequirements;
-    @endphp
-    @if($modelRequirements->isNotEmpty())
-        <div class="detail-card">
-            <div class="detail-section-title">Model Requirements ({{ $modelRequirements->count() }})</div>
-            @foreach($modelRequirements as $model)
-                <div class="model-card">
-                    <div class="model-header">
-                        <div class="model-title">{{ $model->title ?? 'Model ' . $loop->iteration }}</div>
-                        <div class="model-quantity">{{ $model->quantity }} {{ $model->quantity == 1 ? 'Talent' : 'Talents' }}</div>
-                    </div>
-
-                    <div class="model-details-grid">
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Gender</div>
-                            <div class="model-detail-value">{{ App\Models\CastingRequirement::GENDER_SELECT[$model->gender] ?? 'Any' }}</div>
-                        </div>
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Age Range</div>
-                            <div class="model-detail-value">
-                                @if($model->age_range_key && isset(App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$model->age_range_key]))
-                                    {{ App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$model->age_range_key]['label'] }}
-                                @else
-                                    Any
-                                @endif
-                            </div>
-                        </div>
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Hair Color</div>
-                            <div class="model-detail-value">{{ $model->hair_color ?: 'Any' }}</div>
-                        </div>
-                        @if($model->height_range)
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Height Range</div>
-                            <div class="model-detail-value">{{ $model->height_range }}</div>
-                        </div>
-                        @endif
-                        @if($model->weight_range)
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Weight Range</div>
-                            <div class="model-detail-value">{{ $model->weight_range }}</div>
-                        </div>
-                        @endif
-                        @if($model->skin_color)
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Skin Color</div>
-                            <div class="model-detail-value">{{ ucfirst($model->skin_color) }}</div>
-                        </div>
-                        @endif
-                        @if($model->eye_color)
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Eye Color</div>
-                            <div class="model-detail-value">{{ ucfirst($model->eye_color) }}</div>
-                        </div>
-                        @endif
-                        <div class="model-detail-item">
-                            <div class="model-detail-label">Rate</div>
-                            <div class="model-detail-value">
-                                @if(($model->rate_decision ?? 'talent_decide') === 'admin_decide')
-                                    @if($model->rate !== null)
-                                        ${{ number_format($model->rate, 2) }}
-                                    @else
-                                        Not set
-                                    @endif
-                                @else
-                                    Talent Decide
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    @if($model->labels->isNotEmpty())
-                        <div style="margin-bottom: 14px;">
-                            <div class="model-detail-label" style="margin-bottom: 8px;">Labels</div>
-                            <div>
-                                @foreach($model->labels as $label)
-                                    <span class="label-badge">{{ $label->name }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Outfit Selection for this Model -->
-                    @php
-                        $outfits = [];
-                        if ($model->male_traditional_id) {
-                            $outfit = \App\Models\Outfit::find($model->male_traditional_id);
-                            if ($outfit) $outfits[] = ['outfit' => $outfit, 'type' => 'Traditional'];
-                        }
-                        if ($model->male_top_id) {
-                            $outfit = \App\Models\Outfit::find($model->male_top_id);
-                            if ($outfit) $outfits[] = ['outfit' => $outfit, 'type' => 'Top'];
-                        }
-                        if ($model->male_bottom_id) {
-                            $outfit = \App\Models\Outfit::find($model->male_bottom_id);
-                            if ($outfit) $outfits[] = ['outfit' => $outfit, 'type' => 'Bottom'];
-                        }
-                        if ($model->female_top_id) {
-                            $outfit = \App\Models\Outfit::find($model->female_top_id);
-                            if ($outfit) $outfits[] = ['outfit' => $outfit, 'type' => 'Top'];
-                        }
-                        if ($model->female_bottom_id) {
-                            $outfit = \App\Models\Outfit::find($model->female_bottom_id);
-                            if ($outfit) $outfits[] = ['outfit' => $outfit, 'type' => 'Bottom'];
-                        }
-                    @endphp
-                    @if(!empty($outfits))
-                        <div class="outfit-section">
-                            <div class="outfit-section-title">Selected Outfits</div>
-                            <div class="outfit-grid">
-                                @foreach($outfits as $item)
-                                    <div class="outfit-item">
-                                        @if($item['outfit']->image)
-                                            <img src="{{ $item['outfit']->image }}" alt="{{ $item['outfit']->name }}" class="outfit-image">
-                                        @else
-                                            <div class="outfit-image" style="display: flex; align-items: center; justify-content: center; color: var(--ink-500); font-size: 11px;">No Image</div>
-                                        @endif
-                                        <div class="outfit-name">{{ $item['outfit']->name }}</div>
-                                        <div class="outfit-category">{{ $item['type'] }} · {{ ucfirst($item['outfit']->category) }}</div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Reference Photos for this Model -->
-                    @php $modelRefs = $model->getMedia('reference_photo'); @endphp
-                    @if($modelRefs->isNotEmpty())
-                        <div class="outfit-section">
-                            <div class="outfit-section-title">Reference Photos</div>
-                            <div class="reference-photos-grid">
-                                @foreach($modelRefs as $media)
-                                    <a href="{{ $media->getUrl() }}" target="_blank" class="reference-photo-item">
-                                        <img src="{{ $media->getUrl() }}" alt="Reference Photo">
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            @endforeach
+    {{-- SECTION 2: Model Specifications --}}
+    <div class="section-card">
+        <div class="section-header">
+           
+            <h2>Section 2: Model Specifications</h2>
         </div>
-    @endif
-
-    <!-- Notes & References -->
-    <div class="detail-card">
-        <div class="detail-section-title">Shoot Brief</div>
-
-        @if($castingRequirement->notes)
-            <div>
-                <div class="model-detail-label" style="margin-bottom: 8px;">Shoot Brief</div>
-                <div class="notes-box">{{ $castingRequirement->notes }}</div>
-            </div>
-        @endif
-
-        @php $referenceFiles = $castingRequirement->reference; @endphp
-        @if($referenceFiles->isNotEmpty())
-            <div style="margin-top: 20px;">
-                <div class="model-detail-label" style="margin-bottom: 12px;">Reference Files</div>
-                <div class="reference-files-grid">
-                    @foreach($referenceFiles as $media)
-                        <a href="{{ $media->getUrl() }}" target="_blank" class="reference-file-item">
-                            <div class="reference-file-icon">
-                                <i class="fas fa-file-image"></i>
+        <div class="section-body">
+            @forelse($castingRequirement->modelRequirements as $model)
+                <div class="model-requirement-card">
+                    <div class="model-card-header">
+                        <span class="model-index">Requirement #{{ $loop->iteration }} - {{ $model->title ?: 'Model' }}</span>
+                        <div class="tag" style="background: var(--ink-900); color: #fff;">{{ $model->quantity }} {{ Str::plural('Talent', $model->quantity) }}</div>
+                    </div>
+                    <div class="model-card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Gender</span>
+                                <span class="info-value">{{ ucfirst($model->gender ?: 'Any') }}</span>
                             </div>
-                            <div class="reference-file-name">{{ $media->name }}</div>
-                            <i class="fas fa-external-link-alt" style="color: var(--ink-500);"></i>
-                        </a>
-                    @endforeach
+                            <div class="info-item">
+                                <span class="info-label">Age Range</span>
+                                <span class="info-value">
+                                    @if($model->age_range_key && isset(App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$model->age_range_key]))
+                                        {{ App\Models\CastingRequirementModel::AGE_RANGE_OPTIONS[$model->age_range_key]['label'] }}
+                                    @else
+                                        Not specified
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Hours Needed</span>
+                                <span class="info-value">{{ $model->model_hours ?: '0' }} Hours</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Time Slot</span>
+                                <span class="info-value">
+                                    @if($model->time_slot)
+                                        <span style="color: var(--primary);">{{ $model->time_slot }}</span>
+                                    @else
+                                        <span class="empty">Not selected</span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Rate</span>
+                                <span class="info-value">
+                                    @if(($model->rate_decision ?? 'talent_decide') === 'admin_decide')
+                                        {{ number_format($model->rate, 2) }} KWD
+                                    @else
+                                        Talent Decides
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Physical Stats</span>
+                                <div class="info-value">
+                                    @php $stats = []; @endphp
+                                    @if($model->height_range) @php $stats[] = "H: " . $model->height_range . "cm"; @endphp @endif
+                                    @if($model->weight_range) @php $stats[] = "W: " . $model->weight_range . "kg"; @endphp @endif
+                                    @if(empty($stats))
+                                        <span class="empty">Not specified</span>
+                                    @else
+                                        {{ implode(' · ', $stats) }}
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Complexion</span>
+                                <div class="info-value">
+                                    @php $comp = []; @endphp
+                                    @if($model->skin_color) @php $comp[] = "Skin: " . ucfirst($model->skin_color); @endphp @endif
+                                    @if($model->eye_color) @php $comp[] = "Eyes: " . ucfirst($model->eye_color); @endphp @endif
+                                    @if(empty($comp))
+                                        <span class="empty">Not specified</span>
+                                    @else
+                                        {{ implode(' · ', $comp) }}
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($model->labels->isNotEmpty())
+                            <div class="model-tags">
+                                @foreach($model->labels as $label)
+                                    <span class="tag">#{{ $label->name }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Reference Photos --}}
+                        @php $mediaCount = $model->getMedia('reference_photo')->count(); @endphp
+                        @if($mediaCount > 0)
+                            <div class="outfits-container">
+                                <span class="info-label">Reference Photos ({{ $mediaCount }})</span>
+                                <div class="ref-photos-grid">
+                                    @foreach($model->getMedia('reference_photo') as $media)
+                                        <a href="{{ $media->getUrl() }}" target="_blank" class="ref-photo">
+                                            <img src="{{ $media->getUrl() }}" alt="Reference">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Outfit Display Logic --}}
+                        @php
+                            $selectedOutfits = [];
+                            $isTraditional = ($model->traditional_mode === 'true');
+
+                            if ($isTraditional && $model->male_traditional_id) {
+                                $o = \App\Models\Outfit::find($model->male_traditional_id);
+                                if ($o) $selectedOutfits[] = ['obj' => $o, 'type' => 'Traditional'];
+                            } elseif (!$isTraditional) {
+                                // Male
+                                if ($model->gender === 'male' || $model->gender === 'boy') {
+                                    if ($model->male_top_id) {
+                                        $o = \App\Models\Outfit::find($model->male_top_id);
+                                        if ($o) $selectedOutfits[] = ['obj' => $o, 'type' => 'Top'];
+                                    }
+                                    if ($model->male_bottom_id) {
+                                        $o = \App\Models\Outfit::find($model->male_bottom_id);
+                                        if ($o) $selectedOutfits[] = ['obj' => $o, 'type' => 'Bottom'];
+                                    }
+                                }
+                                // Female
+                                if ($model->gender === 'female' || $model->gender === 'girl') {
+                                    if ($model->female_top_id) {
+                                        $o = \App\Models\Outfit::find($model->female_top_id);
+                                        if ($o) $selectedOutfits[] = ['obj' => $o, 'type' => 'Top'];
+                                    }
+                                    if ($model->female_bottom_id) {
+                                        $o = \App\Models\Outfit::find($model->female_bottom_id);
+                                        if ($o) $selectedOutfits[] = ['obj' => $o, 'type' => 'Bottom'];
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @if(!empty($selectedOutfits))
+                            <div class="outfits-container">
+                                <span class="info-label">Selected Outfits</span>
+                                <div class="outfits-grid">
+                                    @foreach($selectedOutfits as $item)
+                                        <div class="outfit-card">
+                                            <div class="outfit-image-wrapper">
+                                                @if($item['obj']->image)
+                                                    <img src="{{ $item['obj']->image }}" alt="{{ $item['obj']->name }}">
+                                                @else
+                                                    <i class="fas fa-image" style="font-size: 24px; color: var(--ink-400);"></i>
+                                                @endif
+                                            </div>
+                                            <div class="outfit-name">{{ $item['obj']->name }}</div>
+                                            <div class="outfit-sub">{{ $item['type'] }}</div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        @endif
+            @empty
+                <div class="text-center py-5 text-muted">
+                    No model requirements added.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- SECTION 3: Shoot Brief --}}
+    <div class="section-card">
+        <div class="section-header">
+           
+            <h2>Section 3: Shoot Brief</h2>
+        </div>
+        <div class="section-body">
+            @if($castingRequirement->notes)
+                <div class="brief-content">
+                    {{ $castingRequirement->notes }}
+                </div>
+            @else
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-pencil-alt d-block mb-2"></i>
+                    No specific shoot brief provided.
+                </div>
+            @endif
+
+            @php $generalRefs = $castingRequirement->getMedia('reference'); @endphp
+            @if($generalRefs->isNotEmpty())
+               <div style="margin-top: 32px;">
+                    <span class="info-label" style="display: block; margin-bottom: 12px;">General Reference Files</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        @foreach($generalRefs as $media)
+                            <a href="{{ $media->getUrl() }}" target="_blank" class="tag" style="padding: 8px 16px; border: 1px solid var(--border); background: #fff; display: flex; align-items: center; gap: 8px; text-decoration: none;">
+                                <i class="fas fa-file-pdf text-danger"></i>
+                                {{ $media->name }}
+                                <i class="fas fa-download small text-muted"></i>
+                            </a>
+                        @endforeach
+                    </div>
+               </div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

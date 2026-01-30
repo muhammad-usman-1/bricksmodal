@@ -45,6 +45,8 @@
         'child_top_id' => null,
         'child_bottom_id' => null,
         'time_slot' => null,
+        'model_hours' => null,
+        'traditional_mode' => 'false',
         'reference_photos' => [],
     ];
 
@@ -74,6 +76,8 @@
                     'skin_color' => $model->skin_color,
                     'eye_color' => $model->eye_color,
                     'time_slot' => $model->time_slot,
+                    'model_hours' => $model->model_hours,
+                    'traditional_mode' => $model->traditional_mode ?? 'false',
                     'reference_photos' => $model->getMedia('reference_photo')->map->getUrl()->all(),
                 ];
             })->toArray();
@@ -298,6 +302,7 @@
                             <input type="hidden" name="models[{{ $index }}][id]" value="{{ $model['id'] ?? '' }}">
                             <input type="hidden" name="models[{{ $index }}][title]" value="{{ $modelLabel }}">
                             <input type="hidden" name="models[{{ $index }}][quantity]" value="{{ $model['quantity'] ?? 1 }}">
+                            <input type="hidden" name="models[{{ $index }}][traditional_mode]" value="{{ $model['traditional_mode'] ?? 'false' }}" data-traditional-mode-input>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                                 <div class="field-block">
@@ -618,6 +623,7 @@
                     <input type="hidden" name="models[__INDEX__][id]" value="">
                     <input type="hidden" name="models[__INDEX__][title]" value="Model __INDEX_DISPLAY__">
                     <input type="hidden" name="models[__INDEX__][quantity]" value="1">
+                    <input type="hidden" name="models[__INDEX__][traditional_mode]" value="false" data-traditional-mode-input>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                         <div class="field-block">
@@ -663,7 +669,7 @@
                                         class="pill-select time-slot-select"
                                         data-slot-index="__INDEX__"
                                     >
-                                        <option value="">-- Select a time slot (optional) --</option>
+                                        <option value="">Select a time slot</option>
                                         @foreach($timeSlots as $key => $label)
                                             <option value="{{ $key }}">{{ $label }}</option>
                                         @endforeach

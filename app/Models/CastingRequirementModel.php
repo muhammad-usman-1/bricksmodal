@@ -22,7 +22,7 @@ class CastingRequirementModel extends Model implements HasMedia
         'rate' => 'float',
         'rate_decision' => 'string',
         'quantity' => 'integer',
-        'model_hours' => 'integer',
+        'model_hours' => 'float',
     ];
 
     public const AGE_RANGE_OPTIONS = [
@@ -41,12 +41,12 @@ class CastingRequirementModel extends Model implements HasMedia
     ];
 
     public const TIME_SLOT_OPTIONS = [
-        '01:00-05:00' => '01:00 - 05:00',
-        '05:00-09:00' => '05:00 - 09:00',
-        '09:00-13:00' => '09:00 - 13:00',
-        '13:00-17:00' => '13:00 - 17:00',
-        '17:00-21:00' => '17:00 - 21:00',
-        '21:00-01:00' => '21:00 - 01:00',
+        '1:00 AM – 5:00 AM' => '1:00 AM – 5:00 AM',
+        '5:00 AM – 9:00 AM' => '5:00 AM – 9:00 AM',
+        '9:00 AM – 1:00 PM' => '9:00 AM – 1:00 PM',
+        '1:00 PM – 5:00 PM' => '1:00 PM – 5:00 PM',
+        '5:00 PM – 9:00 PM' => '5:00 PM – 9:00 PM',
+        '9:00 PM – 1:00 AM' => '9:00 PM – 1:00 AM',
     ];
 
     protected function serializeDate(DateTimeInterface $date)

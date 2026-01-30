@@ -624,7 +624,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const shootTimeInput = document.getElementById('shoot_time');
         if (shootTimeInput) {
             shootTimeInput.addEventListener('change', () => {
-                applyTimeSlotBounds();
+                // Time slots are now handled via selects, no need for applyTimeSlotBounds here
+                if (window.updateAllTimeSlotSelects) window.updateAllTimeSlotSelects();
             });
         }
 
@@ -658,48 +659,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return { startMins, endMins };
     };
 
-    const applyTimeSlotBounds = (scope = document) => {
-        const window = getShootWindow();
-        scope.querySelectorAll('.time-slot-input').forEach(input => {
-            if (!window) {
-                input.removeAttribute('min');
-                input.removeAttribute('max');
-                return;
-            }
-
-            const minStr = minutesToTimeString(window.startMins);
-            // Clamp to same-day upper bound; if shoot spans past midnight, cap at 23:59
-            const maxStr = minutesToTimeString(Math.min(window.endMins, (24 * 60) - 1));
-            input.min = minStr;
-            input.max = maxStr;
-
-            // If current value is outside bounds, clear it so user re-selects
-            const currentVal = input.value;
-            if (currentVal) {
-                const currentMins = parseTimeToMinutes(currentVal);
-                if (currentMins === null || currentMins < window.startMins || currentMins > window.endMins) {
-                    input.value = '';
-                }
-            }
-        });
-    };
-    // Expose for calls from other initializers
-    window.applyTimeSlotBounds = applyTimeSlotBounds;
-
-    const applyHoursMax = (scope = document) => {
-        const durationInputEl = steps[0].querySelector('#duration');
-        const durationVal = durationInputEl?.value;
-        const durationHours = durationVal ? parseFloat(durationVal) : null;
-        scope.querySelectorAll('input[name*="[model_hours]"]').forEach(input => {
-            if (!Number.isNaN(durationHours) && durationHours > 0) {
-                input.max = durationHours;
-            } else {
-                input.removeAttribute('max');
-            }
-        });
-    };
-    // Expose for calls from other initializers
-    window.applyHoursMax = applyHoursMax;
 
     const showStep = (index) => {
         steps.forEach((step, idx) => {
@@ -725,8 +684,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Keep Step 2 inputs constrained when moving between steps
-        applyTimeSlotBounds();
-        applyHoursMax();
+        if (window.updateAllTimeSlotSelects) window.updateAllTimeSlotSelects();
+        if (window.applyHoursMax) window.applyHoursMax();
     };
 
     // Helper: find the right place to render errors (below the input box, not inside it)
@@ -938,28 +897,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // Validate Time Slot (must be within shoot window)
-                    const timeSlotInput = card.querySelector('input[name*="[time_slot]"]');
-                    if (timeSlotInput) {
-                        const timeSlotValue = timeSlotInput.value;
+                    const timeSlotSelect = card.querySelector('.time-slot-select');
+                    if (timeSlotSelect) {
+                        const timeSlotValue = timeSlotSelect.value;
                         if (!timeSlotValue || timeSlotValue.trim() === '') {
-                            showFieldError(timeSlotInput, 'Time slot start time is required.');
-                            valid = false;
-                        } else if (!shootWindow) {
-                            showFieldError(timeSlotInput, 'Please set start time and duration in step 1 first.');
+                            showFieldError(timeSlotSelect, 'Time slot is required.');
                             valid = false;
                         } else {
-                            const slotMins = parseTimeToMinutes(timeSlotValue);
-                            if (slotMins === null) {
-                                showFieldError(timeSlotInput, 'Invalid time selected.');
-                                valid = false;
-                            } else if (slotMins < shootWindow.startMins || slotMins > shootWindow.endMins) {
-                                const minStr = minutesToTimeString(shootWindow.startMins);
-                                const maxStr = minutesToTimeString(Math.min(shootWindow.endMins, (24 * 60) - 1));
-                                showFieldError(timeSlotInput, `Time slot must be within the shoot window (${minStr} - ${maxStr}).`);
-                                valid = false;
-                            } else {
-                                clearFieldError(timeSlotInput);
-                            }
+                            clearFieldError(timeSlotSelect);
                         }
                     }
 
@@ -1105,19 +1050,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Real-time validation for time slot fields (must stay within shoot window)
-        if (e.target.classList.contains('time-slot-input')) {
-            const window = getShootWindow();
-            const timeSlotValue = e.target.value;
-            if (timeSlotValue && window) {
-                const slotMins = parseTimeToMinutes(timeSlotValue);
-                if (slotMins === null || slotMins < window.startMins || slotMins > window.endMins) {
-                    const minStr = minutesToTimeString(window.startMins);
-                    const maxStr = minutesToTimeString(Math.min(window.endMins, (24 * 60) - 1));
-                    showFieldError(e.target, `Time slot must be within the shoot window (${minStr} - ${maxStr}).`);
-                } else {
-                    clearFieldError(e.target);
-                }
-            }
+        if (e.target.classList.contains('time-slot-select')) {
+            // Dropdown selection is generally safe, but we can clear error if it was there
+            clearFieldError(e.target);
         }
 
         // Real-time enforcement for Hours Needed
@@ -1420,19 +1355,31 @@ const initModelCard = (scope) => {
         if (btn.dataset.toggleBound === 'true') return;
         btn.dataset.toggleBound = 'true';
 
+        const outfitCard = btn.closest('[data-outfit-gender="male"]');
+        const modelCard = btn.closest('[data-model-card]');
+        const hiddenInput = modelCard?.querySelector('[data-traditional-mode-input]');
+
+        // Set initial state based on hidden input
+        if (outfitCard && hiddenInput) {
+            const isTraditional = hiddenInput.value === 'true';
+            outfitCard.dataset.traditionalMode = isTraditional ? 'true' : 'false';
+            btn.textContent = isTraditional ? 'Switch to Casual Outfit' : 'Switch to Traditional Outfit';
+        }
+
         btn.addEventListener('click', function() {
-            const outfitCard = this.closest('[data-outfit-gender="male"]');
-            if (!outfitCard) return;
+            if (!outfitCard || !hiddenInput) return;
 
             const isTraditionalMode = outfitCard.dataset.traditionalMode === 'true';
 
             if (isTraditionalMode) {
                 // Switch to top/bottom mode
                 outfitCard.dataset.traditionalMode = 'false';
+                hiddenInput.value = 'false';
                 this.textContent = 'Switch to Traditional Outfit';
             } else {
                 // Switch to traditional mode
                 outfitCard.dataset.traditionalMode = 'true';
+                hiddenInput.value = 'true';
                 this.textContent = 'Switch to Casual Outfit';
             }
         });
@@ -1953,8 +1900,8 @@ function generateTimeSlots(startTimeStr, hoursNeeded) {
         const endDisplay = formatTimeWithAMPM(endH, endM);
         const slotLabel = `${startDisplay} – ${endDisplay}`;
 
-        // Store value as start time in 24h format
-        const slotValue = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
+        // Store value as the exact label string
+        const slotValue = slotLabel;
 
         slots.push({
             label: slotLabel,
@@ -2032,9 +1979,23 @@ function updateAllTimeSlotSelects() {
     });
 }
 
+function applyHoursMax(scope = document) {
+    const durationInputEl = document.getElementById('duration');
+    const durationVal = durationInputEl?.value;
+    const durationHours = durationVal ? parseFloat(durationVal) : null;
+    scope.querySelectorAll('input[name*="[model_hours]"]').forEach(input => {
+        if (!Number.isNaN(durationHours) && durationHours > 0) {
+            input.max = durationHours;
+        } else {
+            input.removeAttribute('max');
+        }
+    });
+}
+
 // Expose functions globally
 window.updateTimeSlotForCard = updateTimeSlotForCard;
 window.updateAllTimeSlotSelects = updateAllTimeSlotSelects;
+window.applyHoursMax = applyHoursMax;
 
 // Wire up Step 1 changes to regenerate time slots for all cards
 document.addEventListener('DOMContentLoaded', function() {
