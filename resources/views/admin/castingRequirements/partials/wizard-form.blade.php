@@ -360,7 +360,7 @@
                                         class="pill-select time-slot-select @error('models.' . $index . '.time_slot') is-invalid @enderror"
                                         data-slot-index="{{ $index }}"
                                     >
-                                        <option value="">-- Select a time slot (optional) --</option>
+                                        <option value="">Select a time slot</option>
                                         @foreach($timeSlots as $key => $label)
                                             <option value="{{ $key }}" {{ (old('models.' . $index . '.time_slot') ?? $model['time_slot'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
                                         @endforeach
