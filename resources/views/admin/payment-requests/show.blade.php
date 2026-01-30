@@ -181,7 +181,7 @@
                     </div>
                     <div>
                         <div class="kv-label">{{ __('Amount') }}</div>
-                        <div class="kv-value amount">{{ number_format($amount, 2) }} KWD</div>
+                        <div class="kv-value amount">${{ number_format($amount, 2) }}</div>
                     </div>
                     <div>
                         <div class="kv-label">{{ __('Talent') }}</div>

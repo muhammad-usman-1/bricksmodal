@@ -122,7 +122,7 @@
                             @php
                                 $postDate = $project->created_at ? $project->created_at->format(config('panel.date_format')) : trans('global.not_set');
                                 $endDate = $project->shoot_date_display ?? ($project->shoot_date_time ?? trans('global.not_set'));
-                                $rate = $project->rate_per_model ? 'KWD ' . number_format($project->rate_per_model, 2) : trans('global.not_set');
+                                $rate = $project->rate_per_model ? '$' . number_format($project->rate_per_model, 2) : trans('global.not_set');
                                 $statusLabel = $statusDisplay[$project->status] ?? $project->status;
                                 $statusClass = $statusLabel === 'open' ? 'badge-success' : ($statusLabel === 'close' ? 'badge-secondary' : 'badge-info');
                             @endphp

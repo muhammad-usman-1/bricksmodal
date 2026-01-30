@@ -192,7 +192,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Total Requested Amount</div>
-                            <p class="summary-amount">{{ number_format($financials['total_requested'] ?? 0, 2) }} KWD</p>
+                            <p class="summary-amount">${{ number_format($financials['total_requested'] ?? 0, 2) }}</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -203,7 +203,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Pending Amount</div>
-                            <p class="summary-amount">{{ number_format($financials['total_pending'] ?? 0, 2) }} KWD</p>
+                            <p class="summary-amount">${{ number_format($financials['total_pending'] ?? 0, 2) }}</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -214,7 +214,7 @@
                     <div class="summary-card-body">
                         <div>
                             <div class="summary-title">Released Amount</div>
-                            <p class="summary-amount">{{ number_format($financials['total_released'] ?? 0, 2) }} KWD</p>
+                            <p class="summary-amount">${{ number_format($financials['total_released'] ?? 0, 2) }}</p>
                         </div>
                         <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -253,7 +253,7 @@
                                     {{ optional($application->talent_profile)->display_name ?? (optional($application->talent_profile)->legal_name ?? 'N/A') }}
                                 </td>
                                 <td>{{ optional($application->casting_requirement)->project_name ?? 'N/A' }}</td>
-                                <td>{{ number_format($application->getPaymentAmount(), 2) }} KWD</td>
+                                <td>${{ number_format($application->getPaymentAmount(), 2) }}</td>
                                 <td><span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span></td>
                                 <td>
                                     @if ($application->payment_requested_at)

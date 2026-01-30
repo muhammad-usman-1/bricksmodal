@@ -1103,7 +1103,7 @@
                         <div class="rate-input-wrapper">
                             <div class="rate-display">
                                 <span>{{ $predefinedRate ? number_format($predefinedRate, 2) : 'Rate to be provided' }}</span>
-                                <span class="rate-currency">KWD</span>
+                                <span class="rate-currency">$</span>
                             </div>
                         </div>
                         <input type="hidden" name="rate" value="{{ $predefinedRate ?? '' }}">
@@ -1122,7 +1122,7 @@
                                 pattern="^\d+(\.\d{1,2})?$"
                                 title="Please enter a valid number (up to 2 decimals)."
                             >
-                            <span class="currency-symbol">KWD</span>
+                            <span class="currency-symbol">$</span>
                         </div>
                     @endif
                 </div>

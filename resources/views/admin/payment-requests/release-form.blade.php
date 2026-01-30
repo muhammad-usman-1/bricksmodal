@@ -184,7 +184,7 @@
                 </div>
                 <div>
                     <div class="kv-label">Amount Due</div>
-                    <div class="kv-value amount">{{ number_format($amount, 2) }} KWD</div>
+                    <div class="kv-value amount">${{ number_format($amount, 2) }}</div>
                 </div>
                 <div>
                     <div class="kv-label">Talent</div>
@@ -225,9 +225,9 @@
                 @csrf
 
                 <div class="field">
-                    <label for="payment_amount">Payment Amount (KWD) *</label>
+                    <label for="payment_amount">Payment Amount ($) *</label>
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <div class="stripe-control" style="width:64px; text-align:center; padding: 10px 0; font-weight:800; color: var(--ink-700);">KWD</div>
+                        <div class="stripe-control" style="width:64px; text-align:center; padding: 10px 0; font-weight:800; color: var(--ink-700);">$</div>
                         <input
                             type="number"
                             name="payment_amount"
@@ -242,7 +242,7 @@
                     @error('payment_amount')
                         <div class="inline-error">{{ $message }}</div>
                     @enderror
-                    <div class="hint">Default amount is based on the approved rate: {{ number_format($application->getPaymentAmount(), 2) }} KWD</div>
+                    <div class="hint">Default amount is based on the approved rate: ${{ number_format($application->getPaymentAmount(), 2) }}</div>
                 </div>
 
                 <div class="field">
@@ -298,8 +298,8 @@
                 <div class="note-box" style="background:#fffaeb; border-color:#fedf89; color:#b54708;">
                     <strong>Processing Fee:</strong> Stripe charges approximately 2.9% + 0.30 per transaction.
                     <div class="kv-sub" style="margin-top:6px;">
-                        For {{ number_format($application->getPaymentAmount(), 2) }} KWD, the fee will be approximately
-                        {{ number_format(($application->getPaymentAmount() * 0.029) + 0.30, 2) }} KWD.
+                        For ${{ number_format($application->getPaymentAmount(), 2) }}, the fee will be approximately
+                        ${{ number_format(($application->getPaymentAmount() * 0.029) + 0.30, 2) }}.
                     </div>
                 </div>
 
@@ -307,7 +307,7 @@
                     <div class="confirm-row">
                         <input type="checkbox" id="confirm_payment" name="confirm_payment" required>
                         <label for="confirm_payment" style="margin:0; font-size:13px; color: var(--ink-700); font-weight:600;">
-                            I confirm that I want to process this payment of <strong>{{ number_format($application->getPaymentAmount(), 2) }} KWD</strong>
+                            I confirm that I want to process this payment of <strong>${{ number_format($application->getPaymentAmount(), 2) }}</strong>
                             to <strong>{{ $talentName }}</strong>'s card ending in <strong>{{ $last4 ?: '—' }}</strong>.
                         </label>
                     </div>

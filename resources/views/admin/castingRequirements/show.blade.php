@@ -441,7 +441,7 @@
                                 <span class="info-label">Rate</span>
                                 <span class="info-value">
                                     @if(($model->rate_decision ?? 'talent_decide') === 'admin_decide')
-                                        {{ number_format($model->rate, 2) }} KWD
+                                        ${{ number_format($model->rate, 2) }}
                                     @else
                                         Talent Decides
                                     @endif

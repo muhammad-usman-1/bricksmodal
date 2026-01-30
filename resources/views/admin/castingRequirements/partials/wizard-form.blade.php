@@ -391,7 +391,7 @@
                                     @enderror
                                 </div>
                                 <div class="field-block" data-rate-input-wrapper style="{{ $rateDecision === 'admin_decide' ? '' : 'display:none;' }}">
-                                    <label class="required">Rate Amount (KWD)</label>
+                                    <label class="required">Rate Amount ($)</label>
                                     <input
                                         class="pill-input @error('models.' . $index . '.rate') is-invalid @enderror"
                                         type="number"
@@ -399,7 +399,7 @@
                                         min="0"
                                         name="models[{{ $index }}][rate]"
                                         value="{{ $model['rate'] ?? '' }}"
-                                        placeholder="Enter rate (KWD)"
+                                        placeholder="Enter rate ($)"
                                         data-rate-input
                                     >
                                     @error('models.' . $index . '.rate')
@@ -691,7 +691,7 @@
                             </div>
                         </div>
                         <div class="field-block" data-rate-input-wrapper style="display:none;">
-                            <label class="required">Rate Amount (KWD)</label>
+                            <label class="required">Rate Amount ($)</label>
                             <input
                                 class="pill-input"
                                 type="number"
@@ -699,7 +699,7 @@
                                 min="0"
                                 name="models[__INDEX__][rate]"
                                 value="0"
-                                placeholder="Enter rate (KWD)"
+                                placeholder="Enter rate ($)"
                                 data-rate-input
                             >
                         </div>

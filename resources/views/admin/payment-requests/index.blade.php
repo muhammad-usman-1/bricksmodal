@@ -251,7 +251,7 @@
                     <p class="stat-label">Total Pending Amount</p>
                     <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                 </div>
-                <p class="stat-value">{{ number_format($stats['total_amount_pending'], 2) }} KWD</p>
+                <p class="stat-value">${{ number_format($stats['total_amount_pending'], 2) }}</p>
                 <p class="stat-trend"><i class="fas fa-arrow-up"></i> +23% vs last month</p>
             </div>
         </div>
@@ -341,7 +341,7 @@
                                     <span class="talent-sub">No feedback</span>
                                 @endif
                             </td>
-                            <td data-label="Amount" class="amount">{{ number_format($amount, 2) }} KWD</td>
+                            <td data-label="Amount" class="amount">${{ number_format($amount, 2) }}</td>
                             <td data-label="Requested Date">
                                 @if($requestedAt)
                                     {{ $requestedAt->format('M d, Y') }}<br>
