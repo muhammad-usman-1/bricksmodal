@@ -740,12 +740,15 @@
                                     <input
                                         id="date_of_birth"
                                         name="date_of_birth"
-                                        class="control dob-input"
+                                        class="control dob-input @error('date_of_birth') is-invalid @enderror"
                                         type="date"
                                         value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}"
-                                        max="{{ \Carbon\Carbon::now()->subDay()->format('Y-m-d') }}"
+                                        max="{{ \Carbon\Carbon::now()->subYears(18)->format('Y-m-d') }}"
                                         required
                                     >
+                                    @error('date_of_birth')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="field">
@@ -1492,6 +1495,33 @@
 
             // 3. Form Submission Validation - Specific Targeting
             function attachValidation() {
+                // Step 1 Form
+                const formStep1 = document.querySelector('form[action*="step-1"]');
+                if (formStep1) {
+                    formStep1.addEventListener('submit', function(e) {
+                         const dobValue = document.getElementById('date_of_birth')?.value;
+                         if (dobValue) {
+                             const dob = new Date(dobValue);
+                             const today = new Date();
+                             let age = today.getFullYear() - dob.getFullYear();
+                             const m = today.getMonth() - dob.getMonth();
+                             if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                                 age--;
+                             }
+
+                             if (age < 18) {
+                                e.preventDefault();
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Age Requirement',
+                                    text: 'You must be at least 18 years old to join.',
+                                    confirmButtonColor: '#1a1a1a'
+                                });
+                             }
+                         }
+                    });
+                }
+
                 // Step 2 Form
                 const formStep2 = document.querySelector('form[action*="step-2"]');
                 if (formStep2) {

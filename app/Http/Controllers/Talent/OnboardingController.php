@@ -168,15 +168,18 @@ class OnboardingController extends Controller
 
         switch ($step) {
             case 'step-1':
+                $eighteenYearsAgo = now()->subYears(18)->format('Y-m-d');
                 $data = $request->validate([
                     'first_name'        => ['required', 'string', 'max:120'],
                     'last_name'         => ['required', 'string', 'max:120'],
-                    'date_of_birth'     => ['required', 'date'],
+                    'date_of_birth'     => ['required', 'date', "before_or_equal:$eighteenYearsAgo"],
                     'nationality'       => ['nullable', 'string', 'max:120'],
                     'country_code'      => ['required', 'string', 'max:10'],
                     'mobile_number'     => ['required', 'string', 'max:30'],
                     'whatsapp_number'   => ['nullable', 'required_if:whatsapp_choice,alt', 'string', 'max:30'],
                     'whatsapp_choice'   => ['required', 'in:same,alt'],
+                ], [
+                    'date_of_birth.before_or_equal' => 'You must be at least 18 years old to join.',
                 ]);
 
                 $fullName = trim($data['first_name'] . ' ' . $data['last_name']);

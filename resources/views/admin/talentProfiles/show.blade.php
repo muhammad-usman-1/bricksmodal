@@ -764,7 +764,10 @@
                                                 <option value="no_hijab" {{ $f['value'] === 'no_hijab' ? 'selected' : '' }}>No</option>
                                             </select>
                                         @else
-                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}" class="inline-edit-input" {{ ($f['required'] ?? false) ? 'required' : '' }}>
+                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}" 
+                                                class="inline-edit-input" 
+                                                {{ ($f['required'] ?? false) ? 'required' : '' }}
+                                                @if($f['name'] === 'date_of_birth') max="{{ now()->subYears(18)->format('Y-m-d') }}" @endif>
                                         @endif
                                     </div>
                                 </td>
