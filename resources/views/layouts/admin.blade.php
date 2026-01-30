@@ -204,45 +204,7 @@
                             </a>
                         </div>
                     @endif
-                    @unless(request()->routeIs('admin.payment-requests.index'))
-                        @if(session('message'))
-                            <div class="row mb-2">
-                                <div class="col-lg-12">
-                                    <div class="alert alert-success" role="alert">{{ session('message') }}</div>
-                                </div>
-                            </div>
-                        @endif
-                        @if(session('success'))
-                            <div class="row mb-2">
-                                <div class="col-lg-12">
-                                    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
-                                </div>
-                            </div>
-                        @endif
-                        @if(session('warning'))
-                            <div class="row mb-2">
-                                <div class="col-lg-12">
-                                    <div class="alert alert-warning" role="alert">{{ session('warning') }}</div>
-                                </div>
-                            </div>
-                        @endif
-                        @if(session('error'))
-                            <div class="row mb-2">
-                                <div class="col-lg-12">
-                                    <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
-                                </div>
-                            </div>
-                        @endif
-                    @endunless
-                    @if($errors->count() > 0)
-                        <div class="alert alert-danger">
-                            <ul class="list-unstyled">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    {{-- SweetAlert handles these notifications now --}}
                     @yield('content')
 
                 </div>
@@ -460,6 +422,57 @@
   $.fn.dataTable.ext.classes.sPageButton = '';
 });
 
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Success Message
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#000000',
+                });
+            @endif
+
+            // Error Message
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#000000',
+                });
+            @endif
+
+            // Message (Generic)
+            @if(session('message'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Notice',
+                    text: "{{ session('message') }}",
+                    confirmButtonColor: '#000000',
+                });
+            @endif
+
+            // Validation Errors
+            @if($errors->any())
+                @php
+                    $errorList = '<ul style="text-align: left;">';
+                    foreach($errors->all() as $error) {
+                        $errorList .= '<li>' . addslashes($error) . '</li>';
+                    }
+                    $errorList .= '</ul>';
+                @endphp
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Issue',
+                    html: '{!! $errorList !!}',
+                    confirmButtonColor: '#000000',
+                });
+            @endif
+        });
     </script>
     @yield('scripts')
 </body>

@@ -140,7 +140,7 @@ class CastingRequirementController extends Controller
 
         $this->notifyApprovedTalents($castingRequirement);
 
-        return redirect()->route('admin.casting-requirements.index');
+        return redirect()->route('admin.casting-requirements.index')->with('success', 'Shoot Requirement created successfully.');
     }
 
     public function edit(CastingRequirement $castingRequirement)
@@ -256,7 +256,7 @@ class CastingRequirementController extends Controller
         // Attempt to scrape Instagram image logic
         $this->fetchAndSaveInstagramImage($castingRequirement);
 
-        return redirect()->route('admin.casting-requirements.index');
+        return redirect()->route('admin.casting-requirements.index')->with('success', 'Shoot Requirement updated successfully.');
     }
 
     public function show(CastingRequirement $castingRequirement)

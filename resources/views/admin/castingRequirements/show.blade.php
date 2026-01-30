@@ -109,6 +109,7 @@
         margin: 0;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+         font-family: 'Arimo', sans-serif;
     }
 
     .section-body {
