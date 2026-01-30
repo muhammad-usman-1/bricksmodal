@@ -33,8 +33,8 @@ class HomeController
             'active_campaigns' => $activeCampaigns,
         ];
 
-        // Get recent 4 talents with the same filters
-        $talents = (clone $baseQuery)->latest()->take(4)->get();
+        // Get recent 7 talents with the same filters
+        $talents = (clone $baseQuery)->latest()->take(7)->get();
 
         return view('home', compact('stats', 'talents'));
     }
