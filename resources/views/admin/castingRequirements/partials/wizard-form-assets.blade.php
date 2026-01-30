@@ -61,10 +61,10 @@
     .duration-value.step2-style { background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; font-size: 12px; color: #4c5160; font-weight: 500; }
     .duration-unit.step2-style { background: #f7f8fb; border: 1px solid #e3e6ec; border-radius: 6px; font-size: 12px; color: #4c5160; min-width: 70px; }
 
-    .step2-head { margin-left: 40px;display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .step2-head {padding-right: 44px; margin-left: 40px;display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .add-model-btn { background: #0f1014; color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
 
-    .model-spec-card {margin-left: 40px; margin-right: 40px; background: #fff; border: 1px solid #e4e7ed; border-left: 4px solid #000; border-radius: 12px; padding: 14px 16px; box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06); margin-bottom: 12px; position: relative; }
+    .model-spec-card {margin-left: 40px; margin-right: 40px; background: #fff; border: 1px solid #e4e7ed; border-left: 4px solid #000; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; position: relative; }
     .model-name { margin-bottom: 15px; font-weight: 600; color: #0f1524; font-size: 13px; text-transform: capitalize; }
     .model-actions { position: absolute; top: 14px; right: 16px; display: inline-flex; align-items: center; gap: 8px; }
     .icon-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #e1e3e8; background: #fff; color: #5f6470; display: grid; place-items: center; font-size: 12px; padding: 0; }
