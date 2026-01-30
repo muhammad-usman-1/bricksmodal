@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .shoot-page {  padding: 10px 0 22px; }
-    .shoot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .shoot-header { padding-right:44px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .shoot-title1 { color: #101828; font-size: 24px; font-weight: 400; line-height: 30px; }
     .shoot-title { color: #101828; font-size: 20px; font-weight: 400; line-height: 30px; }
     .shoot-subtitle { color: #6c7280; font-size: 12px; margin-top: 2px; }
@@ -103,7 +103,7 @@
 
     .model-card {  border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); }
 
-    .shoot-builder__footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }
+    .shoot-builder__footer {padding-right:44px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #eef0f5; }
     .footer-back { border: 1.5px solid #d6d8de; background: #fff; color: #3b4150; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; }
     .footer-back:hover:not(:disabled) { background: #fff; border-color: #d6d8de; color: #3b4150; }
     .footer-back:disabled { opacity: 0.5; cursor: not-allowed; }

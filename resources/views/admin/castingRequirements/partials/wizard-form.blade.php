@@ -194,9 +194,9 @@
 
                     <div class="grid grid-3 condensed">
                         <div class="field-block">
-                            <label for="shoot_date">Date</label>
+                            <label class="required" for="shoot_date">Date</label>
                             <div class="dark-input has-picker" id="datePickerTrigger">
-                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="mm/dd/yy">
+                                <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="mm/dd/yy" required>
                                 <span class="picker-icon"><i class="far fa-calendar-alt"></i></span>
                             </div>
                             <div class="custom-picker-dropdown" id="calendarDropdown">
@@ -223,9 +223,9 @@
                         </div>
 
                         <div class="field-block">
-                            <label for="shoot_time">Start Time</label>
+                            <label class="required" for="shoot_time">Start Time</label>
                             <div class="dark-input has-picker" id="timePickerTrigger">
-                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time_display" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--:-- --" data-time-24h="">
+                                <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time_display" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--:-- --" data-time-24h="" required>
                                 <input type="hidden" name="shoot_time" id="shoot_time_value" value="{{ $shootTimeValue }}">
                                 <span class="picker-icon"><i class="far fa-clock"></i></span>
                             </div>
@@ -244,7 +244,7 @@
                         </div>
 
                         <div class="field-block">
-                            <label for="duration">Duration</label>
+                            <label class="required" for="duration">Duration</label>
                             <div style="display: flex; gap: 5px; align-items: center;">
                                 <div class="dark-input" style="width: 80px;">
                                     <input
@@ -256,6 +256,7 @@
                                         placeholder="0"
                                         min="0"
                                         step="1"
+                                        required
                                         style="text-align: center; color: #868c99;"
                                     >
                                 </div>
@@ -354,11 +355,12 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label>Time Slot</label>
+                                    <label class="required">Time Slot</label>
                                     <select
                                         name="models[{{ $index }}][time_slot]"
                                         class="pill-select time-slot-select @error('models.' . $index . '.time_slot') is-invalid @enderror"
                                         data-slot-index="{{ $index }}"
+                                        required
                                     >
                                         <option value="">Select a time slot</option>
                                         @foreach($timeSlots as $key => $label)
@@ -663,11 +665,12 @@
                             </div>
                                 </div>
                                 <div class="field-block">
-                                    <label>Time Slot</label>
+                                    <label class="required">Time Slot</label>
                                     <select
                                         name="models[__INDEX__][time_slot]"
                                         class="pill-select time-slot-select"
                                         data-slot-index="__INDEX__"
+                                        required
                                     >
                                         <option value="">Select a time slot</option>
                                         @foreach($timeSlots as $key => $label)
