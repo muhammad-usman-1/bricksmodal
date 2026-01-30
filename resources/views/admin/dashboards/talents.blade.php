@@ -255,14 +255,11 @@ line-height: 36px; /* 150% */}
                     $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
                     $avatar = $toUrl($avatarCandidate) ?: $fallbackImg;
 
-                    // Collect all images for hover effect
-                    $headshotImages = [];
-                    $fullBodyImages = [];
-
                     // Helper function to normalize image path
                     $normalizeImage = $toUrl;
 
-                    // Collect headshot images
+                    // 1. Collect from hardcoded columns
+                    $headshotImages = [];
                     if ($talent->headshot_left_path) {
                         $img = $normalizeImage($talent->headshot_left_path);
                         if ($img) $headshotImages[] = $img;
@@ -276,7 +273,7 @@ line-height: 36px; /* 150% */}
                         if ($img) $headshotImages[] = $img;
                     }
 
-                    // Collect full-body images
+                    $fullBodyImages = [];
                     if ($talent->full_body_front_path) {
                         $img = $normalizeImage($talent->full_body_front_path);
                         if ($img) $fullBodyImages[] = $img;
@@ -290,8 +287,17 @@ line-height: 36px; /* 150% */}
                         if ($img) $fullBodyImages[] = $img;
                     }
 
-                    // Combine all images (headshots first, then full-body)
-                    $allImages = array_merge($headshotImages, $fullBodyImages);
+                    // 2. Collect from talent_media relationship
+                    $talentMediaImages = [];
+                    if ($talent->media) {
+                        foreach ($talent->media as $mediaItem) {
+                            $img = $normalizeImage($mediaItem->file_path);
+                            if ($img) $talentMediaImages[] = $img;
+                        }
+                    }
+
+                    // Combine all images (media table first, then headshots, then full-body)
+                    $allImages = array_merge($talentMediaImages, $headshotImages, $fullBodyImages);
                     if (empty($allImages)) {
                         $allImages = [$avatar];
                     }
