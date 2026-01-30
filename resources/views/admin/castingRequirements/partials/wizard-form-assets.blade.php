@@ -1934,7 +1934,7 @@ function formatTimeWithAMPM(h, m) {
 }
 
 function populateTimeSlotSelect(selectElement, slots, currentValue) {
-    selectElement.innerHTML = '<option value="">-- Select a time slot --</option>';
+    selectElement.innerHTML = '<option value="">Select a time slot</option>';
 
     slots.forEach(slot => {
         const option = document.createElement('option');
