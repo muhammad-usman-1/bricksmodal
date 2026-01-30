@@ -423,12 +423,13 @@
         ['label' => 'Card holder name', 'name' => 'card_holder_name', 'value' => $talentProfile->card_holder_name, 'type' => 'text'],
     ];
 
+    $sizeOptions = ['XXS' => 'XXS', 'XS' => 'XS', 'S' => 'S', 'M' => 'M', 'L' => 'L', 'XL' => 'XL', 'XXL' => 'XXL', 'XXXL' => 'XXXL'];
+
     $measurementFields = [
         ['label' => 'Height', 'name' => 'height', 'value' => $talentProfile->height, 'type' => 'number'],
         ['label' => 'Weight', 'name' => 'weight', 'value' => $talentProfile->weight, 'type' => 'number'],
-        ['label' => 'Chest', 'name' => 'chest', 'value' => $talentProfile->chest, 'type' => 'number'],
-        ['label' => 'Waist', 'name' => 'waist', 'value' => $talentProfile->waist, 'type' => 'number'],
-        ['label' => 'Hips', 'name' => 'hips', 'value' => $talentProfile->hips, 'type' => 'number'],
+        ['label' => 'T-Shirt Size', 'name' => 't_shirt_size', 'value' => $talentProfile->t_shirt_size, 'type' => 'select', 'options' => $sizeOptions],
+        ['label' => 'Dress Size', 'name' => 'dress_size', 'value' => $talentProfile->dress_size, 'type' => 'select', 'options' => $sizeOptions],
         ['label' => 'Shoe size', 'name' => 'shoe_size', 'value' => $talentProfile->shoe_size, 'type' => 'number'],
     ];
 

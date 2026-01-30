@@ -51,23 +51,13 @@ class UpdateTalentProfileRequest extends FormRequest
                 'min:-2147483648',
                 'max:2147483647',
             ],
-            'chest' => [
+            't_shirt_size' => [
+                'string',
                 'nullable',
-                'integer',
-                'min:-2147483648',
-                'max:2147483647',
             ],
-            'waist' => [
+            'dress_size' => [
+                'string',
                 'nullable',
-                'integer',
-                'min:-2147483648',
-                'max:2147483647',
-            ],
-            'hips' => [
-                'nullable',
-                'integer',
-                'min:-2147483648',
-                'max:2147483647',
             ],
             'hair_color' => [
                 'string',
