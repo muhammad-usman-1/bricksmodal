@@ -639,9 +639,9 @@
             <div class="section-title">ID Document</div>
             @foreach($idDocs as $field => $label)
                 @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
-                <div class="upload-tile is-editable" data-field="{{ $field }}" style="width: 100%; aspect-ratio: 16/9; max-height: 400px;">
+                <div class="upload-tile is-editable id-doc-tile" data-field="{{ $field }}" style="width: 100%; height: auto; aspect-ratio: auto; min-height: 200px;">
                     @if($img)
-                        <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                        <img src="{{ $img }}" alt="{{ $label }}" class="preview-img" style="height: auto; object-fit: contain;">
                         <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
                             <i class="fa fa-times"></i>
                         </button>
