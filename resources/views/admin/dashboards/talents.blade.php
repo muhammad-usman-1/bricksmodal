@@ -36,7 +36,7 @@ line-height: 36px; /* 150% */}
     .pill-btn { border: 1px solid var(--border); background: #fff; color: var(--ink-700); border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; transition: all .15s ease; }
     .pill-btn.active { background: black; color: #fff; border-color: #0f1524; }
 
-    .talent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .talent-grid { padding-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .talent-card { position: relative; background: #f0f1f3; border-radius: 10px; overflow: hidden; height: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.2s ease; cursor: pointer; }
     .talent-card:hover { transform: translateY(-4px); }
     .talent-img-container { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
