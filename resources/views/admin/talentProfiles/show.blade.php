@@ -53,7 +53,7 @@
     .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 14px; margin-bottom: 14px; }
     .section-title { font-weight: 600; color: var(--ink-900); font-size: 14px; margin-bottom: 12px; }
 
-    .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .upload-tile {
         background: white;
         border: 1px solid #cbd5e1;
@@ -552,32 +552,70 @@
             <div id="profileImagesContainer">
                 <div class="upload-grid" id="profileImagesGrid">
                     @php
-                        $mediaImages = $talentProfile->media()->get();
+                        // 1. Collect hardcoded columns
+                        $standardPhotoFields = [
+                            'headshot_center_path' => 'Headshot (Center)',
+                            'headshot_left_path'   => 'Headshot (Left)',
+                            'headshot_right_path'  => 'Headshot (Right)',
+                            'full_body_front_path' => 'Full Body (Front)',
+                            'full_body_right_path' => 'Full Body (Right)',
+                            'full_body_back_path'  => 'Full Body (Back)',
+                        ];
+
+                        $photos = [];
+                        foreach ($standardPhotoFields as $field => $label) {
+                            $path = $talentProfile->{$field};
+                            if ($path) {
+                                $photos[] = [
+                                    'id'    => null,
+                                    'path'  => $path,
+                                    'field' => $field,
+                                    'label' => $label
+                                ];
+                            }
+                        }
+
+                        // 2. Collect from media relationship
+                        $mediaItems = $talentProfile->media()->get();
+                        foreach ($mediaItems as $media) {
+                            $photos[] = [
+                                'id'    => $media->id,
+                                'path'  => $media->file_path,
+                                'field' => null,
+                                'label' => 'Additional Photo'
+                            ];
+                        }
+
+                        // Ensure at least 3 boxes (or more if needed)
                         $minBoxes = 3;
-                        $totalBoxes = max($mediaImages->count(), $minBoxes);
+                        $displayCount = max(count($photos), $minBoxes);
                     @endphp
-                    @for($i = 0; $i < $totalBoxes; $i++)
-                        @php $media = $mediaImages->get($i); @endphp
-                        <div class="upload-tile is-editable" data-media-id="{{ $media?->id ?? '' }}">
-                            @if($media)
-                                @php $img = $resolveUrl($media->file_path); @endphp
+
+                    @for($i = 0; $i < $displayCount; $i++)
+                        @php $photo = $photos[$i] ?? null; @endphp
+                        <div class="upload-tile is-editable" 
+                             data-media-id="{{ $photo['id'] ?? '' }}" 
+                             data-field="{{ $photo['field'] ?? '' }}">
+                            @if($photo)
+                                @php $img = $resolveUrl($photo['path']); @endphp
                                 @if($img)
-                                    <img src="{{ $img }}" alt="Profile Image" class="preview-img">
-                                    <button type="button" class="remove-image-btn display-mode-only" onclick="removeMediaImage(this, event)" title="Remove image">
+                                    <img src="{{ $img }}" alt="{{ $photo['label'] }}" class="preview-img">
+                                    <button type="button" class="remove-image-btn display-mode-only" 
+                                            onclick="{{ $photo['id'] ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}" 
+                                            title="Remove image">
                                         <i class="fa fa-times"></i>
                                     </button>
                                 @else
                                     <div class="upload-placeholder">
                                         <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                        <div style="font-size:12px;">Drop files here to upload</div>
-                                        <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                                        <div style="font-size:12px;">No image</div>
                                     </div>
                                 @endif
                             @else
                                 <div class="upload-placeholder">
                                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
                                     <div style="font-size:12px;">Drop files here to upload</div>
-                                    <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                                    <div class="upload-support">Supports .jpg, .png up to 10MB</div>
                                 </div>
                                 <div class="upload-overlay edit-mode-only" style="display: none;">
                                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
