@@ -15,8 +15,21 @@
         '09:00-13:00' => '09:00 - 13:00',
         '13:00-17:00' => '13:00 - 17:00',
         '17:00-21:00' => '17:00 - 21:00',
-        '21:00-01:00' => '21:00 - 01:00',
+        '21:00-01:00' => '21:00 - 21:00',
     ];
+
+    // Load bilingual label settings
+    $settingsPath = resource_path('lang/label_settings.php');
+    $isBilingualEnabled = file_exists($settingsPath) && (include $settingsPath)['casting'] ?? false;
+
+    // Helper function to get bilingual label
+    if (!function_exists('bilingualLabel')) {
+        function bilingualLabel($key, $isBilingualEnabled = false) {
+            $en = __('casting.' . $key, [], 'en');
+            $ar = __('casting.' . $key, [], 'ar');
+            return $isBilingualEnabled ? $en . ' | ' . $ar : $en;
+        }
+    }
 
     if ((! $shootDateValue || ! $shootTimeValue) && $rawShootDateTime) {
         try {
@@ -160,7 +173,7 @@
             <div class="shoot-step" data-step="1">
                 <div class="shoot-step-card">
                     <div class="field-block">
-                        <label class="required" for="project_name">Shoot Title</label>
+                        <label class="required" for="project_name">{!! bilingualLabel('project_name', $isBilingualEnabled) !!}</label>
                         <div class="dark-input">
                             <input class="{{ $errors->has('project_name') ? 'is-invalid' : '' }}" type="text" name="project_name" id="project_name" value="{{ old('project_name', $castingRequirement->project_name ?? '') }}" placeholder="e.g. Summer Collection 2024" required>
                         </div>
@@ -171,7 +184,7 @@
 
                     <div class="grid grid-2 condensed">
                         <div class="field-block">
-                            <label for="location">Location</label>
+                            <label for="location">{!! bilingualLabel('location', $isBilingualEnabled) !!}</label>
                             <div class="dark-input has-icon">
                                 <span class="input-icon"><i class="fas fa-search"></i></span>
                                 <input class="{{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', $castingRequirement->location ?? '') }}" autocomplete="off" placeholder="Search Google Maps...">
@@ -182,7 +195,7 @@
                         </div>
 
                         <div class="field-block">
-                            <label for="instagram_url">Instagram URL</label>
+                            <label for="instagram_url">{!! bilingualLabel('instagram_url', $isBilingualEnabled) !!}</label>
                             <div class="dark-input">
                                 <input class="{{ $errors->has('instagram_url') ? 'is-invalid' : '' }}" type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://instagram.com/username">
                             </div>
@@ -194,7 +207,7 @@
 
                     <div class="grid grid-3 condensed">
                         <div class="field-block">
-                            <label class="required" for="shoot_date">Date</label>
+                            <label class="required" for="shoot_date">{!! bilingualLabel('shoot_date', $isBilingualEnabled) !!}</label>
                             <div class="dark-input has-picker" id="datePickerTrigger">
                                 <input class="{{ $errors->has('shoot_date') ? 'is-invalid' : '' }}" type="text" name="shoot_date" id="shoot_date" value="{{ $shootDateValue }}" readonly placeholder="mm/dd/yy" required>
                                 <span class="picker-icon"><i class="far fa-calendar-alt"></i></span>
@@ -223,7 +236,7 @@
                         </div>
 
                         <div class="field-block">
-                            <label class="required" for="shoot_time">Start Time</label>
+                            <label class="required" for="shoot_time">{!! bilingualLabel('shoot_time', $isBilingualEnabled) !!}</label>
                             <div class="dark-input has-picker" id="timePickerTrigger">
                                 <input class="{{ $errors->has('shoot_time') ? 'is-invalid' : '' }}" type="text" name="shoot_time_display" id="shoot_time" value="{{ $shootTimeValue }}" readonly placeholder="--:-- --" data-time-24h="" required>
                                 <input type="hidden" name="shoot_time" id="shoot_time_value" value="{{ $shootTimeValue }}">
@@ -244,7 +257,7 @@
                         </div>
 
                         <div class="field-block">
-                            <label class="required" for="duration">Duration</label>
+                            <label class="required" for="duration">{!! bilingualLabel('duration', $isBilingualEnabled) !!}</label>
                             <div style="display: flex; gap: 5px; align-items: center;">
                                 <div class="dark-input" style="width: 80px;">
                                     <input
@@ -261,7 +274,7 @@
                                     >
                                 </div>
                                 <div class="dark-input" style="width: auto; border: none; background: transparent; padding-left: 0; box-shadow: none;">
-                                    <input type="text" value="hours" readonly style="color: #6b7280; background: transparent; cursor: default; padding: 0; width: auto; font-weight: 500; text-transform: lowercase;">
+                                    <input type="text" value="{!! bilingualLabel('hours', $isBilingualEnabled) !!}" readonly style="color: #6b7280; background: transparent; cursor: default; padding: 0; width: auto; font-weight: 500; text-transform: lowercase;">
                                 </div>
                             </div>
                             @if($errors->has('duration'))
@@ -279,10 +292,10 @@
             <div class="shoot-step" data-step="2">
                 <div class="step2-head">
                     <div>
-                        <div class="shoot-title">Model Specifications</div>
-                        <div class="shoot-subtitle">Define the models needed for this shoot.</div>
+                        <div class="shoot-title">{!! bilingualLabel('model_specifications', $isBilingualEnabled) !!}</div>
+                        <div class="shoot-subtitle">{!! bilingualLabel('model_specifications_sub', $isBilingualEnabled) !!}</div>
                     </div>
-                    <button type="button" class="add-model-btn" data-add-model><i class="fas fa-plus"></i> Add New Model</button>
+                    <button type="button" class="add-model-btn" data-add-model><i class="fas fa-plus"></i> {!! bilingualLabel('add_new_model', $isBilingualEnabled) !!}</button>
                 </div>
 
                 <div data-model-requirements data-next-index="{{ count($modelInputs) }}">
@@ -307,7 +320,7 @@
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                                 <div class="field-block">
-                                    <label class="required">Gender</label>
+                                    <label class="required">{!! bilingualLabel('gender', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][gender]" class="pill-select @error('models.' . $index . '.gender') is-invalid @enderror" data-gender-select required>
                                         @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
                                             @if($key !== 'any')
@@ -321,7 +334,7 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Age Range</label>
+                                    <label class="required">{!! bilingualLabel('age_range', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][age_range_key]" class="pill-select @error('models.' . $index . '.age_range_key') is-invalid @enderror" required>
                                         <option value="" disabled {{ ($model['age_range_key'] ?? '') === '' ? 'selected' : '' }}>Choose age range</option>
                                         @foreach($ageRanges as $key => $range)
@@ -334,7 +347,7 @@
                                 </div>
 
                                 <div class="field-block" style="margin-right: 30px;">
-                                    <label class="required">Hours Needed</label>
+                                    <label class="required">{!! bilingualLabel('hours_needed', $isBilingualEnabled) !!}</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
                                         <input
                                             class="pill-input model-hours-input"
@@ -347,7 +360,7 @@
                                             style="width: 80px; text-align: center;"
                                             data-model-index="{{ $index }}"
                                         >
-                                        <span style="color: #4b5563; font-weight: 500;">hours</span>
+                                        <span style="color: #4b5563; font-weight: 500;">{!! bilingualLabel('hours', $isBilingualEnabled) !!}</span>
                                     </div>
                                     @error('models.' . $index . '.model_hours')
                                         <div class="invalid-feedback d-block">{{ humanizeModelError($message) }}</div>
@@ -355,7 +368,7 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Time Slot</label>
+                                    <label class="required">{!! bilingualLabel('time_slot', $isBilingualEnabled) !!}</label>
                                     <select
                                         name="models[{{ $index }}][time_slot]"
                                         class="pill-select time-slot-select @error('models.' . $index . '.time_slot') is-invalid @enderror"
@@ -377,15 +390,15 @@
                             @endphp
                             <div class="grid grid-2 condensed" data-rate-container>
                                 <div class="field-block" data-rate-choice-group>
-                                    <label class="required">Rate?</label>
+                                    <label class="required">{!! bilingualLabel('rate_decision', $isBilingualEnabled) !!}</label>
                                     <div class="rate-options">
                                         <label class="rate-option">
                                             <input type="radio" name="models[{{ $index }}][rate_decision]" value="admin_decide" {{ $rateDecision === 'admin_decide' ? 'checked' : '' }}>
-                                            <span>Predefined</span>
+                                            <span>{!! bilingualLabel('predefined', $isBilingualEnabled) !!}</span>
                                         </label>
                                         <label class="rate-option">
                                             <input type="radio" name="models[{{ $index }}][rate_decision]" value="talent_decide" {{ $rateDecision !== 'admin_decide' ? 'checked' : '' }}>
-                                            <span>Talent Decides</span>
+                                            <span>{!! bilingualLabel('talent_decides', $isBilingualEnabled) !!}</span>
                                         </label>
                                     </div>
                                     @error('models.' . $index . '.rate_decision')
@@ -393,7 +406,7 @@
                                     @enderror
                                 </div>
                                 <div class="field-block" data-rate-input-wrapper style="{{ $rateDecision === 'admin_decide' ? '' : 'display:none;' }}">
-                                    <label class="required">Rate Amount ($)</label>
+                                    <label class="required">{!! bilingualLabel('rate_amount', $isBilingualEnabled) !!}</label>
                                     <input
                                         class="pill-input @error('models.' . $index . '.rate') is-invalid @enderror"
                                         type="number"
@@ -412,7 +425,7 @@
 
                             <div class="grid grid-3 condensed">
                                 <div class="field-block">
-                                    <label class="required">Height Range</label>
+                                    <label class="required">{!! bilingualLabel('height_range', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][height_range]" class="pill-select" required>
                                         <option value="150-160" {{ ($model['height_range'] ?? '150-160') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
                                         <option value="161-170" {{ ($model['height_range'] ?? '') === '161-170' ? 'selected' : '' }}>161 - 170 cm</option>
@@ -425,7 +438,7 @@
                                 </div>
 
                                 <div class="field-block">
-                                    <label class="required">Weight Range</label>
+                                    <label class="required">{!! bilingualLabel('weight_range', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][weight_range]" class="pill-select" required>
                                         <option value="40-50" {{ ($model['weight_range'] ?? '40-50') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
                                         <option value="51-60" {{ ($model['weight_range'] ?? '') === '51-60' ? 'selected' : '' }}>51 - 60 kg</option>
@@ -440,7 +453,7 @@
 
                             <div class="grid grid-2 condensed">
                                 <div class="field-block">
-                                    <label class="required">Skin Color</label>
+                                    <label class="required">{!! bilingualLabel('skin_color', $isBilingualEnabled) !!}</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $skin = $model['skin_color'] ?? ''; @endphp
                                         <button type="button" class="swatch {{ $skin === 'tan' ? 'active' : '' }}" data-swatch-value="tan" style="background:#e6bd8d;"></button>
@@ -457,7 +470,7 @@
                                     @enderror
                                 </div>
                                 <div class="field-block">
-                                    <label class="required">Eye Color</label>
+                                    <label class="required">{!! bilingualLabel('eye_color', $isBilingualEnabled) !!}</label>
                                     <div class="swatch-row" data-swatch-group>
                                         @php $eye = $model['eye_color'] ?? ''; @endphp
                                         <button type="button" class="swatch {{ $eye === 'amber' ? 'active' : '' }}" data-swatch-value="amber" style="background:#c48b5a;"></button>
@@ -475,13 +488,13 @@
                                 </div>
                             </div>
                             <div class="reference-upload" data-reference-block>
-                                <div class="reference-upload-title">Reference Photos</div>
-                                <div class="reference-upload-sub">Optional. Share example poses or looks for this model.</div>
+                                <div class="reference-upload-title">{!! bilingualLabel('reference_photos', $isBilingualEnabled) !!}</div>
+                                <div class="reference-upload-sub">{!! bilingualLabel('reference_photos_sub', $isBilingualEnabled) !!}</div>
                                 <label class="dropbox" data-file-drop>
                                     <div class="dropbox-inner">
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <div class="drop-title" data-file-label>Upload Reference Photos</div>
-                                        <div class="drop-sub">JPG or PNG · Max 10 MB each</div>
+                                        <div class="drop-title" data-file-label>{!! bilingualLabel('upload_reference', $isBilingualEnabled) !!}</div>
+                                        <div class="drop-sub">{!! bilingualLabel('upload_hint', $isBilingualEnabled) !!}</div>
                                     </div>
                                     <input
                                         type="file"
@@ -511,24 +524,24 @@
                             </div>
 
                             <div class="outfit-selection-container">
-                                <div class="outfit-section-title">Outfit Selection</div>
-                                <div class="outfit-section-subtitle">Select one or multiple outfits</div>
+                                <div class="outfit-section-title">{!! bilingualLabel('outfit_selection', $isBilingualEnabled) !!}</div>
+                                <div class="outfit-section-subtitle">{!! bilingualLabel('outfit_selection_sub', $isBilingualEnabled) !!}</div>
 
                                 <div class="outfit-selection-grid">
                                     <!-- Male Outfits -->
                                     <div class="outfit-type-card" data-outfit-gender="male">
                                         <div class="outfit-type-header">
                                             <i class="fas fa-shopping-bag"></i>
-                                            <span>Male Outfits</span>
-                                            <button type="button" class="traditional-outfit-btn" data-toggle-traditional>Switch to Traditional Outfit</button>
+                                            <span>{!! bilingualLabel('male_outfits', $isBilingualEnabled) !!}</span>
+                                            <button type="button" class="traditional-outfit-btn" data-toggle-traditional>{!! bilingualLabel('switch_traditional', $isBilingualEnabled) !!}</button>
                                         </div>
                                         <div class="outfit-item-group">
                                             <div class="outfit-sub-item" data-outfit-type="traditional" style="display: none;">
                                                 <div class="item-image-box" data-image-target>Image for traditional</div>
                                                 <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
+                                                    <div class="item-label"><i class="fas fa-crown"></i> {!! strtoupper(bilingualLabel('traditional', $isBilingualEnabled)) !!}</div>
                                                     <select name="models[{{ $index }}][male_traditional_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
+                                                        <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                         @foreach($outfits['male'] ?? [] as $outfit)
                                                             @if($outfit->sub_category === 'traditional')
                                                                 <option value="{{ $outfit->id }}" {{ ($model['male_traditional_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
@@ -540,9 +553,9 @@
                                             <div class="outfit-sub-item" data-outfit-type="top">
                                                 <div class="item-image-box" data-image-target>Image for tops</div>
                                                 <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                    <div class="item-label"><i class="fas fa-tshirt"></i> {!! strtoupper(bilingualLabel('top', $isBilingualEnabled)) !!}</div>
                                                     <select name="models[{{ $index }}][male_top_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
+                                                        <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                         @foreach($outfits['male'] ?? [] as $outfit)
                                                             @if($outfit->sub_category === 'top')
                                                                 <option value="{{ $outfit->id }}" {{ ($model['male_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
@@ -554,9 +567,9 @@
                                             <div class="outfit-sub-item" data-outfit-type="bottom">
                                                 <div class="item-image-box" data-image-target>Image for bottoms</div>
                                                 <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                    <div class="item-label"><i class="fas fa-vial"></i> {!! strtoupper(bilingualLabel('bottom', $isBilingualEnabled)) !!}</div>
                                                     <select name="models[{{ $index }}][male_bottom_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
+                                                        <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                         @foreach($outfits['male'] ?? [] as $outfit)
                                                             @if($outfit->sub_category === 'bottom')
                                                                 <option value="{{ $outfit->id }}" {{ ($model['male_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
@@ -572,15 +585,15 @@
                                     <div class="outfit-type-card" data-outfit-gender="female">
                                         <div class="outfit-type-header">
                                             <i class="fas fa-shopping-bag"></i>
-                                            <span>Female Outfits</span>
+                                            <span>{!! bilingualLabel('female_outfits', $isBilingualEnabled) !!}</span>
                                         </div>
                                         <div class="outfit-item-group">
                                             <div class="outfit-sub-item">
                                                 <div class="item-image-box" data-image-target>Image for tops</div>
                                                 <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                    <div class="item-label"><i class="fas fa-tshirt"></i> {!! strtoupper(bilingualLabel('top', $isBilingualEnabled)) !!}</div>
                                                     <select name="models[{{ $index }}][female_top_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
+                                                        <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                         @foreach($outfits['female'] ?? [] as $outfit)
                                                             @if($outfit->sub_category === 'top')
                                                                 <option value="{{ $outfit->id }}" {{ ($model['female_top_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
@@ -592,9 +605,9 @@
                                             <div class="outfit-sub-item">
                                                 <div class="item-image-box" data-image-target>Image for bottoms</div>
                                                 <div class="item-details">
-                                                    <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                    <div class="item-label"><i class="fas fa-vial"></i> {!! strtoupper(bilingualLabel('bottom', $isBilingualEnabled)) !!}</div>
                                                     <select name="models[{{ $index }}][female_bottom_id]" class="item-select" data-outfit-select>
-                                                        <option value="">Chose any</option>
+                                                        <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                         @foreach($outfits['female'] ?? [] as $outfit)
                                                             @if($outfit->sub_category === 'bottom')
                                                                 <option value="{{ $outfit->id }}" {{ ($model['female_bottom_id'] ?? '') == $outfit->id ? 'selected' : '' }}>{{ $outfit->name }}</option>
@@ -617,8 +630,8 @@
                     <div class="model-card-head">
                         <div class="model-name">Model __INDEX_DISPLAY__</div>
                         <div class="model-actions">
-                            <button type="button" class="icon-btn" data-duplicate-model title="Duplicate"><i class="fas fa-copy"></i></button>
-                            <button type="button" class="icon-btn danger" data-remove-model title="Remove"><i class="fas fa-trash"></i></button>
+                            <button type="button" class="icon-btn" data-duplicate-model title="{!! bilingualLabel('duplicate', $isBilingualEnabled) !!}"><i class="fas fa-copy"></i></button>
+                            <button type="button" class="icon-btn danger" data-remove-model title="{!! bilingualLabel('remove', $isBilingualEnabled) !!}"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
 
@@ -629,7 +642,7 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr; gap: 12px; align-items: start;">
                         <div class="field-block">
-                            <label class="required">Gender</label>
+                            <label class="required">{!! bilingualLabel('gender', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][gender]" class="pill-select" data-gender-select required>
                                 @foreach(App\Models\CastingRequirement::GENDER_SELECT as $key => $label)
                                     @if($key !== 'any')
@@ -639,7 +652,7 @@
                             </select>
                         </div>
                         <div class="field-block">
-                            <label class="required">Age Range</label>
+                            <label class="required">{!! bilingualLabel('age_range', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][age_range_key]" class="pill-select" required>
                                 <option value="" disabled selected>Choose age range</option>
                                 @foreach($ageRanges as $key => $range)
@@ -648,7 +661,7 @@
                             </select>
                         </div>
                         <div class="field-block" style="margin-right: 30px;">
-                            <label class="required">Hours Needed</label>
+                            <label class="required">{!! bilingualLabel('hours_needed', $isBilingualEnabled) !!}</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <input
                                     class="pill-input model-hours-input"
@@ -661,11 +674,11 @@
                                     style="width: 80px; text-align: center;"
                                     data-model-index="__INDEX__"
                                 >
-                                <span style="color: #4b5563; font-weight: 500;">Hours</span>
+                                <span style="color: #4b5563; font-weight: 500;">{!! bilingualLabel('hours', $isBilingualEnabled) !!}</span>
                             </div>
                                 </div>
                                 <div class="field-block">
-                                    <label class="required">Time Slot</label>
+                                    <label class="required">{!! bilingualLabel('time_slot', $isBilingualEnabled) !!}</label>
                                     <select
                                         name="models[__INDEX__][time_slot]"
                                         class="pill-select time-slot-select"
@@ -681,20 +694,20 @@
                         </div>
                     <div class="grid grid-2 condensed" data-rate-container>
                         <div class="field-block" data-rate-choice-group>
-                            <label class="required">Rate?</label>
+                            <label class="required">{!! bilingualLabel('rate_decision', $isBilingualEnabled) !!}</label>
                             <div class="rate-options">
                                 <label class="rate-option">
                                     <input type="radio" name="models[__INDEX__][rate_decision]" value="admin_decide">
-                                    <span>Predefined</span>
+                                    <span>{!! bilingualLabel('predefined', $isBilingualEnabled) !!}</span>
                                 </label>
                                 <label class="rate-option">
                                     <input type="radio" name="models[__INDEX__][rate_decision]" value="talent_decide" checked>
-                                    <span>Talent Decides</span>
+                                    <span>{!! bilingualLabel('talent_decides', $isBilingualEnabled) !!}</span>
                                 </label>
                             </div>
                         </div>
                         <div class="field-block" data-rate-input-wrapper style="display:none;">
-                            <label class="required">Rate Amount ($)</label>
+                            <label class="required">{!! bilingualLabel('rate_amount', $isBilingualEnabled) !!}</label>
                             <input
                                 class="pill-input"
                                 type="number"
@@ -710,7 +723,7 @@
 
                     <div class="grid grid-3 condensed">
                         <div class="field-block">
-                            <label class="required">Height Range</label>
+                            <label class="required">{!! bilingualLabel('height_range', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][height_range]" class="pill-select" required>
                                 <option value="150-160" selected>150 - 160 cm</option>
                                 <option value="161-170">161 - 170 cm</option>
@@ -719,7 +732,7 @@
                             </select>
                         </div>
                         <div class="field-block">
-                            <label class="required">Weight Range</label>
+                            <label class="required">{!! bilingualLabel('weight_range', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][weight_range]" class="pill-select" required>
                                 <option value="40-50" selected>40 - 50 kg</option>
                                 <option value="51-60">51 - 60 kg</option>
@@ -731,7 +744,7 @@
 
                     <div class="grid grid-2 condensed">
                          <div class="field-block">
-                            <label class="required">Skin Color</label>
+                            <label class="required">{!! bilingualLabel('skin_color', $isBilingualEnabled) !!}</label>
                             <div class="swatch-row" data-swatch-group>
                                 <button type="button" class="swatch" data-swatch-value="tan" style="background:#e6bd8d;"></button>
                                 <button type="button" class="swatch" data-swatch-value="golden" style="background:#d7a86e;"></button>
@@ -742,7 +755,7 @@
                             <input type="hidden" name="models[__INDEX__][skin_color]" value="" data-swatch-input>
                         </div>
                         <div class="field-block">
-                            <label class="required">Eye Color</label>
+                            <label class="required">{!! bilingualLabel('eye_color', $isBilingualEnabled) !!}</label>
                             <div class="swatch-row" data-swatch-group>
                                 <button type="button" class="swatch" data-swatch-value="amber" style="background:#c48b5a;"></button>
                                 <button type="button" class="swatch" data-swatch-value="hazel" style="background:#c9a063;"></button>
@@ -754,13 +767,13 @@
                         </div>
                     </div>
                     <div class="reference-upload" data-reference-block>
-                        <div class="reference-upload-title">Reference Photos</div>
-                        <div class="reference-upload-sub">Optional. Share example poses or looks for this model.</div>
+                        <div class="reference-upload-title">{!! bilingualLabel('reference_photos', $isBilingualEnabled) !!}</div>
+                        <div class="reference-upload-sub">{!! bilingualLabel('reference_photos_sub', $isBilingualEnabled) !!}</div>
                         <label class="dropbox" data-file-drop>
                             <div class="dropbox-inner">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <div class="drop-title" data-file-label>Upload Reference Photos</div>
-                                <div class="drop-sub">JPG or PNG · Max 10 MB each</div>
+                                <div class="drop-title" data-file-label>{!! bilingualLabel('upload_reference', $isBilingualEnabled) !!}</div>
+                                <div class="drop-sub">{!! bilingualLabel('upload_hint', $isBilingualEnabled) !!}</div>
                             </div>
                             <input
                                 type="file"
@@ -774,24 +787,24 @@
                     </div>
 
                     <div class="outfit-selection-container">
-                        <div class="outfit-section-title">Outfit Selection</div>
-                        <div class="outfit-section-subtitle">Select one or multiple outfits</div>
+                        <div class="outfit-section-title">{!! bilingualLabel('outfit_selection', $isBilingualEnabled) !!}</div>
+                        <div class="outfit-section-subtitle">{!! bilingualLabel('outfit_selection_sub', $isBilingualEnabled) !!}</div>
 
                         <div class="outfit-selection-grid">
                             <!-- Male Outfits -->
                             <div class="outfit-type-card" data-outfit-gender="male">
                                 <div class="outfit-type-header">
                                     <i class="fas fa-shopping-bag"></i>
-                                    <span>Male Outfits</span>
-                                    <button type="button" class="traditional-outfit-btn" data-toggle-traditional>Switch to Traditional Outfit</button>
+                                    <span>{!! bilingualLabel('male_outfits', $isBilingualEnabled) !!}</span>
+                                    <button type="button" class="traditional-outfit-btn" data-toggle-traditional>{!! bilingualLabel('switch_traditional', $isBilingualEnabled) !!}</button>
                                 </div>
                                     <div class="outfit-item-group">
                                         <div class="outfit-sub-item" data-outfit-type="traditional" style="display: none;">
                                             <div class="item-image-box" data-image-target>Image for traditional</div>
                                             <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-crown"></i> TRADITIONAL</div>
+                                                <div class="item-label"><i class="fas fa-crown"></i> {!! strtoupper(bilingualLabel('traditional', $isBilingualEnabled)) !!}</div>
                                                 <select name="models[__INDEX__][male_traditional_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
+                                                    <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                     @foreach($outfits['male'] ?? [] as $outfit)
                                                         @if($outfit->sub_category === 'traditional')
                                                             <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
@@ -803,9 +816,9 @@
                                         <div class="outfit-sub-item" data-outfit-type="top">
                                             <div class="item-image-box" data-image-target>Image for tops</div>
                                             <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                <div class="item-label"><i class="fas fa-tshirt"></i> {!! strtoupper(bilingualLabel('top', $isBilingualEnabled)) !!}</div>
                                                 <select name="models[__INDEX__][male_top_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
+                                                    <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                     @foreach($outfits['male'] ?? [] as $outfit)
                                                         @if($outfit->sub_category === 'top')
                                                             <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
@@ -817,9 +830,9 @@
                                         <div class="outfit-sub-item" data-outfit-type="bottom">
                                             <div class="item-image-box" data-image-target>Image for bottoms</div>
                                             <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                <div class="item-label"><i class="fas fa-vial"></i> {!! strtoupper(bilingualLabel('bottom', $isBilingualEnabled)) !!}</div>
                                                 <select name="models[__INDEX__][male_bottom_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
+                                                    <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                     @foreach($outfits['male'] ?? [] as $outfit)
                                                         @if($outfit->sub_category === 'bottom')
                                                             <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
@@ -835,15 +848,15 @@
                                 <div class="outfit-type-card" data-outfit-gender="female">
                                     <div class="outfit-type-header">
                                         <i class="fas fa-shopping-bag"></i>
-                                        <span>Female Outfits</span>
+                                        <span>{!! bilingualLabel('female_outfits', $isBilingualEnabled) !!}</span>
                                     </div>
                                     <div class="outfit-item-group">
                                         <div class="outfit-sub-item">
                                             <div class="item-image-box" data-image-target>Image for tops</div>
                                             <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-tshirt"></i> TOP</div>
+                                                <div class="item-label"><i class="fas fa-tshirt"></i> {!! strtoupper(bilingualLabel('top', $isBilingualEnabled)) !!}</div>
                                                 <select name="models[__INDEX__][female_top_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
+                                                    <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                     @foreach($outfits['female'] ?? [] as $outfit)
                                                         @if($outfit->sub_category === 'top')
                                                             <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
@@ -855,9 +868,9 @@
                                         <div class="outfit-sub-item">
                                             <div class="item-image-box" data-image-target>Image for bottoms</div>
                                             <div class="item-details">
-                                                <div class="item-label"><i class="fas fa-vial"></i> BOTTOM</div>
+                                                <div class="item-label"><i class="fas fa-vial"></i> {!! strtoupper(bilingualLabel('bottom', $isBilingualEnabled)) !!}</div>
                                                 <select name="models[__INDEX__][female_bottom_id]" class="item-select" data-outfit-select>
-                                                    <option value="">Chose any</option>
+                                                    <option value="">{!! bilingualLabel('choose_any', $isBilingualEnabled) !!}</option>
                                                     @foreach($outfits['female'] ?? [] as $outfit)
                                                         @if($outfit->sub_category === 'bottom')
                                                             <option value="{{ $outfit->id }}">{{ $outfit->name }}</option>
@@ -886,7 +899,7 @@
                     <!-- Reference Photo Removed from Step 3 -->
 
                     <div class="field-block">
-                        <label for="notes">Shoot Brief</label>
+                        <label for="notes">{!! bilingualLabel('shoot_brief', $isBilingualEnabled) !!}</label>
                         <div class="dark-input has-textarea">
                              <textarea class="form-control {{ $errors->has('notes') ? 'is-invalid' : '' }}" name="notes" id="notes" rows="4" placeholder="Enter shoot brief...">{{ old('notes', $castingRequirement->notes ?? '') }}</textarea>
                         </div>
@@ -923,4 +936,3 @@
         </div>
     </form>
 </div>
-

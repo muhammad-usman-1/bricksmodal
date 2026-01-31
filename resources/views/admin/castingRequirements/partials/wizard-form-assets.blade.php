@@ -505,7 +505,7 @@
 
     .dark-input.has-picker { cursor: pointer; }
     .dark-input.has-picker input { cursor: pointer; }
-    .picker-icon { color: #98A2B3; font-size: 18px; }
+    .picker-icon { color: #98A2B3; font-size: 13px; }
 
     /* Validation Error Styles */
     .validation-error {
@@ -2025,4 +2025,3 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('Google Places API key is not configured. Location autocomplete is disabled.');
     </script>
 @endif
-

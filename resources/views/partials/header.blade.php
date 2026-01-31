@@ -176,6 +176,10 @@ height:auto;
                         <i class="fas fa-tshirt" style="width: 16px; text-align: center;"></i>
                         <span>Add Outfit</span>
                     </a>
+                    <a class="dropdown-item" href="{{ route('admin.onboarding-labels.index') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                        <i class="fas fa-language" style="width: 16px; text-align: center;"></i>
+                        <span>Add Arabic Labels</span>
+                    </a>
                 </div>
             </div>
             <a href="{{ route('admin.settings.index') }}" class="header-icon-link" aria-label="Settings">

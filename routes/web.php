@@ -164,6 +164,11 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::delete('bank-details/destroy', [BankDetailController::class, 'massDestroy'])->name('bank-details.massDestroy');
         Route::resource('bank-details', BankDetailController::class);
 
+        // Onboarding Labels (Arabic Editor)
+        Route::get('onboarding-labels', [\App\Http\Controllers\Admin\OnboardingLabelController::class, 'index'])->name('onboarding-labels.index');
+        Route::post('onboarding-labels', [\App\Http\Controllers\Admin\OnboardingLabelController::class, 'update'])->name('onboarding-labels.update');
+
+
         // Talent Media
         Route::delete('talent-media/{talentMedia}', [TalentProfileController::class, 'destroyMedia'])->name('talent-media.destroy');
     });

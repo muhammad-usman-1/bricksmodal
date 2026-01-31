@@ -327,7 +327,7 @@
         }
 
         .seg-btn {
-            width: 140px;
+           
             height: 48px;
             border: 1px solid #e5e7eb;
             background: #ffffff;
@@ -683,7 +683,7 @@
             <div class="wizard-hero">
                 <!-- Logo removed -->
                 <div class="hero-title" style="display: flex; justify-content: space-between; align-items: center;">
-                    Complete Your Profile
+                    {{ \App\Helpers\Bilingual::get('onboarding.complete_profile') }}
                     <a href="javascript:void(0)" id="logout-trigger" style="color: #ffffff; opacity: 0.8; transition: opacity 0.2s;" title="Logout">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -695,7 +695,7 @@
                 <form id="logout-form" action="{{ route('talent.logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
-                <div class="hero-sub">Step <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, 'step-5' => 5, default => 1 } }}</span> of 5</div>
+                <div class="hero-sub">{{ \App\Helpers\Bilingual::get('onboarding.step') }} <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, 'step-5' => 5, default => 1 } }}</span> {{ \App\Helpers\Bilingual::get('onboarding.of') }} 5</div>
                 <div class="progress-track" aria-hidden="true">
                     <span class="progress-bar {{ $currentStep == 'step-1' ? 'is-active' : ($profile->onboarding_steps_completed >= 1 ? 'is-complete' : '') }}" data-progress-index="0"></span>
                     <span class="progress-bar {{ $currentStep == 'step-2' ? 'is-active' : ($profile->onboarding_steps_completed >= 2 ? 'is-complete' : '') }}" data-progress-index="1"></span>
@@ -724,18 +724,18 @@
 
                         <div class="field-grid">
                             <div class="field">
-                                <label for="first_name">First Name</label>
+                                <label for="first_name">{{ \App\Helpers\Bilingual::get('onboarding.first_name') }}</label>
                                 <input id="first_name" name="first_name" class="control" type="text" placeholder="Enter first name" value="{{ old('first_name', $profile->first_name) }}" required>
                             </div>
                             <div class="field">
-                                <label for="last_name">Last Name</label>
+                                <label for="last_name">{{ \App\Helpers\Bilingual::get('onboarding.last_name') }}</label>
                                 <input id="last_name" name="last_name" class="control" type="text" placeholder="Enter last name" value="{{ old('last_name', $profile->last_name) }}" required>
                             </div>
                         </div>
 
                         <div class="field-grid" style="margin-top: 8px;">
                             <div class="field">
-                                <label for="date_of_birth">Date of Birth</label>
+                                <label for="date_of_birth">{{ \App\Helpers\Bilingual::get('onboarding.date_of_birth') }}</label>
                                 <div class="dob-wrap">
                                     <input
                                         id="date_of_birth"
@@ -752,11 +752,11 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label for="nationality">Nationality</label>
+                                <label for="nationality">{{ \App\Helpers\Bilingual::get('onboarding.nationality') }}</label>
                                 <div class="nationality-wrapper">
                                     <span id="nationality_flag" class="fi nationality-flag" style="display:none;"></span>
                                     <select id="nationality" name="nationality" class="control nationality-select" required>
-                                        <option value="">Select nationality</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_nationality') }}</option>
                                         @foreach($countries as $code => $name)
                                             <option value="{{ $code }}" {{ old('nationality', $profile->nationality) == $code ? 'selected' : '' }}>{{ $name }}</option>
                                         @endforeach
@@ -766,7 +766,7 @@
                         </div>
 
                         <div class="field">
-                             <label for="mobile_number">Mobile Number</label>
+                             <label for="mobile_number">{{ \App\Helpers\Bilingual::get('onboarding.mobile_number') }}</label>
                              <div class="phone-row" style="margin-bottom: 16px;">
                                 <div class="country-code-display" style="background:#e9ecef;">
                                     <span class="fi fi-kw country-flag" title="Kuwait"></span>
@@ -778,17 +778,17 @@
                                     readonly style="background-color: #e9ecef; cursor: not-allowed;" required>
                              </div>
 
-                             <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px;">Do you have a WhatsApp number on the same number?</label>
+                             <label style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px;">{{ \App\Helpers\Bilingual::get('onboarding.whatsapp_question') }}</label>
                              <div class="radio-row" style="margin-top: 6px;">
                                 <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" id="wa_same" name="whatsapp_choice" value="same" {{ $whatsappChoice == 'same' ? 'checked' : '' }}> Yes
+                                    <input type="radio" id="wa_same" name="whatsapp_choice" value="same" {{ $whatsappChoice == 'same' ? 'checked' : '' }}> {{ \App\Helpers\Bilingual::get('onboarding.yes') }}
                                 </label>
                                 <label style="display:flex;align-items:center;gap:4px;">
-                                    <input type="radio" id="wa_alt" name="whatsapp_choice" value="alt" {{ $whatsappChoice == 'alt' ? 'checked' : '' }}> No
+                                    <input type="radio" id="wa_alt" name="whatsapp_choice" value="alt" {{ $whatsappChoice == 'alt' ? 'checked' : '' }}> {{ \App\Helpers\Bilingual::get('onboarding.no') }}
                                 </label>
                              </div>
                              <div id="whatsapp_number_section" style="display:none; margin-top:12px;">
-                                <label style="font-size: 12px; font-weight:600; margin-bottom:6px;">WhatsApp Number</label>
+                                <label style="font-size: 12px; font-weight:600; margin-bottom:6px;">{{ \App\Helpers\Bilingual::get('onboarding.whatsapp_number') }}</label>
                                 <div class="phone-row">
                                      <div class="country-code-display">
                                          <span class="fi fi-kw country-flag" title="Kuwait"></span>
@@ -836,7 +836,7 @@
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
                             <button type="submit" class="btn-primary" style="padding: 0 32px;">
-                                Next
+                                {{ \App\Helpers\Bilingual::get('onboarding.next') }}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
@@ -853,56 +853,56 @@
 
                         <div class="field-grid">
                             <div class="field">
-                                <label for="height">Height (cm)</label>
+                                <label for="height">{{ \App\Helpers\Bilingual::get('onboarding.height') }}</label>
                                 <input id="height" name="height" class="control" type="number" step="0.1" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}" required>
                                 <input type="hidden" id="height_unit" value="cm">
                             </div>
                             <div class="field">
-                                <label for="weight">Weight (kg)</label>
+                                <label for="weight">{{ \App\Helpers\Bilingual::get('onboarding.weight') }}</label>
                                 <input id="weight" name="weight" class="control" type="number" step="0.1" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}" required>
                             </div>
                         </div>
 
                         <div class="field" style="margin-top: 20px;">
-                            <label>Select Your Gender</label>
+                            <label>{{ \App\Helpers\Bilingual::get('onboarding.select_gender') }}</label>
                             <div class="segmented" data-segment>
                                 <button type="button" class="seg-btn" data-seg-btn data-target-input="#gender" data-value="male">
                                     <img src="{{ asset('images/male.png') }}" alt="" class="male-icon">
-                                    Male
+                                    {{ \App\Helpers\Bilingual::get('onboarding.male') }}
                                 </button>
                                 <button type="button" class="seg-btn" data-seg-btn data-target-input="#gender" data-value="female">
                                     <img src="{{ asset('images/female.png') }}" alt="" class="female-icon">
-                                    Female
+                                    {{ \App\Helpers\Bilingual::get('onboarding.female') }}
                                 </button>
                             </div>
                             <input type="hidden" name="gender" id="gender" value="{{ old('gender', $profile->gender ?? 'male') }}">
                         </div>
 
                         <div class="field" id="hijab_preference_section" style="margin-top: 24px; display:none;">
-                            <label>Hijab Preference</label>
-                            <p style="font-size: 13px; color: #666;">This helps us match you with appropriate casting calls</p>
+                            <label>{{ \App\Helpers\Bilingual::get('onboarding.hijab_preference') }}</label>
+                            <p style="font-size: 13px; color: #666;">{{ \App\Helpers\Bilingual::get('onboarding.hijab_help') }}</p>
                             <div class="hijab-group">
                                 <label class="hijab-option">
                                     <input type="radio" name="hijab_preference" value="wear_hijab" {{ old('hijab_preference', $profile->hijab_preference ?? 'wear_hijab') == 'wear_hijab' ? 'checked' : '' }}>
-                                    <span>Hijabi</span>
+                                    <span>{{ \App\Helpers\Bilingual::get('onboarding.hijabi') }}</span>
                                 </label>
                                 <label class="hijab-option">
                                     <input type="radio" name="hijab_preference" value="no_hijab" {{ old('hijab_preference', $profile->hijab_preference) == 'no_hijab' ? 'checked' : '' }}>
-                                    <span>Non-Hijabi</span>
+                                    <span>{{ \App\Helpers\Bilingual::get('onboarding.non_hijabi') }}</span>
                                 </label>
                             </div>
                         </div>
 
                         <div class="field-grid" style="margin-top:20px; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
                             <div class="field" id="hair_color_field">
-                                <label for="hair_color">Hair Color</label>
+                                <label for="hair_color">{{ \App\Helpers\Bilingual::get('onboarding.hair_color') }}</label>
                                 <div style="position:relative;">
                                     @php
                                         $hairOptions = ['Black','Brown','Blonde','Auburn','Red','Grey','White','Bald','Dyed / Colored'];
                                         $hairSelected = old('hair_color', $profile->hair_color);
                                     @endphp
                                     <select id="hair_color" name="hair_color" class="control" style="appearance:none;" required>
-                                        <option value="">Select hair color</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_hair_color') }}</option>
                                         @foreach($hairOptions as $option)
                                             <option value="{{ $option }}" {{ $hairSelected === $option ? 'selected' : '' }}>{{ $option }}</option>
                                         @endforeach
@@ -911,14 +911,14 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label for="eye_color">Eye Color</label>
+                                <label for="eye_color">{{ \App\Helpers\Bilingual::get('onboarding.eye_color') }}</label>
                                 <div style="position:relative;">
                                     @php
                                         $eyeOptions = ['Brown','Hazel','Blue','Green','Gray','Amber'];
                                         $eyeSelected = old('eye_color', $profile->eye_color);
                                     @endphp
                                     <select id="eye_color" name="eye_color" class="control" style="appearance:none;" required>
-                                        <option value="">Select eye color</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_eye_color') }}</option>
                                         @foreach($eyeOptions as $option)
                                             <option value="{{ $option }}" {{ $eyeSelected === $option ? 'selected' : '' }}>{{ $option }}</option>
                                         @endforeach
@@ -927,10 +927,10 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label for="skin_tone">Skin Tone</label>
+                                <label for="skin_tone">{{ \App\Helpers\Bilingual::get('onboarding.skin_tone') }}</label>
                                 <div style="position:relative;">
                                     <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;" required>
-                                        <option value="">Select skin color</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_skin_color') }}</option>
                                         @foreach(['Fair','Light','Medium','Olive','Brown','Dark'] as $tone)
                                             <option value="{{$tone}}" {{ old('skin_tone', $profile->skin_tone) == $tone ? 'selected' : '' }}>{{$tone}}</option>
                                         @endforeach
@@ -942,24 +942,30 @@
 
                         <div class="field-grid" style="margin-top: 24px; gap: 16px;">
                             <div class="mini-card">
-                                <h5>Do you have visible tattoos?</h5>
+                                <h5>
+                                    <div style="text-align: left;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.visible_tattoos', [], 'en') }}</div>
+                                    <div style="text-align: right; direction: rtl;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.visible_tattoos', [], 'ar') }}</div>
+                                </h5>
                                 <div style="display: flex; gap: 24px;">
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_visible_tattoos" value="0" {{ old('has_visible_tattoos', $profile->has_visible_tattoos ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> No
+                                        <input type="radio" name="has_visible_tattoos" value="0" {{ old('has_visible_tattoos', $profile->has_visible_tattoos ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> {{ \App\Helpers\Bilingual::get('onboarding.no') }}
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_visible_tattoos" value="1" {{ old('has_visible_tattoos', $profile->has_visible_tattoos) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> Yes
+                                        <input type="radio" name="has_visible_tattoos" value="1" {{ old('has_visible_tattoos', $profile->has_visible_tattoos) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> {{ \App\Helpers\Bilingual::get('onboarding.yes') }}
                                     </label>
                                 </div>
                             </div>
                             <div class="mini-card">
-                                <h5>Do you have piercings?</h5>
+                                <h5>
+                                    <div style="text-align: left;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.piercings', [], 'en') }}</div>
+                                    <div style="text-align: right; direction: rtl;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.piercings', [], 'ar') }}</div>
+                                </h5>
                                 <div style="display: flex; gap: 24px;">
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_piercings" value="0" {{ old('has_piercings', $profile->has_piercings ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> No
+                                        <input type="radio" name="has_piercings" value="0" {{ old('has_piercings', $profile->has_piercings ?? 0) == 0 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> {{ \App\Helpers\Bilingual::get('onboarding.no') }}
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: #4b5563;">
-                                        <input type="radio" name="has_piercings" value="1" {{ old('has_piercings', $profile->has_piercings) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> Yes
+                                        <input type="radio" name="has_piercings" value="1" {{ old('has_piercings', $profile->has_piercings) == 1 ? 'checked' : '' }} style="accent-color: #1a1a1a; width: 18px; height: 18px;" required> {{ \App\Helpers\Bilingual::get('onboarding.yes') }}
                                     </label>
                                 </div>
                             </div>
@@ -968,10 +974,10 @@
                         <div class="action-group">
                             <a href="{{ route('talent.onboarding.show', 'step-1') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                Back
+                                {{ \App\Helpers\Bilingual::get('onboarding.back') }}
                             </a>
                             <button type="submit" class="btn-primary" style="padding: 0 32px;">
-                                Next
+                                {{ \App\Helpers\Bilingual::get('onboarding.next') }}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
@@ -983,14 +989,17 @@
                 <form method="POST" action="{{ route('talent.onboarding.store', 'step-3') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="step-panel is-active" data-step="3">
-                        <p style="font-size: 14px; color: #888; margin-bottom: 32px;">Please provide accurate measurements to help us match you with fitting outfits.</p>
+                        <div style="margin-bottom: 32px;">
+                            <p style="font-size: 14px; color: #888; margin-bottom: 4px; text-align: left;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.measurements_info', [], 'en') }}</p>
+                            <p style="font-size: 14px; color: #888; margin-bottom: 0; text-align: right; direction: rtl;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.measurements_info', [], 'ar') }}</p>
+                        </div>
 
                         <div class="field-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
-                            <div class="field">
-                                <label for="t_shirt_size">T-Shirt Size</label>
-                                <div style="position:relative;">
+                            <div class="field" style="display: flex; flex-direction: column;">
+                                <label for="t_shirt_size">{{ \App\Helpers\Bilingual::get('onboarding.t_shirt_size') }}</label>
+                                <div style="position:relative; margin-top: auto;">
                                     <select id="t_shirt_size" name="t_shirt_size" class="control" style="appearance:none;" required>
-                                        <option value="">Select size</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_size') }}</option>
                                         @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
                                             <option value="{{ $size }}" {{ old('t_shirt_size', $profile->t_shirt_size) == $size ? 'selected' : '' }}>{{ $size }}</option>
                                         @endforeach
@@ -998,11 +1007,11 @@
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
                             </div>
-                            <div class="field">
-                                <label for="dress_size">Dress Size</label>
-                                <div style="position:relative;">
+                            <div class="field" style="display: flex; flex-direction: column;">
+                                <label for="dress_size">{{ \App\Helpers\Bilingual::get('onboarding.dress_size') }}</label>
+                                <div style="position:relative; margin-top: auto;">
                                     <select id="dress_size" name="dress_size" class="control" style="appearance:none;" required>
-                                        <option value="">Select size</option>
+                                        <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_size') }}</option>
                                         @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $size)
                                             <option value="{{ $size }}" {{ old('dress_size', $profile->dress_size) == $size ? 'selected' : '' }}>{{ $size }}</option>
                                         @endforeach
@@ -1010,19 +1019,20 @@
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
                             </div>
-                            <div class="field">
-                                <label for="shoe_size">Shoe Size (EU)</label>
-                                <input id="shoe_size" name="shoe_size" class="control" type="number" step="0.1" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required>
+                            <div class="field" style="display: flex; flex-direction: column;">
+                                <label for="shoe_size">{{ \App\Helpers\Bilingual::get('onboarding.shoe_size') }}</label>
+                                <input id="shoe_size" name="shoe_size" class="control" type="number" step="0.1" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required style="margin-top: auto;">
                             </div>
+
                         </div>
 
                         <div class="action-group">
                             <a href="{{ route('talent.onboarding.show', 'step-2') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                Back
+                                {{ \App\Helpers\Bilingual::get('onboarding.back') }}
                             </a>
                             <button type="submit" class="btn-primary" style="padding: 0 32px;">
-                                Next
+                                {{ \App\Helpers\Bilingual::get('onboarding.next') }}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
@@ -1043,8 +1053,10 @@
                                 <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
                             <div class="info-box-content">
-                                We need a copy of your Civil ID or Passport to verify your identity.
-                                <br>This information is kept strictly confidential.
+                                <div>
+                                    <div style="text-align: left;">{!! \Illuminate\Support\Facades\Lang::get('onboarding.id_document_info', [], 'en') !!}</div>
+                                    <div style="text-align: right; direction: rtl;">{!! \Illuminate\Support\Facades\Lang::get('onboarding.id_document_info', [], 'ar') !!}</div>
+                                </div>
                             </div>
                         </div>
 
@@ -1075,26 +1087,26 @@
 
                              @if($hasDoc)
                              <div class="field" style="margin-bottom: 16px;">
-                                 <label style="margin-bottom: 8px; display: block;">Current ID Document</label>
+                                 <label style="margin-bottom: 8px; display: block;">{{ \App\Helpers\Bilingual::get('onboarding.current_id_document') }}</label>
                                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
                                      <div style="position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f9fafb;">
                                          <img src="{{ $docUrl }}" alt="ID Document" style="width: 100%; height: 150px; object-fit: cover;">
-                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">Document</div>
+                                         <div style="padding: 8px; background: #fff; text-align: center; font-size: 12px; color: #6b7280;">{{ \App\Helpers\Bilingual::get('onboarding.document') }}</div>
                                      </div>
                                  </div>
-                                 <p style="font-size: 13px; color: #6b7280; margin: 0;">You can upload a new document to replace the existing one.</p>
+                                 <p style="font-size: 13px; color: #6b7280; margin: 0;">{{ \App\Helpers\Bilingual::get('onboarding.replace_document_info') }}</p>
                              </div>
                              @endif
 
                              <div class="field">
-                                 <label>{{ $hasDoc ? 'Upload New ID Document (Optional)' : 'ID Document' }}</label>
+                                 <label>{{ $hasDoc ? \App\Helpers\Bilingual::get('onboarding.upload_new_id') : \App\Helpers\Bilingual::get('onboarding.id_document') }}</label>
                                  <label class="upload-card" for="upload_id_document_front" style="width:100%; margin:0;">
                                      <input id="upload_id_document_front" name="id_document_front" type="file" accept="image/*" style="display:none;">
                                      <div class="upload-inner">
                                          <div class="upload-icon">
                                              <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                          </div>
-                                         <div class="upload-label" data-file-label="id_document_front">Drop file here to upload</div>
+                                         <div class="upload-label" data-file-label="id_document_front">{{ \App\Helpers\Bilingual::get('onboarding.drop_file') }}</div>
                                      </div>
                                  </label>
                                  @error('id_document_front')
@@ -1106,10 +1118,10 @@
                         <div class="action-group" id="step4-action-group">
                             <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                Back
+                                {{ \App\Helpers\Bilingual::get('onboarding.back') }}
                             </a>
                             <button type="submit" class="btn-primary" style="padding: 0 32px;">
-                                Next
+                                {{ \App\Helpers\Bilingual::get('onboarding.next') }}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
@@ -1123,7 +1135,7 @@
                     <div class="step-panel is-active" data-step="5">
                         <div id="portfolio-photos-section" style="margin-top: 0;">
                             <div style="margin-bottom:12px; display: flex; justify-content: space-between; align-items: center;">
-                                <label style="margin-bottom: 0;">Add Photos</label>
+                                <label style="margin-bottom: 0;">{{ \App\Helpers\Bilingual::get('onboarding.add_photos') }}</label>
                                 <button type="button" id="camera-capture-btn" style="background: none; border: none; outline: none; box-shadow: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Take photo with camera">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -1139,8 +1151,8 @@
                                         <div class="upload-icon">
                                             <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                         </div>
-                                        <div class="upload-label">Drop multiple photos here or click to browse</div>
-                                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">You can select multiple files at once</p>
+                                        <div class="upload-label">{{ \App\Helpers\Bilingual::get('onboarding.drop_multiple_photos') }}</div>
+                                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">{{ \App\Helpers\Bilingual::get('onboarding.select_multiple_hint') }}</p>
                                     </div>
                                 </label>
                             </div>
@@ -1149,7 +1161,7 @@
 
                         <div id="video-upload-section" style="margin-top: 24px;">
                             <div style="margin-bottom:12px;">
-                                <label>Profile Video (Optional)</label>
+                                <label>{{ \App\Helpers\Bilingual::get('onboarding.profile_video') }}</label>
                             </div>
                             <div class="field">
                                 <label class="upload-card" for="upload_video" style="width:100%; margin:0;">
@@ -1158,7 +1170,7 @@
                                         <div class="upload-icon">
                                             <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                         </div>
-                                        <div class="upload-label" data-file-label="video">Drop files here to upload</div>
+                                        <div class="upload-label" data-file-label="video">{{ \App\Helpers\Bilingual::get('onboarding.drop_file') }}</div>
                                     </div>
                                 </label>
                                 @error('video')
@@ -1170,10 +1182,10 @@
                         <div class="action-group" id="step5-action-group">
                             <a href="{{ route('talent.onboarding.show', 'step-4') }}" class="back-link">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                Back
+                                {{ \App\Helpers\Bilingual::get('onboarding.back') }}
                             </a>
                             <button type="submit" class="btn-primary btn-submit" style="padding: 0 32px;">
-                                Submit Application
+                                {{ \App\Helpers\Bilingual::get('onboarding.submit_application') }}
                             </button>
                         </div>
                     </div>
