@@ -635,39 +635,7 @@
             </div>
         </div>
 
-        <div class="section-card">
-            <div class="section-title">Headshot and Full Body Photo</div>
-            <div class="upload-grid" style="grid-template-columns: repeat(2, 1fr);">
-                @php
-                    $headshotAndFullBody = [
-                        'headshot_center_path' => 'Headshot (Center)',
-                        'full_body_front_path' => 'Full Body (Front)',
-                    ];
-                @endphp
-                @foreach($headshotAndFullBody as $field => $label)
-                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
-                    <div class="upload-tile is-editable" data-field="{{ $field }}">
-                        @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
-                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        @else
-                            <div class="upload-placeholder">
-                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                <div style="font-size:12px;">{{ $label }}</div>
-                                <div class="upload-support">Drop file here or click to upload</div>
-                            </div>
-                        @endif
-                        <div class="upload-overlay">
-                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                            <span>{{ $img ? 'Change ' . $label : 'Upload ' . $label }}</span>
-                        </div>
-                        <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
-                    </div>
-                @endforeach
-            </div>
-        </div>
+       
 
         @if(auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin()))
         <div class="section-card">
