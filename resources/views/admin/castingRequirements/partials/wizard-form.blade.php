@@ -266,8 +266,9 @@
                                         name="duration"
                                         id="duration"
                                         value="{{ $durationValue }}"
-                                        placeholder="0"
-                                        min="0"
+                                        placeholder="4"
+                                        min="1"
+                                        max="24"
                                         step="1"
                                         required
                                         style="text-align: center; color: #868c99;"

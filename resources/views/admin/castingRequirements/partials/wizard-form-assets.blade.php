@@ -1881,22 +1881,23 @@ function generateTimeSlots(startTimeStr, hoursNeeded) {
         let endH = currentH + Math.floor(hoursNeeded);
         let endM = currentM + ((hoursNeeded % 1) * 60);
 
-        // Handle minute overflow
+        // Handle minute overflow for end time
         if (endM >= 60) {
             endH += Math.floor(endM / 60);
             endM = endM % 60;
         }
 
-        // Handle hour overflow to next day
+        // Handle hour overflow to next day for end time
         let endDayOffset = dayOffset;
         if (endH >= 24) {
             endDayOffset += Math.floor(endH / 24);
             endH = endH % 24;
         }
 
-        // Check if we've passed 8:00 AM on the next day
+        // Check if the END time has passed 8:00 AM on the next day
+        // (If strictly "end at 8am next day", we stop if end time > 8:00 AM next day)
         if (endDayOffset > 1 || (endDayOffset === 1 && (endH > 8 || (endH === 8 && endM > 0)))) {
-            // Stop generating slots - we've gone past 8:00 AM next day
+            // Stop generating slots
             break;
         }
 
@@ -1918,10 +1919,18 @@ function generateTimeSlots(startTimeStr, hoursNeeded) {
             endDayOffset: endDayOffset
         });
 
-        // Move to next slot (start where the previous one ended)
-        currentH = endH;
-        currentM = endM;
-        dayOffset = endDayOffset;
+        // Move to next slot start time (Increment by 30 minutes)
+        currentM += 30;
+        if (currentM >= 60) {
+            currentH += Math.floor(currentM / 60);
+            currentM = currentM % 60;
+        }
+        
+        // Handle hour overflow for start time
+        if (currentH >= 24) {
+            dayOffset += Math.floor(currentH / 24);
+            currentH = currentH % 24;
+        }
     }
 
     return slots;
@@ -2008,6 +2017,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (shootTimeValue) {
         shootTimeValue.addEventListener('change', updateAllTimeSlotSelects);
+    }
+
+    // Listen for changes on any model-hours-input (using delegation)
+    const form = document.getElementById('shootWizard');
+    if (form) {
+        form.addEventListener('input', function(e) {
+            if (e.target.classList.contains('model-hours-input')) {
+                const card = e.target.closest('[data-model-card]');
+                if (card) {
+                    updateTimeSlotForCard(card);
+                }
+            }
+        });
     }
 
     // Initial population on page load
