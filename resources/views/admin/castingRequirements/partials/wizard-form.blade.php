@@ -428,6 +428,7 @@
                                 <div class="field-block">
                                     <label class="required">{!! bilingualLabel('height_range', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][height_range]" class="pill-select" required>
+                                        <option value="unspecified" {{ ($model['height_range'] ?? '') === 'unspecified' ? 'selected' : '' }}>Unspecified</option>
                                         <option value="150-160" {{ ($model['height_range'] ?? '150-160') === '150-160' ? 'selected' : '' }}>150 - 160 cm</option>
                                         <option value="161-170" {{ ($model['height_range'] ?? '') === '161-170' ? 'selected' : '' }}>161 - 170 cm</option>
                                         <option value="171-180" {{ ($model['height_range'] ?? '') === '171-180' ? 'selected' : '' }}>171 - 180 cm</option>
@@ -441,6 +442,7 @@
                                 <div class="field-block">
                                     <label class="required">{!! bilingualLabel('weight_range', $isBilingualEnabled) !!}</label>
                                     <select name="models[{{ $index }}][weight_range]" class="pill-select" required>
+                                        <option value="unspecified" {{ ($model['weight_range'] ?? '') === 'unspecified' ? 'selected' : '' }}>Unspecified</option>
                                         <option value="40-50" {{ ($model['weight_range'] ?? '40-50') === '40-50' ? 'selected' : '' }}>40 - 50 kg</option>
                                         <option value="51-60" {{ ($model['weight_range'] ?? '') === '51-60' ? 'selected' : '' }}>51 - 60 kg</option>
                                         <option value="61-70" {{ ($model['weight_range'] ?? '') === '61-70' ? 'selected' : '' }}>61 - 70 kg</option>
@@ -726,6 +728,7 @@
                         <div class="field-block">
                             <label class="required">{!! bilingualLabel('height_range', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][height_range]" class="pill-select" required>
+                                <option value="unspecified">Unspecified</option>
                                 <option value="150-160" selected>150 - 160 cm</option>
                                 <option value="161-170">161 - 170 cm</option>
                                 <option value="171-180">171 - 180 cm</option>
@@ -735,6 +738,7 @@
                         <div class="field-block">
                             <label class="required">{!! bilingualLabel('weight_range', $isBilingualEnabled) !!}</label>
                             <select name="models[__INDEX__][weight_range]" class="pill-select" required>
+                                <option value="unspecified">Unspecified</option>
                                 <option value="40-50" selected>40 - 50 kg</option>
                                 <option value="51-60">51 - 60 kg</option>
                                 <option value="61-70">61 - 70 kg</option>
