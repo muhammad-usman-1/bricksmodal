@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cloud Filesystem Disk
+    |--------------------------------------------------------------------------
+    |
+    | The cloud disk is used for file uploads that need to be stored on
+    | cloud storage services like Amazon S3. This can be configured in
+    | your .env file using the FILESYSTEM_CLOUD variable.
+    |
+    */
+
+    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

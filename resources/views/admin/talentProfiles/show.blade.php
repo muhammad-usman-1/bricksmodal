@@ -594,15 +594,15 @@
 
                     @for($i = 0; $i < $displayCount; $i++)
                         @php $photo = $photos[$i] ?? null; @endphp
-                        <div class="upload-tile is-editable" 
-                             data-media-id="{{ $photo['id'] ?? '' }}" 
+                        <div class="upload-tile is-editable"
+                             data-media-id="{{ $photo['id'] ?? '' }}"
                              data-field="{{ $photo['field'] ?? '' }}">
                             @if($photo)
                                 @php $img = $resolveUrl($photo['path']); @endphp
                                 @if($img)
                                     <img src="{{ $img }}" alt="{{ $photo['label'] }}" class="preview-img">
-                                    <button type="button" class="remove-image-btn display-mode-only" 
-                                            onclick="{{ $photo['id'] ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}" 
+                                    <button type="button" class="remove-image-btn display-mode-only"
+                                            onclick="{{ $photo['id'] ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}"
                                             title="Remove image">
                                         <i class="fa fa-times"></i>
                                     </button>
@@ -632,6 +632,40 @@
                         <i class="fas fa-plus"></i> Add More Photos
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Headshot and Full Body Photo</div>
+            <div class="upload-grid" style="grid-template-columns: repeat(2, 1fr);">
+                @php
+                    $headshotAndFullBody = [
+                        'headshot_center_path' => 'Headshot (Center)',
+                        'full_body_front_path' => 'Full Body (Front)',
+                    ];
+                @endphp
+                @foreach($headshotAndFullBody as $field => $label)
+                    @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
+                    <div class="upload-tile is-editable" data-field="{{ $field }}">
+                        @if($img)
+                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                            <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        @else
+                            <div class="upload-placeholder">
+                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
+                                <div style="font-size:12px;">{{ $label }}</div>
+                                <div class="upload-support">Drop file here or click to upload</div>
+                            </div>
+                        @endif
+                        <div class="upload-overlay">
+                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                            <span>{{ $img ? 'Change ' . $label : 'Upload ' . $label }}</span>
+                        </div>
+                        <input type="file" name="{{ $field }}" accept="image/*" style="display:none" onchange="previewImage(this)">
+                    </div>
+                @endforeach
             </div>
         </div>
 
@@ -765,8 +799,8 @@
                                                 <option value="no_hijab" {{ $f['value'] === 'no_hijab' ? 'selected' : '' }}>No</option>
                                             </select>
                                         @else
-                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}" 
-                                                class="inline-edit-input" 
+                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}"
+                                                class="inline-edit-input"
                                                 {{ ($f['required'] ?? false) ? 'required' : '' }}
                                                 @if($f['name'] === 'date_of_birth') max="{{ now()->subYears(18)->format('Y-m-d') }}" @endif>
                                         @endif

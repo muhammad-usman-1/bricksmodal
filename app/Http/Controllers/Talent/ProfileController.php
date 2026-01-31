@@ -148,9 +148,11 @@ class ProfileController extends Controller
 
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
-        $path = $file->store("talent/{$profile->id}/{$folder}", 'public');
+        $disk = config('filesystems.cloud', 's3');
+        $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
 
-        return Storage::url($path);
+        // Return full URL for cloud storage
+        return Storage::disk($disk)->url($path);
     }
 
     private function sanitizePhoneNumber(?string $number): ?string
