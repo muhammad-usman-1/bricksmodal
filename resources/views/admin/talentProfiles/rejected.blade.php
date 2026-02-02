@@ -55,8 +55,8 @@
 
     .talent-cell { display: flex; align-items: center; gap: 12px; }
     .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #e5e7eb; }
-    .talent-name { font-weight: 700; color: var(--ink-900); text-decoration: none; transition: color 0.2s; }
-    .talent-name:hover { color: #3b82f6; text-decoration: underline; }
+    .talent-name { font-weight: 700; color: var(--ink-900); text-decoration: none; }
+    .talent-name:hover { color: var(--ink-900); text-decoration: none; }
     .talent-email { margin: 0; color: var(--ink-500); font-size: 12px; }
 
     .badge-status {

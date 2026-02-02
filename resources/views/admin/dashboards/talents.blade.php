@@ -121,6 +121,45 @@
         background: none;
     }
 
+    /* Empty State Styles */
+    .empty-state {
+        grid-column: 1 / -1;
+        padding: 60px 20px;
+        text-align: center;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px dashed #e2e8f0;
+        margin: 20px 0;
+    }
+    .empty-state-content {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .empty-icon i {
+        font-size: 24px;
+        color: #94a3b8;
+    }
+    .empty-state h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+    .empty-state p {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.5;
+    }
     .header-dropdown {
         position: absolute;
         top: 100%;
@@ -420,6 +459,16 @@
                 </div>
             @endforeach
         </div>
+
+        <div id="emptyState" class="empty-state d-none">
+            <div class="empty-state-content">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 id="emptyStateTitle">No talents found</h3>
+                <p id="emptyStateText">We couldn't find any talents matching your criteria.</p>
+            </div>
+        </div>
     @endif
 </div>
 
@@ -456,6 +505,7 @@
             const filter = activePill ? activePill.dataset.filter : 'all';
             const term = (searchInput?.value || '').toLowerCase();
 
+            let visibleCount = 0;
             cards.forEach(card => {
                 const gender = card.dataset.gender || '';
                 const status = card.dataset.status || '';
@@ -472,8 +522,33 @@
                 // if (filter === 'verified') matchesFilter = isActive; // Removed
                 // if (filter === 'suspended') matchesFilter = status === 'suspended'; // Removed
 
-                card.style.display = matchesSearch && matchesFilter ? '' : 'none';
+                const isVisible = matchesSearch && matchesFilter;
+                card.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
             });
+
+            // Handle empty state
+            const emptyState = document.getElementById('emptyState');
+            const emptyStateTitle = document.getElementById('emptyStateTitle');
+            const emptyStateText = document.getElementById('emptyStateText');
+
+            if (emptyState) {
+                if (visibleCount === 0) {
+                    emptyState.classList.remove('d-none');
+                    if (filter === 'pending') {
+                        emptyStateTitle.textContent = 'No pending talents';
+                        emptyStateText.textContent = 'There are no pending talents to review at the moment.';
+                    } else if (term) {
+                        emptyStateTitle.textContent = 'No results found';
+                        emptyStateText.textContent = `We couldn't find any talents matching "${term}".`;
+                    } else {
+                        emptyStateTitle.textContent = 'No talents found';
+                        emptyStateText.textContent = "We couldn't find any talents matching your criteria.";
+                    }
+                } else {
+                    emptyState.classList.add('d-none');
+                }
+            }
         }
 
         pills.forEach(pill => {

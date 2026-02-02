@@ -598,13 +598,66 @@ Dropzone.options.referenceDropzone = {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Navigation Guard for "Back to Shoots" button
+    document.querySelectorAll('.shoot-back').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+
+            if (typeof Swal === 'undefined') {
+                window.location.href = url;
+                return;
+            }
+
+            Swal.fire({
+                title: 'Do you want to stay or go back?',
+                text: "You haven't saved your shoot yet.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Go Back',
+                cancelButtonText: 'Stay',
+                confirmButtonColor: '#000000',
+                cancelButtonColor: '#fff',
+                customClass: {
+                    cancelButton: 'btn btn-outline-secondary',
+                    confirmButton: 'btn btn-dark'
+                },
+                buttonsStyling: true,
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Form data will be lost forever!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Clear & Go Back',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#000000',
+                        cancelButtonColor: '#fff',
+                        customClass: {
+                            cancelButton: 'btn btn-outline-secondary',
+                            confirmButton: 'btn btn-dark'
+                        },
+                        buttonsStyling: true,
+                        reverseButtons: true
+                    }).then((secondResult) => {
+                        if (secondResult.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+            });
+        });
+    });
+
     const steps = Array.from(document.querySelectorAll('.shoot-step'));
     const nextBtn = document.querySelector('[data-next-step]');
     const prevBtn = document.querySelector('[data-prev-step]');
     const submitBtn = document.querySelector('[data-submit-form]');
     const indicator = document.querySelector('[data-step-indicator]');
     const form = document.getElementById('shootWizard');
-        const durationInput = document.getElementById('duration');
+    const durationInput = document.getElementById('duration');
 
     if (!steps.length || !nextBtn || !prevBtn || !indicator) {
         return;
