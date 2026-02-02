@@ -152,11 +152,9 @@ class TalentProfileController extends Controller
     {
         abort_if(Gate::denies('talent_profile_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $this->removeTalentProfile($talentProfile, true);
+        $this->removeTalentProfile($talentProfile, false);
 
-        return redirect()
-            ->route('admin.talents.dashboard')
-            ->with('message', 'Talent deleted successfully.');
+        return redirect()->route('admin.talents.dashboard');
     }
 
     public function massDestroy(MassDestroyTalentProfileRequest $request)
@@ -258,24 +256,37 @@ class TalentProfileController extends Controller
         DB::transaction(function () use ($talentProfile, $notify) {
             $user = $talentProfile->user;
 
-            if ($notify) {
+            if ($notify && $user) {
                 $this->notifyTalent($talentProfile, 'deleted', trans('notifications.talent_profile_deleted'));
             }
 
+            // Group detachments/deletions for clarity
             $talentProfile->languages()->detach();
             $talentProfile->labels()->detach();
 
-            // Force delete related records to satisfy foreign key constraints
             CastingApplication::where('talent_profile_id', $talentProfile->id)->forceDelete();
             BankDetail::where('talent_profile_id', $talentProfile->id)->forceDelete();
             TalentMedia::where('talent_profile_id', $talentProfile->id)->forceDelete();
-            TalentSetting::where('talent_profile_id', $talentProfile->id)->delete(); // TalentSetting doesn't use SoftDeletes
+            TalentSetting::where('talent_profile_id', $talentProfile->id)->delete();
 
-            $talentProfile->forceDelete();
-
+            // Handle User record with care
             if ($user) {
-                $user->roles()->detach();
-                $user->forceDelete();
+                // If it's an admin/superadmin, keep the user record and just remove the talent link
+                // This prevents breaking dependencies (like casting_requirements owned by this admin)
+                if ($user->isAdmin() || $user->is_super_admin) {
+                     $talentProfile->forceDelete();
+                } else {
+                    // It's a dedicated talent user - safe to remove after clearing dependencies
+                    $talentProfile->forceDelete();
+                    
+                    // Nullify references in casting_requirements before deleting the user
+                    \DB::table('casting_requirements')->where('user_id', $user->id)->update(['user_id' => null]);
+                    
+                    $user->roles()->detach();
+                    $user->forceDelete();
+                }
+            } else {
+                $talentProfile->forceDelete();
             }
         });
     }
