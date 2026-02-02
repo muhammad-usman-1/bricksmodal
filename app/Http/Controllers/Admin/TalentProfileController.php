@@ -31,6 +31,28 @@ class TalentProfileController extends Controller
         return view('admin.talentProfiles.index', compact('talentProfiles'));
     }
 
+    public function suspended()
+    {
+        abort_if(Gate::denies('talent_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $talentProfiles = TalentProfile::with(['user', 'media'])
+            ->where('verification_status', 'suspended')
+            ->get();
+
+        return view('admin.talentProfiles.suspended', compact('talentProfiles'));
+    }
+
+    public function rejected()
+    {
+        abort_if(Gate::denies('talent_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $talentProfiles = TalentProfile::with(['user', 'media'])
+            ->where('verification_status', 'rejected')
+            ->get();
+
+        return view('admin.talentProfiles.rejected', compact('talentProfiles'));
+    }
+
     public function create()
     {
         abort_if(Gate::denies('talent_profile_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');

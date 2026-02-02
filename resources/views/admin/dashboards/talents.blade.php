@@ -101,6 +101,59 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
+    .header-actions { position: relative; }
+    .header-actions-btn {
+        background: none;
+        border: none;
+        color: var(--ink-900);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        outline: none;
+    }
+    .header-actions-btn:focus, .header-actions-btn:active {
+        outline: none;
+        border: none;
+        background: none;
+    }
+
+    .header-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 1000;
+        min-width: 180px;
+        display: none;
+        overflow: hidden;
+    }
+    .header-dropdown.active { display: block; animation: dropdownFade 0.2s ease; }
+    .header-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: var(--ink-700);
+        text-decoration: none;
+        transition: background 0.12s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+    .header-dropdown-item:hover { background: #f3f5f9; color: var(--ink-900); text-decoration: none; }
+    .header-dropdown-item i { font-size: 14px; width: 16px; text-align: center; }
+
     .actions-dropdown-item {
         display: flex;
         align-items: center;
@@ -225,6 +278,19 @@
                 <span>Manage and verify profiles</span>
             </div>
         </div>
+        <div class="header-actions">
+            <button type="button" class="header-actions-btn" id="headerActionsBtn" aria-label="Management options">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="header-dropdown" id="headerDropdown">
+                <a href="{{ route('admin.talent-profiles.suspended') }}" class="header-dropdown-item">
+                    <i class="fas fa-pause-circle"></i> Suspend Talent
+                </a>
+                <a href="{{ route('admin.talent-profiles.rejected') }}" class="header-dropdown-item">
+                    <i class="fas fa-times-circle"></i> Reject Talent
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="search-row">
@@ -234,9 +300,7 @@
         <button class="pill-btn active" data-filter="all">All Talents</button>
         <button class="pill-btn" data-filter="male">Male</button>
         <button class="pill-btn" data-filter="female">Female</button>
-        <button class="pill-btn" data-filter="verified">Verified</button>
         <button class="pill-btn" data-filter="pending">Pending</button>
-        <button class="pill-btn" data-filter="suspended">Suspended</button>
     </div>
 
     @if($talents->isEmpty())
@@ -367,6 +431,22 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const headerActionsBtn = document.getElementById('headerActionsBtn');
+        const headerDropdown = document.getElementById('headerDropdown');
+
+        if (headerActionsBtn && headerDropdown) {
+            headerActionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                headerDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!headerDropdown.contains(e.target) && !headerActionsBtn.contains(e.target)) {
+                    headerDropdown.classList.remove('active');
+                }
+            });
+        }
+
         const pills = Array.from(document.querySelectorAll('#filterPills .pill-btn'));
         const searchInput = document.getElementById('talentSearch');
         const cards = Array.from(document.querySelectorAll('#talentGrid .talent-card'));
@@ -382,12 +462,15 @@
                 const name = card.dataset.name || '';
 
                 const matchesSearch = !term || name.includes(term);
-                let matchesFilter = filter === 'all';
-                if (filter === 'male') matchesFilter = gender === 'male';
-                if (filter === 'female') matchesFilter = gender === 'female';
-                if (filter === 'verified') matchesFilter = status === 'approved';
+                const isActive = status === 'approved' || status === 'verified';
+                
+                let matchesFilter = false;
+                if (filter === 'all') matchesFilter = isActive;
+                if (filter === 'male') matchesFilter = gender === 'male' && isActive;
+                if (filter === 'female') matchesFilter = gender === 'female' && isActive;
                 if (filter === 'pending') matchesFilter = status === 'pending';
-                if (filter === 'suspended') matchesFilter = status === 'suspended';
+                // if (filter === 'verified') matchesFilter = isActive; // Removed
+                // if (filter === 'suspended') matchesFilter = status === 'suspended'; // Removed
 
                 card.style.display = matchesSearch && matchesFilter ? '' : 'none';
             });
@@ -402,6 +485,9 @@
         });
 
         searchInput?.addEventListener('input', applyFilters);
+
+        // Initial apply
+        applyFilters();
 
         // Make cards clickable
         cards.forEach(card => {

@@ -77,6 +77,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::get('talents', [TalentsDashboardController::class, 'index'])->name('talents.dashboard');
 
             // Talent Profile
+            Route::get('talent-profiles/suspended', [TalentProfileController::class, 'suspended'])->name('talent-profiles.suspended');
+            Route::get('talent-profiles/rejected', [TalentProfileController::class, 'rejected'])->name('talent-profiles.rejected');
             Route::delete('talent-profiles/destroy', [TalentProfileController::class, 'massDestroy'])->name('talent-profiles.massDestroy');
             Route::post('talent-profiles/{talent_profile}/approve', [TalentProfileController::class, 'approve'])->name('talent-profiles.approve');
             Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
