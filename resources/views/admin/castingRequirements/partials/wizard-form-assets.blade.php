@@ -538,6 +538,32 @@
         font-size: 12px;
         color: #dc2626;
     }
+
+    /* Custom SweetAlert Button Styles */
+    .swal-btn-black {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        border: none !important;
+        cursor: pointer !important;
+        margin: 0 5px !important;
+    }
+    .swal-btn-white {
+        background-color: #ffffff !important;
+        color: #475467 !important;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        border: 1px solid #d0d5dd !important;
+        cursor: pointer !important;
+        margin: 0 5px !important;
+    }
+    .swal-btn-black:hover { background-color: #1a1a1a !important; }
+    .swal-btn-white:hover { background-color: #f9fafb !important; }
 </style>
 @endpush
 @endonce
@@ -616,13 +642,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCancelButton: true,
                 confirmButtonText: 'Go Back',
                 cancelButtonText: 'Stay',
-                confirmButtonColor: '#000000',
-                cancelButtonColor: '#fff',
                 customClass: {
-                    cancelButton: 'btn btn-outline-secondary',
-                    confirmButton: 'btn btn-dark'
+                    confirmButton: 'swal-btn-black',
+                    cancelButton: 'swal-btn-white'
                 },
-                buttonsStyling: true,
+                buttonsStyling: false,
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -633,13 +657,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         showCancelButton: true,
                         confirmButtonText: 'Clear & Go Back',
                         cancelButtonText: 'Cancel',
-                        confirmButtonColor: '#000000',
-                        cancelButtonColor: '#fff',
                         customClass: {
-                            cancelButton: 'btn btn-outline-secondary',
-                            confirmButton: 'btn btn-dark'
+                            confirmButton: 'swal-btn-black',
+                            cancelButton: 'swal-btn-white'
                         },
-                        buttonsStyling: true,
+                        buttonsStyling: false,
                         reverseButtons: true
                     }).then((secondResult) => {
                         if (secondResult.isConfirmed) {
