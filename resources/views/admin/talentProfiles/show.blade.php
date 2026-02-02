@@ -820,14 +820,17 @@
     </form>
 
     <div class="action-bar display-mode-only">
-        @if(($talentProfile->verification_status ?? '') !== 'approved')
+        @php
+            $currentStatus = $talentProfile->verification_status ?? '';
+            $showAcceptReject = !in_array($currentStatus, ['approved', 'suspended']);
+        @endphp
+
+        @if($showAcceptReject)
             <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;" id="reject-talent-form">
                 @csrf
                 <input type="hidden" name="notes" id="rejectNotesInput" value="">
                 <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> Reject</button>
             </form>
-        @endif
-        @if(($talentProfile->verification_status ?? '') !== 'approved')
             <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
                 @csrf
                 <button type="submit" class="btn-approve"><i class="fas fa-check"></i> Accept</button>
