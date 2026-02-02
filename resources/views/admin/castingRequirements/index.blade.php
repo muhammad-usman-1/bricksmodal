@@ -605,13 +605,13 @@
         <table class="shoot-table">
             <thead>
                 <tr>
-                    <th>Shoot Name <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
+                    <th>Shoot Name</th>
                     <th>Location</th>
-                    <th>Shoot Date-Time <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
-                    <th>Status <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
+                    <th>Shoot Date-Time</th>
+                    <th>Status</th>
 
                     <th>Required</th>
-                     <th>Applicants <i class="fas fa-chevron-down ml-1" style="font-size:10px;"></i></th>
+                     <th>Applicants</th>
                     <th></th>
                 </tr>
             </thead>
