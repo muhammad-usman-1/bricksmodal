@@ -94,7 +94,7 @@
             <a class="back-link" href="{{ route('admin.talents.dashboard') }}">
                 <i class="fas fa-arrow-left"></i> Back to Talents
             </a>
-            <h5 style="margin-top: 8px;">Suspended Talents</h5>
+            
         </div>
     </div>
 
