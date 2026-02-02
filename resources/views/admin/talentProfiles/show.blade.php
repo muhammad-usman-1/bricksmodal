@@ -107,20 +107,34 @@
     .upload-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(15, 23, 42, 0.5);
         color: #fff;
-        display: flex;
+        display: none;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 4px;
         font-size: 13px;
         font-weight: 600;
         backdrop-filter: blur(2px);
+        z-index: 15;
     }
-    .upload-overlay { display: none !important; }
     .is-editing .upload-tile.is-editable .upload-overlay { display: flex !important; }
-    .upload-tile.is-editable input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
+    .upload-tile.is-editable input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 20; }
+
+    .remove-photo-link {
+        color: #ff4d4f !important;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 8px;
+        position: relative;
+        z-index: 30;
+    }
+    .remove-photo-link:hover {
+        text-decoration: underline;
+    }
 
     .upload-placeholder { display: grid; place-items: center; gap: 8px; text-align: center; }
     .upload-placeholder i { font-size: 22px; color: #9ca3af; }
@@ -606,33 +620,35 @@
                         <div class="upload-tile is-editable"
                              data-media-id="{{ $photo['id'] ?? '' }}"
                              data-field="{{ $photo['field'] ?? '' }}">
-                            @if($photo)
-                                @php $img = $resolveUrl($photo['path']); @endphp
-                                @if($img)
-                                    <img src="{{ $img }}" alt="{{ $photo['label'] }}" class="preview-img">
-                                    <button type="button" class="remove-image-btn display-mode-only"
-                                            onclick="{{ $photo['id'] ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}"
-                                            title="Remove image">
-                                        <i class="fa fa-times"></i>
-                                    </button>
-                                @else
-                                    <div class="upload-placeholder">
-                                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                        <div style="font-size:12px;">No image</div>
-                                    </div>
-                                @endif
+                            
+                            @php $img = $photo ? $resolveUrl($photo['path']) : null; @endphp
+                            
+                            @if($img)
+                                <img src="{{ $img }}" alt="{{ $photo['label'] ?? 'Profile Photo' }}" class="preview-img">
                             @else
                                 <div class="upload-placeholder">
                                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                                    <div style="font-size:12px;">Drop files here to upload</div>
-                                    <div class="upload-support">Supports .jpg, .png up to 10MB</div>
+                                    <div style="font-size:12px; color: #64748b; font-weight: 500;">Drop files here to upload</div>
+                                    <div style="font-size:10px; color: #94a3b8;">Supports .jpg, .png up to 10MB</div>
                                 </div>
-                                <div class="upload-overlay edit-mode-only" style="display: none;">
-                                    <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                                    <span>Upload Photo</span>
-                                </div>
-                                <input type="file" class="media-file-input" accept="image/*" style="display:none" onchange="previewMediaImage(this)">
                             @endif
+
+                            <div class="upload-overlay">
+                                <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                                <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
+                                <span class="remove-photo-link" 
+                                      style="display: {{ $img ? 'block' : 'none' }};"
+                                      onclick="{{ ($photo['id'] ?? null) ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}">
+                                    Remove Photo
+                                </span>
+                            </div>
+
+                            <input type="file" 
+                                   name="{{ ($photo['field'] ?? null) ? $photo['field'] : 'media_files[]' }}" 
+                                   class="media-file-input" 
+                                   accept="image/*" 
+                                   style="display:none" 
+                                   onchange="previewMediaImage(this)">
                         </div>
                     @endfor
                 </div>
@@ -654,19 +670,21 @@
                 <div class="upload-tile is-editable id-doc-tile" data-field="{{ $field }}" style="width: 100%; height: auto; aspect-ratio: auto; min-height: 200px;">
                     @if($img)
                         <img src="{{ $img }}" alt="{{ $label }}" class="preview-img" style="height: auto; object-fit: contain;">
-                        <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
-                            <i class="fa fa-times"></i>
-                        </button>
                     @else
                         <div class="upload-placeholder">
                             <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
-                            <div style="font-size:12px;">Drop files here to upload</div>
-                            <div class="upload-support">Supports .jpg, .png, .pdf up to 10MB</div>
+                            <div style="font-size:12px; color: #64748b; font-weight: 500;">Drop files here to upload</div>
+                            <div style="font-size:10px; color: #94a3b8;">Supports .jpg, .png, .pdf up to 10MB</div>
                         </div>
                     @endif
                     <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                        <span>{{ $img ? 'Update Document' : 'Upload Document' }}</span>
+                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                        <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
+                        <span class="remove-photo-link" 
+                              style="display: {{ $img ? 'block' : 'none' }};"
+                              onclick="removeImage(this, event)">
+                            Remove Photo
+                        </span>
                     </div>
                     <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
                 </div>
@@ -1571,52 +1589,30 @@
     function updateMediaImageEditMode() {
         const shell = document.querySelector('.talent-shell');
         const isEditing = shell && shell.classList.contains('is-editing');
-        const profileImagesContainer = document.getElementById('profileImagesContainer');
+        const tiles = document.querySelectorAll('.upload-tile');
 
-        if (profileImagesContainer) {
-            const tiles = profileImagesContainer.querySelectorAll('.upload-tile');
-            tiles.forEach((tile, index) => {
-                if (isEditing) {
-                    // In edit mode: add file input to empty tiles
-                    if (!tile.querySelector('.media-file-input') && !tile.querySelector('input[type="file"]')) {
-                        const fileInput = document.createElement('input');
-                        fileInput.type = 'file';
-                        fileInput.className = 'media-file-input';
-                        fileInput.accept = 'image/*';
-                        fileInput.style.display = 'none';
-                        fileInput.onchange = function() { previewMediaImage(this); };
-                        tile.appendChild(fileInput);
+        tiles.forEach((tile) => {
+            const hasImg = !!tile.querySelector('.preview-img');
+            const uploadText = tile.querySelector('.upload-text');
+            const removeLink = tile.querySelector('.remove-photo-link');
+            const placeholder = tile.querySelector('.upload-placeholder');
 
-                        // Add upload overlay
-                        const overlay = document.createElement('div');
-                        overlay.className = 'upload-overlay';
-                        overlay.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);"><span>Upload Photo</span>';
-                        overlay.style.display = 'none';
-                        tile.appendChild(overlay);
-                    }
-
-                    // Show overlay for empty tiles
-                    const placeholder = tile.querySelector('.upload-placeholder');
-                    const overlay = tile.querySelector('.upload-overlay');
-                    if (placeholder && !tile.querySelector('.preview-img')) {
-                        placeholder.style.display = 'none';
-                        if (overlay) overlay.style.display = 'grid';
-                    }
-
-                    // Add click handler for file selection
-                    const fileInput = tile.querySelector('input[type="file"]');
-                    if (fileInput && !tile.dataset.clickHandlerAdded) {
-                        tile.addEventListener('click', function(e) {
-                            if (e.target === this || e.target.classList.contains('upload-placeholder') || e.target.closest('.upload-placeholder') || e.target.classList.contains('upload-overlay') || e.target.closest('.upload-overlay')) {
-                                fileInput.click();
-                            }
-                        });
-                        tile.style.cursor = 'pointer';
-                        tile.dataset.clickHandlerAdded = 'true';
-                    }
+            if (isEditing) {
+                if (uploadText) uploadText.textContent = hasImg ? 'Replace Photo' : 'Upload Photo';
+                if (removeLink) removeLink.style.display = hasImg ? 'block' : 'none';
+                if (placeholder) placeholder.style.display = hasImg ? 'none' : 'grid';
+                
+                const fileInput = tile.querySelector('input[type="file"]');
+                if (fileInput && !tile.dataset.clickHandlerAdded) {
+                    tile.addEventListener('click', function(e) {
+                        if (e.target.closest('.remove-photo-link')) return;
+                        fileInput.click();
+                    });
+                    tile.style.cursor = 'pointer';
+                    tile.dataset.clickHandlerAdded = 'true';
                 }
-            });
-        }
+            }
+        });
     }
 
     function previewMediaImage(input) {
@@ -1624,47 +1620,33 @@
             const reader = new FileReader();
             const tile = input.closest('.upload-tile');
             const placeholder = tile.querySelector('.upload-placeholder');
-            const overlay = tile.querySelector('.upload-overlay');
+            const uploadText = tile.querySelector('.upload-text');
+            const removeLink = tile.querySelector('.remove-photo-link');
             let preview = tile.querySelector('.preview-img');
-            let removeBtn = tile.querySelector('.remove-image-btn');
 
             reader.onload = function(e) {
-                // Hide placeholder and overlay
                 if (placeholder) placeholder.style.display = 'none';
-                if (overlay) overlay.style.display = 'none';
 
-                // Remove existing preview image if any
                 if (preview && preview.tagName === 'IMG') {
-                    preview.remove();
-                }
-
-                // Create new preview image
-                const newImg = document.createElement('img');
-                newImg.src = e.target.result;
-                newImg.classList.add('preview-img');
-                newImg.style.position = 'relative';
-                newImg.style.zIndex = '1';
-                tile.insertBefore(newImg, tile.firstChild);
-
-                // Add/show remove button
-                if (!removeBtn) {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'remove-image-btn';
-                    btn.innerHTML = '<i class="fa fa-times"></i>';
-                    btn.title = 'Remove image';
-                    btn.style.zIndex = '20';
-                    btn.onclick = function(e) {
-                        removeMediaImage(this, e);
-                    };
-                    tile.appendChild(btn);
+                    preview.src = e.target.result;
                 } else {
-                    removeBtn.style.display = 'flex';
+                    const newImg = document.createElement('img');
+                    newImg.src = e.target.result;
+                    newImg.classList.add('preview-img');
+                    if (tile.classList.contains('id-doc-tile')) {
+                        newImg.style.height = 'auto';
+                        newImg.style.objectFit = 'contain';
+                    }
+                    tile.insertBefore(newImg, tile.firstChild);
                 }
+
+                if (uploadText) uploadText.textContent = 'Replace Photo';
+                if (removeLink) removeLink.style.display = 'block';
             }
             reader.readAsDataURL(input.files[0]);
         }
     }
+    window.previewImage = previewMediaImage;
 
     function removeMediaImage(btn, event) {
         if (event) {
@@ -1673,64 +1655,65 @@
         }
 
         const tile = btn.closest('.upload-tile');
-        const fileInput = tile.querySelector('input[type="file"].media-file-input');
+        const fileInput = tile.querySelector('input[type="file"]');
         const preview = tile.querySelector('.preview-img');
         const placeholder = tile.querySelector('.upload-placeholder');
-        const overlay = tile.querySelector('.upload-overlay');
+        const uploadText = tile.querySelector('.upload-text');
+        const removeLink = tile.querySelector('.remove-photo-link');
 
-        // Remove preview image
-        if (preview) {
-            preview.remove();
-        }
-
-        // Hide remove button
-        btn.style.display = 'none';
-
-        // Show placeholder and overlay if tile is empty
+        if (preview) preview.remove();
         if (placeholder) placeholder.style.display = 'grid';
-        if (overlay) overlay.style.display = 'grid';
-
-        // Clear file input
+        if (uploadText) uploadText.textContent = 'Upload Photo';
+        if (removeLink) removeLink.style.display = 'none';
+        
         if (fileInput) {
             fileInput.value = '';
+            const field = tile.dataset.field;
+            if (field) {
+                let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
+                if (!removeInput) {
+                    removeInput = document.createElement('input');
+                    removeInput.type = 'hidden';
+                    removeInput.name = 'remove_' + field;
+                    removeInput.value = '1';
+                    tile.appendChild(removeInput);
+                }
+            }
         }
     }
+    window.removeImage = removeMediaImage;
 
     function addMorePhotoSlots(event) {
         event.preventDefault();
         const profileImagesGrid = document.getElementById('profileImagesGrid');
 
-        // Add 3 more photo slots
         for (let i = 0; i < 3; i++) {
             const tile = document.createElement('div');
             tile.className = 'upload-tile is-editable';
+            tile.innerHTML = `
+                <div class="upload-placeholder">
+                    <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
+                    <div style="font-size:12px; color: #64748b; font-weight: 500;">Drop files here to upload</div>
+                    <div style="font-size:10px; color: #94a3b8;">Supports .jpg, .png up to 10MB</div>
+                </div>
+                <div class="upload-overlay">
+                    <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                    <span class="upload-text">Upload Photo</span>
+                    <span class="remove-photo-link" style="display: none;">Remove Photo</span>
+                </div>
+                <input type="file" name="media_files[]" class="media-file-input" accept="image/*" style="display:none">
+            `;
 
-            const placeholder = document.createElement('div');
-            placeholder.className = 'upload-placeholder';
-            placeholder.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px;"><div style="font-size:12px;">No image</div>';
-
-            const overlay = document.createElement('div');
-            overlay.className = 'upload-overlay';
-            overlay.style.display = 'grid';
-            overlay.innerHTML = '<img src="' + "{{ asset('images/upload.png') }}" + '" alt="Upload" style="width: 24px; height: 24px; filter: brightness(0) invert(1);"><span>Upload Photo</span>';
-
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.className = 'media-file-input';
-            fileInput.accept = 'image/*';
-            fileInput.style.display = 'none';
+            const fileInput = tile.querySelector('input[type="file"]');
             fileInput.onchange = function() { previewMediaImage(this); };
+            
+            tile.querySelector('.remove-photo-link').onclick = function(e) { removeMediaImage(this, e); };
 
-            tile.appendChild(placeholder);
-            tile.appendChild(overlay);
-            tile.appendChild(fileInput);
-
-            // Add click handler to tile for file selection
             tile.addEventListener('click', function(e) {
-                if (e.target === this || e.target.classList.contains('upload-placeholder') || e.target.closest('.upload-placeholder') || e.target.classList.contains('upload-overlay') || e.target.closest('.upload-overlay')) {
-                    fileInput.click();
-                }
+                if (e.target.closest('.remove-photo-link')) return;
+                fileInput.click();
             });
+            tile.style.cursor = 'pointer';
 
             profileImagesGrid.appendChild(tile);
         }
