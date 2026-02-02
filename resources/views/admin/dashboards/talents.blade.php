@@ -68,6 +68,12 @@
     .badge-rejected::before {
         background: #dc2626;
     }
+    .badge-suspended {
+        background: #f3f4f6; color: #6b7280;
+    }
+    .badge-suspended::before {
+        background: #6b7280;
+    }
 
     .card-ellipsis { position: absolute; top: 12px; right: 15px; z-index: 30; }
     .dropdown-toggle-btn { color: #111; font-size: 16px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
@@ -230,6 +236,7 @@
         <button class="pill-btn" data-filter="female">Female</button>
         <button class="pill-btn" data-filter="verified">Verified</button>
         <button class="pill-btn" data-filter="pending">Pending</button>
+        <button class="pill-btn" data-filter="suspended">Suspended</button>
     </div>
 
     @if($talents->isEmpty())
@@ -299,13 +306,18 @@
                         $allImages = [$avatar];
                     }
                 @endphp
+                @php
+                    $isSuspended = $status === 'suspended';
+                @endphp
                 <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
                     <div class="talent-img-container">
                         @foreach($allImages as $index => $imgSrc)
                             <img class="talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
                         @endforeach
                     </div>
-                    <span class="badge-active {{ $isVerified ? '' : ($isRejected ? 'badge-rejected' : 'badge-pending') }}">{{ $isVerified ? 'Active' : ($isRejected ? 'Rejected' : 'Pending') }}</span>
+                    <span class="badge-active {{ $isVerified ? '' : ($isSuspended ? 'badge-suspended' : ($isRejected ? 'badge-rejected' : 'badge-pending')) }}">
+                        {{ $isVerified ? 'Active' : ($isSuspended ? 'Suspended' : ($isRejected ? 'Rejected' : 'Pending')) }}
+                    </span>
                     <div class="card-ellipsis actions-dropdown-container">
                         <span class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></span>
                         <div class="actions-dropdown-menu">
@@ -375,6 +387,7 @@
                 if (filter === 'female') matchesFilter = gender === 'female';
                 if (filter === 'verified') matchesFilter = status === 'approved';
                 if (filter === 'pending') matchesFilter = status === 'pending';
+                if (filter === 'suspended') matchesFilter = status === 'suspended';
 
                 card.style.display = matchesSearch && matchesFilter ? '' : 'none';
             });

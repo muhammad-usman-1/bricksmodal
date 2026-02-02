@@ -70,6 +70,10 @@ class ProjectController extends Controller
             return redirect()->route('talent.login');
         }
 
+        if ($profile->verification_status === 'suspended') {
+            return back()->with('message', 'Your account is suspended. You cannot apply for projects.');
+        }
+
         if (CastingApplication::where('casting_requirement_id', $castingRequirement->id)
             ->where('talent_profile_id', $profile->id)
             ->exists()) {

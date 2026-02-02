@@ -40,6 +40,7 @@ class TalentProfile extends Model
         'approved'     => 'Approved',
         'rejected'     => 'Rejected',
         'under_review' => 'Under Review',
+        'suspended'    => 'Suspended',
     ];
 
     public const SKIN_TONE_SELECT = [

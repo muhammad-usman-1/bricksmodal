@@ -1,5 +1,12 @@
 @extends('layouts.admin')
-
+@section('styles')
+<style>
+    .custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #000 !important;
+        border-color: #000 !important;
+    }
+</style>
+@endsection
 @section('content')
 <div class="content">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">

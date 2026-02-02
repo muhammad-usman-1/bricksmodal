@@ -154,7 +154,9 @@ class TalentProfileController extends Controller
 
         $this->removeTalentProfile($talentProfile, false);
 
-        return redirect()->route('admin.talents.dashboard');
+        return redirect()
+            ->route('admin.talents.dashboard')
+            ->with('success', 'Talent Profile deleted successfully.');
     }
 
     public function massDestroy(MassDestroyTalentProfileRequest $request)
@@ -211,6 +213,29 @@ class TalentProfileController extends Controller
         }
 
         return back()->with('message', trans('notifications.status_updated'));
+    }
+
+    public function unsuspend(Request $request, TalentProfile $talentProfile)
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        // Check if there were previous notes about why it was suspended
+        $talentProfile->update([
+            'verification_status' => 'approved',
+        ]);
+
+        return back()->with('success', 'Talent unsuspended successfully.');
+    }
+
+    public function suspend(Request $request, TalentProfile $talentProfile)
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $talentProfile->update([
+            'verification_status' => 'suspended',
+        ]);
+
+        return back()->with('success', 'Talent suspended successfully.');
     }
 
     public function reactivate(Request $request, TalentProfile $talentProfile)

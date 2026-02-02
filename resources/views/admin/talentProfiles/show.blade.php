@@ -495,6 +495,21 @@
                         </button>
                         <div class="actions-dropdown" id="talentActionsDropdown" role="menu" aria-label="Talent actions">
                             @can('talent_profile_edit')
+                                @if($talentProfile->verification_status === 'suspended')
+                                    <form action="{{ route('admin.talent-profiles.unsuspend', $talentProfile->id) }}" method="POST" id="unsuspend-talent-form" style="display:none;">
+                                        @csrf
+                                    </form>
+                                    <button type="button" class="actions-item" id="talentActionUnsuspend">
+                                        <i class="fas fa-play"></i> Unsuspend
+                                    </button>
+                                @else
+                                    <form action="{{ route('admin.talent-profiles.suspend', $talentProfile->id) }}" method="POST" id="suspend-talent-form" style="display:none;">
+                                        @csrf
+                                    </form>
+                                    <button type="button" class="actions-item" id="talentActionSuspend">
+                                        <i class="fas fa-pause"></i> Suspend
+                                    </button>
+                                @endif
                                 <button type="button" class="actions-item" id="talentActionEdit">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
@@ -1171,6 +1186,38 @@
                 } else {
                     deleteForm.submit();
                 }
+            });
+        }
+
+        const actionSuspend = document.getElementById('talentActionSuspend');
+        const actionUnsuspend = document.getElementById('talentActionUnsuspend');
+        const suspendForm = document.getElementById('suspend-talent-form');
+        const unsuspendForm = document.getElementById('unsuspend-talent-form');
+
+        if (actionSuspend && suspendForm) {
+            actionSuspend.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeActions();
+                Swal.fire({
+                    text: 'Are you sure you want to suspend this talent? They will not be able to apply for any projects.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#000000',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, suspend'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        suspendForm.submit();
+                    }
+                });
+            });
+        }
+
+        if (actionUnsuspend && unsuspendForm) {
+            actionUnsuspend.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeActions();
+                unsuspendForm.submit();
             });
         }
 

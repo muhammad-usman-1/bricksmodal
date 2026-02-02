@@ -82,6 +82,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
             Route::post('talent-profiles/{talent_profile}/reactivate', [TalentProfileController::class, 'reactivate'])->name('talent-profiles.reactivate');
             Route::post('talent-profiles/{talent_profile}/upload-media', [TalentProfileController::class, 'uploadMedia'])->name('talent-profiles.upload-media');
+            Route::post('talent-profiles/{talent_profile}/suspend', [TalentProfileController::class, 'suspend'])->name('talent-profiles.suspend');
+            Route::post('talent-profiles/{talent_profile}/unsuspend', [TalentProfileController::class, 'unsuspend'])->name('talent-profiles.unsuspend');
             Route::resource('talent-profiles', TalentProfileController::class);
         });
 
