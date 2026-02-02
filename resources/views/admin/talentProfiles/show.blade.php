@@ -1209,7 +1209,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#000000',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, suspend'
+                    confirmButtonText: 'Yes, Suspend'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         suspendForm.submit();
