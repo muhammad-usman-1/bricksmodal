@@ -42,8 +42,14 @@ class RolePermissionController extends Controller
             if (str_contains($permission->title, 'talent_')) {
                 return 'Talent Management';
             }
+            if (str_contains($permission->title, 'header_')) {
+                return 'Header Settings';
+            }
             if (str_contains($permission->title, 'payment_') || str_contains($permission->title, 'bank_')) {
                 return 'Payment Management';
+            }
+            if (str_contains($permission->title, 'label_')) {
+                return 'Arabic Labels';
             }
             if (str_contains($permission->title, 'content_') || str_contains($permission->title, 'language_') || str_contains($permission->title, 'outfit_') || str_contains($permission->title, 'email_template_')) {
                 return 'Content Management';

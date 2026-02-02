@@ -83,7 +83,7 @@
 
     .overview h5 {
 
-        color: #101828;
+        color: black;
 
 font-size: 24px;
 font-style: normal;

@@ -194,7 +194,7 @@
                         $originalAdmin = $impersonatingId ? \App\Models\User::find($impersonatingId) : null;
                     @endphp
                     @if($impersonatingId && $originalAdmin)
-                        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert" style="margin-top: 1rem;"> 
                             <div>
                                 <strong>{{ trans('global.impersonating_notice', ['name' => auth('admin')->user()->name]) }}</strong>
                                 <span class="d-block small">{{ trans('global.impersonating_original', ['name' => $originalAdmin->name]) }}</span>
@@ -276,17 +276,20 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const attachSwal = function () {
-                document.querySelectorAll('form[data-swal-confirm]').forEach(function (form) {
-                    if (form.dataset.swalBound === 'true') {
+                document.querySelectorAll('form[data-swal-confirm], a[data-swal-confirm]').forEach(function (element) {
+                    if (element.dataset.swalBound === 'true') {
                         return;
                     }
-                    form.dataset.swalBound = 'true';
-                    form.addEventListener('submit', function (e) {
-                        if (form.dataset.swalConfirmed === 'true') {
+                    element.dataset.swalBound = 'true';
+                    
+                    const eventType = element.tagName === 'FORM' ? 'submit' : 'click';
+                    
+                    element.addEventListener(eventType, function (e) {
+                        if (element.dataset.swalConfirmed === 'true') {
                             return;
                         }
                         e.preventDefault();
-                        const message = form.dataset.swalConfirm || '{{ trans('global.areYouSure') }}';
+                        const message = element.dataset.swalConfirm || '{{ trans('global.areYouSure') }}';
                         Swal.fire({
                             text: message,
                             icon: 'warning',
@@ -296,8 +299,12 @@
                             confirmButtonText: '{{ trans('global.yes') }}'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                form.dataset.swalConfirmed = 'true';
-                                form.submit();
+                                element.dataset.swalConfirmed = 'true';
+                                if (element.tagName === 'FORM') {
+                                    element.submit();
+                                } else {
+                                    window.location.href = element.href;
+                                }
                             }
                         });
                     });

@@ -24,11 +24,8 @@
         gap: 12px;
         padding: 10px 0 12px;
     }
-    .talents-head h5 { color: #101828;
-font-size: 24px;
-font-style: normal;
-font-weight: 400;
-line-height: 36px; /* 150% */}
+    .talents-head h5 {  color: black;
+           font-family: 'Arimo', sans-serif; color: black; font-size: 24px;  font-weight: 400; line-height: 36px;}
     .talents-head .meta { margin: 4px 0; color: var(--ink-500); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .search-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
     .search-input { min-width: 240px; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--ink-700); background: #fff; }

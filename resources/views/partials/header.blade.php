@@ -168,18 +168,26 @@ height:auto;
                         <i class="fas fa-camera" style="width: 16px; text-align: center;"></i>
                         <span>Add New Shoot</span>
                     </a>
-                    <a class="dropdown-item" href="{{ route('admin.admin-management.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
-                        <i class="fas fa-user-circle" style="width: 16px; text-align: center;"></i>
-                        <span>Add User</span>
-                    </a>
+                    @if(auth()->user()->isSuperAdmin())
+                        <a class="dropdown-item" href="{{ route('admin.admin-management.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                            <i class="fas fa-user-circle" style="width: 16px; text-align: center;"></i>
+                            <span>Add User</span>
+                        </a>
+                        <a class="dropdown-item" href="{{ route('admin.role-permissions.index') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                            <i class="fas fa-key" style="width: 16px; text-align: center;"></i>
+                            <span>Add Permission</span>
+                        </a>
+                    @endif
                     <a class="dropdown-item" href="{{ route('admin.outfits.create') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
                         <i class="fas fa-tshirt" style="width: 16px; text-align: center;"></i>
                         <span>Add Outfit</span>
                     </a>
-                    <a class="dropdown-item" href="{{ route('admin.onboarding-labels.index') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
-                        <i class="fas fa-language" style="width: 16px; text-align: center;"></i>
-                        <span>Add Arabic Labels</span>
-                    </a>
+                    @can('header_label_access')
+                        <a class="dropdown-item" href="{{ route('admin.onboarding-labels.index') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px;">
+                            <i class="fas fa-language" style="width: 16px; text-align: center;"></i>
+                            <span>Add Arabic Labels</span>
+                        </a>
+                    @endcan
                 </div>
             </div>
             <a href="{{ route('admin.settings.index') }}" class="header-icon-link" aria-label="Settings">

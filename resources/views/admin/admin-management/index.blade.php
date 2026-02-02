@@ -19,12 +19,8 @@
 
     .admin-shell { padding: 8px 0 18px; }
     .admin-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .admin-title { color: #101828;
-           font-family: 'Arimo', sans-serif;
-font-size: 24px;
-font-style: normal;
-font-weight: 400;
-line-height: 32px; /* 133.333% */ }
+    .admin-title { color: black;
+           font-family: 'Arimo', sans-serif; color: black; font-size: 24px;  font-weight: 400; line-height: 36px;}
     .admin-sub { margin: 2px 0 0; color: var(--ink-500); font-size: 13px; }
     .add-btn { background: black; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;cursor: pointer; }
     .add-btn:hover, .add-btn:focus { color: #fff; opacity: 0.9; text-decoration: none; }
@@ -40,12 +36,28 @@ line-height: 32px; /* 133.333% */ }
     .pill-green { background: var(--pill-green); color: var(--pill-green-text); border-color: #c7e8d7; }
     .pill-gray { background: #eef1f5; color: #6b7280; border-color: #e1e3e6; }
     .actions { display: inline-flex; gap: 12px; align-items: center; }
-    .action-icon { font-size: 14px; text-decoration: none; transition: opacity 0.15s ease, filter 0.15s ease; }
+    .action-icon { 
+        font-size: 14px; 
+        text-decoration: none !important; 
+        transition: none !important; 
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: none !important;
+        padding: 0;
+    }
+    .action-icon:hover, .action-icon:focus, .action-icon:active {
+        opacity: 1 !important;
+        filter: none !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        text-decoration: none !important;
+    }
     .action-icon.view { color: #2563eb; }
     .action-icon.edit { color: #f59e0b; }
     .action-icon.impersonate { color: #8b5cf6; }
     .action-icon.delete { color: #dc2626; }
-    .action-icon:hover { opacity: 0.85; filter: saturate(1.05); text-decoration: none; }
 
     @media (max-width: 768px) {
         .admin-head { flex-direction: column; align-items: flex-start; }
@@ -62,7 +74,7 @@ line-height: 32px; /* 133.333% */ }
             <h5 class="admin-title">Admin Management</h5>
             <div class="admin-sub">Manage admin users and their permissions.</div>
         </div>
-        <a class="add-btn" href="{{ route('admin.admin-management.create') }}"><i class="fas fa-plus"></i> Add New User</a>
+        <a class="add-btn" href="{{ route('admin.admin-management.create') }}" data-swal-confirm="Proceed to add a new admin user?"><i class="fas fa-plus"></i> Add New User</a>
     </div>
 
     <div class="admin-card">
@@ -99,7 +111,7 @@ line-height: 32px; /* 133.333% */ }
                                 <div class="actions">
 
                                     @if(!$isSuperAdmin)
-                                        <a class="action-icon edit" title="Edit" href="{{ route('admin.admin-management.edit', $admin) }}">
+                                        <a class="action-icon edit" title="Edit" href="{{ route('admin.admin-management.edit', $admin) }}" data-swal-confirm="Edit this admin user?">
                                             <i class="far fa-edit"></i>
                                         </a>
                                     @else

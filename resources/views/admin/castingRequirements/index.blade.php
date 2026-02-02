@@ -32,12 +32,8 @@
     }
 
     .title-block h5 {
-       color: #101828;
-font-size: 24px;
-font-style: normal;
-font-weight: 400;
-line-height: 36px; /* 150% */
-margin-bottom: 0;
+       color: black;
+           font-family: 'Arimo', sans-serif; color: black; font-size: 24px;  font-weight: 400; line-height: 36px;
     }
 
     .title-block .sub {

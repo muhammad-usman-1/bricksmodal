@@ -13,15 +13,13 @@
         }
 
         .pay-shell {
-            padding: 22px 0;
+            padding: 12px 0;
               font-family: 'Arimo', sans-serif;
         }
 
         .pay-header h5 {
-            color: #101828;
-            font-size: 24px;
-            font-weight: 400;
-            margin-bottom: 4px;
+         color: black;
+           font-family: 'Arimo', sans-serif; color: black; font-size: 24px;  font-weight: 400;  
         }
 
         .pay-header p {

@@ -191,6 +191,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 42,
                 'title' => 'label_delete',
             ],
+            [
+                'id'    => 43,
+                'title' => 'header_label_access',
+            ],
         ];
 
         // Use idempotent creation so seeding is safe on existing DBs
