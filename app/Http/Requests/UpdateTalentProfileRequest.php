@@ -74,7 +74,7 @@ class UpdateTalentProfileRequest extends FormRequest
                 'max:2147483647',
             ],
             'whatsapp_number' => [
-                'required',
+                'nullable',
                 'regex:/^\+?[0-9\s\-()]{7,20}$/',
             ],
             'first_name' => [

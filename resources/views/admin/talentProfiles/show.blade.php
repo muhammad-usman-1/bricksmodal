@@ -496,16 +496,10 @@
                         <div class="actions-dropdown" id="talentActionsDropdown" role="menu" aria-label="Talent actions">
                             @can('talent_profile_edit')
                                 @if($talentProfile->verification_status === 'suspended')
-                                    <form action="{{ route('admin.talent-profiles.unsuspend', $talentProfile->id) }}" method="POST" id="unsuspend-talent-form" style="display:none;">
-                                        @csrf
-                                    </form>
                                     <button type="button" class="actions-item" id="talentActionUnsuspend">
                                         <i class="fas fa-play"></i> Unsuspend
                                     </button>
                                 @else
-                                    <form action="{{ route('admin.talent-profiles.suspend', $talentProfile->id) }}" method="POST" id="suspend-talent-form" style="display:none;">
-                                        @csrf
-                                    </form>
                                     <button type="button" class="actions-item" id="talentActionSuspend">
                                         <i class="fas fa-pause"></i> Suspend
                                     </button>
@@ -816,6 +810,14 @@
             @endforeach
         </div> {{-- end info-grid --}}
     </form> {{-- end talentEditForm --}}
+
+    {{-- Auxiliary Forms (Outside main form to prevent nesting issues) --}}
+    <form action="{{ route('admin.talent-profiles.suspend', $talentProfile->id) }}" method="POST" id="suspend-talent-form" style="display:none;">
+        @csrf
+    </form>
+    <form action="{{ route('admin.talent-profiles.unsuspend', $talentProfile->id) }}" method="POST" id="unsuspend-talent-form" style="display:none;">
+        @csrf
+    </form>
 
     <div class="action-bar display-mode-only">
         @if(($talentProfile->verification_status ?? '') !== 'approved')
