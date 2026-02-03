@@ -1861,24 +1861,29 @@
                                return;
                           }
 
-                          // Strict Validation for Step 5 Size
-                          if (file.size > 10 * 1024 * 1024) {
-                              // Show validation error
-                              const errorDiv = document.createElement('div');
-                              errorDiv.id = 'step5-file-error';
-                              errorDiv.style.color = '#dc3545';
-                              errorDiv.style.marginTop = '8px';
-                              errorDiv.style.fontSize = '14px';
-                              errorDiv.textContent = 'Image size is too large. Please upload an image up to 10MB.';
-                              
-                              if(multiUploadArea) {
-                                  multiUploadArea.parentNode.insertBefore(errorDiv, multiUploadArea.nextSibling);
-                              }
-                              // Do NOT add file
-                              return;
-                          }
+                          // 2. Check for compression (restore logic)
+                          if (file.type.indexOf('image/') !== -1 && file.size > 10 * 1024 * 1024) {
+                                activeCompressions++;
+                                updateSubmitButton();
+                                
+                                // Placeholder for the file in the UI (we push original first)
+                                selectedFiles.push(file);
 
-                          selectedFiles.push(file);
+                                compressImage(file).then(compressed => {
+                                      // Find the original file we pushed and replace it
+                                      const idx = selectedFiles.indexOf(file);
+                                      if (idx !== -1) {
+                                          selectedFiles[idx] = compressed;
+                                          syncInputFiles();
+                                      }
+                                }).catch(err => console.error(err))
+                                  .finally(() => {
+                                      activeCompressions--;
+                                      updateSubmitButton();
+                                  });
+                          } else {
+                                selectedFiles.push(file);
+                          }
                       });
                       
                       syncInputFiles();
