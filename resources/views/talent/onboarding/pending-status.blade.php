@@ -119,15 +119,7 @@
             transition: all 0.2s ease;
             text-decoration: none;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-            background: #1a1a1a;
-            color: white;
-            text-decoration: none;
+           
         }
 
         .logout-btn:active {
