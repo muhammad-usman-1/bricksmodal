@@ -1291,6 +1291,9 @@
                                              <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                          </div>
                                          <div class="upload-label" data-file-label="id_document_front">{{ \App\Helpers\Bilingual::get('onboarding.drop_file') }}</div>
+                                         <div class="progress-bar-container" style="display:none; width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 8px; overflow: hidden;">
+                                             <div class="progress-bar-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.2s ease;"></div>
+                                         </div>
                                      </div>
                                  </label>
                                  @error('id_document_front')
@@ -1516,6 +1519,34 @@
                           }
                       });
 
+                      // Simulate upload progress for Step 4 ID document
+                      if (input.id === 'upload_id_document_front') {
+                          input.addEventListener('change', () => {
+                              if (input.files.length > 0) {
+                                  const container = card.querySelector('.progress-bar-container');
+                                  const fill = card.querySelector('.progress-bar-fill');
+                                  
+                                  if (container && fill) {
+                                      container.style.display = 'block';
+                                      fill.style.width = '0%';
+                                      
+                                      // Clear validation error immediately
+                                      clearFieldError(input);
+
+                                      // Simulated upload progress
+                                      let progress = 0;
+                                      const interval = setInterval(() => {
+                                          progress += 10;
+                                          fill.style.width = `${progress}%`;
+                                          if (progress >= 100) {
+                                              clearInterval(interval);
+                                          }
+                                      }, 50);
+                                  }
+                              }
+                          });
+                      }
+
                      // Drag Events
                      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                          card.addEventListener(eventName, preventDefaults, false);
@@ -1613,8 +1644,8 @@
 
                   if (multiUploadArea && multiInput) {
                       multiInput.addEventListener('change', (e) => {
-                          selectedFiles = Array.from(e.target.files || []);
-                          renderPreviews();
+                          addFiles(e.target.files);
+                          multiInput.value = ''; // Reset to allow re-selecting same files
                       });
 
                       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1655,9 +1686,22 @@
                               reader.onload = (e) => {
                                   const div = document.createElement('div');
                                   div.className = 'photo-preview-item';
-                                  div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                                  // Optional: Add remove button here if needed in future
+                                  div.innerHTML = `
+                                    <div class="preview-image-container" style="position: relative;">
+                                        <img src="${e.target.result}" alt="Preview">
+                                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.5);">
+                                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+                                        </div>
+                                    </div>`;
                                   previewContainer.appendChild(div);
+                                  
+                                  // Simulate progress for newly added item
+                                  setTimeout(() => {
+                                      const progressBar = div.querySelector('.upload-progress-bar');
+                                      if(progressBar) {
+                                          progressBar.style.width = '100%';
+                                      }
+                                  }, 100);
                               };
                               reader.readAsDataURL(file);
                           });
