@@ -86,6 +86,10 @@
         gap: 6px;
     }
     .action-btn:hover { background: #1f2937; }
+
+    table.dataTable.no-footer {
+        border-bottom: 0 !important;
+    }
 </style>
 
 <div class="dash-shell">
