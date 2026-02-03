@@ -1583,7 +1583,14 @@
                      const input = card.querySelector('input[type="file"]');
                      const label = card.querySelector('.upload-label');
 
+                     const input = card.querySelector('input[type="file"]');
+                     const label = card.querySelector('.upload-label');
+
                      if (!input) return;
+
+                     // FIX: Skip generic logic for Step 5 "Additional Photos" to prevent duplication
+                     // It has its own dedicated handlers below
+                     if (input.id === 'additional_photos_input') return;
 
                       const trimFileName = (name, maxLength = 25) => {
                           if (name.length <= maxLength) return name;
@@ -1593,13 +1600,19 @@
                       // File Input Change
                       input.addEventListener('change', async () => {
                           if(input.files.length > 0) {
+                              const file = input.files[0]; // Define file here
+
                               // Compression applied for single files (Step 4 / Video)
-                              // Only compress if it is an image
-                              const file = input.files[0];
-                              
                               if (file.type.startsWith('image/')) {
-                                  try {
-                                      const compressedFile = await compressImage(file);
+                                 // STRICT VALIDATION: If this is Video Upload, reject images
+                                 if (input.id === 'upload_video') {
+                                     alert('Only video files are allowed here.');
+                                     input.value = '';
+                                     return;
+                                 }
+
+                                 try {
+                                     const compressedFile = await compressImage(file);
                                       // Update input files with compressed version
                                       const dt = new DataTransfer();
                                       dt.items.add(compressedFile);
@@ -1610,8 +1623,15 @@
                               }
 
                               /* 3. Handle Video Upload (Step 5) */
-                              if (input.id === 'upload_video') {
-                                  const container = card.querySelector('.progress-bar-container');
+                             if (input.id === 'upload_video') {
+                                 // STRICT VALIDATION: Ensure it is a video
+                                 if (!input.files[0].type.startsWith('video/')) {
+                                     alert('Only video files are allowed.');
+                                     input.value = '';
+                                     return;
+                                 }
+                                 
+                                 const container = card.querySelector('.progress-bar-container');
                                   const fill = card.querySelector('.progress-bar-fill');
                                   const labelDiv = card.querySelector('.upload-label');
                                   
@@ -1673,7 +1693,14 @@
                       if (input.id === 'upload_id_document_front') {
                           input.addEventListener('change', () => {
                               if (input.files.length > 0) {
-                                  const container = card.querySelector('.progress-bar-container');
+                                  // STRICT VALIDATION: Ensure it is an image
+                                  if (!input.files[0].type.startsWith('image/')) {
+                                      alert('Only image files are allowed for ID.');
+                                      input.value = '';
+                                      return;
+                                  }
+
+                                 const container = card.querySelector('.progress-bar-container');
                                   const fill = card.querySelector('.progress-bar-fill');
                                   
                                   if (container && fill) {
@@ -1831,8 +1858,14 @@
                       if(existingError) existingError.remove();
 
                       Array.from(files).forEach(file => {
-                          // Strict Validation for Step 5
-                          if (file.type.indexOf('image/') !== -1 && file.size > 10 * 1024 * 1024) {
+                          // Allow only images for Step 5 Photos
+                          if (file.type.indexOf('image/') === -1) {
+                               // Optional: specific error for non-images
+                               return;
+                          }
+
+                          // Strict Validation for Step 5 Size
+                          if (file.size > 10 * 1024 * 1024) {
                               // Show validation error
                               const errorDiv = document.createElement('div');
                               errorDiv.id = 'step5-file-error';
