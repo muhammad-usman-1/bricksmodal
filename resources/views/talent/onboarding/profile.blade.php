@@ -1639,6 +1639,20 @@
                                           fill.style.width = `${progress}%`;
                                           if (progress >= 100) {
                                               clearInterval(interval);
+                                              // Show Success Message
+                                              const successMsg = document.createElement('div');
+                                              successMsg.className = 'upload-success-msg';
+                                              successMsg.style.color = '#10b981';
+                                              successMsg.style.fontSize = '12px';
+                                              successMsg.style.marginTop = '4px';
+                                              successMsg.style.fontWeight = '500';
+                                              successMsg.textContent = 'Successfully Uploaded';
+                                              
+                                              // Remove old success message if exists
+                                              const oldMsg = card.querySelector('.upload-success-msg');
+                                              if(oldMsg) oldMsg.remove();
+                                              
+                                              card.querySelector('.upload-inner').appendChild(successMsg);
                                           }
                                       }, 50);
                                   }
