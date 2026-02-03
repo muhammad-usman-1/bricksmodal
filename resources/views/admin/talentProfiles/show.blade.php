@@ -373,8 +373,14 @@
     ];
 
     $idDocs = [
-        'id_document_front' => 'ID Document',
+        'id_front_path' => 'ID Front',
+        'id_back_path'  => 'ID Back',
     ];
+
+    // If both of those are empty, check for the legacy field
+    if (!$talentProfile->id_front_path && !$talentProfile->id_back_path && $talentProfile->id_document_front) {
+        $idDocs = ['id_document_front' => 'ID Document'];
+    }
 
     $resolveUrl = function ($path) {
         if (! $path) {

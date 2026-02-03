@@ -42,7 +42,7 @@ class OutfitController extends Controller
 
     public function index()
     {
-        $outfits = Outfit::orderBy('category')->orderBy('sort_order')->get();
+        $outfits = Outfit::latest()->get();
         return view('admin.outfits.index', compact('outfits'));
     }
 
