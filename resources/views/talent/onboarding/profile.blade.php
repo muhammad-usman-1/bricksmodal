@@ -1654,7 +1654,7 @@
                                               successMsg.style.fontSize = '12px';
                                               successMsg.style.marginTop = '4px';
                                               successMsg.style.fontWeight = '500';
-                                              successMsg.textContent = 'Successfully Compressed';
+                                              successMsg.textContent = 'Done, Now Click Next to Submit your Profile images and video.';
                                               
                                               // Remove old success message if exists
                                               const oldMsg = card.querySelector('.upload-success-msg');
