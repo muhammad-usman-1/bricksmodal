@@ -148,12 +148,6 @@
 @section('content')
     <div class="wizard-shell">
         <div class="wizard-card">
-            <div class="wizard-hero">
-                <div class="hero-title">
-                    {{ \App\Helpers\Bilingual::get('onboarding.complete_profile') ?? 'Talent Portal' }}
-                </div>
-            </div>
-
             <div class="wizard-body">
                 <div class="status-card">
                     <div class="status-icon-box">
