@@ -190,9 +190,11 @@ height:auto;
                     @endcan
                 </div>
             </div>
-            <a href="{{ route('admin.settings.index') }}" class="header-icon-link" aria-label="Settings">
-                <img src="{{ asset('images/setting.png') }}" alt="Settings">
-            </a>
+            @if(!auth()->user()->isCreative())
+                <a href="{{ route('admin.settings.index') }}" class="header-icon-link" aria-label="Settings">
+                    <img src="{{ asset('images/setting.png') }}" alt="Settings">
+                </a>
+            @endif
             <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
                 <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" style="margin-left: 0 !important; position: relative !important;">
                     <img src="{{ asset('images/noti.png') }}" alt="Notifications">
