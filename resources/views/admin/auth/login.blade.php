@@ -294,4 +294,20 @@
             </a>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        e.preventDefault();
+                        const form = this.closest('form');
+                        if (form) {
+                            form.submit();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
