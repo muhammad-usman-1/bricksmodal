@@ -1839,7 +1839,7 @@
                               errorDiv.style.color = '#dc3545';
                               errorDiv.style.marginTop = '8px';
                               errorDiv.style.fontSize = '14px';
-                              errorDiv.textContent = 'Image size zyda ha k10mb tk kro'; // "Image size is too large, make it up to 10MB"
+                              errorDiv.textContent = 'Image size is too large. Please upload an image up to 10MB.';
                               
                               if(multiUploadArea) {
                                   multiUploadArea.parentNode.insertBefore(errorDiv, multiUploadArea.nextSibling);
