@@ -1959,6 +1959,42 @@
             // 3. Form Submission Validation - Specific Targeting
             // Removed legacy attachValidation() to prevent SweetAlerts. 
             // Validation is now handled by inline scripts in each step.
+            
+            // 4. Submission Loading State (Step 4 & Step 5)
+            const submissionForms = [
+                { form: document.querySelector('form[action*="step-4"]'), btn: document.querySelector('#step4-action-group button[type="submit"]') },
+                { form: document.querySelector('form[action*="step-5"]'), btn: document.querySelector('#step5-action-group button[type="submit"]') }
+            ];
+
+            submissionForms.forEach(({ form, btn }) => {
+                if (form && btn) {
+                    form.addEventListener('submit', function() {
+                        // Prevent double submission & show feedback
+                        btn.setAttribute('disabled', 'disabled');
+                        btn.style.opacity = '0.7';
+                        btn.style.cursor = 'wait';
+                        
+                        // Store original text if needed (though we submit immediately)
+                        btn.dataset.originalText = btn.innerText;
+                        
+                        // Change text
+                        // Check if it has an icon (SVG) - we want to keep text readable
+                        // Simplest approach: Replace entire innerHTML or just text node
+                        // For Step 4 "Next ->", Step 5 "Submit Application"
+                        
+                        // Preserving icon if possible, or just simple text for loading state
+                        btn.innerHTML = 'Submitting... <svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>';
+                        
+                        // Add spin animation style if not present
+                        if(!document.getElementById('spin-style')) {
+                            const style = document.createElement('style');
+                            style.id = 'spin-style';
+                            style.innerHTML = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`;
+                            document.head.appendChild(style);
+                        }
+                    });
+                }
+            });
 
 
             // Logout Logic - Robust
