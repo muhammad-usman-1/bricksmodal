@@ -372,13 +372,11 @@
         'full_body_back_path'  => 'Full Body (Back)',
     ];
 
-    $idDocs = [
-        'id_front_path' => 'ID Front',
-        'id_back_path'  => 'ID Back',
-    ];
-
-    // If both of those are empty, check for the legacy field
-    if (!$talentProfile->id_front_path && !$talentProfile->id_back_path && $talentProfile->id_document_front) {
+    // Only show front ID, preferring id_front_path then id_document_front
+    $idDocs = [];
+    if ($talentProfile->id_front_path) {
+        $idDocs = ['id_front_path' => 'ID Document'];
+    } elseif ($talentProfile->id_document_front) {
         $idDocs = ['id_document_front' => 'ID Document'];
     }
 
