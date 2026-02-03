@@ -1100,6 +1100,35 @@
                                             { id: 'skin_tone', msg: 'Skin tone is required' }
                                         ];
                                         
+                                        // Strict Validation for Height/Weight
+                                        const heightEl = document.getElementById('height');
+                                        if(heightEl && heightEl.value) {
+                                            if(parseFloat(heightEl.value) < 100) {
+                                                isValid = false;
+                                                heightEl.classList.add('is-invalid');
+                                                heightEl.style.borderColor = '#dc3545';
+                                                const hErr = document.getElementById('error-height');
+                                                if(hErr) {
+                                                    hErr.textContent = 'Height must be 100 cm or greater';
+                                                    hErr.style.display = 'block';
+                                                }
+                                            }
+                                        }
+
+                                        const weightEl = document.getElementById('weight');
+                                        if(weightEl && weightEl.value) {
+                                            if(parseFloat(weightEl.value) < 50) {
+                                                isValid = false;
+                                                weightEl.classList.add('is-invalid');
+                                                weightEl.style.borderColor = '#dc3545';
+                                                const wErr = document.getElementById('error-weight');
+                                                if(wErr) {
+                                                    wErr.textContent = 'Weight must be 50 or greater';
+                                                    wErr.style.display = 'block';
+                                                }
+                                            }
+                                        }
+                                        
                                         requiredIds.forEach(item => {
                                             const el = document.getElementById(item.id);
                                             const errEl = document.getElementById('error-' + item.id);
@@ -1186,6 +1215,15 @@
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const form = document.querySelector('form[action*="step-3"]');
+                                
+                                // Restrict Shoe Size to 2 digits
+                                const shoeInput = document.getElementById('shoe_size');
+                                if(shoeInput) {
+                                    shoeInput.addEventListener('input', function() {
+                                        if(this.value.length > 2) this.value = this.value.slice(0, 2);
+                                    });
+                                }
+
                                 if (form) {
                                     form.addEventListener('submit', function(e) {
                                         let isValid = true;
