@@ -122,6 +122,7 @@
             border: 1px solid #e6e6e6;
             border-radius: 14px;
             font-size: 14px;
+            font-family: 'Space Grotesk', sans-serif;
             color: #1f1f1f;
             background: #ffffff;
         }
@@ -216,8 +217,11 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2L8.09 9.91a16 16 0 0 0 6 6l1.34-1.34a2 2 0 0 1 2-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
-                    <input id="phone" type="tel" placeholder="00000000" required>
+                    <input id="phone" type="tel" placeholder="00000000" maxlength="8" required>
                 </div>
+            </div>
+            <div id="phone-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: -10px; margin-bottom: 12px; text-align: left;">
+                Phone number cannot be less than 8 digits
             </div>
 
             <input type="hidden" name="phone_country_code" id="phone_country_code">
@@ -239,15 +243,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             const phoneInput = document.querySelector('#phone');
             const form = document.getElementById('auth-form');
+            const errorMsg = document.getElementById('phone-error');
 
             // Only allow digits in phone input
             phoneInput.addEventListener('input', function(e) {
                 e.target.value = e.target.value.replace(/\D/g, '');
+
+                // Remove error state
+                if (phoneInput.classList.contains('is-invalid')) {
+                    phoneInput.classList.remove('is-invalid');
+                    phoneInput.style.borderColor = '#e6e6e6';
+                    errorMsg.style.display = 'none';
+                }
             });
 
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function(e) {
                 const inputValue = phoneInput.value.trim();
                 const phoneNumber = inputValue.replace(/\D/g, '');
+
+                if (phoneNumber.length < 8) {
+                    e.preventDefault();
+                    phoneInput.classList.add('is-invalid');
+                    phoneInput.style.borderColor = '#dc3545';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
                 const countryCode = '+965';
 
                 document.getElementById('phone_country_code').value = countryCode;
