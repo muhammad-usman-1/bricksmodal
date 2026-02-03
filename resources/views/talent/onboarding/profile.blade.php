@@ -1761,26 +1761,29 @@
                   }
 
                   function addFiles(files) {
+                      // Remove any previous error message
+                      const existingError = document.getElementById('step5-file-error');
+                      if(existingError) existingError.remove();
+
                       Array.from(files).forEach(file => {
-                          selectedFiles.push(file);
-                          
-                          // Check if compression is actually needed before incrementing counter
+                          // Strict Validation for Step 5
                           if (file.type.indexOf('image/') !== -1 && file.size > 10 * 1024 * 1024) {
-                                activeCompressions++;
-                                updateSubmitButton();
-                                
-                                compressImage(file).then(compressed => {
-                                      const idx = selectedFiles.indexOf(file);
-                                      if (idx !== -1) {
-                                          selectedFiles[idx] = compressed;
-                                          syncInputFiles();
-                                      }
-                                }).catch(err => console.error(err))
-                                  .finally(() => {
-                                      activeCompressions--;
-                                      updateSubmitButton();
-                                  });
+                              // Show validation error
+                              const errorDiv = document.createElement('div');
+                              errorDiv.id = 'step5-file-error';
+                              errorDiv.style.color = '#dc3545';
+                              errorDiv.style.marginTop = '8px';
+                              errorDiv.style.fontSize = '14px';
+                              errorDiv.textContent = 'Image size zyda ha k10mb tk kro'; // "Image size is too large, make it up to 10MB"
+                              
+                              if(multiUploadArea) {
+                                  multiUploadArea.parentNode.insertBefore(errorDiv, multiUploadArea.nextSibling);
+                              }
+                              // Do NOT add file
+                              return;
                           }
+
+                          selectedFiles.push(file);
                       });
                       
                       syncInputFiles();
