@@ -32,7 +32,7 @@ class EnsureTalentOnboarded
         }
 
         if ($profile->verification_status !== 'approved') {
-            return redirect()->route('talent.pending');
+            return redirect()->route('talent.pending_status');
         }
 
         return $next($request);

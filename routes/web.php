@@ -207,6 +207,7 @@ Route::prefix('talent')->as('talent.')->group(function () {
         Route::get('onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');
+        Route::get('pending-status', [OnboardingController::class, 'pendingStatus'])->name('pending_status');
 
         Route::middleware('talent.onboarded')->group(function () {
             Route::get('dashboard', TalentDashboardController::class)->name('dashboard');

@@ -181,7 +181,7 @@ class LoginController extends Controller
         }
 
         if ($profile->verification_status !== 'approved') {
-            return redirect()->route('talent.pending');
+            return redirect()->route('talent.pending_status');
         }
 
         return redirect()->intended(route('talent.dashboard'));

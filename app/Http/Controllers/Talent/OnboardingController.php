@@ -347,6 +347,7 @@ class OnboardingController extends Controller
                     'verification_status'     => 'pending',
                 ]);
 
+                session()->flash('onboarding_just_completed', true);
                 return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));
 
             default:
@@ -461,7 +462,26 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
+        if (!session('onboarding_just_completed')) {
+            return redirect()->route('talent.pending_status');
+        }
+
         return view('talent.onboarding.pending', compact('profile'));
+    }
+
+    public function pendingStatus(Request $request)
+    {
+        $profile = $this->profile($request);
+
+        if (!$profile->hasCompletedOnboarding()) {
+            return $this->redirectToCurrentStep($profile);
+        }
+
+        if ($profile->verification_status === 'approved') {
+            return redirect()->route('talent.dashboard');
+        }
+
+        return view('talent.onboarding.pending-status', compact('profile'));
     }
 
     private function redirectToCurrentStep(TalentProfile $profile): RedirectResponse
