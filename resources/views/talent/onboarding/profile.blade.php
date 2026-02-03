@@ -674,6 +674,12 @@
                 justify-content: center;
             }
         }
+        
+        .required-asterisk {
+            color: #dc3545;
+            margin-left: 2px;
+            font-weight: bold;
+        }
     </style>
 @endsection
 
@@ -709,7 +715,7 @@
                 {{-- Removed top stacked error box; field-level errors only --}}
 
                 @if($currentStep == 'step-1')
-                <form method="POST" action="{{ route('talent.onboarding.store', 'step-1') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-1') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="step-panel is-active" data-step="1">
                         @php
@@ -724,18 +730,20 @@
 
                         <div class="field-grid">
                             <div class="field">
-                                <label for="first_name">{{ \App\Helpers\Bilingual::get('onboarding.first_name') }}</label>
+                                <label for="first_name">{{ \App\Helpers\Bilingual::get('onboarding.first_name') }} <span class="required-asterisk">*</span></label>
                                 <input id="first_name" name="first_name" class="control" type="text" placeholder="Enter first name" value="{{ old('first_name', $profile->first_name) }}" required>
+                                <span class="error-text" id="error-first_name" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">First name is required</span>
                             </div>
                             <div class="field">
-                                <label for="last_name">{{ \App\Helpers\Bilingual::get('onboarding.last_name') }}</label>
+                                <label for="last_name">{{ \App\Helpers\Bilingual::get('onboarding.last_name') }} <span class="required-asterisk">*</span></label>
                                 <input id="last_name" name="last_name" class="control" type="text" placeholder="Enter last name" value="{{ old('last_name', $profile->last_name) }}" required>
+                                <span class="error-text" id="error-last_name" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Last name is required</span>
                             </div>
                         </div>
 
                         <div class="field-grid" style="margin-top: 8px;">
                             <div class="field">
-                                <label for="date_of_birth">{{ \App\Helpers\Bilingual::get('onboarding.date_of_birth') }}</label>
+                                <label for="date_of_birth">{{ \App\Helpers\Bilingual::get('onboarding.date_of_birth') }} <span class="required-asterisk">*</span></label>
                                 <div class="dob-wrap">
                                     <input
                                         id="date_of_birth"
@@ -750,9 +758,10 @@
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror
                                 </div>
+                                <span class="error-text" id="error-date_of_birth" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Date of birth is required</span>
                             </div>
                             <div class="field">
-                                <label for="nationality">{{ \App\Helpers\Bilingual::get('onboarding.nationality') }}</label>
+                                <label for="nationality">{{ \App\Helpers\Bilingual::get('onboarding.nationality') }} <span class="required-asterisk">*</span></label>
                                 <div class="nationality-wrapper">
                                     <span id="nationality_flag" class="fi nationality-flag" style="display:none;"></span>
                                     <select id="nationality" name="nationality" class="control nationality-select" required>
@@ -766,7 +775,7 @@
                         </div>
 
                         <div class="field">
-                             <label for="mobile_number">{{ \App\Helpers\Bilingual::get('onboarding.mobile_number') }}</label>
+                             <label for="mobile_number">{{ \App\Helpers\Bilingual::get('onboarding.mobile_number') }} <span class="required-asterisk">*</span></label>
                              <div class="phone-row" style="margin-bottom: 16px;">
                                 <div class="country-code-display" style="background:#e9ecef;">
                                     <span class="fi fi-kw country-flag" title="Kuwait"></span>
@@ -795,14 +804,17 @@
                                          <span>+965</span>
                                      </div>
                                      <input type="hidden" name="whatsapp_country_code" value="kw">
-                                     <input class="control" id="whatsapp_number_input" name="whatsapp_number" type="tel" value="{{ old('whatsapp_number', $profile->whatsapp_number) }}">
+                                     <input class="control" id="whatsapp_number_input" name="whatsapp_number" type="tel" value="{{ old('whatsapp_number', $profile->whatsapp_number) }}" maxlength="8" pattern="\d*">
                                 </div>
+                                <span id="whatsapp-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: 4px;">WhatsApp number must be 8 digits</span>
                              </div>
                              <script>
                                 (function() {
                                     try {
                                         var waSec = document.getElementById('whatsapp_number_section');
                                         var waInp = document.getElementById('whatsapp_number_input');
+                                        var waErr = document.getElementById('whatsapp-error');
+                                        var form = document.querySelector('form[action*="step-1"]');
 
                                         function doToggle(forceVal) {
                                             var val = forceVal;
@@ -814,16 +826,104 @@
                                             if(waSec) {
                                                 waSec.style.display = (val === 'alt') ? 'block' : 'none';
                                                 if(waInp) {
-                                                    if(val === 'alt') waInp.setAttribute('required', 'required');
-                                                    else waInp.removeAttribute('required');
+                                                    if(val === 'alt') {
+                                                        waInp.setAttribute('required', 'required');
+                                                    } else {
+                                                        waInp.removeAttribute('required');
+                                                        // clear error state when hidden
+                                                        waInp.classList.remove('is-invalid');
+                                                        waInp.style.borderColor = '#e5e7eb';
+                                                        if(waErr) waErr.style.display = 'none';
+                                                    }
                                                 }
                                             }
                                         }
 
-                                        // Bind events
+                                        // Restrict WhatsApp input to numbers only
+                                        if (waInp) {
+                                            waInp.addEventListener('input', function(e) {
+                                                this.value = this.value.replace(/\D/g, '');
+                                                
+                                                // Clear error on input
+                                                if (this.classList.contains('is-invalid')) {
+                                                    this.classList.remove('is-invalid');
+                                                    this.style.borderColor = '#e5e7eb';
+                                                    if(waErr) waErr.style.display = 'none';
+                                                }
+                                            });
+                                        }
+
+                                        // Bind radio events
                                         var radios = document.getElementsByName('whatsapp_choice');
                                         for(var i=0; i<radios.length; i++) {
                                             radios[i].addEventListener('change', function(e) { doToggle(this.value); });
+                                        }
+
+                                        // Form Validation
+                                        if (form) {
+                                            // Name inputs character restriction
+                                            ['first_name', 'last_name'].forEach(id => {
+                                                const el = document.getElementById(id);
+                                                if(el) {
+                                                    el.addEventListener('input', function() {
+                                                        this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
+                                                    });
+                                                }
+                                            });
+
+                                            form.addEventListener('submit', function(e) {
+                                                let isValid = true;
+                                                const requiredIds = [
+                                                    { id: 'first_name', msg: 'First name is required' },
+                                                    { id: 'last_name', msg: 'Last name is required' },
+                                                    { id: 'date_of_birth', msg: 'Date of birth is required' },
+                                                    { id: 'nationality', msg: 'Nationality is required' }
+                                                ];
+                                                
+                                                // Validate core fields
+                                                requiredIds.forEach(item => {
+                                                    const el = document.getElementById(item.id);
+                                                    const errEl = document.getElementById('error-' + item.id);
+                                                    
+                                                    if (el && !el.value.trim()) {
+                                                        isValid = false;
+                                                        el.classList.add('is-invalid');
+                                                        el.style.borderColor = '#dc3545';
+                                                        if(errEl) errEl.style.display = 'block';
+                                                        
+                                                        // Add input listener to clear error
+                                                        el.addEventListener('input', function() {
+                                                            this.classList.remove('is-invalid');
+                                                            this.style.borderColor = '#e5e7eb';
+                                                            if(errEl) errEl.style.display = 'none';
+                                                        }, { once: true });
+                                                        
+                                                        // For select inputs (nationality)
+                                                        el.addEventListener('change', function() {
+                                                            this.classList.remove('is-invalid');
+                                                            this.style.borderColor = '#e5e7eb';
+                                                            if(errEl) errEl.style.display = 'none';
+                                                        }, { once: true });
+                                                    }
+                                                });
+
+                                                // Validate WhatsApp if alternate is selected
+                                                const chk = document.querySelector('input[name="whatsapp_choice"]:checked');
+                                                const choice = chk ? chk.value : 'same';
+                                                
+                                                if (choice === 'alt' && waInp) {
+                                                    const val = waInp.value.replace(/\D/g, '');
+                                                    if (val.length !== 8) {
+                                                        isValid = false;
+                                                        waInp.classList.add('is-invalid');
+                                                        waInp.style.borderColor = '#dc3545';
+                                                        if(waErr) waErr.style.display = 'block';
+                                                        e.preventDefault();
+                                                    }
+                                                }
+
+                                                if (!isValid) e.preventDefault();
+                                            });
                                         }
 
                                         // Init immediately
@@ -845,7 +945,7 @@
                 @endif
 
                 @if($currentStep == 'step-2')
-                <form method="POST" action="{{ route('talent.onboarding.store', 'step-2') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-2') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="step-panel is-active" data-step="2">
                         <!-- Redundant titles removed -->
@@ -853,13 +953,15 @@
 
                         <div class="field-grid">
                             <div class="field">
-                                <label for="height">{{ \App\Helpers\Bilingual::get('onboarding.height') }}</label>
+                                <label for="height">{{ \App\Helpers\Bilingual::get('onboarding.height') }} <span class="required-asterisk">*</span></label>
                                 <input id="height" name="height" class="control" type="number" step="0.1" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}" required>
                                 <input type="hidden" id="height_unit" value="cm">
+                                <span class="error-text" id="error-height" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Height is required</span>
                             </div>
                             <div class="field">
-                                <label for="weight">{{ \App\Helpers\Bilingual::get('onboarding.weight') }}</label>
+                                <label for="weight">{{ \App\Helpers\Bilingual::get('onboarding.weight') }} <span class="required-asterisk">*</span></label>
                                 <input id="weight" name="weight" class="control" type="number" step="0.1" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}" required>
+                                <span class="error-text" id="error-weight" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Weight is required</span>
                             </div>
                         </div>
 
@@ -895,7 +997,7 @@
 
                         <div class="field-grid" style="margin-top:20px; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
                             <div class="field" id="hair_color_field">
-                                <label for="hair_color">{{ \App\Helpers\Bilingual::get('onboarding.hair_color') }}</label>
+                                <label for="hair_color">{{ \App\Helpers\Bilingual::get('onboarding.hair_color') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative;">
                                     @php
                                         $hairOptions = ['Black','Brown','Blonde','Auburn','Red','Grey','White','Bald','Dyed / Colored'];
@@ -909,9 +1011,10 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
+                                <span class="error-text" id="error-hair_color" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Hair color is required</span>
                             </div>
                             <div class="field">
-                                <label for="eye_color">{{ \App\Helpers\Bilingual::get('onboarding.eye_color') }}</label>
+                                <label for="eye_color">{{ \App\Helpers\Bilingual::get('onboarding.eye_color') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative;">
                                     @php
                                         $eyeOptions = ['Brown','Hazel','Blue','Green','Gray','Amber'];
@@ -925,9 +1028,10 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
+                                <span class="error-text" id="error-eye_color" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Eye color is required</span>
                             </div>
                             <div class="field">
-                                <label for="skin_tone">{{ \App\Helpers\Bilingual::get('onboarding.skin_tone') }}</label>
+                                <label for="skin_tone">{{ \App\Helpers\Bilingual::get('onboarding.skin_tone') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative;">
                                     <select id="skin_tone" name="skin_tone" class="control" style="appearance:none;" required>
                                         <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_skin_color') }}</option>
@@ -937,6 +1041,7 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
+                                <span class="error-text" id="error-skin_tone" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Skin tone is required</span>
                             </div>
                         </div>
 
@@ -986,7 +1091,7 @@
                 @endif
 
                 @if($currentStep == 'step-3')
-                <form method="POST" action="{{ route('talent.onboarding.store', 'step-3') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-3') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="step-panel is-active" data-step="3">
                         <div style="margin-bottom: 32px;">
@@ -996,7 +1101,7 @@
 
                         <div class="field-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
                             <div class="field" style="display: flex; flex-direction: column;">
-                                <label for="t_shirt_size">{{ \App\Helpers\Bilingual::get('onboarding.t_shirt_size') }}</label>
+                                <label for="t_shirt_size">{{ \App\Helpers\Bilingual::get('onboarding.t_shirt_size') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative; margin-top: auto;">
                                     <select id="t_shirt_size" name="t_shirt_size" class="control" style="appearance:none;" required>
                                         <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_size') }}</option>
@@ -1006,9 +1111,10 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
+                                <span class="error-text" id="error-t_shirt_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">T-shirt size is required</span>
                             </div>
                             <div class="field" style="display: flex; flex-direction: column;">
-                                <label for="dress_size">{{ \App\Helpers\Bilingual::get('onboarding.dress_size') }}</label>
+                                <label for="dress_size">{{ \App\Helpers\Bilingual::get('onboarding.dress_size') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative; margin-top: auto;">
                                     <select id="dress_size" name="dress_size" class="control" style="appearance:none;" required>
                                         <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_size') }}</option>
@@ -1018,10 +1124,12 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
+                                <span class="error-text" id="error-dress_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Dress size is required</span>
                             </div>
                             <div class="field" style="display: flex; flex-direction: column;">
-                                <label for="shoe_size">{{ \App\Helpers\Bilingual::get('onboarding.shoe_size') }}</label>
+                                <label for="shoe_size">{{ \App\Helpers\Bilingual::get('onboarding.shoe_size') }} <span class="required-asterisk">*</span></label>
                                 <input id="shoe_size" name="shoe_size" class="control" type="number" step="0.1" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required style="margin-top: auto;">
+                                <span class="error-text" id="error-shoe_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Shoe size is required</span>
                             </div>
 
                         </div>
@@ -1506,116 +1614,9 @@
             });
 
             // 3. Form Submission Validation - Specific Targeting
-            function attachValidation() {
-                // Step 1 Form
-                const formStep1 = document.querySelector('form[action*="step-1"]');
-                if (formStep1) {
-                    formStep1.addEventListener('submit', function(e) {
-                         const dobValue = document.getElementById('date_of_birth')?.value;
-                         if (dobValue) {
-                             const dob = new Date(dobValue);
-                             const today = new Date();
-                             let age = today.getFullYear() - dob.getFullYear();
-                             const m = today.getMonth() - dob.getMonth();
-                             if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-                                 age--;
-                             }
-
-                             if (age < 18) {
-                                e.preventDefault();
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Age Requirement',
-                                    text: 'You must be at least 18 years old to join.',
-                                    confirmButtonColor: '#1a1a1a'
-                                });
-                             }
-                         }
-                    });
-                }
-
-                // Step 2 Form
-                const formStep2 = document.querySelector('form[action*="step-2"]');
-                if (formStep2) {
-                    formStep2.addEventListener('submit', function(e) {
-                         let isValid = true;
-                         let errorMsg = '';
-
-                        // Validate Step 2
-                        const height = document.getElementById('height')?.value;
-                        const weight = document.getElementById('weight')?.value;
-                        const hairColor = document.getElementById('hair_color');
-                        const eyeColor = document.getElementById('eye_color')?.value;
-                        const skinTone = document.getElementById('skin_tone')?.value;
-
-                        // Check required text/number fields
-                        if (!height || !weight || !eyeColor || !skinTone) {
-                            isValid = false;
-                            errorMsg = 'Please fill in all required fields (Height, Weight, Eye Color, Skin Tone).';
-                        }
-
-                        // Check hair color if visible
-                            if (isValid && hairColor && hairColor.offsetParent !== null && !hairColor.value) {
-                             isValid = false;
-                                errorMsg = 'Please select your Hair Color.';
-                        }
-
-                        // Validate specific formats again
-                            if (isValid && (/[^0-9.]/.test(height) || /[^0-9.]/.test(weight))) {
-                            isValid = false;
-                             errorMsg = 'Height and Weight must be numbers.';
-                        }
-
-                        // Check radios
-                         if (isValid) {
-                             const tattoos = document.querySelector('input[name="has_visible_tattoos"]:checked');
-                             if (!tattoos) {
-                                  isValid = false;
-                                  errorMsg = 'Please select if you have visible tattoos.';
-                             }
-                         }
-
-                         if (isValid) {
-                             const piercings = document.querySelector('input[name="has_piercings"]:checked');
-                             if (!piercings) {
-                                  isValid = false;
-                                  errorMsg = 'Please select if you have piercings.';
-                             }
-                         }
-
-                         if (!isValid) {
-                            e.preventDefault();
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Missing Information',
-                                text: errorMsg,
-                                confirmButtonColor: '#1a1a1a'
-                            });
-                        }
-                    });
-                }
-
-                // Step 3 Form
-                const formStep3 = document.querySelector('form[action*="step-3"]');
-                if(formStep3) {
-                     formStep3.addEventListener('submit', function(e) {
-                        const tShirtSize = document.getElementById('t_shirt_size')?.value;
-                        const dressSize = document.getElementById('dress_size')?.value;
-                        const shoeSize = document.getElementById('shoe_size')?.value;
-
-                        if (!tShirtSize || !dressSize || !shoeSize) {
-                            e.preventDefault();
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Missing Information',
-                                text: 'Please fill in all size fields.',
-                                confirmButtonColor: '#1a1a1a'
-                            });
-                        }
-                     });
-                }
-            }
-            attachValidation();
+            // 3. Form Submission Validation - Specific Targeting
+            // Removed legacy attachValidation() to prevent SweetAlerts. 
+            // Validation is now handled by inline scripts in each step.
 
 
             // Logout Logic - Robust
