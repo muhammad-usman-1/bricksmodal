@@ -1583,9 +1583,6 @@
                      const input = card.querySelector('input[type="file"]');
                      const label = card.querySelector('.upload-label');
 
-                     const input = card.querySelector('input[type="file"]');
-                     const label = card.querySelector('.upload-label');
-
                      if (!input) return;
 
                      // FIX: Skip generic logic for Step 5 "Additional Photos" to prevent duplication
