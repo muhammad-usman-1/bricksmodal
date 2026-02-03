@@ -1086,6 +1086,45 @@
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const form = document.querySelector('form[action*="step-2"]');
+                                if (form) {
+                                    form.addEventListener('submit', function(e) {
+                                        let isValid = true;
+                                        const requiredIds = [
+                                            { id: 'height', msg: 'Height is required' },
+                                            { id: 'weight', msg: 'Weight is required' },
+                                            { id: 'hair_color', msg: 'Hair color is required' },
+                                            { id: 'eye_color', msg: 'Eye color is required' },
+                                            { id: 'skin_tone', msg: 'Skin tone is required' }
+                                        ];
+                                        
+                                        requiredIds.forEach(item => {
+                                            const el = document.getElementById(item.id);
+                                            const errEl = document.getElementById('error-' + item.id);
+                                            
+                                            if (el && el.offsetParent !== null && !el.value.trim()) {
+                                                isValid = false;
+                                                el.classList.add('is-invalid');
+                                                el.style.borderColor = '#dc3545';
+                                                if(errEl) errEl.style.display = 'block';
+                                                
+                                                ['input', 'change'].forEach(evt => {
+                                                    el.addEventListener(evt, function() {
+                                                        this.classList.remove('is-invalid');
+                                                        this.style.borderColor = '#e5e7eb';
+                                                        if(errEl) errEl.style.display = 'none';
+                                                    }, { once: true });
+                                                });
+                                            }
+                                        });
+
+                                        if (!isValid) e.preventDefault();
+                                    });
+                                }
+                            });
+                        </script>
                     </div>
                 </form>
                 @endif
@@ -1144,6 +1183,43 @@
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
                         </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const form = document.querySelector('form[action*="step-3"]');
+                                if (form) {
+                                    form.addEventListener('submit', function(e) {
+                                        let isValid = true;
+                                        const requiredIds = [
+                                            { id: 't_shirt_size', msg: 'T-shirt size is required' },
+                                            { id: 'dress_size', msg: 'Dress size is required' },
+                                            { id: 'shoe_size', msg: 'Shoe size is required' }
+                                        ];
+                                        
+                                        requiredIds.forEach(item => {
+                                            const el = document.getElementById(item.id);
+                                            const errEl = document.getElementById('error-' + item.id);
+                                            
+                                            if (el && !el.value.trim()) {
+                                                isValid = false;
+                                                el.classList.add('is-invalid');
+                                                el.style.borderColor = '#dc3545';
+                                                if(errEl) errEl.style.display = 'block';
+                                                
+                                                ['input', 'change'].forEach(evt => {
+                                                    el.addEventListener(evt, function() {
+                                                        this.classList.remove('is-invalid');
+                                                        this.style.borderColor = '#e5e7eb';
+                                                        if(errEl) errEl.style.display = 'none';
+                                                    }, { once: true });
+                                                });
+                                            }
+                                        });
+
+                                        if (!isValid) e.preventDefault();
+                                    });
+                                }
+                            });
+                        </script>
                     </div>
                 </form>
                 @endif
