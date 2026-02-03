@@ -1776,21 +1776,22 @@
                                   const div = document.createElement('div');
                                   div.className = 'photo-preview-item';
                                   div.innerHTML = `
-                                    <div class="preview-image-container" style="position: relative;">
-                                        <img src="${e.target.result}" alt="Preview">
-                                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.5);">
-                                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+                                    <div class="preview-image-container" style="position: relative; width: 100px; height: 100px;">
+                                        <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.2); z-index: 10;">
+                                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s ease; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>
                                         </div>
                                     </div>`;
                                   previewContainer.appendChild(div);
                                   
                                   // Simulate progress for newly added item
+                                  // Use a slightly longer timeout to ensure DOM update
                                   setTimeout(() => {
                                       const progressBar = div.querySelector('.upload-progress-bar');
                                       if(progressBar) {
                                           progressBar.style.width = '100%';
                                       }
-                                  }, 100);
+                                  }, 50);
                               };
                               reader.readAsDataURL(file);
                           });
