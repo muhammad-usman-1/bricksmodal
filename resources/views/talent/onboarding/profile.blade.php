@@ -1492,6 +1492,28 @@
                  const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
                  if(steps.length === 0) return;
                  
+                 let activeCompressions = 0;
+                 const step5SubmitBtn = document.querySelector('#step5-action-group button[type="submit"]');
+
+                 const updateSubmitButton = () => {
+                     if(!step5SubmitBtn) return;
+                     if(activeCompressions > 0) {
+                         step5SubmitBtn.setAttribute('disabled', 'disabled');
+                         step5SubmitBtn.style.opacity = '0.7';
+                         step5SubmitBtn.style.cursor = 'not-allowed';
+                         step5SubmitBtn.dataset.originalText = step5SubmitBtn.dataset.originalText || step5SubmitBtn.innerText;
+                         step5SubmitBtn.innerText = 'Compressing...';
+                     } else {
+                         step5SubmitBtn.removeAttribute('disabled');
+                         step5SubmitBtn.style.opacity = '1';
+                         step5SubmitBtn.style.cursor = 'pointer';
+                         if(step5SubmitBtn.dataset.originalText) {
+                             step5SubmitBtn.innerText = step5SubmitBtn.dataset.originalText;
+                         }
+                     }
+                 };
+
+                 
                  // --- Image Compression Utility ---
                  const compressImage = (file, maxSizeMB = 10, quality = 0.7) => {
                      return new Promise((resolve, reject) => {
@@ -1740,20 +1762,27 @@
 
                   function addFiles(files) {
                       Array.from(files).forEach(file => {
-                          // 1. Add original file immediately so UI shows up
                           selectedFiles.push(file);
                           
-                          // 2. Compress in background and swap
-                          compressImage(file).then(compressed => {
-                              const idx = selectedFiles.indexOf(file);
-                              if (idx !== -1) {
-                                  selectedFiles[idx] = compressed;
-                                  syncInputFiles();
-                              }
-                          }).catch(err => console.error(err));
+                          // Check if compression is actually needed before incrementing counter
+                          if (file.type.indexOf('image/') !== -1 && file.size > 10 * 1024 * 1024) {
+                                activeCompressions++;
+                                updateSubmitButton();
+                                
+                                compressImage(file).then(compressed => {
+                                      const idx = selectedFiles.indexOf(file);
+                                      if (idx !== -1) {
+                                          selectedFiles[idx] = compressed;
+                                          syncInputFiles();
+                                      }
+                                }).catch(err => console.error(err))
+                                  .finally(() => {
+                                      activeCompressions--;
+                                      updateSubmitButton();
+                                  });
+                          }
                       });
                       
-                      // 3. Render and sync immediately
                       syncInputFiles();
                       renderPreviews();
                   }
