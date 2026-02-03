@@ -1358,6 +1358,9 @@
                                             <img src="{{ asset('images/upload.png') }}" alt="Upload">
                                         </div>
                                         <div class="upload-label" data-file-label="video">{{ \App\Helpers\Bilingual::get('onboarding.drop_file') }}</div>
+                                        <div class="progress-bar-container" style="display:none; width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 8px; overflow: hidden;">
+                                            <div class="progress-bar-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.2s ease;"></div>
+                                        </div>
                                     </div>
                                 </label>
                                 @error('video')
@@ -1603,6 +1606,54 @@
                                       input.files = dt.files;
                                   } catch (e) {
                                       console.error("Compression failed", e);
+                                  }
+                              }
+
+                              /* 3. Handle Video Upload (Step 5) */
+                              if (input.id === 'upload_video') {
+                                  const container = card.querySelector('.progress-bar-container');
+                                  const fill = card.querySelector('.progress-bar-fill');
+                                  const labelDiv = card.querySelector('.upload-label');
+                                  
+                                  if (container && fill) {
+                                      container.style.display = 'block';
+                                      fill.style.width = '0%';
+                                      
+                                      // Optional: Update label to indicate processing
+                                      if(labelDiv) labelDiv.textContent = 'Compressing...';
+                                      
+                                      // Simulated compression/upload progress for video
+                                      let progress = 0;
+                                      const interval = setInterval(() => {
+                                          progress += 5; // Slower for video
+                                          fill.style.width = `${progress}%`;
+                                          
+                                          if (progress >= 100) {
+                                              clearInterval(interval);
+                                              // Show Success Message
+                                              const successMsg = document.createElement('div');
+                                              successMsg.className = 'upload-success-msg';
+                                              successMsg.style.color = '#10b981';
+                                              successMsg.style.fontSize = '12px';
+                                              successMsg.style.marginTop = '4px';
+                                              successMsg.style.fontWeight = '500';
+                                              successMsg.textContent = 'Successfully Compressed';
+                                              
+                                              // Remove old success message if exists
+                                              const oldMsg = card.querySelector('.upload-success-msg');
+                                              if(oldMsg) oldMsg.remove();
+                                              
+                                              card.querySelector('.upload-inner').appendChild(successMsg);
+                                              
+                                              // Restore file name in label
+                                              if(labelDiv && input.files[0]) {
+                                                  // slightly delayed to let user see "Compression" context if desired, or just show file name now
+                                                  setTimeout(() => {
+                                                       labelDiv.textContent = trimFileName(input.files[0].name);
+                                                  }, 1000);
+                                              }
+                                          }
+                                      }, 100);
                                   }
                               }
 
