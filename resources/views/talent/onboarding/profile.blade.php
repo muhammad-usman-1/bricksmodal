@@ -1491,6 +1491,67 @@
             function initFileUploadSteps() {
                  const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
                  if(steps.length === 0) return;
+                 
+                 // --- Image Compression Utility ---
+                 const compressImage = (file, maxSizeMB = 10, quality = 0.7) => {
+                     return new Promise((resolve, reject) => {
+                         if (file.type.indexOf('image/') === -1 || file.size <= maxSizeMB * 1024 * 1024) {
+                             resolve(file); // No compression needed
+                             return;
+                         }
+
+                         const reader = new FileReader();
+                         reader.readAsDataURL(file);
+                         reader.onload = event => {
+                             const img = new Image();
+                             img.src = event.target.result;
+                             img.onload = () => {
+                                 const canvas = document.createElement('canvas');
+                                 const ctx = canvas.getContext('2d');
+                                 
+                                 // Simple scaling logic (maintain aspect ratio)
+                                 let width = img.width;
+                                 let height = img.height;
+                                 
+                                 // Reduce dimensions if extremely large
+                                 const MAX_DIMENSION = 2048; 
+                                 if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                                     if (width > height) {
+                                         height *= MAX_DIMENSION / width;
+                                         width = MAX_DIMENSION;
+                                     } else {
+                                         width *= MAX_DIMENSION / height;
+                                         height = MAX_DIMENSION;
+                                     }
+                                 }
+
+                                 canvas.width = width;
+                                 canvas.height = height;
+                                 ctx.drawImage(img, 0, 0, width, height);
+
+                                 canvas.toBlob(blob => {
+                                     if (!blob) {
+                                         resolve(file); // Fallback to original
+                                         return;
+                                     }
+                                     const newFile = new File([blob], file.name, {
+                                         type: 'image/jpeg',
+                                         lastModified: Date.now()
+                                     });
+                                     
+                                     // If compressed version is smaller, use it. Otherwise use original.
+                                     if (newFile.size < file.size) {
+                                         resolve(newFile);
+                                     } else {
+                                         resolve(file);
+                                     }
+                                 }, 'image/jpeg', quality);
+                             };
+                         };
+                         reader.onerror = error => reject(error);
+                     });
+                 };
+
 
                  // File Labels & Drag-and-Drop
                  document.querySelectorAll('.upload-card').forEach(card => {
@@ -1505,8 +1566,24 @@
                       };
 
                       // File Input Change
-                      input.addEventListener('change', () => {
+                      input.addEventListener('change', async () => {
                           if(input.files.length > 0) {
+                              // Compression applied for single files (Step 4 / Video)
+                              // Only compress if it is an image
+                              const file = input.files[0];
+                              
+                              if (file.type.startsWith('image/')) {
+                                  try {
+                                      const compressedFile = await compressImage(file);
+                                      // Update input files with compressed version
+                                      const dt = new DataTransfer();
+                                      dt.items.add(compressedFile);
+                                      input.files = dt.files;
+                                  } catch (e) {
+                                      console.error("Compression failed", e);
+                                  }
+                              }
+
                               if(label) {
                                   if(input.files.length === 1) {
                                       label.textContent = trimFileName(input.files[0].name);
@@ -1565,7 +1642,7 @@
 
                          if(files.length > 0) {
                              input.files = files;
-                             // Trigger change event manually
+                             // Trigger change event manually (this will trigger compression logic above)
                              const event = new Event('change');
                              input.dispatchEvent(event);
                          }
@@ -1663,8 +1740,20 @@
 
                   function addFiles(files) {
                       Array.from(files).forEach(file => {
+                          // 1. Add original file immediately so UI shows up
                           selectedFiles.push(file);
+                          
+                          // 2. Compress in background and swap
+                          compressImage(file).then(compressed => {
+                              const idx = selectedFiles.indexOf(file);
+                              if (idx !== -1) {
+                                  selectedFiles[idx] = compressed;
+                                  syncInputFiles();
+                              }
+                          }).catch(err => console.error(err));
                       });
+                      
+                      // 3. Render and sync immediately
                       syncInputFiles();
                       renderPreviews();
                   }
