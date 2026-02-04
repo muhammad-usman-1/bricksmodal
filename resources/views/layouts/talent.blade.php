@@ -9,7 +9,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ trans('panel.site_title') }}</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=1.1">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}?v=1.1">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v=1.1">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/@coreui/coreui@3.2/dist/css/coreui.min.css" rel="stylesheet" />
@@ -195,78 +197,184 @@
                         <style>
                             .noti-badge {
                                 position: absolute !important;
-                                top: -2px !important;
-                                right: -2px !important;
-                                width: 18px !important;
-                                height: 18px !important;
-                                background: #ef4444 !important;
-                                border-radius: 50% !important;
-                                border: 2px solid #fff !important;
+                                top: -5px !important;
+                                right: -5px !important;
+                                width: auto !important;
+                                height: auto !important;
+                                background: transparent !important;
+                                border: none !important;
                                 display: flex !important;
                                 align-items: center !important;
                                 justify-content: center !important;
-                                font-size: 10px !important;
-                                color: white !important;
-                                font-weight: bold !important;
+                                font-size: 11px !important;
+                                color: #000 !important;
+                                font-weight: 800 !important;
+                                z-index: 10 !important;
+                                padding: 0 !important;
                             }
-                            .dropdown-item.unread { background-color: #f9fafb; }
-                            .mark-read-btn { 
-                                padding: 2px 6px; 
-                                font-size: 10px; 
-                                border-radius: 4px; 
-                                border: 1px solid #e5e7eb;
-                                background: #fff;
-                                color: #6b7280;
-                                cursor: pointer;
+                            .dropdown-menu.notification-dropdown {
+                                width: 340px !important;
+                                border: 1px solid #eee !important;
+                                border-radius: 12px !important;
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+                                padding: 0 !important;
+                                border: none !important;
+                                margin-top: 10px !important;
                             }
-                            .mark-read-btn:hover { background: #f3f4f6; }
+                            .notification-header {
+                                padding: 16px 20px !important;
+                                background-color: #f8f9fa !important;
+                                border-bottom: 1px solid #f1f1f1 !important;
+                                border-top-left-radius: 12px !important;
+                                border-top-right-radius: 12px !important;
+                            }
+                            .notification-header h6 {
+                                margin: 0 !important;
+                                font-size: 15px !important;
+                                font-weight: 700 !important;
+                                color: #1a1a1a !important;
+                            }
+                            .mark-all-read {
+                                font-size: 12px !important;
+                                color: #6c757d !important;
+                                text-decoration: none !important;
+                            }
+                            .mark-all-read:hover {
+                                color: #000 !important;
+                            }
+                            .notification-item {
+                                padding: 16px 20px !important;
+                                border-bottom: 1px solid #f8f9fa !important;
+                                transition: background-color 0.2s !important;
+                                display: block !important;
+                                text-decoration: none !important;
+                                color: inherit !important;
+                            }
+                            .notification-item:hover {
+                                background-color: #fcfcfc !important;
+                                text-decoration: none !important;
+                                color: inherit !important;
+                            }
+                            .notification-item.unread {
+                                background-color: #fff !important;
+                            }
+                            .notification-item-top {
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: space-between !important;
+                                margin-bottom: 4px !important;
+                            }
+                            .notification-icon-title {
+                                display: flex !important;
+                                align-items: center !important;
+                                gap: 12px !important;
+                            }
+                            .notification-title {
+                                font-size: 14px !important;
+                                font-weight: 700 !important;
+                                color: #000 !important;
+                            }
+                            .mark-read-mini {
+                                font-size: 11px !important;
+                                color: #6c757d !important;
+                                border: 1px solid #eee !important;
+                                padding: 2px 8px !important;
+                                border-radius: 4px !important;
+                                background: #fff !important;
+                                cursor: pointer !important;
+                                transition: all 0.2s !important;
+                            }
+                            .mark-read-mini:hover {
+                                background: #000 !important;
+                                color: #fff !important;
+                                border-color: #000 !important;
+                            }
+                            .notification-msg {
+                                font-size: 13px !important;
+                                color: #6c757d !important;
+                                margin-left: 28px !important;
+                                margin-bottom: 4px !important;
+                                line-height: 1.4 !important;
+                            }
+                            .notification-time {
+                                font-size: 11px !important;
+                                color: #adb5bd !important;
+                                margin-left: 28px !important;
+                            }
+                            .view-all-footer {
+                                padding: 14px !important;
+                                text-align: left !important;
+                                border-top: 1px solid #f1f1f1 !important;
+                            }
+                            .view-all-link {
+                                font-size: 14px !important;
+                                font-weight: 700 !important;
+                                color: #000 !important;
+                                text-decoration: none !important;
+                            }
+                            @media (max-width: 576px) {
+                                .dropdown-menu.notification-dropdown {
+                                    width: 300px !important;
+                                    position: fixed !important;
+                                    right: 10px !important;
+                                    left: auto !important;
+                                }
+                            }
                         </style>
-                        <div class="dropdown-menu dropdown-menu-right pt-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                            <div class="dropdown-header bg-light d-flex justify-content-between align-items-center py-2">
-                                <strong>Notifications</strong>
+                        <div class="dropdown-menu dropdown-menu-right notification-dropdown">
+                            <div class="notification-header d-flex justify-content-between align-items-center">
+                                <h6>Notifications</h6>
                                 @if($talentUser && $unreadCount > 0)
-                                    <a href="javascript:void(0)" onclick="markAllNotificationsAsRead()" class="text-muted" style="font-size: 0.8em;">
+                                    <a href="javascript:void(0)" onclick="markAllNotificationsAsRead()" class="mark-all-read">
                                         Mark all as read
                                     </a>
                                 @endif
                             </div>
-                            <div id="notifications-list">
+                            <div id="notifications-list" style="max-height: 380px; overflow-y: auto;">
                                 @if($talentUser)
-                                    @forelse($talentUser->notifications()->latest()->limit(10)->get() as $notification)
-                                        <div class="dropdown-item d-flex flex-column p-3 {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
-                                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                                <div class="d-flex align-items-center">
-                                                    @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
-                                                        <i class="fas fa-user text-dark mr-2"></i>
-                                                    @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
-                                                        <i class="fas fa-video text-dark mr-2"></i>
+                                    @forelse($talentUser->notifications()->latest()->limit(5)->get() as $notification)
+                                        <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
+                                            <div class="notification-item-top">
+                                                <div class="notification-icon-title">
+                                                    @php
+                                                        $type = $notification->data['type'] ?? '';
+                                                    @endphp
+                                                    @if(str_contains($type, 'talent_profile') || str_contains($type, 'talent_signup'))
+                                                        <i class="fas fa-user text-dark" style="font-size: 14px;"></i>
+                                                    @elseif(str_contains($type, 'shoot'))
+                                                        <i class="fas fa-video text-dark" style="font-size: 14px;"></i>
+                                                    @elseif(str_contains($type, 'payment'))
+                                                        <i class="fas fa-credit-card text-dark" style="font-size: 14px;"></i>
+                                                    @elseif(str_contains($type, 'feedback'))
+                                                        <i class="fas fa-star text-dark" style="font-size: 14px;"></i>
                                                     @else
-                                                        <i class="fas fa-bell text-dark mr-2"></i>
+                                                        <i class="fas fa-bell text-dark" style="font-size: 14px;"></i>
                                                     @endif
-                                                    <span class="font-weight-bold" style="font-size: 13px;">{{ $notification->data['title'] ?? 'Notification' }}</span>
+                                                    <span class="notification-title">{{ $notification->data['title'] ?? ($notification->data['subject'] ?? 'Notification') }}</span>
                                                 </div>
                                                 @if(!$notification->read_at)
-                                                    <button onclick="markNotificationAsRead('{{ $notification->id }}')" class="mark-read-btn">Mark as read</button>
+                                                    <button onclick="markNotificationAsRead('{{ $notification->id }}')" class="mark-read-mini">Mark as read</button>
                                                 @endif
                                             </div>
-                                            <div class="small text-muted mb-1">{{ $notification->data['message'] ?? '' }}</div>
-                                            <div class="small text-secondary">{{ $notification->created_at->diffForHumans() }}</div>
+                                            <div class="notification-msg">{{ $notification->data['message'] ?? ($notification->data['body'] ?? '') }}</div>
+                                            <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
                                         </div>
                                     @empty
-                                        <div class="dropdown-item text-center text-muted py-3">
-                                            No notifications
+                                        <div class="p-4 text-center text-muted" style="font-size: 13px;">
+                                            No notifications yet
                                         </div>
                                     @endforelse
                                 @else
-                                    <div class="dropdown-item text-center text-muted py-3">
-                                        No notifications
+                                    <div class="p-4 text-center text-muted" style="font-size: 13px;">
+                                        Please login to view notifications
                                     </div>
                                 @endif
                             </div>
-                            <div class="dropdown-divider m-0"></div>
-                            <a class="dropdown-item text-center py-2 font-weight-bold" href="{{ route('talent.notifications.index') }}" style="font-size: 12px; color: #000 !important;">
-                                View all notifications
-                            </a>
+                            <div class="view-all-footer">
+                                <a class="view-all-link" href="{{ route('talent.notifications.index') }}">
+                                    View all notifications
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

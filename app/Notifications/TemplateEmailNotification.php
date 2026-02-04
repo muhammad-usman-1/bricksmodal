@@ -24,6 +24,11 @@ class TemplateEmailNotification extends Notification implements ShouldQueue
         if (config('mail.enabled', true)) {
             $channels[] = 'mail';
         }
+
+        if (!empty($this->meta['send_sms'])) {
+            $channels[] = \App\Notifications\Channels\KwtSmsChannel::class;
+        }
+
         return $channels;
     }
 
@@ -42,11 +47,26 @@ class TemplateEmailNotification extends Notification implements ShouldQueue
         return $message;
     }
 
+    public function toKwtSms(object $notifiable): array
+    {
+        $mobile = $this->meta['mobile_number'] ?? null;
+        
+        if (!$mobile && $notifiable instanceof \App\Models\User && $notifiable->talentProfile) {
+            $mobile = $notifiable->talentProfile->mobile_number;
+        }
+
+        return [
+            'mobile'  => $mobile,
+            'content' => $this->body,
+            'lang'    => $this->meta['lang'] ?? 1,
+        ];
+    }
+
     public function toArray(object $notifiable): array
     {
         return array_merge($this->meta, [
-            'subject' => $this->subject,
-            'body'    => $this->body,
+            'title'   => $this->subject,
+            'message' => $this->body,
         ]);
     }
 }

@@ -133,6 +133,16 @@ class CastingApplicationController extends Controller
                 'casting_application_id' => $castingApplication->id,
                 'type'                   => 'application_selected',
             ]);
+
+            $notificationService->notifyAdmins('admin_application_status_update', [
+                'name'         => optional($castingApplication->talent_profile)->display_name,
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+                'status'       => 'approved (selected)',
+                'admin_name'   => optional(auth()->user())->name ?? 'Admin',
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'admin_approval_action',
+            ]);
         }
 
         return back()->with('message', 'Application approved successfully. Talent can now request payment.');
@@ -170,6 +180,16 @@ class CastingApplicationController extends Controller
                 'casting_application_id' => $castingApplication->id,
                 'type'                   => 'application_rejected',
             ]);
+
+            $notificationService->notifyAdmins('admin_application_status_update', [
+                'name'         => optional($castingApplication->talent_profile)->display_name,
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+                'status'       => 'rejected',
+                'admin_name'   => optional(auth()->user())->name ?? 'Admin',
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'admin_rejection_action',
+            ]);
         }
 
         return back()->with('message', 'Application rejected successfully.');
@@ -205,6 +225,16 @@ class CastingApplicationController extends Controller
             ], [
                 'casting_application_id' => $castingApplication->id,
                 'type'                   => 'application_shortlisted',
+            ]);
+
+            $notificationService->notifyAdmins('admin_application_status_update', [
+                'name'         => optional($castingApplication->talent_profile)->display_name,
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+                'status'       => 'shortlisted',
+                'admin_name'   => optional(auth()->user())->name ?? 'Admin',
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'admin_shortlist_action',
             ]);
         }
         

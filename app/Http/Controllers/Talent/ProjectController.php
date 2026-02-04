@@ -98,6 +98,15 @@ class ProjectController extends Controller
             'project_name' => $castingRequirement->project_name,
         ]);
 
+        $notificationService->notifyAdmins('admin_shoot_application', [
+            'name'         => $profile->display_name,
+            'project_name' => $castingRequirement->project_name,
+        ], [
+            'casting_requirement_id' => $castingRequirement->id,
+            'talent_profile_id'      => $profile->id,
+            'type'                   => 'new_shoot_application',
+        ]);
+
         return redirect()->route('talent.projects.show', $castingRequirement)->with('message', trans('global.application_submitted'));
     }
 }

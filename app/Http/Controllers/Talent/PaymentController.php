@@ -54,6 +54,15 @@ class PaymentController extends Controller
             'payment_requested_at' => now(),
         ]);
 
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyAdmins('payment_request', [
+            'talent_name' => $profile->display_name,
+            'project_name' => optional($castingApplication->casting_requirement)->project_name,
+        ], [
+            'casting_application_id' => $castingApplication->id,
+            'type' => 'payment_requested',
+        ]);
+
         return back()->with('message', 'Payment request sent successfully. You will be notified once approved.');
     }
 
@@ -88,6 +97,15 @@ class PaymentController extends Controller
         ], [
             'casting_application_id' => $castingApplication->id,
             'type' => 'payment_received_confirmation',
+        ]);
+
+        $notificationService->notifyAdmins('admin_payment_received', [
+            'name'         => $profile->display_name,
+            'project_name' => optional($castingApplication->casting_requirement)->project_name,
+        ], [
+            'casting_application_id' => $castingApplication->id,
+            'talent_profile_id'      => $profile->id,
+            'type'                   => 'payment_confirmed_by_talent',
         ]);
 
         return back()->with('message', 'Payment receipt confirmed. Thank you!');

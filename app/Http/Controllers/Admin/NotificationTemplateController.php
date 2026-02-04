@@ -12,7 +12,12 @@ class NotificationTemplateController extends Controller
      */
     public function index()
     {
-        $notificationTemplates = \App\Models\NotificationTemplate::all();
+        $allTemplates = \App\Models\NotificationTemplate::all();
+        $notificationTemplates = [
+            \App\Models\NotificationTemplate::ROLE_TALENT   => $allTemplates->where('role', \App\Models\NotificationTemplate::ROLE_TALENT),
+            \App\Models\NotificationTemplate::ROLE_ADMIN    => $allTemplates->where('role', \App\Models\NotificationTemplate::ROLE_ADMIN),
+        ];
+
         return view('admin.notification-templates.index', compact('notificationTemplates'));
     }
 
@@ -26,6 +31,7 @@ class NotificationTemplateController extends Controller
         $request->validate([
             'key' => 'required|unique:notification_templates,key',
             'name' => 'required',
+            'role' => 'required|in:talent,admin,creative',
             'language_preference' => 'required|in:en,ar,both',
         ]);
 
@@ -44,6 +50,7 @@ class NotificationTemplateController extends Controller
         $request->validate([
             'key' => 'required|unique:notification_templates,key,' . $notificationTemplate->id,
             'name' => 'required',
+            'role' => 'required|in:talent,admin,creative',
             'language_preference' => 'required|in:en,ar,both',
         ]);
 
@@ -56,6 +63,18 @@ class NotificationTemplateController extends Controller
     {
         $notificationTemplate->delete();
         return redirect()->route('admin.notification-templates.index')->with('message', 'Notification template deleted successfully.');
+    }
+
+    public function toggleActive(\App\Models\NotificationTemplate $notificationTemplate)
+    {
+        $notificationTemplate->update([
+            'is_active' => !$notificationTemplate->is_active
+        ]);
+
+        return response()->json([
+            'success'   => true,
+            'is_active' => $notificationTemplate->is_active
+        ]);
     }
 
 }

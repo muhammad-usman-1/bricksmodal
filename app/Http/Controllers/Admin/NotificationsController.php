@@ -30,9 +30,21 @@ class NotificationsController extends Controller
         ];
 
         $typeCounts = [
-            'talent_profile'     => $user->notifications()->where('data->type', 'talent_profile')->count(),
-            'casting_application'=> $user->notifications()->where('data->type', 'casting_application')->count(),
-            'payment_requested'  => $user->notifications()->where('data->type', 'payment_requested')->count(),
+            'talent_profile'     => $user->notifications()->whereIn('data->type', [
+                'talent_profile', 
+                'admin_talent_profile_submission', 
+                'admin_profile_status_update'
+            ])->count(),
+            'casting_application'=> $user->notifications()->whereIn('data->type', [
+                'casting_application', 
+                'admin_shoot_application', 
+                'admin_application_status_update'
+            ])->count(),
+            'payment_requested'  => $user->notifications()->whereIn('data->type', [
+                'payment_requested', 
+                'payment_request', 
+                'admin_payment_received'
+            ])->count(),
         ];
 
         return view('admin.notifications.index', compact('notifications', 'filter', 'stats', 'typeCounts'));
@@ -56,9 +68,28 @@ class NotificationsController extends Controller
         }
     }
 
-    public function markAllRead()
+    public function markAsRead(Request $request, $id)
+    {
+        $notification = Auth::user()->unreadNotifications()->where('id', $id)->first();
+        if ($notification) {
+            $notification->markAsRead();
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back();
+    }
+
+    public function markAllRead(Request $request)
     {
         Auth::user()->unreadNotifications->markAsRead();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
         return redirect()->back()->with('message', 'All notifications marked as read');
     }
 }

@@ -196,50 +196,199 @@ height:auto;
                 </a>
             @endif
             <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
+                @php
+                    $adminUser = auth()->user();
+                    $adminUnreadCount = $adminUser ? $adminUser->unreadNotifications->count() : 0;
+                @endphp
                 <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" style="margin-left: 0 !important; position: relative !important;">
                     <img src="{{ asset('images/noti.png') }}" alt="Notifications">
-                    <span class="noti-badge {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'd-none' }}"></span>
+                    <span class="noti-badge {{ $adminUnreadCount > 0 ? '' : 'd-none' }}" id="notification-badge">
+                        @if($adminUnreadCount > 0)
+                            <span class="badge-count">{{ $adminUnreadCount }}</span>
+                        @endif
+                    </span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
-                    <div class="dropdown-header bg-light py-2">
-                        <strong>Notifications</strong>
-                        @if(auth()->user()->unreadNotifications->count() > 0)
-                            <a href="{{ route('admin.notifications.mark-all-read') }}" class="float-right text-muted" style="font-size: 0.8em;">
+                <style>
+                    .noti-badge {
+                        position: absolute !important;
+                        top: -5px !important;
+                        right: -5px !important;
+                        width: auto !important;
+                        height: auto !important;
+                        background: transparent !important;
+                        border: none !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        font-size: 11px !important;
+                        color: #000 !important;
+                        font-weight: 800 !important;
+                        z-index: 10 !important;
+                        padding: 0 !important;
+                    }
+                    .p-4 {
+                        padding: 1.5rem !important;
+                    }
+                    .dropdown-menu.notification-dropdown {
+                        width: 340px !important;
+                        border-radius: 12px !important;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+                        padding: 0 !important;
+                        border: none !important;
+                        margin-top: 10px !important;
+                    }
+                    .notification-header {
+                        padding: 16px 20px !important;
+                        background-color: #f8f9fa !important;
+                        border-bottom: 1px solid #f1f1f1 !important;
+                        border-top-left-radius: 12px !important;
+                        border-top-right-radius: 12px !important;
+                    }
+                    .notification-header h6 {
+                        margin: 0 !important;
+                        font-size: 15px !important;
+                        font-weight: 700 !important;
+                        color: #1a1a1a !important;
+                    }
+                    .mark-all-read {
+                        font-size: 12px !important;
+                        color: #6c757d !important;
+                        text-decoration: none !important;
+                    }
+                    .mark-all-read:hover {
+                        color: #000 !important;
+                    }
+                    .notification-item {
+                        padding: 16px 20px !important;
+                        border-bottom: 1px solid #f8f9fa !important;
+                        transition: background-color 0.2s !important;
+                        display: block !important;
+                        text-decoration: none !important;
+                        color: inherit !important;
+                    }
+                    .notification-item:hover {
+                        background-color: #fcfcfc !important;
+                        text-decoration: none !important;
+                        color: inherit !important;
+                    }
+                    .notification-item.unread {
+                        background-color: #fff !important;
+                    }
+                    .notification-item-top {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        margin-bottom: 4px !important;
+                    }
+                    .notification-icon-title {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 12px !important;
+                    }
+                    .notification-title {
+                        font-size: 14px !important;
+                        font-weight: 700 !important;
+                        color: #000 !important;
+                    }
+                    .mark-read-mini {
+                        font-size: 11px !important;
+                        color: #6c757d !important;
+                        border: 1px solid #eee !important;
+                        padding: 2px 8px !important;
+                        border-radius: 4px !important;
+                        background: #fff !important;
+                        cursor: pointer !important;
+                        transition: all 0.2s !important;
+                    }
+                    .mark-read-mini:hover {
+                        background: #000 !important;
+                        color: #fff !important;
+                        border-color: #000 !important;
+                    }
+                    .notification-msg {
+                        font-size: 13px !important;
+                        color: #6c757d !important;
+                        margin-left: 28px !important;
+                        margin-bottom: 4px !important;
+                        line-height: 1.4 !important;
+                    }
+                    .notification-time {
+                        font-size: 11px !important;
+                        color: #adb5bd !important;
+                        margin-left: 28px !important;
+                    }
+                    .view-all-footer {
+                        padding: 14px !important;
+                        text-align: left !important;
+                        border-top: 1px solid #f1f1f1 !important;
+                    }
+                    .view-all-link {
+                        font-size: 14px !important;
+                        font-weight: 700 !important;
+                        color: #000 !important;
+                        text-decoration: none !important;
+                    }
+                </style>
+                <div class="dropdown-menu dropdown-menu-right notification-dropdown">
+                    <div class="notification-header d-flex justify-content-between align-items-center">
+                        <h6>Notifications</h6>
+                        @if($adminUser && $adminUnreadCount > 0)
+                            <a href="javascript:void(0)" onclick="markAllAdminNotificationsAsRead()" class="mark-all-read">
                                 Mark all as read
                             </a>
                         @endif
                     </div>
-                    @forelse(auth()->user()->notifications()->latest()->limit(10)->get() as $notification)
-                        <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
-                           href="{{ route('admin.notifications.show', $notification->id) }}">
-                            @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
-                                <i class="fas fa-user text-info"></i>
-                            @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
-                                <i class="fas fa-video text-warning"></i>
-                            @else
-                                <i class="fas fa-bell text-secondary"></i>
-                            @endif
-                            {{ $notification->data['title'] ?? 'Notification' }}
-                            @if(isset($notification->data['message']))
-                                <div class="small text-muted">{{ $notification->data['message'] }}</div>
-                            @endif
-                            <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
+                    <div id="notifications-list" style="max-height: 380px; overflow-y: auto;">
+                        @if($adminUser)
+                            @forelse($adminUser->notifications()->latest()->limit(5)->get() as $notification)
+                                <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
+                                    <div class="notification-item-top">
+                                        <div class="notification-icon-title">
+                                            @php
+                                                $type = $notification->data['type'] ?? '';
+                                            @endphp
+                                            @if(str_contains($type, 'talent_profile') || str_contains($type, 'talent_signup'))
+                                                <i class="fas fa-user text-dark" style="font-size: 14px;"></i>
+                                            @elseif(str_contains($type, 'shoot'))
+                                                <i class="fas fa-video text-dark" style="font-size: 14px;"></i>
+                                            @elseif(str_contains($type, 'payment'))
+                                                <i class="fas fa-credit-card text-dark" style="font-size: 14px;"></i>
+                                            @elseif(str_contains($type, 'feedback'))
+                                                <i class="fas fa-star text-dark" style="font-size: 14px;"></i>
+                                            @else
+                                                <i class="fas fa-bell text-dark" style="font-size: 14px;"></i>
+                                            @endif
+                                            <span class="notification-title">{{ $notification->data['title'] ?? ($notification->data['subject'] ?? 'Notification') }}</span>
+                                        </div>
+                                        @if(!$notification->read_at)
+                                            <button onclick="markAdminNotificationAsRead('{{ $notification->id }}')" class="mark-read-mini">Mark as read</button>
+                                        @endif
+                                    </div>
+                                    <div class="notification-msg">{{ $notification->data['message'] ?? ($notification->data['body'] ?? '') }}</div>
+                                    <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                                </div>
+                            @empty
+                                <div class="p-4 text-center text-muted" style="font-size: 13px;">
+                                    No notifications yet
+                                </div>
+                            @endforelse
+                        @else
+                            <div class="p-4 text-center text-muted" style="font-size: 13px;">
+                                Please login to view notifications
+                            </div>
+                        @endif
+                    </div>
+                    <div class="view-all-footer">
+                        <a class="view-all-link" href="{{ route('admin.notifications.index') }}">
+                            View all notifications
                         </a>
-                    @empty
-                        <div class="dropdown-item text-center text-muted">
-                            No notifications
-                        </div>
-                    @endforelse
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">
-                        View all notifications
-                    </a>
-                    @if(auth()->user()->isSuperAdmin())
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item text-center font-weight-bold" href="{{ route('admin.notification-templates.index') }}">
-                            <i class="fas fa-cog mr-1"></i> Manage Notifications
-                        </a>
-                    @endif
+                        @if(auth()->user()->isSuperAdmin())
+                            <div class="dropdown-divider mt-2 mb-2"></div>
+                            <a class="view-all-link d-block" href="{{ route('admin.notification-templates.index') }}" style="font-size: 13px;">
+                                Manage Notifications
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
             </div>

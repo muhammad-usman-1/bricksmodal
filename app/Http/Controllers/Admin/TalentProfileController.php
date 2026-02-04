@@ -207,6 +207,16 @@ class TalentProfileController extends Controller
 
         $this->triggerNotification($talentProfile, 'talent_profile_approval', $notes);
 
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyAdmins('admin_profile_status_update', [
+            'name'       => $talentProfile->display_name,
+            'status'     => 'approved',
+            'admin_name' => optional(auth()->user())->name ?? 'Admin',
+        ], [
+            'talent_profile_id' => $talentProfile->id,
+            'type'              => 'admin_approval_action',
+        ]);
+
         if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
             return redirect()->route('admin.home')->with('sweetalert_success', 'Talent approved successfully!');
         }
@@ -229,6 +239,16 @@ class TalentProfileController extends Controller
         ]);
 
         $this->triggerNotification($talentProfile, 'talent_profile_rejection', $data['notes'] ?? null);
+
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyAdmins('admin_profile_status_update', [
+            'name'       => $talentProfile->display_name,
+            'status'     => 'rejected',
+            'admin_name' => optional(auth()->user())->name ?? 'Admin',
+        ], [
+            'talent_profile_id' => $talentProfile->id,
+            'type'              => 'admin_rejection_action',
+        ]);
 
         if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
             return redirect()->route('admin.home')->with('sweetalert_success', 'Talent rejected successfully!');
@@ -273,6 +293,16 @@ class TalentProfileController extends Controller
         ]);
 
         $this->triggerNotification($talentProfile, 'talent_profile_reactivated', $notes);
+
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyAdmins('admin_profile_status_update', [
+            'name'       => $talentProfile->display_name,
+            'status'     => 'reactivated',
+            'admin_name' => optional(auth()->user())->name ?? 'Admin',
+        ], [
+            'talent_profile_id' => $talentProfile->id,
+            'type'              => 'admin_reactivation_action',
+        ]);
 
         return back()->with('message', trans('notifications.status_updated'));
     }

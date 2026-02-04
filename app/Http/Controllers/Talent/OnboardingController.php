@@ -355,6 +355,13 @@ class OnboardingController extends Controller
                     'name' => $profile->display_name,
                 ]);
 
+                $notificationService->notifyAdmins('admin_talent_profile_submission', [
+                    'name' => $profile->display_name,
+                ], [
+                    'talent_profile_id' => $profile->id,
+                    'type'              => 'new_profile_submission',
+                ]);
+
                 session()->flash('onboarding_just_completed', true);
                 return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));
 

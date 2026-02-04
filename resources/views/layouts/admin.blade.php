@@ -482,6 +482,52 @@
             @endif
         });
     </script>
+    <script>
+        function markAdminNotificationAsRead(id) {
+            $.ajax({
+                url: '/admin/notifications/' + id + '/mark-as-read',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#notification-' + id).removeClass('unread');
+                        $('#notification-' + id + ' .mark-read-mini').remove();
+                        updateAdminBadgeCount();
+                    }
+                }
+            });
+        }
+
+        function markAllAdminNotificationsAsRead() {
+            $.ajax({
+                url: '{{ route('admin.notifications.mark-all-read') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('.notification-item.unread').removeClass('unread');
+                        $('.mark-read-mini').remove();
+                        $('#notification-badge').addClass('d-none');
+                        $('.notification-header .mark-all-read').remove();
+                    }
+                }
+            });
+        }
+
+        function updateAdminBadgeCount() {
+            let count = parseInt($('.badge-count').text()) - 1;
+            if (count > 0) {
+                $('.badge-count').text(count);
+            } else {
+                $('#notification-badge').addClass('d-none');
+                $('.notification-header .mark-all-read').remove();
+            }
+        }
+    </script>
     @yield('scripts')
 </body>
 

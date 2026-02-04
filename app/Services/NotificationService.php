@@ -45,9 +45,13 @@ class NotificationService
             $content = str_replace('{' . $placeholder . '}', (string)$value, $content);
         }
 
+        // Predefined list of keys that should trigger SMS to talent
+        $smsKeys = ['shoot_acceptance', 'shoot_rejection', 'shoot_shortlist', 'talent_signup', 'payment_sent'];
+        $shouldSendSms = in_array($key, $smsKeys) || ($meta['send_sms'] ?? false);
+
         // Prepare meta for SMS and custom payload
         $finalMeta = array_merge([
-            'send_sms' => true,
+            'send_sms' => $shouldSendSms,
             'lang'     => $langId,
             'type'     => $key,
         ], $meta);
@@ -66,5 +70,24 @@ class NotificationService
         }
 
         $notifiable->notify(new TemplateEmailNotification($title, $content, $finalMeta));
+    }
+
+    /**
+     * Notify all administrators and creative users.
+     *
+     * @param string $key
+     * @param array $placeholders
+     * @param array $meta
+     * @return void
+     */
+    public function notifyAdmins(string $key, array $placeholders = [], array $meta = [])
+    {
+        $admins = \App\Models\User::whereHas('roles', function($query) {
+            $query->whereIn('title', ['admin', 'superadmin', 'creative']);
+        })->get();
+
+        foreach ($admins as $admin) {
+            $this->send($admin, $key, $placeholders, $meta);
+        }
     }
 }

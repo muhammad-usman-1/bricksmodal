@@ -54,6 +54,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('notifications', [\App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('notifications.index');
         Route::get('notifications/{notification}', [\App\Http\Controllers\Admin\NotificationsController::class, 'show'])->name('notifications.show');
         Route::get('notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationsController::class, 'markAllRead'])->name('notifications.mark-all-read');
+        Route::post('notifications/{notification}/mark-as-read', [\App\Http\Controllers\Admin\NotificationsController::class, 'markAsRead'])->name('notifications.mark-as-read');
 
         // Projects Dashboard (requires project_management permission)
         Route::middleware('admin.module:project_management')->group(function () {
@@ -109,6 +110,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class)->only(['index', 'edit', 'update']);
         Route::resource('notification-templates', \App\Http\Controllers\Admin\NotificationTemplateController::class);
+        Route::post('notification-templates/{notification_template}/toggle-active', [\App\Http\Controllers\Admin\NotificationTemplateController::class, 'toggleActive'])->name('notification-templates.toggle-active');
 
         // Outfit Management
         Route::resource('outfits', \App\Http\Controllers\Admin\OutfitController::class);

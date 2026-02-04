@@ -1,327 +1,467 @@
 @extends('layouts.admin')
 @section('content')
 <style>
-    .notifications-shell {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+    :root {
+        --notif-primary: #000000;
+        --notif-accent: #000000;
+        --notif-success: #000000;
+        --notif-warning: #4b5563;
+        --notif-gray: #6b7280;
+        --notif-bg: #f9fafb;
+        --notif-card-bg: #ffffff;
+        --notif-border: #e5e7eb;
+        --notif-hover: #f3f4f6;
     }
-    .notif-hero {
-        background: #111827;
-        color: #fff;
-        border-radius: 16px;
-        padding: 18px 20px;
+
+    [data-theme="dark"] {
+        --notif-primary: #ffffff;
+        --notif-accent: #ffffff;
+        --notif-success: #ffffff;
+        --notif-warning: #9ca3af;
+        --notif-gray: #9ca3af;
+        --notif-bg: #000000;
+        --notif-card-bg: #111111;
+        --notif-border: #333333;
+        --notif-hover: #222222;
+    }
+
+    .dashboard-container {
+        margin: 0 auto;
+        padding: 20px 0;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    /* --- Sleek Header --- */
+    .dashboard-header {
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
         flex-wrap: wrap;
-        gap: 12px;
-        box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        gap: 20px;
     }
-    .notif-hero h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-    }
-    .notif-hero p {
+
+
+
+    .header-info p {
+        color: var(--notif-gray);
         margin: 4px 0 0;
-        color: #d1d5db;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 500;
     }
-    .hero-actions {
-        display: inline-flex;
-        gap: 10px;
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
     }
-    .btn-ghost,
-    .btn-solid {
+
+    .btn-premium {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 9px 13px;
-        border-radius: 10px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 14px;
         font-weight: 600;
-        font-size: 13px;
-        border: 1px solid rgba(255,255,255,0.2);
-        color: #fff;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border: 1px solid var(--notif-primary);
+        background: var(--notif-card-bg);
+        color: var(--notif-primary);
+    }
+
+    .btn-premium:hover {
+        background: var(--notif-primary);
+        color: var(--notif-card-bg);
+        text-decoration: none;
+    }
+
+    .btn-premium.primary {
+        background: var(--notif-primary);
+        color: var(--notif-card-bg);
+        border: 1px solid var(--notif-primary);
+    }
+
+    .btn-premium.primary:hover {
         background: transparent;
-        text-decoration: none;
-        transition: all 0.18s ease;
-    }
-    .btn-solid {
-        background: #10b981;
-        border-color: #10b981;
-        color: #ffffff;
-    }
-    .btn-ghost:hover { background: inherit; color: #fff; border-color: rgba(255,255,255,0.2); text-decoration: none; }
-    .btn-solid:hover { background: #0f9a6a; border-color: #0f9a6a; text-decoration: none; }
-
-    .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 12px;
-    }
-    .stat-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 14px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 6px 18px rgba(15,23,42,0.07);
-    }
-    .stat-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        display: grid;
-        place-items: center;
-        color: #fff;
-        font-size: 16px;
-    }
-    .stat-text { display: flex; flex-direction: column; gap: 2px; }
-    .stat-label { font-size: 12px; color: #6b7280; font-weight: 600; }
-    .stat-value { font-size: 18px; font-weight: 800; color: #111827; }
-
-    .filter-pills {
-        display: inline-flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .pill {
-        padding: 7px 12px;
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
-        background: #fff;
-        color: #374151;
-        font-weight: 600;
-        font-size: 12px;
-        text-decoration: none;
-        transition: all 0.15s ease;
-    }
-    .pill:hover { background: #f9fafb; text-decoration: none; }
-    .pill.active {
-        background: #111827;
-        color: #fff;
-        border-color: #111827;
+        color: var(--notif-primary);
     }
 
-    .notif-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .notif-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 14px;
+    /* --- Minimal Stats --- */
+    .stat-bar {
         display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 12px;
-        align-items: center;
-        box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
     }
-    .notif-card.unread { border-color: #c7d2fe; box-shadow: 0 8px 24px rgba(59,130,246,0.18); }
-    .notif-icon {
-        width: 46px;
-        height: 46px;
+
+    .stat-item {
+        background: var(--notif-card-bg);
+        padding: 20px;
         border-radius: 12px;
-        display: grid;
-        place-items: center;
-        color: #fff;
-        font-size: 18px;
-        font-weight: 700;
-    }
-    .notif-body { display: flex; flex-direction: column; gap: 6px; }
-    .notif-title {
+        border: 1px solid var(--notif-border);
         display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 700;
-        color: #111827;
-        margin: 0;
+        align-items: flex-start;
+        justify-content: space-between;
+        transition: all 0.2s ease;
     }
-    .badge-soft {
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #f3f4f6;
-        color: #374151;
+
+    .stat-item:hover {
+        border-color: var(--notif-primary);
+    }
+
+    .stat-content .label {
         font-size: 11px;
+        color: var(--notif-gray);
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 4px;
     }
-    .notif-message { margin: 0; color: #4b5563; font-size: 13px; }
-    .notif-meta { font-size: 12px; color: #6b7280; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-    .notif-actions { display: inline-flex; gap: 8px; }
-    .btn-line,
-    .btn-plain {
-        padding: 8px 12px;
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
-        font-size: 12px;
+    .stat-content .value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--notif-primary);
+    }
+
+    .stat-chart-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 16px;
+    }
+
+    [data-theme="dark"] .stat-chart-mini {
+        background: #222;
+        color: #fff;
+    }
+
+    /* --- Activity Feed Layout --- */
+    .feed-section {
+        background: var(--notif-card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--notif-border);
+        overflow: hidden;
+    }
+
+    .feed-toolbar {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--notif-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--notif-card-bg);
+    }
+
+    .nav-tabs-premium {
+        display: flex;
+        gap: 32px;
+    }
+
+    .tab-item {
+        font-size: 13px;
         font-weight: 700;
-        text-decoration: none;
-        color: #111827;
-        background: #fff;
-        transition: all 0.15s ease;
+        color: var(--notif-gray);
+        position: relative;
+        padding: 12px 0;
+        cursor: pointer;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
-    .btn-line:hover { background: #111827; color: #fff; border-color: #111827; text-decoration: none; }
-    .btn-plain { border-style: dashed; color: #6b7280; }
-    .btn-plain:hover { background: #f3f4f6; color: #111827; text-decoration: none; }
-    .notif-card a:hover { text-decoration: none; }
 
-    /* Dark theme */
-    html[data-theme="dark"] .notif-hero { background: #0f172a; box-shadow: none; }
-    html[data-theme="dark"] .notif-hero p { color: #cbd5e1; }
-    html[data-theme="dark"] .stat-card,
-    html[data-theme="dark"] .notif-card {
-        background: #1f2937;
-        border-color: #2d3138;
-        box-shadow: none;
+    .tab-item:hover { color: var(--notif-primary); }
+    .tab-item.active { color: var(--notif-primary); }
+    .tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: -4px;
+        right: -4px;
+        height: 3px;
+        background: var(--notif-primary);
+        border-radius: 0;
     }
-    html[data-theme="dark"] .stat-label,
-    html[data-theme="dark"] .notif-message,
-    html[data-theme="dark"] .notif-meta { color: #cbd5e1; }
-    html[data-theme="dark"] .stat-value,
-    html[data-theme="dark"] .notif-title { color: #f9fafb; }
-    html[data-theme="dark"] .pill { background: #111827; border-color: #2d3138; color: #e5e7eb; }
-    html[data-theme="dark"] .pill.active { background: #3b82f6; border-color: #3b82f6; }
-    html[data-theme="dark"] .btn-line,
-    html[data-theme="dark"] .btn-plain {
-        background: #111827;
-        border-color: #2d3138;
-        color: #e5e7eb;
+
+    .feed-list {
+        display: flex;
+        flex-direction: column;
     }
-    html[data-theme="dark"] .btn-line:hover { background: #3b82f6; border-color: #3b82f6; color: #fff; }
-    html[data-theme="dark"] .btn-plain:hover { background: #252932; }
+
+    .feed-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        padding: 24px;
+        gap: 16px;
+        align-items: center;
+        border-bottom: 1px solid var(--notif-border);
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .feed-item:last-child { border-bottom: none; }
+    .feed-item:hover { background: var(--notif-hover); }
+
+    .feed-item.unread {
+        background: #fcfcfc;
+    }
+
+    [data-theme="dark"] .feed-item.unread {
+        background: #151515;
+    }
+
+    .feed-item.unread::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #000;
+    }
+
+    [data-theme="dark"] .feed-item.unread::before {
+        background: #fff;
+    }
+
+    .icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+        border: 1px solid var(--notif-border);
+    }
+
+    .feed-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .feed-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--notif-primary);
+        line-height: 1.2;
+    }
+
+    .feed-desc {
+        font-size: 13px;
+        color: var(--notif-gray);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .feed-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--notif-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .type-chip {
+        padding: 2px 8px;
+        background: var(--notif-primary);
+        color: var(--notif-card-bg);
+        font-weight: 900;
+    }
+
+    .feed-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .time-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--notif-gray);
+        white-space: nowrap;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--notif-card-bg);
+        border: 1px solid var(--notif-border);
+        color: var(--notif-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+        background: var(--notif-primary);
+        color: var(--notif-card-bg);
+        border-color: var(--notif-primary);
+    }
+
+    /* Mobile Adaptivity */
+    @media (max-width: 768px) {
+        .dashboard-header { flex-direction: column; align-items: flex-start; }
+        .feed-item { grid-template-columns: 48px 1fr; gap: 12px; }
+        .feed-right { grid-column: 2; margin-top: 8px; justify-content: space-between; }
+        .stat-bar { grid-template-columns: 1fr; }
+    }
 </style>
 
-<div class="notifications-shell">
-    <div class="notif-hero">
-        <div>
-            <h2>Notifications</h2>
-            <p>Stay on top of talent profiles, casting activity, and payments.</p>
+<div class="dashboard-container">
+    <!-- Header Area -->
+    <header class="dashboard-header">
+        <div class="header-info">
+            <h1 style="font-family: 'Arimo', sans-serif; font-size: 24px; font-weight: 700; color: #000;">Activity Center</h1>
+            <p>Monitor applications, profiles, and financial movements in real-time.</p>
         </div>
-        <div class="hero-actions">
-            <a class="btn-ghost" href="{{ route('admin.notifications.index') }}">
-                <i class="fas fa-sync-alt"></i> Refresh
+        <div class="header-actions">
+            <a href="{{ route('admin.notifications.index') }}" class="btn-premium">
+                <i class="fas fa-redo-alt"></i> Refresh
             </a>
             @if(auth()->user()->unreadNotifications->count() > 0)
-                <a class="btn-solid" href="{{ route('admin.notifications.mark-all-read') }}">
-                    <i class="fas fa-check-double"></i> Mark all as read
-            </a>
-        @endif
+                <button onclick="markAllAdminNotificationsAsRead(); location.reload();" class="btn-premium primary">
+                    <i class="fas fa-check-double"></i> Mark All Done
+                </button>
+            @endif
         </div>
-    </div>
+    </header>
 
-    <div class="stat-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#111827;"><i class="fas fa-bell"></i></div>
-            <div class="stat-text">
-                <span class="stat-label">Total</span>
-                <span class="stat-value">{{ $stats['total'] ?? 0 }}</span>
+    <!-- Stats Section -->
+    <section class="stat-bar">
+        <div class="stat-item">
+            <div class="stat-content">
+                <span class="label">Total Activity</span>
+                <span class="value">{{ $stats['total'] ?? 0 }}</span>
+            </div>
+            <div class="stat-chart-mini"><i class="fas fa-bolt"></i></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-content">
+                <span class="label">Attention Needed</span>
+                <span class="value">{{ $stats['unread'] ?? 0 }}</span>
+            </div>
+            <div class="stat-chart-mini"><i class="fas fa-eye"></i></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-content">
+                <span class="label">Completed</span>
+                <span class="value">{{ $stats['read'] ?? 0 }}</span>
+            </div>
+            <div class="stat-chart-mini"><i class="fas fa-check"></i></div>
+        </div>
+    </section>
+
+    <!-- Activity Feed -->
+    <section class="feed-section">
+        <div class="feed-toolbar">
+            <nav class="nav-tabs-premium">
+                <a href="{{ route('admin.notifications.index', ['filter' => 'all']) }}" class="tab-item {{ $filter === 'all' ? 'active' : '' }}">Inbox</a>
+                <a href="{{ route('admin.notifications.index', ['filter' => 'unread']) }}" class="tab-item {{ $filter === 'unread' ? 'active' : '' }}">Unread</a>
+                <a href="{{ route('admin.notifications.index', ['filter' => 'read']) }}" class="tab-item {{ $filter === 'read' ? 'active' : '' }}">Archived</a>
+            </nav>
+            <div style="display: flex; gap: 20px;">
+                <span style="font-size: 10px; font-weight: 800; color: var(--notif-gray); text-transform: uppercase; letter-spacing: 0.05em;">Profiles: {{ $typeCounts['talent_profile'] }}</span>
+                <span style="font-size: 10px; font-weight: 800; color: var(--notif-gray); text-transform: uppercase; letter-spacing: 0.05em;">Apps: {{ $typeCounts['casting_application'] }}</span>
+                <span style="font-size: 10px; font-weight: 800; color: var(--notif-gray); text-transform: uppercase; letter-spacing: 0.05em;">Cash: {{ $typeCounts['payment_requested'] }}</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#2563eb;"><i class="fas fa-inbox"></i></div>
-            <div class="stat-text">
-                <span class="stat-label">Unread</span>
-                <span class="stat-value">{{ $stats['unread'] ?? 0 }}</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#10b981;"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-text">
-                <span class="stat-label">Read</span>
-                <span class="stat-value">{{ $stats['read'] ?? 0 }}</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#f59e0b;"><i class="fas fa-layer-group"></i></div>
-            <div class="stat-text">
-                <span class="stat-label">By Type</span>
-                <span class="stat-value">
-                    TP {{ $typeCounts['talent_profile'] ?? 0 }} · CA {{ $typeCounts['casting_application'] ?? 0 }} · PR {{ $typeCounts['payment_requested'] ?? 0 }}
-                </span>
-            </div>
-        </div>
-    </div>
 
-    <div style="display:flex; align-items:center; justify-content: space-between; flex-wrap: wrap; gap:10px;">
-        <div class="filter-pills">
-            <a class="pill {{ $filter === 'all' ? 'active' : '' }}" href="{{ route('admin.notifications.index', ['filter' => 'all']) }}">All ({{ $stats['total'] ?? 0 }})</a>
-            <a class="pill {{ $filter === 'unread' ? 'active' : '' }}" href="{{ route('admin.notifications.index', ['filter' => 'unread']) }}">Unread ({{ $stats['unread'] ?? 0 }})</a>
-            <a class="pill {{ $filter === 'read' ? 'active' : '' }}" href="{{ route('admin.notifications.index', ['filter' => 'read']) }}">Read ({{ $stats['read'] ?? 0 }})</a>
-        </div>
-        <div class="filter-pills" style="gap:6px;">
-            <span class="badge-soft">Talent Profiles: {{ $typeCounts['talent_profile'] ?? 0 }}</span>
-            <span class="badge-soft">Casting Apps: {{ $typeCounts['casting_application'] ?? 0 }}</span>
-            <span class="badge-soft">Payments: {{ $typeCounts['payment_requested'] ?? 0 }}</span>
-        </div>
-    </div>
+        @php
+            $typeMeta = [
+                'talent_profile'                  => ['icon' => 'fas fa-id-badge', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Profile'],
+                'admin_talent_profile_submission' => ['icon' => 'fas fa-user-plus', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Verification'],
+                'admin_profile_status_update'     => ['icon' => 'fas fa-user-shield', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Governance'],
 
-    @php
-        $typeMeta = [
-            'talent_profile' => ['icon' => 'fas fa-user', 'bg' => '#2563eb', 'label' => 'Talent Profile'],
-            'casting_application' => ['icon' => 'fas fa-video', 'bg' => '#f59e0b', 'label' => 'Casting Application'],
-            'payment_requested' => ['icon' => 'fas fa-dollar-sign', 'bg' => '#10b981', 'label' => 'Payment Request'],
-            'default' => ['icon' => 'fas fa-bell', 'bg' => '#6b7280', 'label' => 'Notification'],
-        ];
-    @endphp
+                'casting_application'             => ['icon' => 'fas fa-clapperboard', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Application'],
+                'admin_shoot_application'         => ['icon' => 'fas fa-paper-plane', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Submission'],
+                'admin_application_status_update' => ['icon' => 'fas fa-rotate', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Decision'],
 
-    <div class="notif-list">
-                    @forelse($notifications as $notification)
-            @php
-                $type = $notification->data['type'] ?? 'default';
-                $meta = $typeMeta[$type] ?? $typeMeta['default'];
-                $title = $notification->data['title'] ?? 'Notification';
-                $message = $notification->data['message'] ?? 'No additional details provided.';
-            @endphp
-            <div class="notif-card {{ $notification->read_at ? '' : 'unread' }}">
-                <div class="notif-icon" style="background: {{ $meta['bg'] }}">
-                    <i class="{{ $meta['icon'] }}"></i>
-                </div>
-                <div class="notif-body">
-                    <div class="notif-title">
-                        <span>{{ $title }}</span>
-                        <span class="badge-soft" style="background: #f3f4f6; color:#111827;">{{ $meta['label'] }}</span>
-                        @if(!$notification->read_at)
-                            <span class="badge-soft" style="background:#c7d2fe; color:#1d4ed8;">Unread</span>
-                                @endif
+                'payment_requested'               => ['icon' => 'fas fa-coins', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Finance'],
+                'payment_request'                 => ['icon' => 'fas fa-wallet', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Transfer'],
+                'admin_payment_received'          => ['icon' => 'fas fa-piggy-bank', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'Revenue'],
+
+                'default'                         => ['icon' => 'fas fa-wave-square', 'bg' => 'transparent', 'color' => 'var(--notif-primary)', 'label' => 'System'],
+            ];
+        @endphp
+
+        <div class="feed-list">
+            @forelse($notifications as $notification)
+                @php
+                    $type = $notification->data['type'] ?? 'default';
+                    $meta = $typeMeta[$type] ?? $typeMeta['default'];
+                    $title = $notification->data['title'] ?? 'New Notification';
+                    $message = $notification->data['message'] ?? 'Check dashboard for details.';
+                @endphp
+                <div id="notification-{{ $notification->id }}" class="feed-item {{ $notification->read_at ? '' : 'unread' }}">
+                    <div class="feed-content">
+                        <div class="feed-title">{{ $title }}</div>
+                        <p class="feed-desc">{{ $message }}</p>
                     </div>
-                    <p class="notif-message">{{ $message }}</p>
-                    <div class="notif-meta">
-                        <span class="status-dot" style="background: {{ $notification->read_at ? '#10b981' : '#f59e0b' }};"></span>
-                        <span>{{ $notification->created_at->format('M d, Y g:i A') }}</span>
-                        <span>({{ $notification->created_at->diffForHumans() }})</span>
+                    <div class="feed-right">
+                        <span class="time-badge">{{ $notification->created_at->diffForHumans() }}</span>
+                        <div class="action-group">
+                            <a href="{{ route('admin.notifications.show', $notification->id) }}" class="btn-icon" title="View Details">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            @if(!$notification->read_at)
+                                <button onclick="markAdminNotificationAsRead('{{ $notification->id }}')" class="btn-icon" title="Archive">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
-                <div class="notif-actions">
-                    <a class="btn-line" href="{{ route('admin.notifications.show', $notification->id) }}">
-                                    View
-                                </a>
-                    @if(!$notification->read_at)
-                        <a class="btn-plain" href="{{ route('admin.notifications.show', $notification->id) }}">
-                            Mark as read
-                        </a>
-                    @endif
+            @empty
+                <div class="p-5 text-center">
+                    <p style="color: var(--notif-gray); font-weight: 800; text-transform: uppercase; letter-spacing: .2em;">Inbox empty</p>
                 </div>
-            </div>
-                    @empty
-            <div class="card">
-                <div class="card-body text-center text-muted">
-                    No notifications found.
-                </div>
-            </div>
-                    @endforelse
+            @endforelse
         </div>
+    </section>
 
-    <div style="margin-top: 8px;">
+    <!-- Pagination -->
+    <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
         {{ $notifications->links() }}
     </div>
 </div>
+
+<script>
+    // These functions are already in the admin layout, but we ensure they behave nicely with our new UI
+    function markAdminNotificationAsRead(id) {
+        $.ajax({
+            url: '/admin/notifications/' + id + '/mark-as-read',
+            method: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(response) {
+                if (response.success) {
+                    $('#notification-' + id).removeClass('unread').addClass('archived');
+                    $('#notification-' + id + ' .btn-icon[title="Archive"]').fadeOut();
+                }
+            }
+        });
+    }
+</script>
 @endsection

@@ -34,21 +34,33 @@
                 @csrf
                 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group mb-4">
                             <label class="font-weight-bold text-dark text-uppercase text-xs mb-1" for="key">Unique Key</label>
                             <input class="form-control border-dark @error('key') is-invalid @enderror" type="text" name="key" id="key" value="{{ old('key', $notificationTemplate->key) }}" required readonly>
-                            <small class="text-muted">Key cannot be changed once created to maintain system integrity.</small>
+                            <small class="text-muted">Key cannot be changed once created.</small>
                             @error('key')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group mb-4">
                             <label class="font-weight-bold text-dark text-uppercase text-xs mb-1" for="name">Friendly Name</label>
                             <input class="form-control border-dark @error('name') is-invalid @enderror" type="text" name="name" id="name" value="{{ old('name', $notificationTemplate->name) }}" required>
                             @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold text-dark text-uppercase text-xs mb-1" for="role">Target Role</label>
+                            <select class="form-control border-dark @error('role') is-invalid @enderror" name="role" id="role" required>
+                                    <option value="talent" {{ $notificationTemplate->role == 'talent' ? 'selected' : '' }}>Talent</option>
+                                    <option value="admin" {{ $notificationTemplate->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                            </select>
+                            @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
