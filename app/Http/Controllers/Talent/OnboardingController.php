@@ -356,7 +356,7 @@ class OnboardingController extends Controller
                                 'mime' => $photo->getClientMimeType(),
                             ]);
                             
-                            $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, false);
+                            $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, true);
                             Log::info("Photo uploaded to S3", ['path' => $path]);
                             
                             $media = $profile->media()->create([

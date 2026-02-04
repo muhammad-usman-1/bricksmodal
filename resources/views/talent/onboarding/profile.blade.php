@@ -2047,7 +2047,37 @@
 
             submissionForms.forEach(({ form, btn }) => {
                 if (form && btn) {
-                    form.addEventListener('submit', function() {
+                    form.addEventListener('submit', function(e) {
+                        // Debug logging for Step 5
+                        if (form.action.includes('step-5')) {
+                            const photoInput = document.getElementById('additional_photos_input');
+                            const videoInput = document.getElementById('upload_video');
+                            
+                            // CRITICAL FIX: Ensure files are synced to input before submission
+                            if (window.selectedFiles && window.selectedFiles.length > 0) {
+                                console.log('Syncing selected files to input before submission...');
+                                const dt = new DataTransfer();
+                                window.selectedFiles.forEach(file => dt.items.add(file));
+                                if (photoInput) {
+                                    photoInput.files = dt.files;
+                                }
+                            }
+                            
+                            console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
+                            console.log('Photo Input:', photoInput);
+                            console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
+                            console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: f.size })) : []);
+                            console.log('Video Input:', videoInput);
+                            console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
+                            console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: f.size })) : []);
+                            console.log('=====================================');
+                            
+                            // If no photos, show alert
+                            if (!photoInput || photoInput.files.length === 0) {
+                                console.warn('WARNING: No photos detected in form submission!');
+                            }
+                        }
+                        
                         // Prevent double submission & show feedback
                         btn.setAttribute('disabled', 'disabled');
                         btn.style.opacity = '0.7';
