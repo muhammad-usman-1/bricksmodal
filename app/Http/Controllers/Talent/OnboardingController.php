@@ -263,7 +263,7 @@ class OnboardingController extends Controller
                 $requireDoc = empty($profile->id_document_front);
 
                 $data = $request->validate([
-                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'image'],
+                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
                 ]);
 
                 $updateData = [
@@ -295,7 +295,7 @@ class OnboardingController extends Controller
                     $data = $request->validate([
                         'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
                         'additional_photos' => ['nullable', 'array'],
-                        'additional_photos.*' => ['image', 'max:4096'],
+                        'additional_photos.*' => ['file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
                     ]);
                     Log::info('Validation passed for Step 5.');
                 } catch (\Illuminate\Validation\ValidationException $e) {
@@ -432,11 +432,13 @@ class OnboardingController extends Controller
                     $image = imagecreatefrompng($path);
                 } elseif ($mime === 'image/webp') {
                     $image = imagecreatefromwebp($path);
+                } elseif ($mime === 'image/gif') {
+                    $image = imagecreatefromgif($path);
                 }
 
                 if ($image) {
                     $tempPath = tempnam(sys_get_temp_dir(), 'compressed_');
-                    imagejpeg($image, $tempPath, 75); // 75% quality
+                    imagejpeg($image, $tempPath, 75); // 75% quality - convert all to JPEG for compression
                     imagedestroy($image);
                     
                     // Create a new File instance from the temporary compressed file
@@ -444,7 +446,7 @@ class OnboardingController extends Controller
                 }
              } catch (\Exception $e) {
                 Log::warning("Backend image compression failed: " . $e->getMessage());
-                // Fallback to original file if compression fails
+                // Fallback to original file if compression fails (e.g., for HEIC, HEIF, BMP, SVG)
              }
         }
 
