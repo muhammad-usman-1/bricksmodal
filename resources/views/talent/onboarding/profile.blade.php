@@ -1591,11 +1591,26 @@
 
                  
                  // --- Image Compression Utility ---
-                 const compressImage = (file, maxSizeMB = 10, quality = 0.7) => {
+                 const compressImage = (file, maxSizeMB = 10, quality = 0.75) => {
                      return new Promise((resolve, reject) => {
-                         if (file.type.indexOf('image/') === -1 || file.size <= maxSizeMB * 1024 * 1024) {
-                             resolve(file); // No compression needed
+                         if (file.type.indexOf('image/') === -1) {
+                             resolve(file); // Not an image, return as-is
                              return;
+                         }
+                         
+                         // Always compress if > maxSizeMB, otherwise compress for optimization
+                         const shouldCompress = file.size > maxSizeMB * 1024 * 1024;
+                         if (!shouldCompress && file.size <= 1 * 1024 * 1024) {
+                             resolve(file); // Small file, no compression needed
+                             return;
+                         }
+                         
+                         // Adjust quality based on file size
+                         let compressionQuality = quality;
+                         if (file.size > 20 * 1024 * 1024) {
+                             compressionQuality = 0.65; // More aggressive for very large files
+                         } else if (file.size > 10 * 1024 * 1024) {
+                             compressionQuality = 0.7; // Moderate for large files
                          }
 
                          const reader = new FileReader();
@@ -1611,8 +1626,14 @@
                                  let width = img.width;
                                  let height = img.height;
                                  
-                                 // Reduce dimensions if extremely large
-                                 const MAX_DIMENSION = 2048; 
+                                 // Reduce dimensions if extremely large - more aggressive for very large files
+                                 let MAX_DIMENSION = 2048;
+                                 if (file.size > 20 * 1024 * 1024) {
+                                     MAX_DIMENSION = 1920; // More aggressive for very large files
+                                 } else if (file.size > 10 * 1024 * 1024) {
+                                     MAX_DIMENSION = 2048; // Standard for large files
+                                 }
+                                 
                                  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
                                      if (width > height) {
                                          height *= MAX_DIMENSION / width;
@@ -1637,13 +1658,14 @@
                                          lastModified: Date.now()
                                      });
                                      
-                                     // If compressed version is smaller, use it. Otherwise use original.
-                                     if (newFile.size < file.size) {
+                                     // Always use compressed version if file was > maxSizeMB
+                                     // Otherwise use it if it's smaller
+                                     if (shouldCompress || newFile.size < file.size) {
                                          resolve(newFile);
                                      } else {
                                          resolve(file);
                                      }
-                                 }, 'image/jpeg', quality);
+                                 }, 'image/jpeg', compressionQuality);
                              };
                          };
                          reader.onerror = error => reject(error);
@@ -1685,13 +1707,27 @@
                                       activeCompressions++;
                                       updateSubmitButton();
 
-                                      const compressedFile = await compressImage(file);
+                                      // Always compress if > 10MB, otherwise compress anyway to ensure quality
+                                      const compressedFile = await compressImage(file, 10, 0.75);
+                                      
                                       // Update input files with compressed version
                                       const dt = new DataTransfer();
                                       dt.items.add(compressedFile);
                                       input.files = dt.files;
+                                      
+                                      // Store compressed file reference for Step 4
+                                      if (input.id === 'upload_id_document_front') {
+                                          input.dataset.compressedFile = 'true';
+                                      }
+                                      
+                                      console.log('Image compressed:', {
+                                          original: file.name,
+                                          originalSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                          compressedSize: (compressedFile.size / 1024 / 1024).toFixed(2) + ' MB'
+                                      });
                                   } catch (e) {
                                       console.error("Compression failed", e);
+                                      // Keep original file if compression fails
                                   } finally {
                                       activeCompressions--;
                                       updateSubmitButton();
@@ -1765,9 +1801,13 @@
                           }
                       });
 
-                      // Simulate upload progress for Step 4 ID document
+                      // Step 4 ID document - compression is handled in the main change handler above
+                      // This handler just shows progress UI
                       if (input.id === 'upload_id_document_front') {
-                          input.addEventListener('change', () => {
+                          // Remove duplicate event listener - compression is already handled above
+                          // Just add progress UI update after compression completes
+                          const originalChangeHandler = input.onchange;
+                          input.addEventListener('change', async () => {
                               if (input.files.length > 0) {
                                   // STRICT VALIDATION: Ensure it is an image
                                   if (!input.files[0].type.startsWith('image/')) {
@@ -1786,29 +1826,31 @@
                                       // Clear validation error immediately
                                       clearFieldError(input);
 
-                                      // Simulated upload progress
-                                      let progress = 0;
-                                      const interval = setInterval(() => {
-                                          progress += 10;
-                                          fill.style.width = `${progress}%`;
-                                          if (progress >= 100) {
-                                              clearInterval(interval);
-                                              // Show Success Message
-                                              const successMsg = document.createElement('div');
-                                              successMsg.className = 'upload-success-msg';
-                                              successMsg.style.color = '#10b981';
-                                              successMsg.style.fontSize = '12px';
-                                              successMsg.style.marginTop = '4px';
-                                              successMsg.style.fontWeight = '500';
-                                              successMsg.textContent = 'Done, Now Click Next to Submit the document.';
-                                              
-                                              // Remove old success message if exists
-                                              const oldMsg = card.querySelector('.upload-success-msg');
-                                              if(oldMsg) oldMsg.remove();
-                                              
-                                              card.querySelector('.upload-inner').appendChild(successMsg);
-                                          }
-                                      }, 50);
+                                      // Wait a bit for compression to complete, then show progress
+                                      setTimeout(() => {
+                                          let progress = 0;
+                                          const interval = setInterval(() => {
+                                              progress += 10;
+                                              fill.style.width = `${progress}%`;
+                                              if (progress >= 100) {
+                                                  clearInterval(interval);
+                                                  // Show Success Message
+                                                  const successMsg = document.createElement('div');
+                                                  successMsg.className = 'upload-success-msg';
+                                                  successMsg.style.color = '#10b981';
+                                                  successMsg.style.fontSize = '12px';
+                                                  successMsg.style.marginTop = '4px';
+                                                  successMsg.style.fontWeight = '500';
+                                                  successMsg.textContent = 'Done, Now Click Next to Submit the document.';
+                                                  
+                                                  // Remove old success message if exists
+                                                  const oldMsg = card.querySelector('.upload-success-msg');
+                                                  if(oldMsg) oldMsg.remove();
+                                                  
+                                                  card.querySelector('.upload-inner').appendChild(successMsg);
+                                              }
+                                          }, 50);
+                                      }, 500); // Wait for compression
                                   }
                               }
                           });
@@ -1934,40 +1976,65 @@
                       const existingError = document.getElementById('step5-file-error');
                       if(existingError) existingError.remove();
 
-                      Array.from(files).forEach(file => {
+                      // Process all files and compress if needed
+                      const filePromises = Array.from(files).map(async (file) => {
                           // Allow only images for Step 5 Photos
                           if (file.type.indexOf('image/') === -1) {
-                               // Optional: specific error for non-images
-                               return;
+                               return null; // Skip non-images
                           }
 
-                          // 2. Check for compression (restore logic)
-                          if (file.type.indexOf('image/') !== -1 && file.size > 10 * 1024 * 1024) {
+                          // Always compress images > 10MB, but also compress smaller ones for consistency
+                          if (file.size > 10 * 1024 * 1024) {
                                 activeCompressions++;
                                 updateSubmitButton();
                                 
-                                // Placeholder for the file in the UI (we push original first)
-                                window.selectedFiles.push(file);
-
-                                compressImage(file).then(compressed => {
-                                      // Find the original file we pushed and replace it
-                                      const idx = window.selectedFiles.indexOf(file);
-                                      if (idx !== -1) {
-                                          window.selectedFiles[idx] = compressed;
-                                          syncInputFiles();
-                                      }
-                                }).catch(err => console.error(err))
-                                  .finally(() => {
-                                      activeCompressions--;
-                                      updateSubmitButton();
-                                  });
+                                try {
+                                    const compressed = await compressImage(file, 10, 0.75);
+                                    console.log('Photo compressed:', {
+                                        original: file.name,
+                                        originalSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                        compressedSize: (compressed.size / 1024 / 1024).toFixed(2) + ' MB'
+                                    });
+                                    return compressed;
+                                } catch (err) {
+                                    console.error('Compression failed for', file.name, err);
+                                    return file; // Fallback to original
+                                } finally {
+                                    activeCompressions--;
+                                    updateSubmitButton();
+                                }
                           } else {
-                                window.selectedFiles.push(file);
+                                // For smaller files, still compress to ensure consistent quality
+                                if (file.size > 1 * 1024 * 1024) { // Compress files > 1MB for consistency
+                                    activeCompressions++;
+                                    updateSubmitButton();
+                                    try {
+                                        const compressed = await compressImage(file, 1, 0.8);
+                                        return compressed;
+                                    } catch (err) {
+                                        return file;
+                                    } finally {
+                                        activeCompressions--;
+                                        updateSubmitButton();
+                                    }
+                                }
+                                return file;
                           }
                       });
-                      
-                      syncInputFiles();
-                      renderPreviews();
+
+                      // Wait for all compressions to complete
+                      Promise.all(filePromises).then(processedFiles => {
+                          // Filter out nulls (non-images)
+                          const validFiles = processedFiles.filter(f => f !== null);
+                          
+                          // Add all processed files to selectedFiles
+                          validFiles.forEach(file => {
+                              window.selectedFiles.push(file);
+                          });
+                          
+                          syncInputFiles();
+                          renderPreviews();
+                      });
                   }
 
                   function syncInputFiles() {
@@ -2048,7 +2115,33 @@
 
             submissionForms.forEach(({ form, btn }) => {
                 if (form && btn) {
-                    form.addEventListener('submit', function(e) {
+                    form.addEventListener('submit', async function(e) {
+                        // Wait for any ongoing compressions before submission
+                        if (activeCompressions > 0) {
+                            e.preventDefault();
+                            console.log('Waiting for compressions to complete...', activeCompressions);
+                            
+                            // Wait for compressions to finish
+                            const checkInterval = setInterval(() => {
+                                if (activeCompressions === 0) {
+                                    clearInterval(checkInterval);
+                                    console.log('All compressions complete, submitting form...');
+                                    form.submit();
+                                }
+                            }, 100);
+                            
+                            // Timeout after 30 seconds
+                            setTimeout(() => {
+                                if (activeCompressions > 0) {
+                                    clearInterval(checkInterval);
+                                    console.warn('Compression timeout, submitting anyway...');
+                                    form.submit();
+                                }
+                            }, 30000);
+                            
+                            return;
+                        }
+                        
                         // Debug logging for Step 5
                         if (form.action.includes('step-5')) {
                             const photoInput = document.getElementById('additional_photos_input');
@@ -2067,15 +2160,29 @@
                             console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
                             console.log('Photo Input:', photoInput);
                             console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
-                            console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: f.size })) : []);
+                            console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
                             console.log('Video Input:', videoInput);
                             console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
-                            console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: f.size })) : []);
+                            console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
                             console.log('=====================================');
                             
                             // If no photos, show alert
                             if (!photoInput || photoInput.files.length === 0) {
                                 console.warn('WARNING: No photos detected in form submission!');
+                            }
+                        }
+                        
+                        // For Step 4, ensure compressed file is ready
+                        if (form.action.includes('step-4')) {
+                            const idInput = document.getElementById('upload_id_document_front');
+                            if (idInput && idInput.files.length > 0) {
+                                console.log('=== STEP 4 FORM SUBMISSION DEBUG ===');
+                                console.log('ID Document File:', {
+                                    name: idInput.files[0].name,
+                                    size: (idInput.files[0].size / 1024 / 1024).toFixed(2) + ' MB',
+                                    type: idInput.files[0].type
+                                });
+                                console.log('=====================================');
                             }
                         }
                         
