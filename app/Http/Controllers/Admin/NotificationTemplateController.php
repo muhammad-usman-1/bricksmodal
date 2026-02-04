@@ -12,10 +12,10 @@ class NotificationTemplateController extends Controller
      */
     public function index()
     {
-        $allTemplates = \App\Models\NotificationTemplate::all();
         $notificationTemplates = [
-            \App\Models\NotificationTemplate::ROLE_TALENT   => $allTemplates->where('role', \App\Models\NotificationTemplate::ROLE_TALENT),
-            \App\Models\NotificationTemplate::ROLE_ADMIN    => $allTemplates->where('role', \App\Models\NotificationTemplate::ROLE_ADMIN),
+            'talent'   => \App\Models\NotificationTemplate::where('role', 'talent')->get(),
+            'admin'    => \App\Models\NotificationTemplate::where('role', 'admin')->get(),
+            'creative' => \App\Models\NotificationTemplate::where('role', 'creative')->get(),
         ];
 
         return view('admin.notification-templates.index', compact('notificationTemplates'));
