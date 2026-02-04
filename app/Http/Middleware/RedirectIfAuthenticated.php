@@ -23,6 +23,22 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 switch ($guard) {
                     case 'talent':
+                        $user = Auth::guard('talent')->user();
+                        $profile = $user->talentProfile ?? null;
+                        
+                        // Check onboarding and verification status
+                        if (!$profile || !$profile->hasCompletedOnboarding()) {
+                            return redirect()->route('talent.onboarding.start');
+                        }
+                        
+                        if ($profile->verification_status !== 'approved') {
+                            // Check if onboarding was just completed
+                            if (session('onboarding_just_completed')) {
+                                return redirect()->route('talent.pending');
+                            }
+                            return redirect()->route('talent.pending_status');
+                        }
+                        
                         return redirect()->route('talent.dashboard');
                     case 'admin':
                     case null:

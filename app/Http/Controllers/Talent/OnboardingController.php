@@ -34,7 +34,12 @@ class OnboardingController extends Controller
 
         if ($profile->hasCompletedOnboarding()) {
             if ($profile->verification_status !== 'approved') {
-                return redirect()->route('talent.pending');
+                // If onboarding is completed but not approved, check if it was just completed
+                if (session('onboarding_just_completed')) {
+                    return redirect()->route('talent.pending');
+                }
+                // Otherwise, redirect to pending-status for subsequent visits
+                return redirect()->route('talent.pending_status');
             }
 
             return redirect()->route('talent.dashboard');
@@ -49,7 +54,12 @@ class OnboardingController extends Controller
 
         if ($profile->hasCompletedOnboarding()) {
             if ($profile->verification_status !== 'approved') {
-                return redirect()->route('talent.pending');
+                // If onboarding is completed but not approved, check if it was just completed
+                if (session('onboarding_just_completed')) {
+                    return redirect()->route('talent.pending');
+                }
+                // Otherwise, redirect to pending-status for subsequent visits
+                return redirect()->route('talent.pending_status');
             }
 
             return redirect()->route('talent.dashboard');
@@ -76,7 +86,12 @@ class OnboardingController extends Controller
 
         if ($profile->hasCompletedOnboarding()) {
             if ($profile->verification_status !== 'approved') {
-                return redirect()->route('talent.pending');
+                // If onboarding is completed but not approved, check if it was just completed
+                if (session('onboarding_just_completed')) {
+                    return redirect()->route('talent.pending');
+                }
+                // Otherwise, redirect to pending-status for subsequent visits
+                return redirect()->route('talent.pending_status');
             }
 
             return redirect()->route('talent.dashboard');
@@ -340,14 +355,14 @@ class OnboardingController extends Controller
                         'photo_count' => count($request->file('additional_photos')),
                         'profile_id' => $profile->id,
                     ]);
-                    
+
                     // Delete existing profile photos
                     $deletedCount = $profile->media()->where('type', 'profile')->delete();
                     Log::info('Deleted existing profile photos', ['count' => $deletedCount]);
-                    
+
                     $s3Disk = config('filesystems.cloud', 's3');
                     Log::info('Using S3 disk for uploads', ['disk' => $s3Disk]);
-                    
+
                     foreach ($request->file('additional_photos') as $index => $photo) {
                         try {
                             Log::info("Processing photo #{$index}", [
@@ -355,15 +370,15 @@ class OnboardingController extends Controller
                                 'size' => $photo->getSize(),
                                 'mime' => $photo->getClientMimeType(),
                             ]);
-                            
+
                             $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, true);
                             Log::info("Photo uploaded to S3", ['path' => $path]);
-                            
+
                             $media = $profile->media()->create([
                                 'file_path' => $path,
                                 'type' => 'profile',
                             ]);
-                            
+
                             Log::info("Media record created in database", [
                                 'media_id' => $media->id,
                                 'file_path' => $media->file_path,
@@ -377,7 +392,7 @@ class OnboardingController extends Controller
                             // Continue with other photos even if one fails
                         }
                     }
-                    
+
                     // Verify photos were saved
                     $savedPhotos = $profile->media()->where('type', 'profile')->get();
                     Log::info('Profile photos saved successfully', [
@@ -440,7 +455,7 @@ class OnboardingController extends Controller
                     $tempPath = tempnam(sys_get_temp_dir(), 'compressed_');
                     imagejpeg($image, $tempPath, 75); // 75% quality - convert all to JPEG for compression
                     imagedestroy($image);
-                    
+
                     // Create a new File instance from the temporary compressed file
                     $file = new \Illuminate\Http\File($tempPath);
                 }

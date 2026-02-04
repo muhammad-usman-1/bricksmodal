@@ -1556,37 +1556,22 @@
             setTimeout(toggleGenderBasedFields, 100);
 
             // 4. File Upload Features (Step 4 and Step 5)
+            // Declare activeCompressions in global scope so form submission handlers can access it
+            window.activeCompressions = window.activeCompressions || 0;
+            let activeCompressions = window.activeCompressions;
+            
             function initFileUploadSteps() {
                  const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
                  if(steps.length === 0) return;
                  
-                 let activeCompressions = 0;
+                 // Use global variable
+                 activeCompressions = window.activeCompressions || 0;
 
                   const updateSubmitButton = () => {
-                      const buttons = [
-                          { el: document.querySelector('#step4-action-group button[type="submit"]'), step: '4' },
-                          { el: document.querySelector('#step5-action-group button[type="submit"]'), step: '5' }
-                      ];
-
-                      buttons.forEach(btnInfo => {
-                          const btn = btnInfo.el;
-                          if(!btn) return;
-
-                          if(activeCompressions > 0) {
-                              btn.setAttribute('disabled', 'disabled');
-                              btn.style.opacity = '0.7';
-                              btn.style.cursor = 'not-allowed';
-                              btn.dataset.originalText = btn.dataset.originalText || btn.innerText;
-                              btn.innerText = 'Submitting...';
-                          } else {
-                              btn.removeAttribute('disabled');
-                              btn.style.opacity = '1';
-                              btn.style.cursor = 'pointer';
-                              if(btn.dataset.originalText) {
-                                  btn.innerText = btn.dataset.originalText;
-                              }
-                          }
-                      });
+                      // Don't update button states during compression
+                      // Both Step 4 and Step 5 buttons should remain enabled during compression
+                      // Buttons are only disabled when user actually clicks submit
+                      // This function is kept for potential future use but doesn't modify buttons during compression
                   };
 
                  
@@ -1704,8 +1689,9 @@
                                  }
 
                                   try {
-                                      activeCompressions++;
-                                      updateSubmitButton();
+                                      window.activeCompressions = (window.activeCompressions || 0) + 1;
+                                      activeCompressions = window.activeCompressions;
+                                      // Don't call updateSubmitButton() - button should stay enabled during compression
 
                                       // Always compress if > 10MB, otherwise compress anyway to ensure quality
                                       const compressedFile = await compressImage(file, 10, 0.75);
@@ -1729,8 +1715,9 @@
                                       console.error("Compression failed", e);
                                       // Keep original file if compression fails
                                   } finally {
-                                      activeCompressions--;
-                                      updateSubmitButton();
+                                      window.activeCompressions = Math.max(0, (window.activeCompressions || 0) - 1);
+                                      activeCompressions = window.activeCompressions;
+                                      // Don't call updateSubmitButton() - button should stay enabled during compression
                                   }
                               }
 
@@ -1985,8 +1972,9 @@
 
                           // Always compress images > 10MB, but also compress smaller ones for consistency
                           if (file.size > 10 * 1024 * 1024) {
-                                activeCompressions++;
-                                updateSubmitButton();
+                                window.activeCompressions = (window.activeCompressions || 0) + 1;
+                                activeCompressions = window.activeCompressions;
+                                // Don't call updateSubmitButton() for Step 5 - button should stay enabled during compression
                                 
                                 try {
                                     const compressed = await compressImage(file, 10, 0.75);
@@ -2000,22 +1988,25 @@
                                     console.error('Compression failed for', file.name, err);
                                     return file; // Fallback to original
                                 } finally {
-                                    activeCompressions--;
-                                    updateSubmitButton();
+                                    window.activeCompressions = Math.max(0, (window.activeCompressions || 0) - 1);
+                                    activeCompressions = window.activeCompressions;
+                                    // Don't call updateSubmitButton() for Step 5 - button should stay enabled during compression
                                 }
                           } else {
                                 // For smaller files, still compress to ensure consistent quality
                                 if (file.size > 1 * 1024 * 1024) { // Compress files > 1MB for consistency
-                                    activeCompressions++;
-                                    updateSubmitButton();
+                                    window.activeCompressions = (window.activeCompressions || 0) + 1;
+                                    activeCompressions = window.activeCompressions;
+                                    // Don't call updateSubmitButton() for Step 5 - button should stay enabled during compression
                                     try {
                                         const compressed = await compressImage(file, 1, 0.8);
                                         return compressed;
                                     } catch (err) {
                                         return file;
                                     } finally {
-                                        activeCompressions--;
-                                        updateSubmitButton();
+                                        window.activeCompressions = Math.max(0, (window.activeCompressions || 0) - 1);
+                                        activeCompressions = window.activeCompressions;
+                                        // Don't call updateSubmitButton() for Step 5 - button should stay enabled during compression
                                     }
                                 }
                                 return file;
@@ -2115,91 +2106,15 @@
 
             submissionForms.forEach(({ form, btn }) => {
                 if (form && btn) {
-                    form.addEventListener('submit', async function(e) {
-                        // Wait for any ongoing compressions before submission
-                        if (activeCompressions > 0) {
-                            e.preventDefault();
-                            console.log('Waiting for compressions to complete...', activeCompressions);
-                            
-                            // Wait for compressions to finish
-                            const checkInterval = setInterval(() => {
-                                if (activeCompressions === 0) {
-                                    clearInterval(checkInterval);
-                                    console.log('All compressions complete, submitting form...');
-                                    form.submit();
-                                }
-                            }, 100);
-                            
-                            // Timeout after 30 seconds
-                            setTimeout(() => {
-                                if (activeCompressions > 0) {
-                                    clearInterval(checkInterval);
-                                    console.warn('Compression timeout, submitting anyway...');
-                                    form.submit();
-                                }
-                            }, 30000);
-                            
-                            return;
-                        }
-                        
-                        // Debug logging for Step 5
-                        if (form.action.includes('step-5')) {
-                            const photoInput = document.getElementById('additional_photos_input');
-                            const videoInput = document.getElementById('upload_video');
-                            
-                            // CRITICAL FIX: Ensure files are synced to input before submission
-                            if (window.selectedFiles && window.selectedFiles.length > 0) {
-                                console.log('Syncing selected files to input before submission...');
-                                const dt = new DataTransfer();
-                                window.selectedFiles.forEach(file => dt.items.add(file));
-                                if (photoInput) {
-                                    photoInput.files = dt.files;
-                                }
-                            }
-                            
-                            console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
-                            console.log('Photo Input:', photoInput);
-                            console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
-                            console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
-                            console.log('Video Input:', videoInput);
-                            console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
-                            console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
-                            console.log('=====================================');
-                            
-                            // If no photos, show alert
-                            if (!photoInput || photoInput.files.length === 0) {
-                                console.warn('WARNING: No photos detected in form submission!');
-                            }
-                        }
-                        
-                        // For Step 4, ensure compressed file is ready
-                        if (form.action.includes('step-4')) {
-                            const idInput = document.getElementById('upload_id_document_front');
-                            if (idInput && idInput.files.length > 0) {
-                                console.log('=== STEP 4 FORM SUBMISSION DEBUG ===');
-                                console.log('ID Document File:', {
-                                    name: idInput.files[0].name,
-                                    size: (idInput.files[0].size / 1024 / 1024).toFixed(2) + ' MB',
-                                    type: idInput.files[0].type
-                                });
-                                console.log('=====================================');
-                            }
-                        }
-                        
-                        // Prevent double submission & show feedback
+                    // Store original button content
+                    const originalButtonHTML = btn.innerHTML;
+                    const originalButtonText = btn.textContent.trim();
+                    
+                    // Function to disable button and show "Submitting"
+                    const disableButton = () => {
                         btn.setAttribute('disabled', 'disabled');
                         btn.style.opacity = '0.7';
                         btn.style.cursor = 'wait';
-                        
-                        // Store original text if needed (though we submit immediately)
-                        btn.dataset.originalText = btn.innerText;
-                        
-                        // Change text
-                        // Check if it has an icon (SVG) - we want to keep text readable
-                        // Simplest approach: Replace entire innerHTML or just text node
-                        // For Step 4 "Next ->", Step 5 "Submit Application"
-                        
-                        // Preserving icon if possible, or just simple text for loading state
                         btn.innerHTML = 'Submitting... <svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>';
                         
                         // Add spin animation style if not present
@@ -2208,6 +2123,192 @@
                             style.id = 'spin-style';
                             style.innerHTML = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`;
                             document.head.appendChild(style);
+                        }
+                    };
+                    
+                    // Function to re-enable button
+                    const enableButton = () => {
+                        btn.removeAttribute('disabled');
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                        btn.innerHTML = originalButtonHTML;
+                    };
+                    
+                    form.addEventListener('submit', async function(e) {
+                        e.preventDefault(); // Always prevent default to handle submission manually
+                        
+                        // Wait for any ongoing compressions before submission
+                        const currentCompressions = window.activeCompressions || 0;
+                        if (currentCompressions > 0) {
+                            console.log('Waiting for compressions to complete...', currentCompressions);
+                            
+                            // Disable button while waiting
+                            disableButton();
+                            
+                            // Wait for compressions to finish
+                            const checkInterval = setInterval(() => {
+                                const compressions = window.activeCompressions || 0;
+                                if (compressions === 0) {
+                                    clearInterval(checkInterval);
+                                    console.log('All compressions complete, submitting form...');
+                                    // Continue with form submission
+                                    submitForm();
+                                }
+                            }, 100);
+                            
+                            // Timeout after 30 seconds
+                            setTimeout(() => {
+                                const compressions = window.activeCompressions || 0;
+                                if (compressions > 0) {
+                                    clearInterval(checkInterval);
+                                    console.warn('Compression timeout, submitting anyway...');
+                                    submitForm();
+                                }
+                            }, 30000);
+                            
+                            return;
+                        }
+                        
+                        // Start submission
+                        submitForm();
+                        
+                        async function submitForm() {
+                            // Disable button immediately
+                            disableButton();
+                            
+                            // Debug logging for Step 5
+                            if (form.action.includes('step-5')) {
+                                const photoInput = document.getElementById('additional_photos_input');
+                                const videoInput = document.getElementById('upload_video');
+                                
+                                // CRITICAL FIX: Ensure files are synced to input before submission
+                                if (window.selectedFiles && window.selectedFiles.length > 0) {
+                                    console.log('Syncing selected files to input before submission...');
+                                    const dt = new DataTransfer();
+                                    window.selectedFiles.forEach(file => dt.items.add(file));
+                                    if (photoInput) {
+                                        photoInput.files = dt.files;
+                                    }
+                                }
+                                
+                                console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
+                                console.log('Photo Input:', photoInput);
+                                console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
+                                console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
+                                console.log('Video Input:', videoInput);
+                                console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
+                                console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
+                                console.log('=====================================');
+                                
+                                // If no photos, show alert
+                                if (!photoInput || photoInput.files.length === 0) {
+                                    console.warn('WARNING: No photos detected in form submission!');
+                                }
+                            }
+                            
+                            // For Step 4, ensure compressed file is ready
+                            if (form.action.includes('step-4')) {
+                                const idInput = document.getElementById('upload_id_document_front');
+                                if (idInput && idInput.files.length > 0) {
+                                    console.log('=== STEP 4 FORM SUBMISSION DEBUG ===');
+                                    console.log('ID Document File:', {
+                                        name: idInput.files[0].name,
+                                        size: (idInput.files[0].size / 1024 / 1024).toFixed(2) + ' MB',
+                                        type: idInput.files[0].type
+                                    });
+                                    console.log('=====================================');
+                                }
+                            }
+                            
+                            try {
+                                // Create FormData from form
+                                const formData = new FormData(form);
+                                
+                                // Submit using fetch - let browser handle redirects automatically
+                                const response = await fetch(form.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                    },
+                                    credentials: 'same-origin'
+                                });
+                                
+                                // Check if response was redirected (Laravel redirect on success)
+                                if (response.redirected || response.url !== form.action) {
+                                    // Success - follow the redirect
+                                    window.location.href = response.url;
+                                    return; // Don't re-enable button as we're redirecting
+                                }
+                                
+                                // Check if response is JSON (validation errors)
+                                const contentType = response.headers.get('content-type') || '';
+                                if (contentType.includes('application/json')) {
+                                    const data = await response.json();
+                                    
+                                    if (data.errors || data.message) {
+                                        // Validation errors - re-enable button
+                                        enableButton();
+                                        
+                                        // Display errors
+                                        console.error('Validation errors:', data.errors || data.message);
+                                        const errorMsg = data.message || 'Please fix the errors and try again.';
+                                        alert(errorMsg);
+                                        return;
+                                    }
+                                }
+                                
+                                // Check for error status codes
+                                if (response.status >= 400) {
+                                    enableButton();
+                                    
+                                    // Try to get error message
+                                    try {
+                                        const text = await response.text();
+                                        try {
+                                            const errorData = JSON.parse(text);
+                                            alert(errorData.message || 'An error occurred. Please try again.');
+                                        } catch {
+                                            // Not JSON, might be HTML error page
+                                            alert('An error occurred. Please try again.');
+                                        }
+                                    } catch {
+                                        alert('An error occurred. Please try again.');
+                                    }
+                                    return;
+                                }
+                                
+                                // Success (200 status) - check if response contains redirect info
+                                if (response.status === 200) {
+                                    const text = await response.text();
+                                    
+                                    // Try to extract redirect URL from HTML response (Laravel might return HTML)
+                                    const redirectMatch = text.match(/window\.location\s*=\s*['"]([^'"]+)['"]/) || 
+                                                         text.match(/location\.href\s*=\s*['"]([^'"]+)['"]/) ||
+                                                         text.match(/<meta[^>]*http-equiv=["']refresh["'][^>]*content=["'][^;]*url=([^"']+)/i) ||
+                                                         text.match(/<script[^>]*>[\s\S]*?window\.location\s*=\s*['"]([^'"]+)['"]/i);
+                                    
+                                    if (redirectMatch && redirectMatch[1]) {
+                                        window.location.href = redirectMatch[1];
+                                        return; // Don't re-enable button as we're redirecting
+                                    }
+                                    
+                                    // If no redirect found but status is 200, assume success
+                                    // Laravel might have set session data, reload to see updated state
+                                    window.location.reload();
+                                    return;
+                                }
+                                
+                                // Fallback: if we get here, something unexpected happened
+                                enableButton();
+                                console.warn('Unexpected response status:', response.status);
+                                
+                            } catch (error) {
+                                // Network error or other exception
+                                console.error('Submission error:', error);
+                                enableButton();
+                                alert('Network error. Please check your connection and try again.');
+                            }
                         }
                     });
                 }
