@@ -99,7 +99,7 @@ class ProjectController extends Controller
         ]);
 
         $notificationService->notifyAdmins('admin_shoot_application', [
-            'name'         => $profile->display_name,
+            'talent_name'  => $profile->display_name,
             'project_name' => $castingRequirement->project_name,
         ], [
             'casting_requirement_id' => $castingRequirement->id,

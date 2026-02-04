@@ -145,9 +145,97 @@ class NotificationTemplateSeeder extends Seeder
                 'content_ar' => 'كان هناك بعض النشاط في حسابك: {detail}',
                 'language_preference' => 'both',
             ],
+            // Admin Notifications
+            [
+                'key' => 'admin_talent_signup',
+                'name' => 'Admin: Talent Signup',
+                'role' => 'admin',
+                'title_en' => 'New Talent Signup',
+                'title_ar' => 'تسجيل موهبة جديدة',
+                'content_en' => 'A new talent {name} has signed up with phone number {phone}.',
+                'content_ar' => 'قام موهبة جديد {name} بالتسجيل برقم الهاتف {phone}.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_talent_profile_submission',
+                'name' => 'Admin: Talent Profile Submission',
+                'role' => 'admin',
+                'title_en' => 'Talent Profile Submitted',
+                'title_ar' => 'تم تقديم ملف موهبة',
+                'content_en' => 'Talent {name} has completed their profile and submitted it for review. Please review, approve, or reject.',
+                'content_ar' => 'قام الموهبة {name} بإكمال ملفه الشخصي وتقديمه للمراجعة. يرجى المراجعة والموافقة أو الرفض.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_shoot_application',
+                'name' => 'Admin: Shoot Application',
+                'role' => 'admin',
+                'title_en' => 'New Shoot Application',
+                'title_ar' => 'طلب تصوير جديد',
+                'content_en' => 'Talent {talent_name} has applied for shoot: {project_name}.',
+                'content_ar' => 'قام الموهبة {talent_name} بالتقديم على التصوير: {project_name}.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_payment_request',
+                'name' => 'Admin: Payment Request',
+                'role' => 'admin',
+                'title_en' => 'Payment Request Received',
+                'title_ar' => 'تم استلام طلب دفع',
+                'content_en' => 'Talent {talent_name} has requested payment for {project_name}. Amount: {amount}',
+                'content_ar' => 'طلب الموهبة {talent_name} دفعاً لـ {project_name}. المبلغ: {amount}',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_payment_received',
+                'name' => 'Admin: Payment Received Confirmation',
+                'role' => 'admin',
+                'title_en' => 'Payment Confirmed by Talent',
+                'title_ar' => 'تأكيد استلام الدفعة من الموهبة',
+                'content_en' => 'Talent {talent_name} has confirmed receiving payment for {project_name}.',
+                'content_ar' => 'أكد الموهبة {talent_name} استلام الدفعة لـ {project_name}.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_profile_status_update',
+                'name' => 'Admin: Profile Status Update',
+                'role' => 'admin',
+                'title_en' => 'Profile Status Updated',
+                'title_ar' => 'تم تحديث حالة الملف الشخصي',
+                'content_en' => '{admin_name} has {status} talent profile: {name}.',
+                'content_ar' => '{admin_name} قام بـ {status} ملف الموهبة: {name}.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
+            [
+                'key' => 'admin_application_status_update',
+                'name' => 'Admin: Application Status Update',
+                'role' => 'admin',
+                'title_en' => 'Application Status Changed',
+                'title_ar' => 'تم تغيير حالة الطلب',
+                'content_en' => '{admin_name} has {status} application from {talent_name} for {project_name}.',
+                'content_ar' => '{admin_name} قام بـ {status} طلب من {talent_name} لـ {project_name}.',
+                'language_preference' => 'both',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($templates as $template) {
+            // Set default role if not specified
+            if (!isset($template['role'])) {
+                $template['role'] = 'talent';
+            }
+            
+            // Set default is_active if not specified
+            if (!isset($template['is_active'])) {
+                $template['is_active'] = true;
+            }
+            
             NotificationTemplate::updateOrCreate(['key' => $template['key']], $template);
         }
     }
