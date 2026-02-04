@@ -13,6 +13,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
+use App\Notifications\TalentSignupCompleted;
 
 class OnboardingController extends Controller
 {
@@ -356,12 +359,11 @@ class OnboardingController extends Controller
                     'name' => $profile->display_name,
                 ]);
 
-                $notificationService->notifyAdmins('admin_talent_profile_submission', [
-                    'name' => $profile->display_name,
-                ], [
-                    'talent_profile_id' => $profile->id,
-                    'type'              => 'new_profile_submission',
-                ]);
+                $admins = User::whereHas('roles', function($q) {
+                    $q->whereIn('title', ['admin', 'superadmin', 'creative']);
+                })->get();
+
+                Notification::send($admins, new TalentSignupCompleted($profile));
 
                 session()->flash('onboarding_just_completed', true);
                 return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));

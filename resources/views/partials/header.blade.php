@@ -338,7 +338,12 @@ height:auto;
                             </a>
                         @endif
                     </div>
-                    <div id="notifications-list" style="max-height: 380px; overflow-y: auto;">
+                    <div id="notifications-list" style="max-height: 380px; overflow-y: scroll; overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none;">
+                        <style>
+                            #notifications-list::-webkit-scrollbar {
+                                display: none;
+                            }
+                        </style>
                         @if($adminUser)
                             @forelse($adminUser->notifications()->latest()->limit(5)->get() as $notification)
                                 <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
