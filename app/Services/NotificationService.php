@@ -85,7 +85,8 @@ class NotificationService
             }
         }
 
-        $notifiable->notify(new TemplateEmailNotification($title, $content, $finalMeta));
+        // Email notifications disabled as per user request
+        // $notifiable->notify(new TemplateEmailNotification($title, $content, $finalMeta));
     }
 
     /**

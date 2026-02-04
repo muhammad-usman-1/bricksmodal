@@ -363,7 +363,8 @@ class OnboardingController extends Controller
                     $q->whereIn('title', ['admin', 'superadmin', 'creative']);
                 })->get();
 
-                Notification::send($admins, new TalentSignupCompleted($profile));
+                // Email notifications disabled as per user request
+                // Notification::send($admins, new TalentSignupCompleted($profile));
 
                 session()->flash('onboarding_just_completed', true);
                 return redirect()->route('talent.pending')->with('message', trans('global.onboarding_submitted'));

@@ -25,7 +25,8 @@ class EmailTemplateManager
         $body    = $template?->render($variables) ?? Arr::get($meta, 'fallback_body', '');
 
         try {
-            $user->notify(new TemplateEmailNotification($subject, $body, $meta));
+            // Email notifications disabled as per user request
+            // $user->notify(new TemplateEmailNotification($subject, $body, $meta));
         } catch (\Throwable $e) {
             Log::warning('Unable to send template email', [
                 'user_id'  => $user->id,
