@@ -333,7 +333,7 @@
         }
 
         .seg-btn {
-           
+
             height: 48px;
             border: 1px solid #e5e7eb;
             background: #ffffff;
@@ -682,7 +682,7 @@
                 justify-content: center;
             }
         }
-        
+
         .required-asterisk {
             color: #dc3545;
             margin-left: 2px;
@@ -851,7 +851,7 @@
                                         if (waInp) {
                                             waInp.addEventListener('input', function(e) {
                                                 this.value = this.value.replace(/\D/g, '');
-                                                
+
                                                 // Clear error on input
                                                 if (this.classList.contains('is-invalid')) {
                                                     this.classList.remove('is-invalid');
@@ -887,25 +887,25 @@
                                                     { id: 'date_of_birth', msg: 'Date of birth is required' },
                                                     { id: 'nationality', msg: 'Nationality is required' }
                                                 ];
-                                                
+
                                                 // Validate core fields
                                                 requiredIds.forEach(item => {
                                                     const el = document.getElementById(item.id);
                                                     const errEl = document.getElementById('error-' + item.id);
-                                                    
+
                                                     if (el && !el.value.trim()) {
                                                         isValid = false;
                                                         el.classList.add('is-invalid');
                                                         el.style.borderColor = '#dc3545';
                                                         if(errEl) errEl.style.visibility = 'visible';
-                                                        
+
                                                         // Add input listener to clear error
                                                         el.addEventListener('input', function() {
                                                             this.classList.remove('is-invalid');
                                                             this.style.borderColor = '#e5e7eb';
                                                             if(errEl) errEl.style.visibility = 'hidden';
                                                         }, { once: true });
-                                                        
+
                                                         // For select inputs (nationality)
                                                         el.addEventListener('change', function() {
                                                             this.classList.remove('is-invalid');
@@ -918,7 +918,7 @@
                                                 // Validate WhatsApp if alternate is selected
                                                 const chk = document.querySelector('input[name="whatsapp_choice"]:checked');
                                                 const choice = chk ? chk.value : 'same';
-                                                
+
                                                 if (choice === 'alt' && waInp) {
                                                     const val = waInp.value.replace(/\D/g, '');
                                                     if (val.length !== 8) {
@@ -1118,7 +1118,7 @@
                                             { id: 'eye_color', msg: 'Eye color is required' },
                                             { id: 'skin_tone', msg: 'Skin tone is required' }
                                         ];
-                                        
+
                                         // Strict Validation for Height/Weight
                                         const heightEl = document.getElementById('height');
                                         if(heightEl && heightEl.value) {
@@ -1151,11 +1151,11 @@
                                                 }
                                             }
                                         }
-                                        
+
                                         requiredIds.forEach(item => {
                                             const el = document.getElementById(item.id);
                                             const errEl = document.getElementById('error-' + item.id);
-                                            
+
                                             if (el && el.offsetParent !== null && !el.value.trim()) {
                                                 isValid = false;
                                                 el.classList.add('is-invalid');
@@ -1234,7 +1234,7 @@
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const form = document.querySelector('form[action*="step-3"]');
-                                
+
                                 // Restrict Shoe Size to 2 digits
                                 const shoeInput = document.getElementById('shoe_size');
                                 if(shoeInput) {
@@ -1251,17 +1251,17 @@
                                             { id: 'dress_size', msg: 'Dress size is required' },
                                             { id: 'shoe_size', msg: 'Shoe size is required' }
                                         ];
-                                        
+
                                         requiredIds.forEach(item => {
                                             const el = document.getElementById(item.id);
                                             const errEl = document.getElementById('error-' + item.id);
-                                            
+
                                             if (el && !el.value.trim()) {
                                                 isValid = false;
                                                 el.classList.add('is-invalid');
                                                 el.style.borderColor = '#dc3545';
                                                 if(errEl) errEl.style.visibility = 'visible';
-                                                
+
                                                 ['input', 'change'].forEach(evt => {
                                                     el.addEventListener(evt, function() {
                                                         this.classList.remove('is-invalid');
@@ -1507,7 +1507,7 @@
                     if (gender === 'female') {
                         hijabSection.style.display = 'block';
                         hijabRadios.forEach(r => r.setAttribute('required', 'required'));
-                        
+
                         // Default to Non-Hijabi if nothing selected
                         const checkedHijab = document.querySelector('input[name="hijab_preference"]:checked');
                         if (!checkedHijab) {
@@ -1559,11 +1559,11 @@
             // Declare activeCompressions in global scope so form submission handlers can access it
             window.activeCompressions = window.activeCompressions || 0;
             let activeCompressions = window.activeCompressions;
-            
+
             function initFileUploadSteps() {
                  const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
                  if(steps.length === 0) return;
-                 
+
                  // Use global variable
                  activeCompressions = window.activeCompressions || 0;
 
@@ -1574,7 +1574,7 @@
                       // This function is kept for potential future use but doesn't modify buttons during compression
                   };
 
-                 
+
                  // --- Image Compression Utility ---
                  const compressImage = (file, maxSizeMB = 10, quality = 0.75) => {
                      return new Promise((resolve, reject) => {
@@ -1582,14 +1582,14 @@
                              resolve(file); // Not an image, return as-is
                              return;
                          }
-                         
+
                          // Always compress if > maxSizeMB, otherwise compress for optimization
                          const shouldCompress = file.size > maxSizeMB * 1024 * 1024;
                          if (!shouldCompress && file.size <= 1 * 1024 * 1024) {
                              resolve(file); // Small file, no compression needed
                              return;
                          }
-                         
+
                          // Adjust quality based on file size
                          let compressionQuality = quality;
                          if (file.size > 20 * 1024 * 1024) {
@@ -1606,11 +1606,11 @@
                              img.onload = () => {
                                  const canvas = document.createElement('canvas');
                                  const ctx = canvas.getContext('2d');
-                                 
+
                                  // Simple scaling logic (maintain aspect ratio)
                                  let width = img.width;
                                  let height = img.height;
-                                 
+
                                  // Reduce dimensions if extremely large - more aggressive for very large files
                                  let MAX_DIMENSION = 2048;
                                  if (file.size > 20 * 1024 * 1024) {
@@ -1618,7 +1618,7 @@
                                  } else if (file.size > 10 * 1024 * 1024) {
                                      MAX_DIMENSION = 2048; // Standard for large files
                                  }
-                                 
+
                                  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
                                      if (width > height) {
                                          height *= MAX_DIMENSION / width;
@@ -1642,7 +1642,7 @@
                                          type: 'image/jpeg',
                                          lastModified: Date.now()
                                      });
-                                     
+
                                      // Always use compressed version if file was > maxSizeMB
                                      // Otherwise use it if it's smaller
                                      if (shouldCompress || newFile.size < file.size) {
@@ -1695,17 +1695,17 @@
 
                                       // Always compress if > 10MB, otherwise compress anyway to ensure quality
                                       const compressedFile = await compressImage(file, 10, 0.75);
-                                      
+
                                       // Update input files with compressed version
                                       const dt = new DataTransfer();
                                       dt.items.add(compressedFile);
                                       input.files = dt.files;
-                                      
+
                                       // Store compressed file reference for Step 4
                                       if (input.id === 'upload_id_document_front') {
                                           input.dataset.compressedFile = 'true';
                                       }
-                                      
+
                                       console.log('Image compressed:', {
                                           original: file.name,
                                           originalSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
@@ -1729,24 +1729,24 @@
                                      input.value = '';
                                      return;
                                  }
-                                 
+
                                  const container = card.querySelector('.progress-bar-container');
                                   const fill = card.querySelector('.progress-bar-fill');
                                   const labelDiv = card.querySelector('.upload-label');
-                                  
+
                                   if (container && fill) {
                                       container.style.display = 'block';
                                       fill.style.width = '0%';
-                                      
+
                                       // Optional: Update label to indicate processing
                                       if(labelDiv) labelDiv.textContent = 'Compressing...';
-                                      
+
                                       // Simulated compression/upload progress for video
                                       let progress = 0;
                                       const interval = setInterval(() => {
                                           progress += 5; // Slower for video
                                           fill.style.width = `${progress}%`;
-                                          
+
                                           if (progress >= 100) {
                                               clearInterval(interval);
                                               // Show Success Message
@@ -1757,13 +1757,13 @@
                                               successMsg.style.marginTop = '4px';
                                               successMsg.style.fontWeight = '500';
                                               successMsg.textContent = 'Done, Now Click Next to Submit your Profile images and video.';
-                                              
+
                                               // Remove old success message if exists
                                               const oldMsg = card.querySelector('.upload-success-msg');
                                               if(oldMsg) oldMsg.remove();
-                                              
+
                                               card.querySelector('.upload-inner').appendChild(successMsg);
-                                              
+
                                               // Restore file name in label
                                               if(labelDiv && input.files[0]) {
                                                   // slightly delayed to let user see "Compression" context if desired, or just show file name now
@@ -1805,11 +1805,11 @@
 
                                  const container = card.querySelector('.progress-bar-container');
                                   const fill = card.querySelector('.progress-bar-fill');
-                                  
+
                                   if (container && fill) {
                                       container.style.display = 'block';
                                       fill.style.width = '0%';
-                                      
+
                                       // Clear validation error immediately
                                       clearFieldError(input);
 
@@ -1829,11 +1829,11 @@
                                                   successMsg.style.marginTop = '4px';
                                                   successMsg.style.fontWeight = '500';
                                                   successMsg.textContent = 'Done, Now Click Next to Submit the document.';
-                                                  
+
                                                   // Remove old success message if exists
                                                   const oldMsg = card.querySelector('.upload-success-msg');
                                                   if(oldMsg) oldMsg.remove();
-                                                  
+
                                                   card.querySelector('.upload-inner').appendChild(successMsg);
                                               }
                                           }, 50);
@@ -1975,7 +1975,7 @@
                                 window.activeCompressions = (window.activeCompressions || 0) + 1;
                                 activeCompressions = window.activeCompressions;
                                 // Don't call updateSubmitButton() for Step 5 - button should stay enabled during compression
-                                
+
                                 try {
                                     const compressed = await compressImage(file, 10, 0.75);
                                     console.log('Photo compressed:', {
@@ -2017,12 +2017,12 @@
                       Promise.all(filePromises).then(processedFiles => {
                           // Filter out nulls (non-images)
                           const validFiles = processedFiles.filter(f => f !== null);
-                          
+
                           // Add all processed files to selectedFiles
                           validFiles.forEach(file => {
                               window.selectedFiles.push(file);
                           });
-                          
+
                           syncInputFiles();
                           renderPreviews();
                       });
@@ -2053,7 +2053,7 @@
                                         </div>
                                     </div>`;
                                   previewContainer.appendChild(div);
-                                  
+
                                   // Simulate progress for newly added item
                                   // Use a slightly longer timeout to ensure DOM update
                                   setTimeout(() => {
@@ -2095,9 +2095,9 @@
 
             // 3. Form Submission Validation - Specific Targeting
             // 3. Form Submission Validation - Specific Targeting
-            // Removed legacy attachValidation() to prevent SweetAlerts. 
+            // Removed legacy attachValidation() to prevent SweetAlerts.
             // Validation is now handled by inline scripts in each step.
-            
+
             // 4. Submission Loading State (Step 4 & Step 5)
             const submissionForms = [
                 { form: document.querySelector('form[action*="step-4"]'), btn: document.querySelector('#step4-action-group button[type="submit"]') },
@@ -2109,14 +2109,14 @@
                     // Store original button content
                     const originalButtonHTML = btn.innerHTML;
                     const originalButtonText = btn.textContent.trim();
-                    
+
                     // Function to disable button and show "Submitting"
                     const disableButton = () => {
                         btn.setAttribute('disabled', 'disabled');
                         btn.style.opacity = '0.7';
                         btn.style.cursor = 'wait';
                         btn.innerHTML = 'Submitting... <svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>';
-                        
+
                         // Add spin animation style if not present
                         if(!document.getElementById('spin-style')) {
                             const style = document.createElement('style');
@@ -2125,7 +2125,7 @@
                             document.head.appendChild(style);
                         }
                     };
-                    
+
                     // Function to re-enable button
                     const enableButton = () => {
                         btn.removeAttribute('disabled');
@@ -2133,18 +2133,61 @@
                         btn.style.cursor = 'pointer';
                         btn.innerHTML = originalButtonHTML;
                     };
-                    
+
                     form.addEventListener('submit', async function(e) {
+                        // For Step 5, use regular form submission to preserve session flash
+                        if (form.action.includes('step-5')) {
+                            // Wait for any ongoing compressions before submission
+                            const currentCompressions = window.activeCompressions || 0;
+                            if (currentCompressions > 0) {
+                                e.preventDefault();
+                                console.log('Waiting for compressions to complete...', currentCompressions);
+
+                                // Disable button while waiting
+                                disableButton();
+
+                                // Wait for compressions to finish
+                                const checkInterval = setInterval(() => {
+                                    const compressions = window.activeCompressions || 0;
+                                    if (compressions === 0) {
+                                        clearInterval(checkInterval);
+                                        console.log('All compressions complete, submitting form...');
+                                        // Submit form normally (don't prevent default)
+                                        form.submit();
+                                    }
+                                }, 100);
+
+                                // Timeout after 30 seconds
+                                setTimeout(() => {
+                                    const compressions = window.activeCompressions || 0;
+                                    if (compressions > 0) {
+                                        clearInterval(checkInterval);
+                                        console.warn('Compression timeout, submitting anyway...');
+                                        form.submit();
+                                    }
+                                }, 30000);
+
+                                return;
+                            }
+
+                            // No compressions in progress, allow normal form submission
+                            // Disable button before submission
+                            disableButton();
+                            // Let form submit normally - don't prevent default
+                            return;
+                        }
+
+                        // For Step 4, use fetch API
                         e.preventDefault(); // Always prevent default to handle submission manually
-                        
+
                         // Wait for any ongoing compressions before submission
                         const currentCompressions = window.activeCompressions || 0;
                         if (currentCompressions > 0) {
                             console.log('Waiting for compressions to complete...', currentCompressions);
-                            
+
                             // Disable button while waiting
                             disableButton();
-                            
+
                             // Wait for compressions to finish
                             const checkInterval = setInterval(() => {
                                 const compressions = window.activeCompressions || 0;
@@ -2155,7 +2198,7 @@
                                     submitForm();
                                 }
                             }, 100);
-                            
+
                             // Timeout after 30 seconds
                             setTimeout(() => {
                                 const compressions = window.activeCompressions || 0;
@@ -2165,22 +2208,22 @@
                                     submitForm();
                                 }
                             }, 30000);
-                            
+
                             return;
                         }
-                        
+
                         // Start submission
                         submitForm();
-                        
+
                         async function submitForm() {
                             // Disable button immediately
                             disableButton();
-                            
+
                             // Debug logging for Step 5
                             if (form.action.includes('step-5')) {
                                 const photoInput = document.getElementById('additional_photos_input');
                                 const videoInput = document.getElementById('upload_video');
-                                
+
                                 // CRITICAL FIX: Ensure files are synced to input before submission
                                 if (window.selectedFiles && window.selectedFiles.length > 0) {
                                     console.log('Syncing selected files to input before submission...');
@@ -2190,7 +2233,7 @@
                                         photoInput.files = dt.files;
                                     }
                                 }
-                                
+
                                 console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
                                 console.log('Photo Input:', photoInput);
                                 console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
@@ -2199,13 +2242,13 @@
                                 console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
                                 console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
                                 console.log('=====================================');
-                                
+
                                 // If no photos, show alert
                                 if (!photoInput || photoInput.files.length === 0) {
                                     console.warn('WARNING: No photos detected in form submission!');
                                 }
                             }
-                            
+
                             // For Step 4, ensure compressed file is ready
                             if (form.action.includes('step-4')) {
                                 const idInput = document.getElementById('upload_id_document_front');
@@ -2219,12 +2262,12 @@
                                     console.log('=====================================');
                                 }
                             }
-                            
+
                             try {
                                 // Create FormData from form
                                 const formData = new FormData(form);
-                                
-                                // Submit using fetch - let browser handle redirects automatically
+
+                                // Submit using fetch - let browser follow redirects automatically
                                 const response = await fetch(form.action, {
                                     method: 'POST',
                                     body: formData,
@@ -2233,23 +2276,25 @@
                                     },
                                     credentials: 'same-origin'
                                 });
-                                
+
                                 // Check if response was redirected (Laravel redirect on success)
-                                if (response.redirected || response.url !== form.action) {
+                                // When fetch follows a redirect, response.redirected will be true
+                                // or response.url will be different from form.action
+                                if (response.redirected || (response.url && response.url !== form.action)) {
                                     // Success - follow the redirect
                                     window.location.href = response.url;
                                     return; // Don't re-enable button as we're redirecting
                                 }
-                                
+
                                 // Check if response is JSON (validation errors)
                                 const contentType = response.headers.get('content-type') || '';
                                 if (contentType.includes('application/json')) {
                                     const data = await response.json();
-                                    
+
                                     if (data.errors || data.message) {
                                         // Validation errors - re-enable button
                                         enableButton();
-                                        
+
                                         // Display errors
                                         console.error('Validation errors:', data.errors || data.message);
                                         const errorMsg = data.message || 'Please fix the errors and try again.';
@@ -2257,11 +2302,11 @@
                                         return;
                                     }
                                 }
-                                
+
                                 // Check for error status codes
                                 if (response.status >= 400) {
                                     enableButton();
-                                    
+
                                     // Try to get error message
                                     try {
                                         const text = await response.text();
@@ -2277,32 +2322,38 @@
                                     }
                                     return;
                                 }
-                                
+
                                 // Success (200 status) - check if response contains redirect info
                                 if (response.status === 200) {
                                     const text = await response.text();
-                                    
+
                                     // Try to extract redirect URL from HTML response (Laravel might return HTML)
-                                    const redirectMatch = text.match(/window\.location\s*=\s*['"]([^'"]+)['"]/) || 
+                                    const redirectMatch = text.match(/window\.location\s*=\s*['"]([^'"]+)['"]/) ||
                                                          text.match(/location\.href\s*=\s*['"]([^'"]+)['"]/) ||
                                                          text.match(/<meta[^>]*http-equiv=["']refresh["'][^>]*content=["'][^;]*url=([^"']+)/i) ||
                                                          text.match(/<script[^>]*>[\s\S]*?window\.location\s*=\s*['"]([^'"]+)['"]/i);
-                                    
+
                                     if (redirectMatch && redirectMatch[1]) {
                                         window.location.href = redirectMatch[1];
                                         return; // Don't re-enable button as we're redirecting
                                     }
-                                    
+
                                     // If no redirect found but status is 200, assume success
-                                    // Laravel might have set session data, reload to see updated state
+                                    // For Step 4, redirect to next step
+                                    if (form.action.includes('step-4')) {
+                                        window.location.href = '{{ route("talent.onboarding.show", "step-5") }}';
+                                        return;
+                                    }
+
+                                    // Fallback: reload only if we can't determine redirect
                                     window.location.reload();
                                     return;
                                 }
-                                
+
                                 // Fallback: if we get here, something unexpected happened
                                 enableButton();
                                 console.warn('Unexpected response status:', response.status);
-                                
+
                             } catch (error) {
                                 // Network error or other exception
                                 console.error('Submission error:', error);
