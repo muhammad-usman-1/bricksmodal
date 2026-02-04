@@ -336,15 +336,56 @@ class OnboardingController extends Controller
                 }
 
                 if ($request->hasFile('additional_photos')) {
-                    $profile->media()->where('type', 'profile')->delete();
+                    Log::info('Processing additional_photos in Step 5...', [
+                        'photo_count' => count($request->file('additional_photos')),
+                        'profile_id' => $profile->id,
+                    ]);
+                    
+                    // Delete existing profile photos
+                    $deletedCount = $profile->media()->where('type', 'profile')->delete();
+                    Log::info('Deleted existing profile photos', ['count' => $deletedCount]);
+                    
                     $s3Disk = config('filesystems.cloud', 's3');
-                    foreach ($request->file('additional_photos') as $photo) {
-                        $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, false); // No compression for step 5
-                        $profile->media()->create([
-                            'file_path' => $path,
-                            'type' => 'profile',
-                        ]);
+                    Log::info('Using S3 disk for uploads', ['disk' => $s3Disk]);
+                    
+                    foreach ($request->file('additional_photos') as $index => $photo) {
+                        try {
+                            Log::info("Processing photo #{$index}", [
+                                'original_name' => $photo->getClientOriginalName(),
+                                'size' => $photo->getSize(),
+                                'mime' => $photo->getClientMimeType(),
+                            ]);
+                            
+                            $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, false);
+                            Log::info("Photo uploaded to S3", ['path' => $path]);
+                            
+                            $media = $profile->media()->create([
+                                'file_path' => $path,
+                                'type' => 'profile',
+                            ]);
+                            
+                            Log::info("Media record created in database", [
+                                'media_id' => $media->id,
+                                'file_path' => $media->file_path,
+                                'type' => $media->type,
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error("Failed to upload photo #{$index}", [
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString(),
+                            ]);
+                            // Continue with other photos even if one fails
+                        }
                     }
+                    
+                    // Verify photos were saved
+                    $savedPhotos = $profile->media()->where('type', 'profile')->get();
+                    Log::info('Profile photos saved successfully', [
+                        'count' => $savedPhotos->count(),
+                        'photos' => $savedPhotos->pluck('file_path')->toArray(),
+                    ]);
+                } else {
+                    Log::info('No additional_photos in request for Step 5');
                 }
 
                 $profile->update([
