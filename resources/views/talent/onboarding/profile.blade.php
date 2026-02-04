@@ -1844,7 +1844,8 @@
                   const multiUploadArea = multiInput ? multiInput.closest('.upload-card') : null;
                   const previewContainer = document.getElementById('additional-photo-previews');
 
-                  let selectedFiles = [];
+                  // Make selectedFiles globally accessible for form submission
+                  window.selectedFiles = [];
 
                   // Camera Capture Logic
                   const cameraBtn = document.getElementById('camera-capture-btn');
@@ -1946,13 +1947,13 @@
                                 updateSubmitButton();
                                 
                                 // Placeholder for the file in the UI (we push original first)
-                                selectedFiles.push(file);
+                                window.selectedFiles.push(file);
 
                                 compressImage(file).then(compressed => {
                                       // Find the original file we pushed and replace it
-                                      const idx = selectedFiles.indexOf(file);
+                                      const idx = window.selectedFiles.indexOf(file);
                                       if (idx !== -1) {
-                                          selectedFiles[idx] = compressed;
+                                          window.selectedFiles[idx] = compressed;
                                           syncInputFiles();
                                       }
                                 }).catch(err => console.error(err))
@@ -1961,7 +1962,7 @@
                                       updateSubmitButton();
                                   });
                           } else {
-                                selectedFiles.push(file);
+                                window.selectedFiles.push(file);
                           }
                       });
                       
@@ -1972,16 +1973,16 @@
                   function syncInputFiles() {
                       if (!multiInput) return;
                       const dt = new DataTransfer();
-                      selectedFiles.forEach(file => dt.items.add(file));
+                      window.selectedFiles.forEach(file => dt.items.add(file));
                       multiInput.files = dt.files;
                   }
 
                   function renderPreviews() {
                       previewContainer.innerHTML = '';
-                      if (selectedFiles.length > 0) {
+                      if (window.selectedFiles.length > 0) {
                           const uploadLabel = multiUploadArea.querySelector('.upload-label');
-                          if (uploadLabel) uploadLabel.textContent = `${selectedFiles.length} photos selected`;
-                          selectedFiles.forEach((file, index) => {
+                          if (uploadLabel) uploadLabel.textContent = `${window.selectedFiles.length} photos selected`;
+                          window.selectedFiles.forEach((file, index) => {
                               const reader = new FileReader();
                               reader.onload = (e) => {
                                   const div = document.createElement('div');
