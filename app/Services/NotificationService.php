@@ -27,22 +27,34 @@ class NotificationService
         }
 
         $language = $template->language_preference;
-        $title = $template->title_en;
-        $content = $template->content_en;
-        $langId = 1; // English for KWT SMS
+        $titleEn = $template->title_en;
+        $contentEn = $template->content_en;
+        $titleAr = $template->title_ar;
+        $contentAr = $template->content_ar;
 
+        // Determine primary language for email/SMS
         if ($language === 'ar' || ($language === 'both' && method_exists($notifiable, 'getPreferredLanguage') && $notifiable->getPreferredLanguage() === 'ar')) {
-            $title = $template->title_ar ?? $title;
-            $content = $template->content_ar ?? $content;
-            $langId = 2; // Arabic for KWT SMS
+            $title = $titleAr ?? $titleEn;
+            $content = $contentAr ?? $contentEn;
+            $langId = 2; // Arabic
         } else {
-            $langId = 1; // English for KWT SMS
+            $title = $titleEn;
+            $content = $contentEn;
+            $langId = 1; // English
         }
 
         // Replace placeholders
+        // Replace placeholders in all variants
         foreach ($placeholders as $placeholder => $value) {
-            $title = str_replace('{' . $placeholder . '}', (string)$value, $title);
-            $content = str_replace('{' . $placeholder . '}', (string)$value, $content);
+            $valStr = (string)$value;
+            $title = str_replace('{' . $placeholder . '}', $valStr, $title);
+            $content = str_replace('{' . $placeholder . '}', $valStr, $content);
+            
+            if($titleEn) $titleEn = str_replace('{' . $placeholder . '}', $valStr, $titleEn);
+            if($titleAr) $titleAr = str_replace('{' . $placeholder . '}', $valStr, $titleAr);
+            
+            if($contentEn) $contentEn = str_replace('{' . $placeholder . '}', $valStr, $contentEn);
+            if($contentAr) $contentAr = str_replace('{' . $placeholder . '}', $valStr, $contentAr);
         }
 
         // Predefined list of keys that should trigger SMS to talent
@@ -54,6 +66,10 @@ class NotificationService
             'send_sms' => $shouldSendSms,
             'lang'     => $langId,
             'type'     => $key,
+            'title_en' => $titleEn,
+            'title_ar' => $titleAr,
+            'message_en' => $contentEn, // consistent naming
+            'message_ar' => $contentAr,
         ], $meta);
 
         // If mobile number isn't provided in meta, try to find it

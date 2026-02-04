@@ -363,13 +363,27 @@ height:auto;
                                             @else
                                                 <i class="fas fa-bell text-dark" style="font-size: 14px;"></i>
                                             @endif
-                                            <span class="notification-title">{{ $notification->data['title'] ?? ($notification->data['subject'] ?? 'Notification') }}</span>
+                                            <div class="d-flex flex-column">
+                                                <span class="notification-title">
+                                                    {{ $notification->data['title_en'] ?? ($notification->data['title'] ?? ($notification->data['subject'] ?? 'Notification')) }}
+                                                </span>
+                                                @if(!empty($notification->data['title_ar']))
+                                                    <span class="notification-title" style="direction: rtl; font-family: 'Tajawal', sans-serif;">{{ $notification->data['title_ar'] }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         @if(!$notification->read_at)
                                             <button onclick="markAdminNotificationAsRead('{{ $notification->id }}')" class="mark-read-mini">Mark as read</button>
                                         @endif
                                     </div>
-                                    <div class="notification-msg">{{ $notification->data['message'] ?? ($notification->data['body'] ?? '') }}</div>
+                                    <div class="notification-msg">
+                                        {{ $notification->data['message_en'] ?? ($notification->data['message'] ?? ($notification->data['body'] ?? '')) }}
+                                        @if(!empty($notification->data['message_ar']))
+                                            <div style="direction: rtl; font-family: 'Tajawal', sans-serif; margin-top: 2px;">
+                                                {{ $notification->data['message_ar'] }}
+                                            </div>
+                                        @endif
+                                    </div>
                                     <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
                                 </div>
                             @empty

@@ -28,7 +28,9 @@ class TalentSignupCompleted extends Notification implements ShouldQueue
     {
         return [
             'title' => 'Talent Signup Complete',
+            'title_ar' => 'اكتمل تسجيل الموهبة',
             'message' => 'A talent signup complete. Visit profile and approve/reject it.',
+            'message_ar' => 'تم اكتمال تسجيل الموهبة. قم بزيارة الملف الشخصي والموافقة عليه أو رفضه.',
             'type' => 'talent_signup',
             'talent_profile_id' => $this->talentProfile->id,
             'time' => now(),

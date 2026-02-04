@@ -67,6 +67,11 @@ class TemplateEmailNotification extends Notification implements ShouldQueue
         return array_merge($this->meta, [
             'title'   => $this->subject,
             'message' => $this->body,
+            'title_en' => $this->meta['title_en'] ?? null,
+            'title_ar' => $this->meta['title_ar'] ?? null,
+            'message_en' => $this->meta['message_en'] ?? null,
+            'message_ar' => $this->meta['message_ar'] ?? null,
+            'message' => $this->body,
         ]);
     }
 }
