@@ -12,6 +12,7 @@
 
     /* Override or ensure body settings if needed, though layout usually handles this */
     .profile-dashboard {
+        margin-top: 10px;
         font-family: 'Inter', sans-serif; /* Ensure font matches design */
         color: var(--text-dark);
     }

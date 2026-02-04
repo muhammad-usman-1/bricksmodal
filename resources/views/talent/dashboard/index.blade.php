@@ -33,6 +33,7 @@
 
 <style>
     .dashboard-header {
+            margin-top: 10px;
         background: black;
         border-radius: 12px;
         padding: 32px 40px;
