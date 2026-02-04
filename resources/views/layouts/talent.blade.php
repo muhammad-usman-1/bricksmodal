@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ trans('panel.site_title') }}</title>
-    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/@coreui/coreui@3.2/dist/css/coreui.min.css" rel="stylesheet" />
@@ -180,52 +180,91 @@
                         <img src="{{ asset('images/setting.png') }}" alt="Settings">
                     </a>
                     <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
-            @php
-                $talentUser = auth('talent')->user();
+                        @php
+                            $talentUser = auth('talent')->user();
                             $unreadCount = $talentUser ? $talentUser->unreadNotifications->count() : 0;
                         @endphp
                         <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" style="margin-left: 0 !important; position: relative !important;">
                             <img src="{{ asset('images/noti.png') }}" alt="Notifications">
-                            <span class="noti-badge {{ $unreadCount > 0 ? '' : 'd-none' }}"></span>
+                            <span class="noti-badge {{ $unreadCount > 0 ? '' : 'd-none' }}" id="notification-badge">
+                                @if($unreadCount > 0)
+                                    <span class="badge-count">{{ $unreadCount }}</span>
+                                @endif
+                            </span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right pt-0" style="max-height: 400px; overflow-y: auto;">
-                            <div class="dropdown-header bg-light py-2">
+                        <style>
+                            .noti-badge {
+                                position: absolute !important;
+                                top: -2px !important;
+                                right: -2px !important;
+                                width: 18px !important;
+                                height: 18px !important;
+                                background: #ef4444 !important;
+                                border-radius: 50% !important;
+                                border: 2px solid #fff !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                font-size: 10px !important;
+                                color: white !important;
+                                font-weight: bold !important;
+                            }
+                            .dropdown-item.unread { background-color: #f9fafb; }
+                            .mark-read-btn { 
+                                padding: 2px 6px; 
+                                font-size: 10px; 
+                                border-radius: 4px; 
+                                border: 1px solid #e5e7eb;
+                                background: #fff;
+                                color: #6b7280;
+                                cursor: pointer;
+                            }
+                            .mark-read-btn:hover { background: #f3f4f6; }
+                        </style>
+                        <div class="dropdown-menu dropdown-menu-right pt-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <div class="dropdown-header bg-light d-flex justify-content-between align-items-center py-2">
                                 <strong>Notifications</strong>
                                 @if($talentUser && $unreadCount > 0)
-                                    <a href="#" class="float-right text-muted" style="font-size: 0.8em;">
+                                    <a href="javascript:void(0)" onclick="markAllNotificationsAsRead()" class="text-muted" style="font-size: 0.8em;">
                                         Mark all as read
                                     </a>
                                 @endif
                             </div>
-                            @if($talentUser)
-                                @forelse($talentUser->notifications()->latest()->limit(10)->get() as $notification)
-                                    <a class="dropdown-item {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}"
-                                       href="#">
-                                        @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
-                                            <i class="fas fa-user text-info"></i>
-                                        @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
-                                            <i class="fas fa-video text-warning"></i>
-                                        @else
-                                            <i class="fas fa-bell text-secondary"></i>
-                                        @endif
-                                        {{ $notification->data['title'] ?? 'Notification' }}
-                                        @if(isset($notification->data['message']))
-                                            <div class="small text-muted">{{ $notification->data['message'] }}</div>
-                                        @endif
-                                        <div class="small text-muted">{{ $notification->created_at->diffForHumans() }}</div>
-                                    </a>
-                                @empty
-                                    <div class="dropdown-item text-center text-muted">
+                            <div id="notifications-list">
+                                @if($talentUser)
+                                    @forelse($talentUser->notifications()->latest()->limit(10)->get() as $notification)
+                                        <div class="dropdown-item d-flex flex-column p-3 {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <div class="d-flex align-items-center">
+                                                    @if(isset($notification->data['type']) && $notification->data['type'] === 'talent_profile')
+                                                        <i class="fas fa-user text-dark mr-2"></i>
+                                                    @elseif(isset($notification->data['type']) && $notification->data['type'] === 'casting_application')
+                                                        <i class="fas fa-video text-dark mr-2"></i>
+                                                    @else
+                                                        <i class="fas fa-bell text-dark mr-2"></i>
+                                                    @endif
+                                                    <span class="font-weight-bold" style="font-size: 13px;">{{ $notification->data['title'] ?? 'Notification' }}</span>
+                                                </div>
+                                                @if(!$notification->read_at)
+                                                    <button onclick="markNotificationAsRead('{{ $notification->id }}')" class="mark-read-btn">Mark as read</button>
+                                                @endif
+                                            </div>
+                                            <div class="small text-muted mb-1">{{ $notification->data['message'] ?? '' }}</div>
+                                            <div class="small text-secondary">{{ $notification->created_at->diffForHumans() }}</div>
+                                        </div>
+                                    @empty
+                                        <div class="dropdown-item text-center text-muted py-3">
+                                            No notifications
+                                        </div>
+                                    @endforelse
+                                @else
+                                    <div class="dropdown-item text-center text-muted py-3">
                                         No notifications
                                     </div>
-                                @endforelse
-                            @else
-                                <div class="dropdown-item text-center text-muted">
-                                    No notifications
-                                </div>
-                            @endif
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-center" href="#">
+                                @endif
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <a class="dropdown-item text-center py-2 font-weight-bold" href="{{ route('talent.notifications.index') }}" style="font-size: 12px; color: #000 !important;">
                                 View all notifications
                             </a>
                         </div>
@@ -268,6 +307,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://unpkg.com/@coreui/coreui@3.2/dist/js/coreui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
+    
+    <script>
+        function markNotificationAsRead(id) {
+            $.ajax({
+                url: '/talent/notifications/' + id + '/mark-as-read',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#notification-' + id).removeClass('unread');
+                        $('#notification-' + id + ' .mark-read-btn').remove();
+                        updateBadgeCount();
+                    }
+                }
+            });
+        }
+
+        function markAllNotificationsAsRead() {
+            $.ajax({
+                url: '{{ route('talent.notifications.mark-all-read') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('.dropdown-item.unread').removeClass('unread');
+                        $('.mark-read-btn').remove();
+                        $('#notification-badge').addClass('d-none');
+                        $('.dropdown-header .text-muted').remove();
+                    }
+                }
+            });
+        }
+
+        function updateBadgeCount() {
+            let count = parseInt($('.badge-count').text()) - 1;
+            if (count > 0) {
+                $('.badge-count').text(count);
+            } else {
+                $('#notification-badge').addClass('d-none');
+                $('.dropdown-header .text-muted').remove();
+            }
+        }
+    </script>
+
     @yield('scripts')
 </body>
 

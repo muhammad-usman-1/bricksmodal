@@ -24,6 +24,7 @@ use App\Http\Controllers\Talent\Auth\RegisterController as TalentRegisterControl
 use App\Http\Controllers\Talent\DashboardController as TalentDashboardController;
 use App\Http\Controllers\Talent\OnboardingController;
 use App\Http\Controllers\Talent\ProfileController as TalentPortalProfileController;
+use App\Http\Controllers\Talent\NotificationController as TalentNotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/talent/login');
@@ -107,6 +108,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class)->only(['index', 'edit', 'update']);
+        Route::resource('notification-templates', \App\Http\Controllers\Admin\NotificationTemplateController::class);
 
         // Outfit Management
         Route::resource('outfits', \App\Http\Controllers\Admin\OutfitController::class);
@@ -228,6 +230,11 @@ Route::prefix('talent')->as('talent.')->group(function () {
             // Talent Settings Routes
             Route::get('settings', [\App\Http\Controllers\Talent\SettingsController::class, 'index'])->name('settings.index');
             Route::post('settings', [\App\Http\Controllers\Talent\SettingsController::class, 'update'])->name('settings.update');
+
+            // Talent Notifications
+            Route::get('notifications', [TalentNotificationController::class, 'index'])->name('notifications.index');
+            Route::post('notifications/{id}/mark-as-read', [TalentNotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+            Route::post('notifications/mark-all-read', [TalentNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
         });
     });
 });

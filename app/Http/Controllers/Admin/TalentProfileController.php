@@ -205,7 +205,7 @@ class TalentProfileController extends Controller
             'onboarding_completed_at' => $talentProfile->onboarding_completed_at ?? now(),
         ]);
 
-        $this->notifyTalent($talentProfile, 'approved', trans('notifications.talent_profile_approved'), $notes);
+        $this->triggerNotification($talentProfile, 'talent_profile_approval', $notes);
 
         if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
             return redirect()->route('admin.home')->with('sweetalert_success', 'Talent approved successfully!');
@@ -228,7 +228,7 @@ class TalentProfileController extends Controller
             'onboarding_step'     => 'pending-approval',
         ]);
 
-        $this->notifyTalent($talentProfile, 'rejected', trans('notifications.talent_profile_rejected'), $data['notes'] ?? null);
+        $this->triggerNotification($talentProfile, 'talent_profile_rejection', $data['notes'] ?? null);
 
         if (request()->is('*home*') || request()->is('admin') || url()->previous() === route('admin.home')) {
             return redirect()->route('admin.home')->with('sweetalert_success', 'Talent rejected successfully!');
@@ -272,12 +272,12 @@ class TalentProfileController extends Controller
             'onboarding_step'     => 'pending-approval',
         ]);
 
-        $this->notifyTalent($talentProfile, 'pending', trans('notifications.talent_profile_reactivated'), $notes);
+        $this->triggerNotification($talentProfile, 'talent_profile_reactivated', $notes);
 
         return back()->with('message', trans('notifications.status_updated'));
     }
 
-    protected function notifyTalent(TalentProfile $talentProfile, string $status, string $message, ?string $notes = null): void
+    protected function triggerNotification(TalentProfile $talentProfile, string $key, ?string $notes = null): void
     {
         $user = $talentProfile->user;
 
@@ -285,18 +285,17 @@ class TalentProfileController extends Controller
             return;
         }
 
-        EmailTemplateManager::sendToUser($user, 'talent_profile_' . $status, [
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->send($user, $key, [
             'name'   => $user->name,
-            'status' => ucfirst($status),
+            'status' => str_replace('talent_profile_', '', $key),
             'notes'  => $notes ?? '',
         ], [
             'talent_profile_id' => $talentProfile->id,
             'acted_by'          => optional(auth()->user())->name,
-            'status'            => $status,
-            'fallback_body'     => $message,
-            'fallback_subject'  => trans('notifications.mail.subject'),
         ]);
     }
+
 
     protected function removeTalentProfile(TalentProfile $talentProfile, bool $notify = false): void
     {

@@ -310,11 +310,11 @@ class CastingRequirementController extends Controller
 
     protected function notifyApprovedTalents(CastingRequirement $castingRequirement): void
     {
-        $templateKey = 'project_created_notification';
+        $notificationService = app(\App\Services\NotificationService::class);
 
         TalentProfile::where('verification_status', 'approved')
             ->with(['user', 'labels'])
-            ->chunk(200, function ($profiles) use ($castingRequirement, $templateKey) {
+            ->chunk(200, function ($profiles) use ($castingRequirement, $notificationService) {
                 foreach ($profiles as $profile) {
                     $user = $profile->user;
 
@@ -326,7 +326,7 @@ class CastingRequirementController extends Controller
                         continue;
                     }
 
-                    EmailTemplateManager::sendToUser($user, $templateKey, [
+                    $notificationService->send($user, 'shoot_creation', [
                         'project_name'     => $castingRequirement->project_name,
                         'project_location' => $castingRequirement->location ?? trans('global.not_set'),
                         'project_notes'    => $castingRequirement->notes ?? '',
@@ -335,8 +335,6 @@ class CastingRequirementController extends Controller
                     ], [
                         'casting_requirement_id' => $castingRequirement->id,
                         'type'                    => 'project_created',
-                        'fallback_subject'        => trans('notifications.project_created_subject', ['project' => $castingRequirement->project_name]),
-                        'fallback_body'           => trans('notifications.project_created_fallback', ['project' => $castingRequirement->project_name, 'url' => route('talent.projects.show', $castingRequirement)]),
                     ]);
                 }
             });

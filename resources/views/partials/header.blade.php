@@ -234,7 +234,14 @@ height:auto;
                     <a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">
                         View all notifications
                     </a>
+                    @if(auth()->user()->isSuperAdmin())
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-center font-weight-bold" href="{{ route('admin.notification-templates.index') }}">
+                            <i class="fas fa-cog mr-1"></i> Manage Notifications
+                        </a>
+                    @endif
                 </div>
+
             </div>
         </div>
     </div>

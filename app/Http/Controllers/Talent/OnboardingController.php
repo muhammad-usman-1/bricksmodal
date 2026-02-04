@@ -132,7 +132,7 @@ class OnboardingController extends Controller
 
 
 
-    public function store(Request $request, string $step): RedirectResponse
+    public function store(Request $request, string $step, \App\Services\NotificationService $notificationService): RedirectResponse
     {
         Log::info("OnboardingController::store called for step: $step");
         if ($step === 'step-4') {
@@ -201,6 +201,10 @@ class OnboardingController extends Controller
                     'date_of_birth'     => $data['date_of_birth'],
                     'onboarding_step'   => 'step-2',
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 1),
+                ]);
+
+                $notificationService->send($request->user('talent'), 'talent_profile_edit', [
+                    'step' => 'Basic Info',
                 ]);
 
                 return redirect()->route('talent.onboarding.show', 'step-2');
@@ -345,6 +349,10 @@ class OnboardingController extends Controller
                     'onboarding_steps_completed' => 5,
                     'onboarding_completed_at' => now(),
                     'verification_status'     => 'pending',
+                ]);
+
+                $notificationService->send($request->user('talent'), 'talent_profile_submission', [
+                    'name' => $profile->display_name,
                 ]);
 
                 session()->flash('onboarding_just_completed', true);

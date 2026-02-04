@@ -79,6 +79,17 @@ class PaymentController extends Controller
             'payment_received_at' => now(),
         ]);
 
+        // Notify system/admin about payment received
+        $notificationService = app(\App\Services\NotificationService::class);
+        // We can notify the talent themselves as confirmation, or admins.
+        // The template suggests it's a confirmation: "Payment receipt for {project_name} has been confirmed."
+        $notificationService->send($talent, 'payment_received', [
+            'project_name' => optional($castingApplication->casting_requirement)->project_name,
+        ], [
+            'casting_application_id' => $castingApplication->id,
+            'type' => 'payment_received_confirmation',
+        ]);
+
         return back()->with('message', 'Payment receipt confirmed. Thank you!');
     }
 

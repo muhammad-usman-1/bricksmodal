@@ -45,7 +45,7 @@ class KwtSmsService
 
         $timestamp = now()->format('Y-m-d H:i:s');
         // Build the message
-        $message = "Dear Bricks Community User, Here is your OTP: {$otp}. DO NOT DISCLOSE THIS OTP to anyone!  {$timestamp}";
+        $message = "Dear Bricks Community User, Here is your OTP {$otp}. DO NOT DISCLOSE THIS OTP to anyone!  {$timestamp}";
 
         // For Kuwait numbers (starting with 965), try full format first (works for KWT SMS API)
         $formatsToTry = [];
@@ -177,6 +177,50 @@ class KwtSmsService
             'message' => $errorMessage,
             'response' => $errorResponse,
         ];
+    }
+
+    /**
+     * Send generic SMS via KWT SMS API
+     *
+     * @param string $mobile Mobile number (e.g., 96551557699)
+     * @param string $message The message content
+     * @param int $lang 1 for English, 2 for Arabic
+     * @return array ['success' => bool, 'message' => string, 'response' => mixed]
+     */
+    public function sendSms(string $mobile, string $message, int $lang = 1): array
+    {
+        // Clean mobile number - remove spaces, dashes, plus signs
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+
+        // Ensure Kuwait country code if it looks like a local number
+        if (strlen($mobile) === 8) {
+            $mobile = '965' . $mobile;
+        }
+
+        if (empty($mobile) || strlen($mobile) < 8) {
+            return ['success' => false, 'message' => 'Invalid mobile number format'];
+        }
+
+        try {
+            $response = Http::timeout(30)->withoutVerifying()->get($this->apiUrl, [
+                'username' => $this->username,
+                'password' => $this->password,
+                'sender'   => $this->sender,
+                'mobile'   => $mobile,
+                'lang'     => $lang,
+                'message'  => $message,
+            ]);
+
+            $responseBody = trim($response->body());
+            
+            if ($response->successful() && stripos($responseBody, 'ERR') === false) {
+                return ['success' => true, 'message' => 'SMS sent successfully', 'response' => $responseBody];
+            }
+
+            return ['success' => false, 'message' => 'Failed to send SMS: ' . $responseBody, 'response' => $responseBody];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'SMS Service Exception: ' . $e->getMessage()];
+        }
     }
 
     /**

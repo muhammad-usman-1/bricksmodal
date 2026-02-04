@@ -231,7 +231,14 @@ class PaymentRequestController extends Controller
 
                 // Notify the talent
                 if ($talentProfile->user) {
-                    $talentProfile->user->notify(new PaymentReleased($castingApplication));
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->send($talentProfile->user, 'payment_sent', [
+                        'amount' => '$' . number_format($amount, 2),
+                        'project_name' => $castingApplication->casting_requirement->project_name,
+                    ], [
+                        'casting_application_id' => $castingApplication->id,
+                        'type' => 'payment_sent',
+                    ]);
                 }
 
                 return redirect()->route('admin.payment-requests.index')->with('message',

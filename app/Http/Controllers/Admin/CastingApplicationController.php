@@ -125,14 +125,13 @@ class CastingApplicationController extends Controller
         // Send notification to talent
         $talent = optional($castingApplication->talent_profile)->user;
         if ($talent) {
-            EmailTemplateManager::sendToUser($talent, 'talent_application_selected', [
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->send($talent, 'shoot_acceptance', [
                 'project_name' => optional($castingApplication->casting_requirement)->project_name,
                 'notes'        => $data['admin_notes'] ?? '',
             ], [
                 'casting_application_id' => $castingApplication->id,
                 'type'                   => 'application_selected',
-                'fallback_subject'       => trans('notifications.application_selected_subject', ['project' => optional($castingApplication->casting_requirement)->project_name]),
-                'fallback_body'          => trans('notifications.application_selected_body', ['project' => optional($castingApplication->casting_requirement)->project_name, 'notes' => $data['admin_notes'] ?? '']),
             ]);
         }
 
@@ -163,14 +162,13 @@ class CastingApplicationController extends Controller
         // Send notification to talent
         $talent = optional($castingApplication->talent_profile)->user;
         if ($talent) {
-            EmailTemplateManager::sendToUser($talent, 'talent_application_rejected', [
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->send($talent, 'shoot_rejection', [
                 'project_name' => optional($castingApplication->casting_requirement)->project_name,
                 'notes'        => $data['admin_notes'] ?? '',
             ], [
                 'casting_application_id' => $castingApplication->id,
                 'type'                   => 'application_rejected',
-                'fallback_subject'       => trans('notifications.application_rejected_subject', ['project' => optional($castingApplication->casting_requirement)->project_name]),
-                'fallback_body'          => trans('notifications.application_rejected_body', ['project' => optional($castingApplication->casting_requirement)->project_name, 'notes' => $data['admin_notes'] ?? '']),
             ]);
         }
 
@@ -198,8 +196,17 @@ class CastingApplicationController extends Controller
             'status' => 'shortlisted',
         ]);
 
-        // Optional: Notify talent? 
-        // For now, no notification as per plan unless requested.
+        // Notify talent about shortlist
+        $talent = optional($castingApplication->talent_profile)->user;
+        if ($talent) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->send($talent, 'shoot_shortlist', [
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type'                   => 'application_shortlisted',
+            ]);
+        }
         
         return back()->with('message', 'Application shortlisted successfully.');
     }
@@ -251,10 +258,30 @@ class CastingApplicationController extends Controller
             'reviews' => $data['reviews'],
         ]);
 
-        // Notify all super admins about payment request
+        // Notify all super admins about payment request using payment_request template
         $superAdmins = User::where('is_super_admin', true)->where('type', 'admin')->get();
+        $notificationService = app(\App\Services\NotificationService::class);
         foreach ($superAdmins as $superAdmin) {
-            $superAdmin->notify(new PaymentRequested($castingApplication));
+            $notificationService->send($superAdmin, 'payment_request', [
+                'talent_name' => optional($castingApplication->talent_profile)->display_name,
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type' => 'payment_requested',
+            ]);
+        }
+
+        // Notify talent about feedback
+        $talent = optional($castingApplication->talent_profile)->user;
+        if ($talent) {
+            $notificationService->send($talent, 'feedback_notification', [
+                'rating' => $data['rating'],
+                'notes' => $data['reviews'],
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type' => 'feedback_received',
+            ]);
         }
 
         return back()->with('message', 'Payment request sent to Super Admin for approval.');
@@ -344,7 +371,18 @@ class CastingApplicationController extends Controller
             'payment_released_at' => now(),
         ]);
 
-        // TODO: Notify talent about payment release
+        // Notify talent about payment release
+        $talent = optional($castingApplication->talent_profile)->user;
+        if ($talent) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->send($talent, 'payment_sent', [
+                'amount' => 'your payment', // Amount not always stored on the app model directly
+                'project_name' => optional($castingApplication->casting_requirement)->project_name,
+            ], [
+                'casting_application_id' => $castingApplication->id,
+                'type' => 'payment_sent',
+            ]);
+        }
 
         return back()->with('message', 'Payment released to talent successfully.');
     }

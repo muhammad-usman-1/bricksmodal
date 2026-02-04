@@ -63,7 +63,7 @@ class ProjectController extends Controller
         return view('talent.projects.show', compact('castingRequirement', 'existingApplication'));
     }
 
-    public function apply(Request $request, CastingRequirement $castingRequirement)
+    public function apply(Request $request, CastingRequirement $castingRequirement, \App\Services\NotificationService $notificationService)
     {
         $profile = $request->user('talent')->talentProfile;
         if (! $profile) {
@@ -92,6 +92,10 @@ class ProjectController extends Controller
             'talent_notes'           => $data['talent_notes'] ?? null,
             'status'                 => 'applied',
             'payment_processed'      => 'n/a',
+        ]);
+
+        $notificationService->send($request->user('talent'), 'shoot_application', [
+            'project_name' => $castingRequirement->project_name,
         ]);
 
         return redirect()->route('talent.projects.show', $castingRequirement)->with('message', trans('global.application_submitted'));

@@ -21,7 +21,7 @@ class RegisterController extends Controller
         return view('talent.auth.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, \App\Services\NotificationService $notificationService)
     {
         // Validate phone number input
         $data = $request->validate([
@@ -46,6 +46,11 @@ class RegisterController extends Controller
         $user->otp_consumed = false;
         $user->otp_attempts = 0;
         $user->save();
+
+        // Trigger template-based notification
+        $notificationService->send($user, 'talent_signup', [
+            'phone' => $user->phone_country_code . $user->phone_number,
+        ]);
 
         // Send OTP via KWT SMS
         $smsService = new KwtSmsService();
