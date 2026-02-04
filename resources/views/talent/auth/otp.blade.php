@@ -223,7 +223,12 @@
                         e.preventDefault();
                         inputs[i + 1].focus();
                     }
-                    if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const btn = document.querySelector('.submit-btn');
+                        if (btn) btn.click();
+                    }
+                    if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
                         e.preventDefault();
                     }
                 });

@@ -211,8 +211,8 @@ class OnboardingController extends Controller
 
             case 'step-2':
                 $data = $request->validate([
-                    'height'            => ['nullable', 'numeric', 'between:0,300'],
-                    'weight'            => ['nullable', 'numeric', 'between:0,500'],
+                    'height'            => ['nullable', 'numeric', 'between:50,300'],
+                    'weight'            => ['nullable', 'numeric', 'between:50,200'],
                     'gender'            => ['required', 'string', 'max:20'],
                     'hijab_preference'  => ['nullable', 'string', 'max:50'],
                     'hair_color'        => ['nullable', 'string', 'max:120'],
@@ -260,7 +260,7 @@ class OnboardingController extends Controller
                 $requireDoc = empty($profile->id_document_front);
 
                 $data = $request->validate([
-                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'image', 'max:4096'],
+                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'image'],
                 ]);
 
                 $updateData = [
@@ -274,7 +274,8 @@ class OnboardingController extends Controller
                         $profile,
                         $request->file('id_document_front'),
                         'id/front',
-                        $s3Disk
+                        $s3Disk,
+                        true // Compress if > 10MB
                     );
                 }
 
@@ -335,7 +336,7 @@ class OnboardingController extends Controller
                     $profile->media()->where('type', 'profile')->delete();
                     $s3Disk = config('filesystems.cloud', 's3');
                     foreach ($request->file('additional_photos') as $photo) {
-                        $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk);
+                        $path = $this->storeTalentFile($profile, $photo, 'photos/profile', $s3Disk, false); // No compression for step 5
                         $profile->media()->create([
                             'file_path' => $path,
                             'type' => 'profile',
@@ -370,9 +371,39 @@ class OnboardingController extends Controller
         }
     }
 
-    private function storeTalentFile(TalentProfile $profile, $file, string $folder, ?string $disk = null): string
+    private function storeTalentFile(TalentProfile $profile, $file, string $folder, ?string $disk = null, bool $compress = false): string
     {
         $disk = $disk ?: config('filesystems.default', 'public');
+
+        // Automatic compression for images > 10MB
+        if ($compress && strpos($file->getMimeType(), 'image/') !== false && $file->getSize() > 10 * 1024 * 1024) {
+             try {
+                $path = $file->getRealPath();
+                $mime = $file->getMimeType();
+                $image = null;
+
+                if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                    $image = imagecreatefromjpeg($path);
+                } elseif ($mime === 'image/png') {
+                    $image = imagecreatefrompng($path);
+                } elseif ($mime === 'image/webp') {
+                    $image = imagecreatefromwebp($path);
+                }
+
+                if ($image) {
+                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_');
+                    imagejpeg($image, $tempPath, 75); // 75% quality
+                    imagedestroy($image);
+                    
+                    // Create a new File instance from the temporary compressed file
+                    $file = new \Illuminate\Http\File($tempPath);
+                }
+             } catch (\Exception $e) {
+                Log::warning("Backend image compression failed: " . $e->getMessage());
+                // Fallback to original file if compression fails
+             }
+        }
+
         $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
 
         // If storing to cloud disk, return full URL (e.g., CloudFront/S3) for DB storage

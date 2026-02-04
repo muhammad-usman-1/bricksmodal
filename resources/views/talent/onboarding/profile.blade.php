@@ -300,6 +300,12 @@
             border: none !important;
         }
 
+        .btn-primary:disabled, .btn-primary[disabled] {
+            background: black !important;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
         .btn-submit:hover, .btn-submit:focus, .btn-submit:active {
             background: #0fb478 !important;
             color: white !important;
@@ -629,11 +635,13 @@
             margin-bottom: 4px;
         }
 
-        .field-error {
+        .field-error, .error-text {
             color: #dc3545;
             font-size: 12px;
             margin-top: 4px;
             display: block;
+            min-height: 18px; /* Reserve space for one line of error text */
+            visibility: hidden; /* Use visibility instead of display to prevent layout shifts */
         }
 
         .info-box {
@@ -703,11 +711,11 @@
                 </form>
                 <div class="hero-sub">{{ \App\Helpers\Bilingual::get('onboarding.step') }} <span data-step-label>{{ match($currentStep) { 'step-1' => 1, 'step-2' => 2, 'step-3' => 3, 'step-4' => 4, 'step-5' => 5, default => 1 } }}</span> {{ \App\Helpers\Bilingual::get('onboarding.of') }} 5</div>
                 <div class="progress-track" aria-hidden="true">
-                    <span class="progress-bar {{ $currentStep == 'step-1' ? 'is-active' : ($profile->onboarding_steps_completed >= 1 ? 'is-complete' : '') }}" data-progress-index="0"></span>
-                    <span class="progress-bar {{ $currentStep == 'step-2' ? 'is-active' : ($profile->onboarding_steps_completed >= 2 ? 'is-complete' : '') }}" data-progress-index="1"></span>
-                    <span class="progress-bar {{ $currentStep == 'step-3' ? 'is-active' : ($profile->onboarding_steps_completed >= 3 ? 'is-complete' : '') }}" data-progress-index="2"></span>
-                    <span class="progress-bar {{ $currentStep == 'step-4' ? 'is-active' : ($profile->onboarding_steps_completed >= 4 ? 'is-complete' : '') }}" data-progress-index="3"></span>
-                    <span class="progress-bar {{ $currentStep == 'step-5' ? 'is-active' : ($profile->onboarding_steps_completed >= 5 ? 'is-complete' : '') }}" data-progress-index="4"></span>
+                    <span class="progress-bar {{ $initialStep == 1 ? 'is-active' : ($initialStep > 1 ? 'is-complete' : '') }}" data-progress-index="0"></span>
+                    <span class="progress-bar {{ $initialStep == 2 ? 'is-active' : ($initialStep > 2 ? 'is-complete' : '') }}" data-progress-index="1"></span>
+                    <span class="progress-bar {{ $initialStep == 3 ? 'is-active' : ($initialStep > 3 ? 'is-complete' : '') }}" data-progress-index="2"></span>
+                    <span class="progress-bar {{ $initialStep == 4 ? 'is-active' : ($initialStep > 4 ? 'is-complete' : '') }}" data-progress-index="3"></span>
+                    <span class="progress-bar {{ $initialStep == 5 ? 'is-active' : ($initialStep > 5 ? 'is-complete' : '') }}" data-progress-index="4"></span>
                 </div>
             </div>
 
@@ -732,12 +740,12 @@
                             <div class="field">
                                 <label for="first_name">{{ \App\Helpers\Bilingual::get('onboarding.first_name') }} <span class="required-asterisk">*</span></label>
                                 <input id="first_name" name="first_name" class="control" type="text" placeholder="Enter first name" value="{{ old('first_name', $profile->first_name) }}" required>
-                                <span class="error-text" id="error-first_name" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">First name is required</span>
+                                <span class="error-text" id="error-first_name" style="color:#dc3545; font-size:12px; margin-top:4px;">First name is required</span>
                             </div>
                             <div class="field">
                                 <label for="last_name">{{ \App\Helpers\Bilingual::get('onboarding.last_name') }} <span class="required-asterisk">*</span></label>
                                 <input id="last_name" name="last_name" class="control" type="text" placeholder="Enter last name" value="{{ old('last_name', $profile->last_name) }}" required>
-                                <span class="error-text" id="error-last_name" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Last name is required</span>
+                                <span class="error-text" id="error-last_name" style="color:#dc3545; font-size:12px; margin-top:4px;">Last name is required</span>
                             </div>
                         </div>
 
@@ -758,7 +766,7 @@
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <span class="error-text" id="error-date_of_birth" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Date of birth is required</span>
+                                <span class="error-text" id="error-date_of_birth" style="color:#dc3545; font-size:12px; margin-top:4px;">Date of birth is required</span>
                             </div>
                             <div class="field">
                                 <label for="nationality">{{ \App\Helpers\Bilingual::get('onboarding.nationality') }} <span class="required-asterisk">*</span></label>
@@ -889,20 +897,20 @@
                                                         isValid = false;
                                                         el.classList.add('is-invalid');
                                                         el.style.borderColor = '#dc3545';
-                                                        if(errEl) errEl.style.display = 'block';
+                                                        if(errEl) errEl.style.visibility = 'visible';
                                                         
                                                         // Add input listener to clear error
                                                         el.addEventListener('input', function() {
                                                             this.classList.remove('is-invalid');
                                                             this.style.borderColor = '#e5e7eb';
-                                                            if(errEl) errEl.style.display = 'none';
+                                                            if(errEl) errEl.style.visibility = 'hidden';
                                                         }, { once: true });
                                                         
                                                         // For select inputs (nationality)
                                                         el.addEventListener('change', function() {
                                                             this.classList.remove('is-invalid');
                                                             this.style.borderColor = '#e5e7eb';
-                                                            if(errEl) errEl.style.display = 'none';
+                                                            if(errEl) errEl.style.visibility = 'hidden';
                                                         }, { once: true });
                                                     }
                                                 });
@@ -956,12 +964,12 @@
                                 <label for="height">{{ \App\Helpers\Bilingual::get('onboarding.height') }} <span class="required-asterisk">*</span></label>
                                 <input id="height" name="height" class="control" type="number" step="0.1" placeholder="e.g. 175" value="{{ old('height', $profile->height) }}" required>
                                 <input type="hidden" id="height_unit" value="cm">
-                                <span class="error-text" id="error-height" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Height is required</span>
+                                <span class="error-text" id="error-height" style="color:#dc3545; font-size:12px; margin-top:4px;">Height is required</span>
                             </div>
                             <div class="field">
                                 <label for="weight">{{ \App\Helpers\Bilingual::get('onboarding.weight') }} <span class="required-asterisk">*</span></label>
                                 <input id="weight" name="weight" class="control" type="number" step="0.1" placeholder="e.g. 60" value="{{ old('weight', $profile->weight) }}" required>
-                                <span class="error-text" id="error-weight" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Weight is required</span>
+                                <span class="error-text" id="error-weight" style="color:#dc3545; font-size:12px; margin-top:4px;">Weight is required</span>
                             </div>
                         </div>
 
@@ -1011,7 +1019,7 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
-                                <span class="error-text" id="error-hair_color" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Hair color is required</span>
+                                <span class="error-text" id="error-hair_color" style="color:#dc3545; font-size:12px; margin-top:4px;">Hair color is required</span>
                             </div>
                             <div class="field">
                                 <label for="eye_color">{{ \App\Helpers\Bilingual::get('onboarding.eye_color') }} <span class="required-asterisk">*</span></label>
@@ -1028,7 +1036,7 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
-                                <span class="error-text" id="error-eye_color" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Eye color is required</span>
+                                <span class="error-text" id="error-eye_color" style="color:#dc3545; font-size:12px; margin-top:4px;">Eye color is required</span>
                             </div>
                             <div class="field">
                                 <label for="skin_tone">{{ \App\Helpers\Bilingual::get('onboarding.skin_tone') }} <span class="required-asterisk">*</span></label>
@@ -1041,7 +1049,7 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
-                                <span class="error-text" id="error-skin_tone" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Skin tone is required</span>
+                                <span class="error-text" id="error-skin_tone" style="color:#dc3545; font-size:12px; margin-top:4px;">Skin tone is required</span>
                             </div>
                         </div>
 
@@ -1092,6 +1100,17 @@
                                 if (form) {
                                     form.addEventListener('submit', function(e) {
                                         let isValid = true;
+                                        function attachClearListener(el, errEl) {
+                                            if (!el || !errEl) return;
+                                            ['input', 'change'].forEach(evt => {
+                                                el.addEventListener(evt, function() {
+                                                    this.classList.remove('is-invalid');
+                                                    this.style.borderColor = '#e5e7eb';
+                                                    errEl.style.visibility = 'hidden';
+                                                }, { once: true });
+                                            });
+                                        }
+
                                         const requiredIds = [
                                             { id: 'height', msg: 'Height is required' },
                                             { id: 'weight', msg: 'Weight is required' },
@@ -1103,28 +1122,32 @@
                                         // Strict Validation for Height/Weight
                                         const heightEl = document.getElementById('height');
                                         if(heightEl && heightEl.value) {
-                                            if(parseFloat(heightEl.value) < 100) {
+                                            const hVal = parseFloat(heightEl.value);
+                                            if(hVal < 50 || hVal > 300) {
                                                 isValid = false;
                                                 heightEl.classList.add('is-invalid');
                                                 heightEl.style.borderColor = '#dc3545';
                                                 const hErr = document.getElementById('error-height');
                                                 if(hErr) {
-                                                    hErr.textContent = 'Height must be 100 cm or greater';
-                                                    hErr.style.display = 'block';
+                                                    hErr.textContent = 'Height must be between 50 and 300 cm.';
+                                                    hErr.style.visibility = 'visible';
+                                                    attachClearListener(heightEl, hErr);
                                                 }
                                             }
                                         }
 
                                         const weightEl = document.getElementById('weight');
                                         if(weightEl && weightEl.value) {
-                                            if(parseFloat(weightEl.value) < 50) {
+                                            const wVal = parseFloat(weightEl.value);
+                                            if(wVal < 50 || wVal > 200) {
                                                 isValid = false;
                                                 weightEl.classList.add('is-invalid');
                                                 weightEl.style.borderColor = '#dc3545';
                                                 const wErr = document.getElementById('error-weight');
                                                 if(wErr) {
-                                                    wErr.textContent = 'Weight must be 50 or greater';
-                                                    wErr.style.display = 'block';
+                                                    wErr.textContent = 'Weight must be between 50 and 200 kg.';
+                                                    wErr.style.visibility = 'visible';
+                                                    attachClearListener(weightEl, wErr);
                                                 }
                                             }
                                         }
@@ -1137,15 +1160,11 @@
                                                 isValid = false;
                                                 el.classList.add('is-invalid');
                                                 el.style.borderColor = '#dc3545';
-                                                if(errEl) errEl.style.display = 'block';
-                                                
-                                                ['input', 'change'].forEach(evt => {
-                                                    el.addEventListener(evt, function() {
-                                                        this.classList.remove('is-invalid');
-                                                        this.style.borderColor = '#e5e7eb';
-                                                        if(errEl) errEl.style.display = 'none';
-                                                    }, { once: true });
-                                                });
+                                                if(errEl) {
+                                                    errEl.textContent = item.msg;
+                                                    errEl.style.visibility = 'visible';
+                                                    attachClearListener(el, errEl);
+                                                }
                                             }
                                         });
 
@@ -1179,7 +1198,7 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
-                                <span class="error-text" id="error-t_shirt_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">T-shirt size is required</span>
+                                <span class="error-text" id="error-t_shirt_size" style="color:#dc3545; font-size:12px; margin-top:4px;">T-shirt size is required</span>
                             </div>
                             <div class="field" style="display: flex; flex-direction: column;">
                                 <label for="dress_size">{{ \App\Helpers\Bilingual::get('onboarding.dress_size') }} <span class="required-asterisk">*</span></label>
@@ -1192,12 +1211,12 @@
                                     </select>
                                     <svg style="position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                                 </div>
-                                <span class="error-text" id="error-dress_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Dress size is required</span>
+                                <span class="error-text" id="error-dress_size" style="color:#dc3545; font-size:12px; margin-top:4px;">Dress size is required</span>
                             </div>
                             <div class="field" style="display: flex; flex-direction: column;">
                                 <label for="shoe_size">{{ \App\Helpers\Bilingual::get('onboarding.shoe_size') }} <span class="required-asterisk">*</span></label>
                                 <input id="shoe_size" name="shoe_size" class="control" type="number" step="0.1" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required style="margin-top: auto;">
-                                <span class="error-text" id="error-shoe_size" style="display:none; color:#dc3545; font-size:12px; margin-top:4px;">Shoe size is required</span>
+                                <span class="error-text" id="error-shoe_size" style="color:#dc3545; font-size:12px; margin-top:4px;">Shoe size is required</span>
                             </div>
 
                         </div>
@@ -1241,13 +1260,13 @@
                                                 isValid = false;
                                                 el.classList.add('is-invalid');
                                                 el.style.borderColor = '#dc3545';
-                                                if(errEl) errEl.style.display = 'block';
+                                                if(errEl) errEl.style.visibility = 'visible';
                                                 
                                                 ['input', 'change'].forEach(evt => {
                                                     el.addEventListener(evt, function() {
                                                         this.classList.remove('is-invalid');
                                                         this.style.borderColor = '#e5e7eb';
-                                                        if(errEl) errEl.style.display = 'none';
+                                                        if(errEl) errEl.style.visibility = 'hidden';
                                                     }, { once: true });
                                                 });
                                             }
@@ -1263,7 +1282,7 @@
                 @endif
 
                 @if($currentStep == 'step-4')
-                <form method="POST" action="{{ route('talent.onboarding.store', 'step-4') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-4') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="step-panel is-active" data-step="4">
                         <div class="info-box">
@@ -1355,7 +1374,7 @@
                 @endif
 
                 @if($currentStep == 'step-5')
-                <form method="POST" action="{{ route('talent.onboarding.store', 'step-5') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('talent.onboarding.store', 'step-5') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="step-panel is-active" data-step="5">
                         <div id="portfolio-photos-section" style="margin-top: 0;">
@@ -1488,6 +1507,14 @@
                     if (gender === 'female') {
                         hijabSection.style.display = 'block';
                         hijabRadios.forEach(r => r.setAttribute('required', 'required'));
+                        
+                        // Default to Non-Hijabi if nothing selected
+                        const checkedHijab = document.querySelector('input[name="hijab_preference"]:checked');
+                        if (!checkedHijab) {
+                            const nonHijabRadio = document.querySelector('input[name="hijab_preference"][value="no_hijab"]');
+                            if (nonHijabRadio) nonHijabRadio.checked = true;
+                        }
+
                         const selectedHijab = document.querySelector('input[name="hijab_preference"]:checked')?.value;
                         if (hairColor) {
                             if (selectedHijab === 'wear_hijab') {
@@ -1534,25 +1561,33 @@
                  if(steps.length === 0) return;
                  
                  let activeCompressions = 0;
-                 const step5SubmitBtn = document.querySelector('#step5-action-group button[type="submit"]');
 
-                 const updateSubmitButton = () => {
-                     if(!step5SubmitBtn) return;
-                     if(activeCompressions > 0) {
-                         step5SubmitBtn.setAttribute('disabled', 'disabled');
-                         step5SubmitBtn.style.opacity = '0.7';
-                         step5SubmitBtn.style.cursor = 'not-allowed';
-                         step5SubmitBtn.dataset.originalText = step5SubmitBtn.dataset.originalText || step5SubmitBtn.innerText;
-                         step5SubmitBtn.innerText = 'Compressing...';
-                     } else {
-                         step5SubmitBtn.removeAttribute('disabled');
-                         step5SubmitBtn.style.opacity = '1';
-                         step5SubmitBtn.style.cursor = 'pointer';
-                         if(step5SubmitBtn.dataset.originalText) {
-                             step5SubmitBtn.innerText = step5SubmitBtn.dataset.originalText;
-                         }
-                     }
-                 };
+                  const updateSubmitButton = () => {
+                      const buttons = [
+                          { el: document.querySelector('#step4-action-group button[type="submit"]'), step: '4' },
+                          { el: document.querySelector('#step5-action-group button[type="submit"]'), step: '5' }
+                      ];
+
+                      buttons.forEach(btnInfo => {
+                          const btn = btnInfo.el;
+                          if(!btn) return;
+
+                          if(activeCompressions > 0) {
+                              btn.setAttribute('disabled', 'disabled');
+                              btn.style.opacity = '0.7';
+                              btn.style.cursor = 'not-allowed';
+                              btn.dataset.originalText = btn.dataset.originalText || btn.innerText;
+                              btn.innerText = 'Submitting...';
+                          } else {
+                              btn.removeAttribute('disabled');
+                              btn.style.opacity = '1';
+                              btn.style.cursor = 'pointer';
+                              if(btn.dataset.originalText) {
+                                  btn.innerText = btn.dataset.originalText;
+                              }
+                          }
+                      });
+                  };
 
                  
                  // --- Image Compression Utility ---
@@ -1646,14 +1681,20 @@
                                      return;
                                  }
 
-                                 try {
-                                     const compressedFile = await compressImage(file);
+                                  try {
+                                      activeCompressions++;
+                                      updateSubmitButton();
+
+                                      const compressedFile = await compressImage(file);
                                       // Update input files with compressed version
                                       const dt = new DataTransfer();
                                       dt.items.add(compressedFile);
                                       input.files = dt.files;
                                   } catch (e) {
                                       console.error("Compression failed", e);
+                                  } finally {
+                                      activeCompressions--;
+                                      updateSubmitButton();
                                   }
                               }
 

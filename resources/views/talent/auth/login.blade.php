@@ -260,6 +260,15 @@
                 }
             });
 
+            // Handle Enter key on phone input
+            phoneInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const btn = document.getElementById('submit-btn');
+                    if(btn) btn.click();
+                }
+            });
+
             form.addEventListener('submit', function(e) {
                 const inputValue = phoneInput.value.trim();
                 const phoneNumber = inputValue.replace(/\D/g, '');
