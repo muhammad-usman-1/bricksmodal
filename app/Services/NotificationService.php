@@ -98,8 +98,10 @@ class NotificationService
      */
     public function notifyAdmins(string $key, array $placeholders = [], array $meta = [])
     {
-        $admins = \App\Models\User::whereHas('roles', function($query) {
-            $query->whereIn('title', ['admin', 'superadmin', 'creative']);
+        $admins = \App\Models\User::where(function($q) {
+            $q->whereHas('roles', function($qm) {
+                $qm->whereIn('title', ['admin', 'superadmin', 'creative']);
+            })->orWhere('is_super_admin', 1);
         })->get();
 
         foreach ($admins as $admin) {

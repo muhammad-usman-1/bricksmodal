@@ -104,7 +104,6 @@ class ProjectController extends Controller
         ], [
             'casting_requirement_id' => $castingRequirement->id,
             'talent_profile_id'      => $profile->id,
-            'type'                   => 'new_shoot_application',
         ]);
 
         return redirect()->route('talent.projects.show', $castingRequirement)->with('message', trans('global.application_submitted'));
