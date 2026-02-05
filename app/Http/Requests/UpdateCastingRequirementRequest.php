@@ -51,12 +51,6 @@ class UpdateCastingRequirementRequest extends FormRequest
                 'string',
                 'nullable',
             ],
-            'instagram_url' => [
-                'string',
-                'nullable',
-                'url',
-                'max:255',
-            ],
             'shoot_date_time' => [
                 'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
                 'nullable',

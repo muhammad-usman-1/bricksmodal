@@ -48,7 +48,6 @@ class CastingRequirement extends Model implements HasMedia
         'project_name',
         'client_name',
         'location',
-        'instagram_url',
         'shoot_date_time',
         'duration',
         'count',

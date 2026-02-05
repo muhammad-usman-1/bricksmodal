@@ -636,56 +636,10 @@
 
                         $shootLogo = $castingRequirement->getFirstMediaUrl('shoot_logo') ?: null;
 
-                        $instaAvatar = null;
-                        if (!$shootLogo && !empty($castingRequirement->instagram_url)) {
-                            // Try Instagram oEmbed first (needs INSTAGRAM_OEMBED_TOKEN in env), fallback to unavatar
-                            if (preg_match('/(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9_\.]+)(?:[\/?#].*)?$/', trim($castingRequirement->instagram_url), $matches)) {
-                                $username = $matches[1];
-
-                                $oembedToken = env('INSTAGRAM_OEMBED_TOKEN');
-                                if ($oembedToken) {
-                                    $cacheKey = 'insta_oembed_thumb_' . md5($castingRequirement->instagram_url);
-                                    $instaAvatar = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($castingRequirement, $oembedToken) {
-                                        try {
-                                            $resp = \Illuminate\Support\Facades\Http::get('https://graph.facebook.com/v19.0/instagram_oembed', [
-                                                'url' => $castingRequirement->instagram_url,
-                                                'access_token' => $oembedToken,
-                                            ]);
-                                            if ($resp->successful()) {
-                                                return $resp->json('thumbnail_url') ?: null;
-                                            }
-                                        } catch (\Throwable $e) {
-                                            return null;
-                                        }
-                                        return null;
-                                    });
-                                }
-
-                                if (!$instaAvatar) {
-                                    $instaAvatar = "https://unavatar.io/https://www.instagram.com/{$username}";
-                                }
-                            }
-                        }
                     @endphp
                     <tr data-status="{{ $statusKey }}" data-location="{{ $location }}" data-show-url="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" class="clickable-row">
                         <td data-label="Shoot Name">
                             <div class="shoot-name">
-                                <div class="logo-circle">
-                                    @if($shootLogo)
-                                        <img src="{{ $shootLogo }}"
-                                             alt="{{ $initials }}"
-                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                                        >
-                                    @elseif($instaAvatar)
-                                        <img src="{{ $instaAvatar }}"
-                                             alt="{{ $initials }}"
-                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                                             onerror="this.style.display='none'; this.parentNode.innerHTML='{{ $initials }}';"
-                                        >
-                                    @else
-                                        {{ $initials }}
-                                    @endif
-                                </div>
                                 <a href="{{ route('admin.casting-requirements.show', $castingRequirement->id) }}" style="text-decoration: none; color: inherit;">{{ $projectName }}</a>
                             </div>
                         </td>

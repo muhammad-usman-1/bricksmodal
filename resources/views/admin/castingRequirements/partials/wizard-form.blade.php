@@ -182,27 +182,15 @@
                         @endif
                     </div>
 
-                    <div class="grid grid-2 condensed">
-                        <div class="field-block">
-                            <label for="location">{!! bilingualLabel('location', $isBilingualEnabled) !!}</label>
-                            <div class="dark-input has-icon">
-                                <span class="input-icon"><i class="fas fa-search"></i></span>
-                                <input class="{{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', $castingRequirement->location ?? '') }}" autocomplete="off" placeholder="Search Google Maps...">
-                            </div>
-                            @if($errors->has('location'))
-                                <div class="invalid-feedback d-block">{{ $errors->first('location') }}</div>
-                            @endif
+                    <div class="field-block">
+                        <label for="location">{!! bilingualLabel('location', $isBilingualEnabled) !!}</label>
+                        <div class="dark-input has-icon">
+                            <span class="input-icon"><i class="fas fa-search"></i></span>
+                            <input class="{{ $errors->has('location') ? 'is-invalid' : '' }}" type="text" name="location" id="location" value="{{ old('location', $castingRequirement->location ?? '') }}" autocomplete="off" placeholder="Search Google Maps...">
                         </div>
-
-                        <div class="field-block">
-                            <label for="instagram_url">{!! bilingualLabel('instagram_url', $isBilingualEnabled) !!}</label>
-                            <div class="dark-input">
-                                <input class="{{ $errors->has('instagram_url') ? 'is-invalid' : '' }}" type="url" name="instagram_url" id="instagram_url" value="{{ old('instagram_url', $castingRequirement->instagram_url ?? '') }}" placeholder="https://instagram.com/username">
-                            </div>
-                            @if($errors->has('instagram_url'))
-                                <div class="invalid-feedback d-block">{{ $errors->first('instagram_url') }}</div>
-                            @endif
-                        </div>
+                        @if($errors->has('location'))
+                            <div class="invalid-feedback d-block">{{ $errors->first('location') }}</div>
+                        @endif
                     </div>
 
                     <div class="grid grid-3 condensed">

@@ -332,19 +332,6 @@
                     <span class="info-value">{{ $castingRequirement->location ?: 'Not specified' }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Instagram URL</span>
-                    <span class="info-value">
-                        @if($castingRequirement->instagram_url)
-                            <a href="{{ $castingRequirement->instagram_url }}" target="_blank" style="color: var(--primary); text-decoration: none;">
-                                {{ str_replace(['https://', 'http://'], '', $castingRequirement->instagram_url) }}
-                                <i class="fas fa-external-link-alt" style="font-size: 10px; margin-left: 2px;"></i>
-                            </a>
-                        @else
-                            <span class="empty">None</span>
-                        @endif
-                    </span>
-                </div>
-                <div class="info-item">
                     <span class="info-label">Shoot Date</span>
                     <span class="info-value">
                         @if($castingRequirement->getRawOriginal('shoot_date_time'))
