@@ -189,38 +189,18 @@ class KwtSmsService
      */
     public function sendSms(string $mobile, string $message, int $lang = 1): array
     {
-        // Clean mobile number - remove spaces, dashes, plus signs
-        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        // KWT SMS service disabled for generic notifications as per user request.
+        // It should only be used for OTP.
+        Log::info('KWT SMS Generic Service is disabled. Skipping SMS sending.', [
+            'mobile' => $mobile,
+            'message' => $message,
+            'lang' => $lang
+        ]);
 
-        // Ensure Kuwait country code if it looks like a local number
-        if (strlen($mobile) === 8) {
-            $mobile = '965' . $mobile;
-        }
-
-        if (empty($mobile) || strlen($mobile) < 8) {
-            return ['success' => false, 'message' => 'Invalid mobile number format'];
-        }
-
-        try {
-            $response = Http::timeout(30)->withoutVerifying()->get($this->apiUrl, [
-                'username' => $this->username,
-                'password' => $this->password,
-                'sender'   => $this->sender,
-                'mobile'   => $mobile,
-                'lang'     => $lang,
-                'message'  => $message,
-            ]);
-
-            $responseBody = trim($response->body());
-            
-            if ($response->successful() && stripos($responseBody, 'ERR') === false) {
-                return ['success' => true, 'message' => 'SMS sent successfully', 'response' => $responseBody];
-            }
-
-            return ['success' => false, 'message' => 'Failed to send SMS: ' . $responseBody, 'response' => $responseBody];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => 'SMS Service Exception: ' . $e->getMessage()];
-        }
+        return [
+            'success' => true, 
+            'message' => 'SMS service is disabled for notifications. Skipping sending.'
+        ];
     }
 
     /**

@@ -57,9 +57,9 @@ class NotificationService
             if($contentAr) $contentAr = str_replace('{' . $placeholder . '}', $valStr, $contentAr);
         }
 
-        // Predefined list of keys that should trigger SMS to talent
-        $smsKeys = ['shoot_acceptance', 'shoot_rejection', 'shoot_shortlist', 'talent_signup', 'payment_sent'];
-        $shouldSendSms = in_array($key, $smsKeys) || ($meta['send_sms'] ?? false);
+        // SMS notifications disabled as per user request. Should only be used for OTP.
+        $smsKeys = []; // ['shoot_acceptance', 'shoot_rejection', 'shoot_shortlist', 'talent_signup', 'payment_sent'];
+        $shouldSendSms = false; // in_array($key, $smsKeys) || ($meta['send_sms'] ?? false);
 
         // Prepare meta for SMS and custom payload
         $finalMeta = array_merge([
