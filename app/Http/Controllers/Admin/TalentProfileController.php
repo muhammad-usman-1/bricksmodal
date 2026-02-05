@@ -104,13 +104,32 @@ class TalentProfileController extends Controller
         $data = $request->except([
             'headshot_center_path', 'headshot_left_path', 'headshot_right_path',
             'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
-            'id_document_front'
+            'id_document_front', 'deleted_media_ids'
         ]);
 
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
 
-        // Handle file uploads
+        // Handle file removals for specific columns
         $fileFields = [
+            'headshot_center_path',
+            'headshot_left_path',
+            'headshot_right_path',
+            'full_body_front_path',
+            'full_body_right_path',
+            'full_body_back_path',
+            'id_document_front',
+            'id_front_path'
+        ];
+
+        foreach ($fileFields as $field) {
+            if ($request->input("remove_{$field}") == '1') {
+                $this->deletePhysicalFile($talentProfile->{$field});
+                $data[$field] = null;
+            }
+        }
+
+        // Handle file uploads
+        $uploadFolders = [
             'headshot_center_path' => 'headshot-center',
             'headshot_left_path'   => 'headshot-left',
             'headshot_right_path'  => 'headshot-right',
@@ -120,9 +139,23 @@ class TalentProfileController extends Controller
             'id_document_front'    => 'id/document',
         ];
 
-        foreach ($fileFields as $field => $folder) {
+        foreach ($uploadFolders as $field => $folder) {
             if ($request->hasFile($field)) {
+                $this->deletePhysicalFile($talentProfile->{$field});
                 $data[$field] = $this->storeTalentFile($talentProfile, $request->file($field), $folder);
+            }
+        }
+
+        // Handle TalentMedia deletions
+        if ($request->has('deleted_media_ids')) {
+            $deletedIds = $request->input('deleted_media_ids');
+            $mediaItems = \App\Models\TalentMedia::whereIn('id', $deletedIds)
+                ->where('talent_profile_id', $talentProfile->id)
+                ->get();
+
+            foreach ($mediaItems as $media) {
+                $this->deletePhysicalFile($media->file_path);
+                $media->delete();
             }
         }
 
@@ -135,9 +168,35 @@ class TalentProfileController extends Controller
     private function storeTalentFile(TalentProfile $profile, $file, string $folder): string
     {
         $disk = config('filesystems.cloud', 's3');
+        
+        // Backend compression fallback for images > 10MB
+        if (strpos($file->getMimeType(), 'image/') !== false && $file->getSize() > 10 * 1024 * 1024) {
+            try {
+                $path = $file->getRealPath();
+                $mime = $file->getMimeType();
+                $image = null;
+
+                if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                    $image = imagecreatefromjpeg($path);
+                } elseif ($mime === 'image/png') {
+                    $image = imagecreatefrompng($path);
+                } elseif ($mime === 'image/webp') {
+                    $image = imagecreatefromwebp($path);
+                }
+
+                if ($image) {
+                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_');
+                    imagejpeg($image, $tempPath, 80);
+                    imagedestroy($image);
+                    $file = new \Illuminate\Http\File($tempPath);
+                }
+            } catch (\Exception $e) {
+                \Log::warning("Backend compression failed: " . $e->getMessage());
+            }
+        }
+
         $path = $file->store("talent/{$profile->id}/{$folder}", $disk);
 
-        // Return full URL for cloud storage
         return \Storage::disk($disk)->url($path);
     }
 
@@ -402,6 +461,49 @@ class TalentProfileController extends Controller
             'message' => 'Media files uploaded successfully',
             'media' => $uploadedMedia,
         ]);
+    }
+
+    public function destroyMedia(TalentMedia $talentMedia)
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $this->deletePhysicalFile($talentMedia->file_path);
+        $talentMedia->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    private function deletePhysicalFile(?string $url): void
+    {
+        if (!$url) return;
+
+        try {
+            $disk = config('filesystems.cloud', 's3');
+            $storage = \Storage::disk($disk);
+            
+            // Extract path from URL. URLs look like: https://bucket.s3.region.amazonaws.com/talent/ID/folder/file.jpg
+            // Or they might be relative paths if config is different.
+            $baseUrl = $storage->url('/');
+            $path = $url;
+            
+            if (strpos($url, 'http') === 0) {
+                // It's a full URL. Try to find the part after the bucket name or custom domain.
+                // A robust way is to look for the "talent/" prefix which we know we use.
+                if (strpos($url, '/talent/') !== false) {
+                    $path = substr($url, strpos($url, 'talent/'));
+                } else {
+                    // Fallback to simple replacement if possible
+                    $path = str_replace(rtrim($baseUrl, '/'), '', $url);
+                    $path = ltrim($path, '/');
+                }
+            }
+
+            if ($storage->exists($path)) {
+                $storage->delete($path);
+            }
+        } catch (\Exception $e) {
+            \Log::warning("Could not delete file from S3: " . $url . " Error: " . $e->getMessage());
+        }
     }
 
     protected function sanitizePhoneNumber(?string $number): ?string

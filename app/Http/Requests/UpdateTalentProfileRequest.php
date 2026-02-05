@@ -132,6 +132,45 @@ class UpdateTalentProfileRequest extends FormRequest
                 'array',
                 'nullable',
             ],
+            'deleted_media_ids' => [
+                'array',
+                'nullable',
+            ],
+            'deleted_media_ids.*' => [
+                'integer',
+            ],
+            'remove_headshot_center_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_headshot_left_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_headshot_right_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_full_body_front_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_full_body_right_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_full_body_back_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_id_front_path' => [
+                'nullable',
+                'boolean',
+            ],
+            'remove_id_document_front' => [
+                'nullable',
+                'boolean',
+            ],
             'headshot_center_path' => [
                 'nullable',
                 'file',

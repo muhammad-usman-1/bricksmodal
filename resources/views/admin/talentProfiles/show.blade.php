@@ -642,7 +642,7 @@
                                 <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
                                 <span class="remove-photo-link" 
                                       style="display: {{ $img ? 'block' : 'none' }};"
-                                      onclick="{{ ($photo['id'] ?? null) ? 'removeMediaImage(this, event)' : 'removeImage(this, event)' }}">
+                                      onclick="removeMediaImage(this, event)">
                                     Remove Photo
                                 </span>
                             </div>
@@ -686,11 +686,11 @@
                         <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
                         <span class="remove-photo-link" 
                               style="display: {{ $img ? 'block' : 'none' }};"
-                              onclick="removeImage(this, event)">
+                               onclick="removeMediaImage(this, event)">
                             Remove Photo
                         </span>
                     </div>
-                    <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewImage(this)">
+                    <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewMediaImage(this)">
                 </div>
             @endforeach
         </div>
@@ -1039,92 +1039,15 @@
 
 @include('admin.castingRequirements.partials.application-modals')
 <script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            const tile = input.closest('.upload-tile');
-            const placeholder = tile.querySelector('.upload-placeholder');
-            let preview = tile.querySelector('.preview-img');
-            let removeBtn = tile.querySelector('.remove-image-btn');
-
-            reader.onload = function(e) {
-                // Remove placeholder if exists
-                if (placeholder) {
-                    placeholder.style.display = 'none';
-                }
-
-                // Remove existing preview image if any
-                if (preview && preview.tagName === 'IMG') {
-                    preview.remove();
-                }
-
-                // Create new preview image
-                const newImg = document.createElement('img');
-                newImg.src = e.target.result;
-                newImg.classList.add('preview-img');
-                tile.insertBefore(newImg, tile.firstChild);
-
-                // Add remove button if it doesn't exist
-                if (!removeBtn) {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'remove-image-btn';
-                    btn.innerHTML = '<i class="fa fa-times"></i>';
-                    btn.title = 'Remove image';
-                    btn.onclick = function(e) {
-                        removeImage(this, e);
-                    };
-                    tile.appendChild(btn);
-                } else {
-                    removeBtn.style.display = 'flex';
-                }
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function removeImage(btn, event) {
-        if (event) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-
-        const tile = btn.closest('.upload-tile');
-        const fileInput = tile.querySelector('input[type="file"]');
-        const preview = tile.querySelector('.preview-img');
-        const placeholder = tile.querySelector('.upload-placeholder');
-
-        // Remove preview image
-        if (preview) {
-            preview.remove();
-        }
-
-        // Remove the remove button
-        btn.remove();
-
-        // Show placeholder
-        if (placeholder) {
-            placeholder.style.display = 'grid';
-        }
-
-        // Clear file input
-        if (fileInput) {
-            fileInput.value = '';
-            // Reattach change handler
-            fileInput.onchange = function() {
-                previewImage(this);
-            };
-        }
-    }
 
     function handleFileSelect(fileInput, file) {
         // Create a FileList-like object
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         fileInput.files = dataTransfer.files;
-
-        // Call previewImage directly (don't trigger change event to avoid double processing)
-        previewImage(fileInput);
+ 
+        // Call previewMediaImage directly
+        previewMediaImage(fileInput);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1621,12 +1544,39 @@
 
     function previewMediaImage(input) {
         if (input.files && input.files[0]) {
+            const file = input.files[0];
             const reader = new FileReader();
             const tile = input.closest('.upload-tile');
             const placeholder = tile.querySelector('.upload-placeholder');
             const uploadText = tile.querySelector('.upload-text');
             const removeLink = tile.querySelector('.remove-photo-link');
             let preview = tile.querySelector('.preview-img');
+
+            // If replacing an existing photo, mark it for deletion
+            const field = tile.dataset.field;
+            const mediaId = tile.dataset.mediaId;
+            const form = document.getElementById('talentEditForm');
+
+            if (field) {
+                let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
+                if (!removeInput) {
+                    removeInput = document.createElement('input');
+                    removeInput.type = 'hidden';
+                    removeInput.name = 'remove_' + field;
+                    removeInput.value = '1';
+                    tile.appendChild(removeInput);
+                }
+            }
+            if (mediaId && form) {
+                let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
+                if (!deletedInput) {
+                    deletedInput = document.createElement('input');
+                    deletedInput.type = 'hidden';
+                    deletedInput.name = 'deleted_media_ids[]';
+                    deletedInput.value = mediaId;
+                    form.appendChild(deletedInput);
+                }
+            }
 
             reader.onload = function(e) {
                 if (placeholder) placeholder.style.display = 'none';
@@ -1647,10 +1597,55 @@
                 if (uploadText) uploadText.textContent = 'Replace Photo';
                 if (removeLink) removeLink.style.display = 'block';
             }
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
     window.previewImage = previewMediaImage;
+
+    async function compressImage(file, maxSizeMB = 10, quality = 0.7) {
+        if (file.size <= maxSizeMB * 1024 * 1024) return file;
+        
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Cap dimensions if extremely large
+                    const maxDim = 4000;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height *= maxDim / width;
+                            width = maxDim;
+                        } else {
+                            width *= maxDim / height;
+                            height = maxDim;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob((blob) => {
+                        const compressedFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
 
     function removeMediaImage(btn, event) {
         if (event) {
@@ -1664,24 +1659,39 @@
         const placeholder = tile.querySelector('.upload-placeholder');
         const uploadText = tile.querySelector('.upload-text');
         const removeLink = tile.querySelector('.remove-photo-link');
+        const mediaId = tile.dataset.mediaId;
+        const field = tile.dataset.field;
 
         if (preview) preview.remove();
         if (placeholder) placeholder.style.display = 'grid';
         if (uploadText) uploadText.textContent = 'Upload Photo';
         if (removeLink) removeLink.style.display = 'none';
         
-        if (fileInput) {
-            fileInput.value = '';
-            const field = tile.dataset.field;
-            if (field) {
-                let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
-                if (!removeInput) {
-                    removeInput = document.createElement('input');
-                    removeInput.type = 'hidden';
-                    removeInput.name = 'remove_' + field;
-                    removeInput.value = '1';
-                    tile.appendChild(removeInput);
-                }
+        if (fileInput) fileInput.value = '';
+
+        if (mediaId) {
+            // Track deleted TalentMedia
+            const form = document.getElementById('talentEditForm');
+            let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
+            if (!deletedInput) {
+                deletedInput = document.createElement('input');
+                deletedInput.type = 'hidden';
+                deletedInput.name = 'deleted_media_ids[]';
+                deletedInput.value = mediaId;
+                form.appendChild(deletedInput);
+            }
+        }
+
+        if (field) {
+            // Track deleted hardcoded field
+            const form = document.getElementById('talentEditForm');
+            let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
+            if (!removeInput) {
+                removeInput = document.createElement('input');
+                removeInput.type = 'hidden';
+                removeInput.name = 'remove_' + field;
+                removeInput.value = '1';
+                tile.appendChild(removeInput);
             }
         }
     }
@@ -1723,7 +1733,7 @@
         }
     }
 
-    function handleMediaImageUpload(event) {
+    async function handleMediaImageUpload(event) {
         event.preventDefault();
 
         const talentEditForm = document.getElementById('talentEditForm');
@@ -1733,18 +1743,32 @@
 
         // Collect all file inputs with files
         const fileInputs = profileImagesGrid.querySelectorAll('input[type="file"].media-file-input');
-        fileInputs.forEach((input, index) => {
+        
+        // Show loading state
+        const saveBtn = talentEditForm.querySelector('.save-btn');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        for (const input of fileInputs) {
             if (input.files && input.files[0]) {
-                mediaFiles.push({
-                    file: input.files[0],
-                    tile: input.closest('.upload-tile')
-                });
+                try {
+                    const compressedFile = await compressImage(input.files[0]);
+                    mediaFiles.push({
+                        file: compressedFile,
+                        tile: input.closest('.upload-tile')
+                    });
+                } catch (err) {
+                    console.error('Compression error:', err);
+                    mediaFiles.push({
+                        file: input.files[0],
+                        tile: input.closest('.upload-tile')
+                    });
+                }
             }
-        });
+        }
 
         if (mediaFiles.length === 0) {
-            // No media files to upload, just submit the form normally
-            // Remove this event listener temporarily to avoid recursion
             talentEditForm.onsubmit = null;
             talentEditForm.submit();
             return;
@@ -1766,18 +1790,21 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Clear the media file inputs and submit form without re-triggering media upload
+                // Clear the media file inputs and submit form
                 fileInputs.forEach(input => input.value = '');
-                // Remove this event listener to prevent infinite recursion
                 talentEditForm.onsubmit = null;
                 talentEditForm.submit();
             } else {
-                alert('Error uploading images: ' + (data.message || 'Unknown error'));
+                Swal.fire('Error', data.message || 'Unknown error', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnText;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error uploading images');
+            Swal.fire('Error', 'Error uploading images', 'error');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalBtnText;
         });
     }
 </script>
