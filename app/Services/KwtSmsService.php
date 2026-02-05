@@ -5,6 +5,14 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * KwtSmsService
+ * 
+ * IMPORTANT: This service is restricted to OTP (One-Time Password) functionality ONLY.
+ * Generic SMS notifications are disabled and should not be used.
+ * 
+ * @package App\Services
+ */
 class KwtSmsService
 {
     protected $username;
