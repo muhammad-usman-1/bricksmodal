@@ -21,8 +21,11 @@ class LoginController extends Controller
     {
         // Phase 1: user submits phone -> generate OTP and show OTP entry form
         $data = $request->validate([
-            'phone_country_code' => ['required', 'string', 'max:8'],
-            'phone_number'       => ['required', 'string', 'max:30'],
+            'phone_country_code' => ['required', 'string', 'in:965,+965'],
+            'phone_number'       => ['required', 'string', 'regex:/^[0-9]{8}$/'],
+        ], [
+            'phone_country_code.in' => 'Only Kuwait numbers (965) are allowed for OTP.',
+            'phone_number.regex'    => 'The phone number must be exactly 8 digits.',
         ]);
 
         // Find or create talent user by phone
