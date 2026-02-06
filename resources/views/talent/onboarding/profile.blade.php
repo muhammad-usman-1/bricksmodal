@@ -1353,6 +1353,7 @@
                                          </div>
                                      </div>
                                  </label>
+                                 <input type="hidden" id="id_document_key" name="id_document_key" value="">
                                  @error('id_document_front')
                                      <span class="field-error">{{ $message }}</span>
                                  @enderror
@@ -1401,6 +1402,7 @@
                                 </label>
                             </div>
                             <div id="additional-photo-previews" class="photo-previews"></div>
+                            <div id="step5-photo-keys" style="display:none;"></div>
                         </div>
 
                         <div id="video-upload-section" style="margin-top: 24px;">
@@ -1451,6 +1453,27 @@
                     </div>
                 </div>
                 @endif
+
+                <!-- Upload Progress Modal -->
+                <div id="upload-progress-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 10000; align-items: center; justify-content: center; flex-direction: column;">
+                    <div style="background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">Uploading Images</h3>
+                            <button type="button" id="upload-modal-close-btn" style="display: none; background: none; border: none; cursor: pointer; padding: 4px; color: #6b7280;" title="Close">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+            </div>
+                        <div id="upload-progress-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Upload items will be inserted here -->
+                        </div>
+                        <div id="upload-modal-footer" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p id="upload-modal-status" style="margin: 0; font-size: 14px; color: #6b7280;">Preparing uploads...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1559,6 +1582,184 @@
             // Declare activeCompressions in global scope so form submission handlers can access it
             window.activeCompressions = window.activeCompressions || 0;
             let activeCompressions = window.activeCompressions;
+
+            // Upload Progress Modal Management
+            const uploadModal = document.getElementById('upload-progress-modal');
+            const uploadProgressList = document.getElementById('upload-progress-list');
+            const uploadModalStatus = document.getElementById('upload-modal-status');
+            const uploadModalCloseBtn = document.getElementById('upload-modal-close-btn');
+            const uploadModalTracker = {
+                items: new Map(), // id -> {fileName, progress, status, error}
+                addItem: function(id, fileName) {
+                    this.items.set(id, { fileName, progress: 0, status: 'uploading', error: null });
+                    this.render();
+                },
+                updateProgress: function(id, progress) {
+                    const item = this.items.get(id);
+                    if (item) {
+                        item.progress = progress;
+                        this.render();
+                    }
+                },
+                markComplete: function(id) {
+                    const item = this.items.get(id);
+                    if (item) {
+                        item.status = 'complete';
+                        item.progress = 100;
+                        this.render();
+                    }
+                    this.checkAllComplete();
+                },
+                markError: function(id, error) {
+                    const item = this.items.get(id);
+                    if (item) {
+                        item.status = 'error';
+                        item.error = error;
+                        this.render();
+                    }
+                    this.checkAllComplete();
+                },
+                render: function() {
+                    uploadProgressList.innerHTML = '';
+                    let allComplete = true;
+                    let hasError = false;
+
+                    this.items.forEach((item, id) => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'padding: 12px; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;';
+
+                        const fileName = document.createElement('div');
+                        fileName.style.cssText = 'font-size: 14px; font-weight: 500; color: #1f2937; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;';
+                        fileName.innerHTML = `
+                            <span>${this.escapeHtml(item.fileName)}</span>
+                            <span style="font-size: 12px; color: ${item.status === 'complete' ? '#10b981' : item.status === 'error' ? '#ef4444' : '#6b7280'};">
+                                ${item.status === 'complete' ? '✓ Ready' : item.status === 'error' ? '✗ Failed' : 'Uploading...'}
+                            </span>
+                        `;
+                        div.appendChild(fileName);
+
+                        if (item.status === 'uploading') {
+                            const progressBar = document.createElement('div');
+                            progressBar.style.cssText = 'width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;';
+                            const fill = document.createElement('div');
+                            fill.style.cssText = `width: ${item.progress}%; height: 100%; background: #10b981; transition: width 0.3s ease;`;
+                            progressBar.appendChild(fill);
+                            div.appendChild(progressBar);
+                            allComplete = false;
+                        } else if (item.status === 'error') {
+                            const errorContainer = document.createElement('div');
+                            errorContainer.style.cssText = 'margin-top: 8px;';
+
+                            const errorMsg = document.createElement('div');
+                            errorMsg.style.cssText = 'font-size: 12px; color: #ef4444; margin-bottom: 4px;';
+                            errorMsg.textContent = item.error || 'Upload failed';
+                            errorContainer.appendChild(errorMsg);
+
+                            // Add retry button for failed uploads
+                            const retryBtn = document.createElement('button');
+                            retryBtn.type = 'button';
+                            retryBtn.textContent = 'Retry';
+                            retryBtn.style.cssText = 'font-size: 12px; padding: 4px 12px; background: #10b981; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;';
+                            retryBtn.onclick = () => {
+                                // Find the item in step5PhotoItems or trigger Step 4 retry
+                                if (id.startsWith('step4-id-doc-')) {
+                                    // Step 4 retry - trigger file input change again
+                                    const idInput = document.getElementById('upload_id_document_front');
+                                    if (idInput && idInput.files.length > 0) {
+                                        const event = new Event('change', { bubbles: true });
+                                        idInput.dispatchEvent(event);
+                                    }
+                                } else {
+                                    // Step 5 retry - find item and retry upload
+                                    const step5Item = window.step5PhotoItems?.find(i => i.id === id);
+                                    if (step5Item && window.uploadOnePhotoItem) {
+                                        step5Item.status = 'queued';
+                                        step5Item.error = null;
+                                        window.uploadOnePhotoItem(step5Item);
+                                    }
+                                }
+                            };
+                            errorContainer.appendChild(retryBtn);
+                            div.appendChild(errorContainer);
+                            hasError = true;
+                        }
+
+                        uploadProgressList.appendChild(div);
+                    });
+
+                    if (allComplete && this.items.size > 0) {
+                        if (hasError) {
+                            uploadModalStatus.innerHTML = 'Some uploads failed. Click "Retry" on failed items or check S3 CORS configuration.<br><small style="color: #9ca3af; margin-top: 4px; display: block;">CORS must allow PUT requests from: ' + window.location.origin + '</small>';
+                            uploadModalStatus.style.color = '#ef4444';
+                        } else {
+                            uploadModalStatus.textContent = 'All images uploaded successfully! Ready to submit.';
+                            uploadModalStatus.style.color = '#10b981';
+                        }
+                        uploadModalCloseBtn.style.display = 'block';
+                    } else if (this.items.size > 0) {
+                        const uploading = Array.from(this.items.values()).filter(i => i.status === 'uploading').length;
+                        uploadModalStatus.textContent = `Uploading ${uploading} image${uploading !== 1 ? 's' : ''}...`;
+                        uploadModalStatus.style.color = '#6b7280';
+                        uploadModalCloseBtn.style.display = 'none';
+                    }
+                },
+                checkAllComplete: function() {
+                    const allComplete = Array.from(this.items.values()).every(item =>
+                        item.status === 'complete' || item.status === 'error'
+                    );
+                    if (allComplete && this.items.size > 0) {
+                        // Auto-close after 2 seconds if all successful, or keep open if errors
+                        const hasError = Array.from(this.items.values()).some(item => item.status === 'error');
+                        if (!hasError) {
+                            setTimeout(() => {
+                                if (Array.from(this.items.values()).every(item => item.status === 'complete')) {
+                                    this.hide();
+                                }
+                            }, 2000);
+                        }
+                    }
+                },
+                show: function() {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'flex';
+                    }
+                },
+                hide: function() {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'none';
+                    }
+                },
+                clear: function() {
+                    this.items.clear();
+                    this.render();
+                },
+                escapeHtml: function(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            };
+
+            // Close modal button
+            if (uploadModalCloseBtn) {
+                uploadModalCloseBtn.addEventListener('click', () => {
+                    uploadModalTracker.hide();
+                });
+            }
+
+            // Close modal when clicking outside (only if all uploads complete)
+            if (uploadModal) {
+                uploadModal.addEventListener('click', (e) => {
+                    if (e.target === uploadModal) {
+                        const allComplete = Array.from(uploadModalTracker.items.values()).every(item =>
+                            item.status === 'complete' || item.status === 'error'
+                        );
+                        if (allComplete && uploadModalTracker.items.size > 0) {
+                            uploadModalTracker.hide();
+                        }
+                    }
+                });
+            }
 
             function initFileUploadSteps() {
                  const steps = document.querySelectorAll('[data-step="4"], [data-step="5"]');
@@ -1813,15 +2014,117 @@
                                       // Clear validation error immediately
                                       clearFieldError(input);
 
-                                      // Wait a bit for compression to complete, then show progress
-                                      setTimeout(() => {
-                                          let progress = 0;
-                                          const interval = setInterval(() => {
-                                              progress += 10;
-                                              fill.style.width = `${progress}%`;
-                                              if (progress >= 100) {
-                                                  clearInterval(interval);
-                                                  // Show Success Message
+                                      // Upload to S3 via presigned URL (single AJAX request)
+                                      const idKeyInput = document.getElementById('id_document_key');
+                                      if (idKeyInput) idKeyInput.value = '';
+                                      window.step4IdUploadInFlight = (window.step4IdUploadInFlight || 0) + 1;
+
+                                      // Clear previous uploads and show modal
+                                      uploadModalTracker.clear();
+                                      uploadModalTracker.show();
+
+                                      const uploadId = 'step4-id-doc-' + Date.now();
+                                      const fileName = input.files[0].name;
+
+                                      const uploadWithProgress = (url, headers, file) => {
+                                          return new Promise((resolve, reject) => {
+                                              // Show modal and add item
+                                              uploadModalTracker.show();
+                                              uploadModalTracker.addItem(uploadId, fileName);
+
+                                              const xhr = new XMLHttpRequest();
+                                              xhr.open('PUT', url, true);
+                                              if (headers && headers['Content-Type']) {
+                                                  xhr.setRequestHeader('Content-Type', headers['Content-Type']);
+                                              } else if (file.type) {
+                                                  xhr.setRequestHeader('Content-Type', file.type);
+                                              }
+                                              xhr.upload.addEventListener('progress', (e) => {
+                                                  if (e.lengthComputable) {
+                                                      const pct = Math.round((e.loaded / e.total) * 100);
+                                                      fill.style.width = `${pct}%`;
+                                                      // Update modal progress
+                                                      uploadModalTracker.updateProgress(uploadId, pct);
+                                                  }
+                                              });
+                                              xhr.onload = () => {
+                                                  if (xhr.status >= 200 && xhr.status < 300) {
+                                                      uploadModalTracker.markComplete(uploadId);
+                                                      resolve();
+                                                  } else {
+                                                      const errorMsg = `Upload failed (S3): ${xhr.status} ${xhr.statusText}`;
+                                                      console.error('S3 upload error:', xhr.status, xhr.responseText);
+                                                      uploadModalTracker.markError(uploadId, errorMsg);
+                                                      reject(new Error(errorMsg));
+                                                  }
+                                              };
+                                              xhr.onerror = () => {
+                                                  console.error('Network error during S3 upload', {
+                                                      status: xhr.status,
+                                                      statusText: xhr.statusText,
+                                                      responseText: xhr.responseText
+                                                  });
+                                                  // Check if it's likely a CORS error (status 0 usually indicates CORS)
+                                                  let errorMsg = 'Upload failed (network error).';
+                                                  if (xhr.status === 0) {
+                                                      errorMsg = 'CORS error: S3 bucket must allow PUT requests from this domain. Please configure CORS on your S3 bucket.';
+                                                  } else if (xhr.status === 403) {
+                                                      errorMsg = 'Access denied. Check S3 bucket permissions and CORS configuration.';
+                                                  } else if (xhr.status === 404) {
+                                                      errorMsg = 'S3 endpoint not found. Check bucket name and region configuration.';
+                                                  }
+                                                  uploadModalTracker.markError(uploadId, errorMsg);
+                                                  reject(new Error(errorMsg));
+                                              };
+                                              xhr.onabort = () => {
+                                                  uploadModalTracker.markError(uploadId, 'Upload cancelled.');
+                                                  reject(new Error('Upload cancelled.'));
+                                              };
+                                              xhr.send(file);
+                                          });
+                                      };
+
+                                      // Wait a beat for compression swap (main handler updates input.files)
+                                      setTimeout(async () => {
+                                          try {
+                                              const fileToUpload = input.files[0];
+                                              const presignRes = await fetch('{{ route("talent.onboarding.presign-id-document") }}', {
+                                                  method: 'POST',
+                                                  headers: {
+                                                      'Content-Type': 'application/json',
+                                                      'X-Requested-With': 'XMLHttpRequest',
+                                                      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                  },
+                                                  credentials: 'same-origin',
+                                                  body: JSON.stringify({
+                                                      file_name: fileToUpload.name,
+                                                      file_type: fileToUpload.type,
+                                                  }),
+                                              });
+
+                                              if (!presignRes.ok) {
+                                                  let msg = 'Could not prepare upload.';
+                                                  try {
+                                                      const data = await presignRes.json();
+                                                      msg = data.message || msg;
+                                                  } catch (e) {}
+                                                  throw new Error(msg);
+                                              }
+
+                                              const presign = await presignRes.json();
+                                              await uploadWithProgress(presign.url, presign.headers, fileToUpload);
+
+                                              if (idKeyInput) idKeyInput.value = presign.key;
+
+                                              // Clear the file input so Step 4 submits only the key (no multipart upload)
+                                              try {
+                                                  const dt = new DataTransfer();
+                                                  input.files = dt.files;
+                                              } catch (e) {
+                                                  input.value = '';
+                                              }
+
+                                              // Success message
                                                   const successMsg = document.createElement('div');
                                                   successMsg.className = 'upload-success-msg';
                                                   successMsg.style.color = '#10b981';
@@ -1830,14 +2133,17 @@
                                                   successMsg.style.fontWeight = '500';
                                                   successMsg.textContent = 'Done, Now Click Next to Submit the document.';
 
-                                                  // Remove old success message if exists
                                                   const oldMsg = card.querySelector('.upload-success-msg');
-                                                  if(oldMsg) oldMsg.remove();
-
+                                              if (oldMsg) oldMsg.remove();
                                                   card.querySelector('.upload-inner').appendChild(successMsg);
-                                              }
-                                          }, 50);
-                                      }, 500); // Wait for compression
+                                          } catch (err) {
+                                              console.error('ID document upload failed', err);
+                                              fill.style.width = '0%';
+                                              alert(err && err.message ? err.message : 'ID document upload failed.');
+                                          } finally {
+                                              window.step4IdUploadInFlight = Math.max(0, (window.step4IdUploadInFlight || 0) - 1);
+                                          }
+                                      }, 300);
                                   }
                               }
                           });
@@ -1868,13 +2174,16 @@
                      }
                   });
 
-                  // Portfolio Photos Multi-Upload Logic
+                  // Portfolio Photos Multi-Upload Logic (Step 5)
+                  // Each photo is uploaded with an individual AJAX request directly to S3 (presigned PUT).
                   const multiInput = document.getElementById('additional_photos_input');
                   const multiUploadArea = multiInput ? multiInput.closest('.upload-card') : null;
                   const previewContainer = document.getElementById('additional-photo-previews');
+                  const uploadedKeysContainer = document.getElementById('step5-photo-keys');
 
-                  // Make selectedFiles globally accessible for form submission
-                  window.selectedFiles = [];
+                  // Global-ish state for Step 5 photos.
+                  window.step5PhotoItems = window.step5PhotoItems || [];
+                  window.step5UploadsInFlight = window.step5UploadsInFlight || 0;
 
                   // Camera Capture Logic
                   const cameraBtn = document.getElementById('camera-capture-btn');
@@ -2018,33 +2327,193 @@
                           // Filter out nulls (non-images)
                           const validFiles = processedFiles.filter(f => f !== null);
 
-                          // Add all processed files to selectedFiles
-                          validFiles.forEach(file => {
-                              window.selectedFiles.push(file);
-                          });
+                          // Add all processed files as items and start uploads
+                          const newItems = validFiles.map(file => ({
+                              id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                              file,
+                              progress: 0,
+                              status: 'queued', // queued | uploading | done | error
+                              key: null,
+                              error: null,
+                          }));
 
-                          syncInputFiles();
+                          window.step5PhotoItems.push(...newItems);
+
+                          // Keep the real <input type=file> empty to avoid multipart uploads;
+                          // we submit only uploaded keys.
+                          clearMultiInputFiles();
+
                           renderPreviews();
+                          syncHiddenKeys();
+
+                          // Clear modal and show it for new batch
+                          uploadModalTracker.clear();
+                          if (newItems.length > 0) {
+                              uploadModalTracker.show();
+                          }
+
+                          // Kick off uploads (each photo = one request)
+                          newItems.forEach(item => uploadOnePhotoItem(item));
                       });
                   }
 
-                  function syncInputFiles() {
+                  function clearMultiInputFiles() {
                       if (!multiInput) return;
+                      try {
                       const dt = new DataTransfer();
-                      window.selectedFiles.forEach(file => dt.items.add(file));
                       multiInput.files = dt.files;
+                      } catch (e) {
+                          // Some browsers may not support setting files; at least clear value.
+                          multiInput.value = '';
+                      }
+                  }
+
+                  function syncHiddenKeys() {
+                      if (!uploadedKeysContainer) return;
+                      uploadedKeysContainer.innerHTML = '';
+                      window.step5PhotoItems
+                          .filter(i => i.status === 'done' && i.key)
+                          .forEach(i => {
+                              const input = document.createElement('input');
+                              input.type = 'hidden';
+                              input.name = 'additional_photo_keys[]';
+                              input.value = i.key;
+                              uploadedKeysContainer.appendChild(input);
+                          });
+                  }
+
+                  // Expose helpers for the Step 5 submit handler (defined outside this scope)
+                  window.clearStep5MultiInputFiles = clearMultiInputFiles;
+                  window.syncStep5HiddenKeys = syncHiddenKeys;
+                  window.uploadOnePhotoItem = uploadOnePhotoItem; // Expose for retry functionality
+
+                  async function presignPhoto(file) {
+                      const res = await fetch('{{ route("talent.onboarding.presign-additional-photo") }}', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-Requested-With': 'XMLHttpRequest',
+                              'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                          },
+                          credentials: 'same-origin',
+                          body: JSON.stringify({
+                              file_name: file.name,
+                              file_type: file.type,
+                          }),
+                      });
+
+                      if (!res.ok) {
+                          let msg = 'Could not prepare upload.';
+                          try {
+                              const data = await res.json();
+                              msg = data.message || msg;
+                          } catch (e) {}
+                          throw new Error(msg);
+                      }
+
+                      return await res.json();
+                  }
+
+                  function uploadToS3Put(url, headers, file, onProgress) {
+                      return new Promise((resolve, reject) => {
+                          const xhr = new XMLHttpRequest();
+                          xhr.open('PUT', url, true);
+                          if (headers && headers['Content-Type']) {
+                              xhr.setRequestHeader('Content-Type', headers['Content-Type']);
+                          } else if (file.type) {
+                              xhr.setRequestHeader('Content-Type', file.type);
+                          }
+
+                          xhr.upload.addEventListener('progress', (e) => {
+                              if (e.lengthComputable) {
+                                  onProgress(Math.round((e.loaded / e.total) * 100));
+                              }
+                          });
+
+                          xhr.onload = () => {
+                              if (xhr.status >= 200 && xhr.status < 300) {
+                                  resolve();
+                              } else {
+                                  const errorMsg = `Upload failed (S3): ${xhr.status} ${xhr.statusText}`;
+                                  console.error('S3 upload error:', xhr.status, xhr.responseText);
+                                  reject(new Error(errorMsg));
+                              }
+                          };
+                          xhr.onerror = () => {
+                              console.error('Network error during S3 upload', {
+                                  status: xhr.status,
+                                  statusText: xhr.statusText,
+                                  responseText: xhr.responseText
+                              });
+                              // Check if it's likely a CORS error (status 0 usually indicates CORS)
+                              let errorMsg = 'Upload failed (network error).';
+                              if (xhr.status === 0) {
+                                  errorMsg = 'CORS error: S3 bucket must allow PUT requests from this domain. Please configure CORS on your S3 bucket.';
+                              } else if (xhr.status === 403) {
+                                  errorMsg = 'Access denied. Check S3 bucket permissions and CORS configuration.';
+                              } else if (xhr.status === 404) {
+                                  errorMsg = 'S3 endpoint not found. Check bucket name and region configuration.';
+                              }
+                              reject(new Error(errorMsg));
+                          };
+                          xhr.onabort = () => reject(new Error('Upload cancelled.'));
+                          xhr.send(file);
+                      });
+                  }
+
+                  async function uploadOnePhotoItem(item) {
+                      if (!item || !item.file) return;
+
+                      // If already uploading/done, skip.
+                      if (item.status === 'uploading' || item.status === 'done') return;
+
+                      item.status = 'uploading';
+                      item.progress = 0;
+                      item.error = null;
+                      window.step5UploadsInFlight = (window.step5UploadsInFlight || 0) + 1;
+                      updatePreviewProgress(item.id, 0);
+
+                      // Show modal and add item
+                      uploadModalTracker.show();
+                      uploadModalTracker.addItem(item.id, item.file.name);
+
+                      try {
+                          const presign = await presignPhoto(item.file);
+                          await uploadToS3Put(presign.url, presign.headers, item.file, (pct) => {
+                              item.progress = pct;
+                              updatePreviewProgress(item.id, pct);
+                              // Update modal progress
+                              uploadModalTracker.updateProgress(item.id, pct);
+                          });
+
+                          item.key = presign.key;
+                          item.status = 'done';
+                          item.progress = 100;
+                          updatePreviewProgress(item.id, 100);
+                          uploadModalTracker.markComplete(item.id);
+                          syncHiddenKeys();
+                      } catch (e) {
+                          item.status = 'error';
+                          item.error = e && e.message ? e.message : 'Upload failed.';
+                          updatePreviewError(item.id, item.error);
+                          uploadModalTracker.markError(item.id, item.error);
+                      } finally {
+                          window.step5UploadsInFlight = Math.max(0, (window.step5UploadsInFlight || 0) - 1);
+                      }
                   }
 
                   function renderPreviews() {
                       previewContainer.innerHTML = '';
-                      if (window.selectedFiles.length > 0) {
+                      if (window.step5PhotoItems.length > 0) {
                           const uploadLabel = multiUploadArea.querySelector('.upload-label');
-                          if (uploadLabel) uploadLabel.textContent = `${window.selectedFiles.length} photos selected`;
-                          window.selectedFiles.forEach((file, index) => {
+                          if (uploadLabel) uploadLabel.textContent = `${window.step5PhotoItems.length} photos selected`;
+                          window.step5PhotoItems.forEach((item) => {
+                              const file = item.file;
                               const reader = new FileReader();
                               reader.onload = (e) => {
                                   const div = document.createElement('div');
                                   div.className = 'photo-preview-item';
+                                  div.dataset.photoItemId = item.id;
                                   div.innerHTML = `
                                     <div class="preview-image-container" style="position: relative; width: 100px; height: 100px;">
                                         <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
@@ -2053,15 +2522,9 @@
                                         </div>
                                     </div>`;
                                   previewContainer.appendChild(div);
-
-                                  // Simulate progress for newly added item
-                                  // Use a slightly longer timeout to ensure DOM update
-                                  setTimeout(() => {
-                                      const progressBar = div.querySelector('.upload-progress-bar');
-                                      if(progressBar) {
-                                          progressBar.style.width = '100%';
-                                      }
-                                  }, 50);
+                                  // Initialize progress based on current state
+                                  updatePreviewProgress(item.id, item.progress || 0);
+                                  if (item.status === 'error' && item.error) updatePreviewError(item.id, item.error);
                               };
                               reader.readAsDataURL(file);
                           });
@@ -2069,6 +2532,18 @@
                           const uploadLabel = multiUploadArea.querySelector('.upload-label');
                           if (uploadLabel) uploadLabel.textContent = 'Drop multiple photos here or click to browse';
                       }
+                  }
+
+                  function updatePreviewProgress(itemId, pct) {
+                      const el = previewContainer.querySelector(`[data-photo-item-id="${itemId}"] .upload-progress-bar`);
+                      if (el) el.style.width = `${pct}%`;
+                  }
+
+                  function updatePreviewError(itemId, message) {
+                      const wrapper = previewContainer.querySelector(`[data-photo-item-id="${itemId}"]`);
+                      if (!wrapper) return;
+                      wrapper.style.opacity = '0.6';
+                      wrapper.title = message || 'Upload failed.';
                   }
             }
             initFileUploadSteps();
@@ -2137,43 +2612,40 @@
                     form.addEventListener('submit', async function(e) {
                         // For Step 5, use regular form submission to preserve session flash
                         if (form.action.includes('step-5')) {
-                            // Wait for any ongoing compressions before submission
-                            const currentCompressions = window.activeCompressions || 0;
-                            if (currentCompressions > 0) {
+                            // Step 5 photos upload via AJAX directly to S3.
+                            // We must wait for BOTH compressions and uploads to complete, then submit only the S3 keys.
                                 e.preventDefault();
-                                console.log('Waiting for compressions to complete...', currentCompressions);
-
-                                // Disable button while waiting
                                 disableButton();
 
-                                // Wait for compressions to finish
-                                const checkInterval = setInterval(() => {
-                                    const compressions = window.activeCompressions || 0;
-                                    if (compressions === 0) {
-                                        clearInterval(checkInterval);
-                                        console.log('All compressions complete, submitting form...');
-                                        // Submit form normally (don't prevent default)
-                                        form.submit();
-                                    }
-                                }, 100);
+                            const startedAt = Date.now();
+                            const timeoutMs = 120000; // 2 minutes
 
-                                // Timeout after 30 seconds
-                                setTimeout(() => {
+                            const waitAndSubmit = () => {
                                     const compressions = window.activeCompressions || 0;
-                                    if (compressions > 0) {
-                                        clearInterval(checkInterval);
-                                        console.warn('Compression timeout, submitting anyway...');
-                                        form.submit();
-                                    }
-                                }, 30000);
+                                const uploads = window.step5UploadsInFlight || 0;
 
+                                if ((compressions > 0 || uploads > 0) && (Date.now() - startedAt) < timeoutMs) {
+                                    setTimeout(waitAndSubmit, 150);
+                                    return;
+                                }
+
+                                // If any photo failed, don't submit.
+                                const items = window.step5PhotoItems || [];
+                                const hasError = items.some(i => i && i.status === 'error');
+                                if (hasError) {
+                                    enableButton();
+                                    alert('Some photos failed to upload. Please try selecting them again and submit.');
                                 return;
                             }
 
-                            // No compressions in progress, allow normal form submission
-                            // Disable button before submission
-                            disableButton();
-                            // Let form submit normally - don't prevent default
+                                // Build hidden inputs for uploaded keys and ensure the file input is empty (no multipart upload).
+                                if (window.syncStep5HiddenKeys) window.syncStep5HiddenKeys();
+                                if (window.clearStep5MultiInputFiles) window.clearStep5MultiInputFiles();
+
+                                form.submit();
+                            };
+
+                            waitAndSubmit();
                             return;
                         }
 
@@ -2219,47 +2691,39 @@
                             // Disable button immediately
                             disableButton();
 
-                            // Debug logging for Step 5
-                            if (form.action.includes('step-5')) {
-                                const photoInput = document.getElementById('additional_photos_input');
-                                const videoInput = document.getElementById('upload_video');
-
-                                // CRITICAL FIX: Ensure files are synced to input before submission
-                                if (window.selectedFiles && window.selectedFiles.length > 0) {
-                                    console.log('Syncing selected files to input before submission...');
-                                    const dt = new DataTransfer();
-                                    window.selectedFiles.forEach(file => dt.items.add(file));
-                                    if (photoInput) {
-                                        photoInput.files = dt.files;
-                                    }
-                                }
-
-                                console.log('=== STEP 5 FORM SUBMISSION DEBUG ===');
-                                console.log('Photo Input:', photoInput);
-                                console.log('Photo Files Count:', photoInput ? photoInput.files.length : 0);
-                                console.log('Photo Files:', photoInput ? Array.from(photoInput.files).map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
-                                console.log('Video Input:', videoInput);
-                                console.log('Video Files Count:', videoInput ? videoInput.files.length : 0);
-                                console.log('Selected Files Array:', window.selectedFiles ? window.selectedFiles.map(f => ({ name: f.name, size: (f.size / 1024 / 1024).toFixed(2) + ' MB' })) : []);
-                                console.log('=====================================');
-
-                                // If no photos, show alert
-                                if (!photoInput || photoInput.files.length === 0) {
-                                    console.warn('WARNING: No photos detected in form submission!');
-                                }
-                            }
+                            // Step 5 is submitted via normal form submit (handled above).
 
                             // For Step 4, ensure compressed file is ready
                             if (form.action.includes('step-4')) {
                                 const idInput = document.getElementById('upload_id_document_front');
-                                if (idInput && idInput.files.length > 0) {
-                                    console.log('=== STEP 4 FORM SUBMISSION DEBUG ===');
-                                    console.log('ID Document File:', {
-                                        name: idInput.files[0].name,
-                                        size: (idInput.files[0].size / 1024 / 1024).toFixed(2) + ' MB',
-                                        type: idInput.files[0].type
-                                    });
-                                    console.log('=====================================');
+                                const idKeyInput = document.getElementById('id_document_key');
+                                const uploads = window.step4IdUploadInFlight || 0;
+
+                                // If user picked a file but upload hasn't finished, wait.
+                                if (uploads > 0) {
+                                    enableButton();
+                                    alert('Please wait for the ID document upload to finish.');
+                                    return;
+                                }
+
+                                // If there is no existing doc and no uploaded key, block submission.
+                                const hasExistingDoc = {{ !empty($profile->id_document_front) ? 'true' : 'false' }};
+                                const hasUploadedKey = !!(idKeyInput && idKeyInput.value);
+
+                                if (!hasExistingDoc && !hasUploadedKey) {
+                                    enableButton();
+                                    alert('Please upload your ID document before continuing.');
+                                    return;
+                                }
+
+                                // Ensure we do not send the file via multipart (we submit only the key).
+                                if (idInput && idInput.files && idInput.files.length > 0) {
+                                    try {
+                                        const dt = new DataTransfer();
+                                        idInput.files = dt.files;
+                                    } catch (e) {
+                                        idInput.value = '';
+                                    }
                                 }
                             }
 

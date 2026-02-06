@@ -208,6 +208,10 @@ Route::prefix('talent')->as('talent.')->group(function () {
         Route::get('onboarding', [OnboardingController::class, 'start'])->name('onboarding.start');
         Route::get('onboarding/intro', [OnboardingController::class, 'intro'])->name('onboarding.intro');
         Route::post('onboarding/save-step', [OnboardingController::class, 'saveStep'])->name('onboarding.save-step');
+        Route::post('onboarding/presign-additional-photo', [OnboardingController::class, 'presignAdditionalPhoto'])
+            ->name('onboarding.presign-additional-photo');
+        Route::post('onboarding/presign-id-document', [OnboardingController::class, 'presignIdDocument'])
+            ->name('onboarding.presign-id-document');
         Route::get('onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');

@@ -8,12 +8,14 @@ use App\Models\TalentProfile;
 use App\Models\TalentMedia;
 use App\Services\MuxService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Notifications\TalentSignupCompleted;
 
@@ -279,6 +281,7 @@ class OnboardingController extends Controller
 
                 $data = $request->validate([
                     'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
+                    'id_document_key' => ['nullable', 'string'],
                 ]);
 
                 $updateData = [
@@ -286,7 +289,23 @@ class OnboardingController extends Controller
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 4),
                 ];
 
-                if ($request->hasFile('id_document_front')) {
+                // Preferred path: ID document is uploaded directly to S3 via AJAX (presigned PUT),
+                // then Step 4 submits only `id_document_key`.
+                $idKey = $request->input('id_document_key');
+                if (is_string($idKey) && $idKey !== '') {
+                    $expectedPrefix = "talent/{$profile->id}/id/front/";
+                    if (str_starts_with($idKey, $expectedPrefix)) {
+                        $s3Disk = config('filesystems.cloud', 's3');
+                        $storageDisk = Storage::disk($s3Disk);
+                        try {
+                            $updateData['id_document_front'] = $storageDisk->url($idKey);
+                        } catch (\Exception $e) {
+                            $updateData['id_document_front'] = $idKey;
+                        }
+                    } else {
+                        Log::warning('Invalid id_document_key prefix for Step 4', ['profile_id' => $profile->id, 'key' => $idKey]);
+                    }
+                } elseif ($request->hasFile('id_document_front')) {
                     $s3Disk = config('filesystems.cloud', 's3');
                     $updateData['id_document_front'] = $this->storeTalentFile(
                         $profile,
@@ -311,6 +330,8 @@ class OnboardingController extends Controller
                         'video'             => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
                         'additional_photos' => ['nullable', 'array'],
                         'additional_photos.*' => ['file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
+                        'additional_photo_keys' => ['nullable', 'array'],
+                        'additional_photo_keys.*' => ['string'],
                     ]);
                     Log::info('Validation passed for Step 5.');
                 } catch (\Illuminate\Validation\ValidationException $e) {
@@ -350,7 +371,57 @@ class OnboardingController extends Controller
                     Log::info('No video file present in request.');
                 }
 
-                if ($request->hasFile('additional_photos')) {
+                // Preferred path: photos are uploaded directly to S3 via AJAX (presigned PUT),
+                // then the form submits only the uploaded object keys in `additional_photo_keys`.
+                $uploadedKeys = $request->input('additional_photo_keys', []);
+                if (is_array($uploadedKeys) && count($uploadedKeys) > 0) {
+                    Log::info('Processing additional_photo_keys in Step 5...', [
+                        'photo_count' => count($uploadedKeys),
+                        'profile_id' => $profile->id,
+                    ]);
+
+                    // Delete existing profile photos
+                    $deletedCount = $profile->media()->where('type', 'profile')->delete();
+                    Log::info('Deleted existing profile photos', ['count' => $deletedCount]);
+
+                    $s3Disk = config('filesystems.cloud', 's3');
+                    $storageDisk = Storage::disk($s3Disk);
+                    $expectedPrefix = "talent/{$profile->id}/photos/profile/";
+
+                    foreach ($uploadedKeys as $index => $key) {
+                        try {
+                            if (!is_string($key) || $key === '' || !str_starts_with($key, $expectedPrefix)) {
+                                Log::warning("Skipping invalid photo key #{$index}", ['key' => $key]);
+                                continue;
+                            }
+
+                            // Store URL if possible, otherwise store the key/path.
+                            $filePathToStore = $key;
+                            try {
+                                $filePathToStore = $storageDisk->url($key);
+                            } catch (\Exception $e) {
+                                // Keep key as fallback (e.g., private bucket without URL)
+                            }
+
+                            $media = $profile->media()->create([
+                                'file_path' => $filePathToStore,
+                                'type' => 'profile',
+                            ]);
+
+                            Log::info("Media record created from key", [
+                                'media_id' => $media->id,
+                                'key' => $key,
+                                'stored_file_path' => $filePathToStore,
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error("Failed to save photo key #{$index}", [
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString(),
+                                'key' => $key,
+                            ]);
+                        }
+                    }
+                } elseif ($request->hasFile('additional_photos')) {
                     Log::info('Processing additional_photos in Step 5...', [
                         'photo_count' => count($request->file('additional_photos')),
                         'profile_id' => $profile->id,
@@ -400,7 +471,7 @@ class OnboardingController extends Controller
                         'photos' => $savedPhotos->pluck('file_path')->toArray(),
                     ]);
                 } else {
-                    Log::info('No additional_photos in request for Step 5');
+                    Log::info('No additional photos in request for Step 5');
                 }
 
                 $profile->update([
@@ -480,6 +551,201 @@ class OnboardingController extends Controller
 
         // Return relative path for non-cloud disks
         return $path;
+    }
+
+    /**
+     * Step 4: Generate a presigned PUT URL for uploading the ID document image directly to S3.
+     */
+    public function presignIdDocument(Request $request): JsonResponse
+    {
+        $profile = $this->profile($request);
+
+        $data = $request->validate([
+            'file_name' => ['required', 'string', 'max:255'],
+            'file_type' => ['required', 'string', 'max:100'],
+        ]);
+
+        $fileName = (string) $data['file_name'];
+        $fileType = (string) $data['file_type'];
+
+        // Allowlist images. Client compression may convert to JPEG.
+        $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/heic' => 'heic',
+            'image/heif' => 'heif',
+            'image/bmp' => 'bmp',
+            'image/svg+xml' => 'svg',
+        ];
+
+        if (!array_key_exists($fileType, $allowed)) {
+            return response()->json(['message' => 'Invalid file type.'], 422);
+        }
+
+        $ext = $allowed[$fileType] ?? (pathinfo($fileName, PATHINFO_EXTENSION) ?: 'jpg');
+        $uuid = (string) Str::uuid();
+        $key = "talent/{$profile->id}/id/front/{$uuid}.{$ext}";
+
+        $diskName = config('filesystems.cloud', 's3');
+        $diskConfig = config("filesystems.disks.{$diskName}");
+        
+        if (!$diskConfig || $diskConfig['driver'] !== 's3') {
+            return response()->json(['message' => 'S3 disk not configured.'], 500);
+        }
+
+        $bucket = $diskConfig['bucket'] ?? null;
+        if (!$bucket) {
+            return response()->json(['message' => 'S3 bucket not configured.'], 500);
+        }
+
+        // Create S3 client directly from config
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $diskConfig['region'] ?? 'us-east-1',
+            'credentials' => [
+                'key' => $diskConfig['key'] ?? null,
+                'secret' => $diskConfig['secret'] ?? null,
+            ],
+        ];
+
+        // Add endpoint if configured (for S3-compatible services)
+        if (!empty($diskConfig['endpoint'])) {
+            $s3Config['endpoint'] = $diskConfig['endpoint'];
+            if (!empty($diskConfig['use_path_style_endpoint'])) {
+                $s3Config['use_path_style_endpoint'] = true;
+            }
+        }
+
+        try {
+            $client = new \Aws\S3\S3Client($s3Config);
+        } catch (\Exception $e) {
+            Log::error('Failed to create S3 client for presigning', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to initialize S3 client.'], 500);
+        }
+
+        // Create presigned PUT URL - don't include ACL as it may be disabled on bucket
+        $command = $client->getCommand('PutObject', [
+            'Bucket' => $bucket,
+            'Key' => $key,
+            'ContentType' => $fileType,
+        ]);
+
+        try {
+            $presignedRequest = $client->createPresignedRequest($command, '+20 minutes');
+            $presignedUrl = (string) $presignedRequest->getUri();
+        } catch (\Exception $e) {
+            Log::error('Failed to create presigned URL', ['error' => $e->getMessage(), 'key' => $key]);
+            return response()->json(['message' => 'Failed to generate presigned URL.'], 500);
+        }
+
+        return response()->json([
+            'key' => $key,
+            'url' => $presignedUrl,
+            'headers' => [
+                'Content-Type' => $fileType,
+            ],
+        ]);
+    }
+
+    /**
+     * Step 5: Generate a presigned PUT URL for uploading one additional profile photo directly to S3.
+     * Each photo should be uploaded with an individual AJAX request.
+     */
+    public function presignAdditionalPhoto(Request $request): JsonResponse
+    {
+        $profile = $this->profile($request);
+
+        $data = $request->validate([
+            'file_name' => ['required', 'string', 'max:255'],
+            'file_type' => ['required', 'string', 'max:100'],
+        ]);
+
+        $fileName = (string) $data['file_name'];
+        $fileType = (string) $data['file_type'];
+
+        // Basic allowlist (client-side also restricts to images).
+        $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/heic' => 'heic',
+            'image/heif' => 'heif',
+            'image/bmp' => 'bmp',
+            'image/svg+xml' => 'svg',
+        ];
+
+        if (!array_key_exists($fileType, $allowed)) {
+            return response()->json(['message' => 'Invalid file type.'], 422);
+        }
+
+        $ext = $allowed[$fileType] ?? (pathinfo($fileName, PATHINFO_EXTENSION) ?: 'jpg');
+        $uuid = (string) Str::uuid();
+        $key = "talent/{$profile->id}/photos/profile/{$uuid}.{$ext}";
+
+        $diskName = config('filesystems.cloud', 's3');
+        $diskConfig = config("filesystems.disks.{$diskName}");
+        
+        if (!$diskConfig || $diskConfig['driver'] !== 's3') {
+            return response()->json(['message' => 'S3 disk not configured.'], 500);
+        }
+
+        $bucket = $diskConfig['bucket'] ?? null;
+        if (!$bucket) {
+            return response()->json(['message' => 'S3 bucket not configured.'], 500);
+        }
+
+        // Create S3 client directly from config
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $diskConfig['region'] ?? 'us-east-1',
+            'credentials' => [
+                'key' => $diskConfig['key'] ?? null,
+                'secret' => $diskConfig['secret'] ?? null,
+            ],
+        ];
+
+        // Add endpoint if configured (for S3-compatible services)
+        if (!empty($diskConfig['endpoint'])) {
+            $s3Config['endpoint'] = $diskConfig['endpoint'];
+            if (!empty($diskConfig['use_path_style_endpoint'])) {
+                $s3Config['use_path_style_endpoint'] = true;
+            }
+        }
+
+        try {
+            $client = new \Aws\S3\S3Client($s3Config);
+        } catch (\Exception $e) {
+            Log::error('Failed to create S3 client for presigning', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to initialize S3 client.'], 500);
+        }
+
+        // Create presigned PUT URL - don't include ACL as it may be disabled on bucket
+        $command = $client->getCommand('PutObject', [
+            'Bucket' => $bucket,
+            'Key' => $key,
+            'ContentType' => $fileType,
+        ]);
+
+        try {
+            $presignedRequest = $client->createPresignedRequest($command, '+20 minutes');
+            $presignedUrl = (string) $presignedRequest->getUri();
+        } catch (\Exception $e) {
+            Log::error('Failed to create presigned URL', ['error' => $e->getMessage(), 'key' => $key]);
+            return response()->json(['message' => 'Failed to generate presigned URL.'], 500);
+        }
+
+        return response()->json([
+            'key' => $key,
+            'url' => $presignedUrl,
+            'headers' => [
+                'Content-Type' => $fileType,
+            ],
+        ]);
     }
 
     private function currentStep(TalentProfile $profile): string
