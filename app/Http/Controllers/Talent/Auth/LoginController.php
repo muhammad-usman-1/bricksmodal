@@ -56,28 +56,36 @@ class LoginController extends Controller
         $user->otp_attempts = 0;
         $user->save();
 
-        // Send OTP via KWT SMS
-        $smsService = new KwtSmsService();
-        $mobile = KwtSmsService::formatMobileNumber($user->phone_country_code, $user->phone_number);
-        $smsResult = $smsService->sendOtp($mobile, $otp);
+        // Check if phone number starts with 123
+        $phoneStartsWith123 = substr($user->phone_number, 0, 3) === '123';
 
-        if (!$smsResult['success']) {
-            Log::error('Failed to send OTP SMS', [
-                'user_id' => $user->id,
-                'mobile' => $mobile,
-                'error' => $smsResult['message'],
-            ]);
-
-            // Log the OTP for development/testing purposes
-            Log::info('Talent OTP (SMS failed) for phone ' . $user->phone_country_code . $user->phone_number . ': ' . $otp);
-
-            // Still proceed to OTP screen for development
-            // In production, you might want to return error instead
+        if ($phoneStartsWith123) {
+            // For phone numbers starting with 123, skip SMS service and just log OTP
+            Log::info('Talent OTP (Test number - no SMS sent) for phone ' . $user->phone_country_code . $user->phone_number . ': ' . $otp);
         } else {
-            Log::info('OTP sent successfully via SMS', [
-                'user_id' => $user->id,
-                'mobile' => $mobile,
-            ]);
+            // Send OTP via KWT SMS for regular phone numbers
+            $smsService = new KwtSmsService();
+            $mobile = KwtSmsService::formatMobileNumber($user->phone_country_code, $user->phone_number);
+            $smsResult = $smsService->sendOtp($mobile, $otp);
+
+            if (!$smsResult['success']) {
+                Log::error('Failed to send OTP SMS', [
+                    'user_id' => $user->id,
+                    'mobile' => $mobile,
+                    'error' => $smsResult['message'],
+                ]);
+
+                // Log the OTP for development/testing purposes
+                Log::info('Talent OTP (SMS failed) for phone ' . $user->phone_country_code . $user->phone_number . ': ' . $otp);
+
+                // Still proceed to OTP screen for development
+                // In production, you might want to return error instead
+            } else {
+                Log::info('OTP sent successfully via SMS', [
+                    'user_id' => $user->id,
+                    'mobile' => $mobile,
+                ]);
+            }
         }
 
         $request->session()->put('talent_phone', [
