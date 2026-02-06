@@ -278,9 +278,16 @@ class OnboardingController extends Controller
             case 'step-4':
                 // Only require document if it hasn't been uploaded yet
                 $requireDoc = empty($profile->id_document_front);
+                
+                // Check if id_document_key is provided (S3 upload path)
+                $hasIdKey = $request->filled('id_document_key');
+                
+                // If id_document_key is provided, id_document_front is not required
+                // Otherwise, require it only if profile doesn't have one yet
+                $idDocRequired = $requireDoc && !$hasIdKey;
 
                 $data = $request->validate([
-                    'id_document_front' => [$requireDoc ? 'required' : 'nullable', 'file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
+                    'id_document_front' => [$idDocRequired ? 'required' : 'nullable', 'file', 'mimes:jpeg,jpg,png,gif,webp,bmp,svg,heic,heif'],
                     'id_document_key' => ['nullable', 'string'],
                 ]);
 
@@ -304,6 +311,10 @@ class OnboardingController extends Controller
                         }
                     } else {
                         Log::warning('Invalid id_document_key prefix for Step 4', ['profile_id' => $profile->id, 'key' => $idKey]);
+                        // If id_document_key is invalid and no existing document, require id_document_front
+                        if ($requireDoc && !$request->hasFile('id_document_front')) {
+                            return back()->withErrors(['id_document_key' => 'Invalid document key. Please upload the document again.'])->withInput();
+                        }
                     }
                 } elseif ($request->hasFile('id_document_front')) {
                     $s3Disk = config('filesystems.cloud', 's3');
