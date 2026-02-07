@@ -226,6 +226,7 @@ Route::prefix('talent')->as('talent.')->group(function () {
             Route::get('profile', [TalentPortalProfileController::class, 'show'])->name('profile.show');
             Route::put('profile', [TalentPortalProfileController::class, 'update'])->name('profile.update');
             Route::post('profile/upload-image', [TalentPortalProfileController::class, 'uploadImage'])->name('profile.upload-image');
+            Route::post('profile/presign-additional-photo', [TalentPortalProfileController::class, 'presignAdditionalPhoto'])->name('profile.presign-additional-photo');
             Route::delete('profile/remove-image', [TalentPortalProfileController::class, 'removeImage'])->name('profile.remove-image');
             Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
