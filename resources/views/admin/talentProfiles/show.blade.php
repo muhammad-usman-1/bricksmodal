@@ -1432,10 +1432,13 @@
                 
                 input.addEventListener('change', function(e) {
                     e.stopPropagation();
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    // Prevent any click events from bubbling up
                     if (this.files && this.files[0]) {
                         previewMediaImage(this);
                     }
-                }, { once: false });
+                }, { once: false, capture: true });
                 
                 input.dataset.handlerAttached = 'true';
             });
@@ -1803,10 +1806,18 @@
             // Track if a drop just occurred to prevent click event
             let justDropped = false;
 
+            // Track if file picker is open to prevent duplicate triggers
+            let filePickerOpen = false;
+            
             // Click to upload handler (only when not dragging)
             tile.addEventListener('click', function(e) {
                 // Don't trigger if clicking remove button
                 if (e.target.closest('.remove-image-btn')) {
+                    return;
+                }
+                
+                // Don't trigger if clicking on the file input itself
+                if (e.target === fileInput || e.target.closest('input[type="file"]')) {
                     return;
                 }
 
@@ -1815,12 +1826,41 @@
                     justDropped = false;
                     return;
                 }
+                
+                // Don't trigger if file input is currently processing
+                if (fileInput.dataset.processing === 'true') {
+                    return;
+                }
+                
+                // Don't trigger if file picker is already open
+                if (filePickerOpen) {
+                    return;
+                }
 
                 // Only trigger if in edit mode
                 if (editForm && editForm.classList.contains('is-editing')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    filePickerOpen = true;
                     fileInput.click();
+                    // Reset flag after a delay (file picker closes)
+                    setTimeout(() => {
+                        filePickerOpen = false;
+                    }, 1000);
                 }
             }, false);
+            
+            // Also track when file input is focused (file picker opened)
+            fileInput.addEventListener('focus', function() {
+                filePickerOpen = true;
+            });
+            
+            // Track when file input loses focus (file picker closed)
+            fileInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    filePickerOpen = false;
+                }, 100);
+            });
 
             // Mark that a drop occurred
             tile.addEventListener('drop', function() {
@@ -1902,7 +1942,21 @@
                 const fileInput = tile.querySelector('input[type="file"]');
                 if (fileInput && !tile.dataset.clickHandlerAdded) {
                     tile.addEventListener('click', function(e) {
+                        // Don't trigger if clicking remove link
                         if (e.target.closest('.remove-photo-link')) return;
+                        
+                        // Don't trigger if clicking on the file input itself
+                        if (e.target === fileInput || e.target.closest('input[type="file"]')) {
+                            return;
+                        }
+                        
+                        // Don't trigger if file input is currently processing
+                        if (fileInput.dataset.processing === 'true') {
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        e.stopPropagation();
                         fileInput.click();
                     });
                     tile.style.cursor = 'pointer';
@@ -1980,15 +2034,21 @@
                     uploadImageToS3(input, tile);
                 }
                 
-                // Reset processing flag after a short delay
+                // Reset processing flag and re-enable tile after a short delay
                 setTimeout(() => {
                     input.dataset.processing = 'false';
+                    if (tile) {
+                        tile.style.pointerEvents = 'auto';
+                    }
                 }, 100);
             }
             reader.readAsDataURL(file);
         } else {
             // Reset processing flag if no file
             input.dataset.processing = 'false';
+            if (tile) {
+                tile.style.pointerEvents = 'auto';
+            }
         }
     }
     window.previewImage = previewMediaImage;
