@@ -1333,6 +1333,13 @@
     // Function to upload a single image to S3
     async function uploadImageToS3(fileInput, tile) {
         if (!fileInput.files || !fileInput.files[0]) return;
+        
+        // Prevent duplicate upload calls
+        if (tile.dataset.uploading === 'true') {
+            console.log('Upload already in progress for this tile, skipping duplicate call');
+            return;
+        }
+        tile.dataset.uploading = 'true';
 
         const file = fileInput.files[0];
         const field = tile.dataset.field || null;
@@ -1356,11 +1363,22 @@
             // Store the S3 key in a hidden input for form submission
             const form = document.getElementById('talentEditForm');
             if (form) {
-                // Remove any existing hidden input for this tile
-                const existingInput = form.querySelector(`input[name="uploaded_keys[]"][data-tile-id="${uploadId}"]`);
-                if (existingInput) {
-                    existingInput.remove();
+                // Remove any existing hidden inputs for this tile or field
+                if (field) {
+                    // Remove by field name (for standard fields)
+                    const existingByField = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
+                    existingByField.forEach(input => input.remove());
+                    
+                    const existingFieldsByField = form.querySelectorAll(`input[name="uploaded_fields[]"][value="${field}"]`);
+                    existingFieldsByField.forEach(input => input.remove());
                 }
+                
+                // Remove by tile ID (for media files)
+                const existingByTile = form.querySelectorAll(`input[name="uploaded_keys[]"][data-tile-id="${uploadId}"]`);
+                existingByTile.forEach(input => input.remove());
+                
+                const existingFieldsByTile = form.querySelectorAll(`input[name="uploaded_fields[]"][data-tile-id="${uploadId}"]`);
+                existingFieldsByTile.forEach(input => input.remove());
 
                 // Create new hidden input with the S3 key
                 const hiddenInput = document.createElement('input');
@@ -1373,10 +1391,6 @@
 
                 // Also store the field name in a separate array for backend processing
                 if (field) {
-                    const existingFieldInput = form.querySelector(`input[name="uploaded_fields[]"][data-tile-id="${uploadId}"]`);
-                    if (existingFieldInput) {
-                        existingFieldInput.remove();
-                    }
                     const fieldInput = document.createElement('input');
                     fieldInput.type = 'hidden';
                     fieldInput.name = 'uploaded_fields[]';
@@ -1392,14 +1406,17 @@
             // Use setTimeout to ensure the upload is fully complete before clearing
             setTimeout(() => {
                 fileInput.value = '';
-                // Reset processing flag after clearing
+                // Reset processing and uploading flags after clearing
                 if (fileInput.dataset) {
                     fileInput.dataset.processing = 'false';
                 }
+                tile.dataset.uploading = 'false';
             }, 500);
         } catch (e) {
             const errorMsg = e && e.message ? e.message : 'Upload failed.';
             uploadModalTracker.markError(uploadId, errorMsg);
+            // Reset uploading flag on error
+            tile.dataset.uploading = 'false';
         }
     }
 
@@ -1982,14 +1999,15 @@
             const removeLink = tile.querySelector('.remove-photo-link');
             let preview = tile.querySelector('.preview-img');
 
-            // If replacing an existing photo, mark it for deletion
+            // If replacing an existing photo, mark it for deletion and clean up old uploads
             const field = tile.dataset.field;
             const mediaId = tile.dataset.mediaId;
             const form = document.getElementById('talentEditForm');
             const shell = document.querySelector('.talent-shell');
             const isEditing = shell && shell.classList.contains('is-editing');
 
-            if (field) {
+            if (field && form) {
+                // Mark old image for deletion
                 let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
                 if (!removeInput) {
                     removeInput = document.createElement('input');
@@ -1998,6 +2016,18 @@
                     removeInput.value = '1';
                     tile.appendChild(removeInput);
                 }
+                
+                // Remove any existing uploaded_keys for this field (from previous uploads)
+                const existingUploadedKeys = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
+                existingUploadedKeys.forEach(keyInput => {
+                    keyInput.remove();
+                });
+                
+                // Remove any existing uploaded_fields for this field
+                const existingUploadedFields = form.querySelectorAll(`input[name="uploaded_fields[]"][value="${field}"]`);
+                existingUploadedFields.forEach(fieldInput => {
+                    fieldInput.remove();
+                });
             }
             if (mediaId && form) {
                 let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
@@ -2008,6 +2038,12 @@
                     deletedInput.value = mediaId;
                     form.appendChild(deletedInput);
                 }
+                
+                // Remove any existing uploaded_keys for this media (from previous uploads)
+                const existingUploadedKeys = form.querySelectorAll(`input[name="uploaded_keys[]"][data-tile-id="${tile.dataset.uploadId || ''}"]`);
+                existingUploadedKeys.forEach(keyInput => {
+                    keyInput.remove();
+                });
             }
 
             reader.onload = function(e) {
