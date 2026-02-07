@@ -305,9 +305,6 @@
                 @endphp
 
                 <a href="{{ route('talent.projects.show', $project) }}" class="shoot-card">
-                    <div class="shoot-icon-container">
-                        <img src="{{ asset('images/camera.png') }}" alt="Shoot">
-                    </div>
                     <div class="shoot-details">
                         <h3 class="shoot-title">{{ $project->project_name }}</h3>
                         <p class="shoot-info">
