@@ -651,8 +651,7 @@
                                    name="{{ ($photo['field'] ?? null) ? $photo['field'] : 'media_files[]' }}"
                                    class="media-file-input"
                                    accept="image/*"
-                                   style="display:none"
-                                   onchange="previewMediaImage(this)">
+                                   style="display:none">
                         </div>
                     @endfor
                 </div>
@@ -690,7 +689,7 @@
                             Remove Photo
                         </span>
                     </div>
-                    <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" onchange="previewMediaImage(this)">
+                    <input type="file" name="{{ $field }}" accept="image/*,application/pdf" style="display:none" class="media-file-input">
                 </div>
             @endforeach
         </div>
@@ -1388,9 +1387,16 @@
             }
 
             uploadModalTracker.markComplete(uploadId);
-
+            
             // Clear the file input after successful upload to prevent re-upload on form submit
-            fileInput.value = '';
+            // Use setTimeout to ensure the upload is fully complete before clearing
+            setTimeout(() => {
+                fileInput.value = '';
+                // Reset processing flag after clearing
+                if (fileInput.dataset) {
+                    fileInput.dataset.processing = 'false';
+                }
+            }, 500);
         } catch (e) {
             const errorMsg = e && e.message ? e.message : 'Upload failed.';
             uploadModalTracker.markError(uploadId, errorMsg);
@@ -1416,6 +1422,27 @@
         });
 
         setActive('profile');
+
+        // Set up file input change handlers (prevent duplicates)
+        function setupFileInputHandlers() {
+            const fileInputs = document.querySelectorAll('.media-file-input');
+            fileInputs.forEach(input => {
+                // Remove any existing listeners by cloning and replacing
+                if (input.dataset.handlerAttached) return;
+                
+                input.addEventListener('change', function(e) {
+                    e.stopPropagation();
+                    if (this.files && this.files[0]) {
+                        previewMediaImage(this);
+                    }
+                }, { once: false });
+                
+                input.dataset.handlerAttached = 'true';
+            });
+        }
+        
+        // Initialize file input handlers
+        setupFileInputHandlers();
 
         // Inline edit toggle logic
         const form = document.getElementById('talentEditForm');
@@ -1886,6 +1913,12 @@
     }
 
     function previewMediaImage(input) {
+        // Prevent duplicate calls
+        if (input.dataset.processing === 'true') {
+            return;
+        }
+        input.dataset.processing = 'true';
+        
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const reader = new FileReader();
@@ -1946,8 +1979,16 @@
                 if (isEditing) {
                     uploadImageToS3(input, tile);
                 }
+                
+                // Reset processing flag after a short delay
+                setTimeout(() => {
+                    input.dataset.processing = 'false';
+                }, 100);
             }
             reader.readAsDataURL(file);
+        } else {
+            // Reset processing flag if no file
+            input.dataset.processing = 'false';
         }
     }
     window.previewImage = previewMediaImage;
