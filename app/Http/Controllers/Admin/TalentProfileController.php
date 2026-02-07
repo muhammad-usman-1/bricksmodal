@@ -449,10 +449,22 @@ class TalentProfileController extends Controller
                 } else {
                     // It's a dedicated talent user - safe to remove after clearing dependencies
                     $talentProfile->forceDelete();
-                    
+
+                    // Remove any other talent profiles for this user (DB allows multiple; FK would block user DB)
+                    $otherProfiles = TalentProfile::where('user_id', $user->id)->get();
+                    foreach ($otherProfiles as $profile) {
+                        $profile->languages()->detach();
+                        $profile->labels()->detach();
+                        CastingApplication::where('talent_profile_id', $profile->id)->forceDelete();
+                        BankDetail::where('talent_profile_id', $profile->id)->forceDelete();
+                        TalentMedia::where('talent_profile_id', $profile->id)->forceDelete();
+                        TalentSetting::where('talent_profile_id', $profile->id)->delete();
+                        $profile->forceDelete();
+                    }
+
                     // Nullify references in casting_requirements before deleting the user
-                    \DB::table('casting_requirements')->where('user_id', $user->id)->update(['user_id' => null]);
-                    
+                    DB::table('casting_requirements')->where('user_id', $user->id)->update(['user_id' => null]);
+
                     $user->roles()->detach();
                     $user->forceDelete();
                 }
