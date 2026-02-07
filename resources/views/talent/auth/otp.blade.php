@@ -144,7 +144,7 @@
             <h1>Verify Identity</h1>
             <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
 
-            
+            @if(isset($debugging))
                 @if(isset($otp) && !empty($otp))
                 <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
                     <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
@@ -157,7 +157,7 @@
                     <div style="font-size: 12px; color: #991b1b;">OTP not found. Phone: {{ ($phone['phone_country_code'] ?? 'N/A') . ' ' . ($phone['phone_number'] ?? 'N/A') }}</div>
                 </div>
                 @endif
-            
+            @endif
 
             @if ($errors->any())
                 <div class="error-message">
