@@ -456,6 +456,131 @@
         color: #6b7280;
         margin-top: 4px;
     }
+
+    /* Profile Avatar Edit Mode */
+    .profile-avatar.is-editable {
+        cursor: pointer;
+        position: relative;
+        transition: opacity 0.2s;
+    }
+    .profile-avatar.is-editable:hover {
+        opacity: 0.8;
+    }
+    .profile-avatar.is-editable::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .profile-avatar.is-editable:hover::after {
+        opacity: 1;
+    }
+    .profile-avatar.is-editable::before {
+        content: '📷';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .profile-avatar.is-editable:hover::before {
+        opacity: 1;
+    }
+    .profile-avatar-actions {
+        position: absolute;
+        top: calc(100% + 12px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 4px;
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 1000;
+        min-width: 160px;
+    }
+    .profile-avatar-actions.show {
+        display: flex;
+    }
+    .profile-avatar-action-btn {
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--text-dark);
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .profile-avatar-action-btn:hover {
+        background: #f3f4f6;
+    }
+    .profile-avatar-action-btn.danger {
+        color: #dc2626;
+    }
+    .profile-avatar-action-btn.danger:hover {
+        background: #fee2e2;
+    }
+
+    /* Upload Progress Modal */
+    .upload-progress-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+    .upload-progress-modal.show {
+        display: flex;
+    }
+    .upload-progress-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        min-width: 320px;
+        max-width: 90%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .upload-progress-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+    }
+    .upload-progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    .upload-progress-bar-fill {
+        height: 100%;
+        background: #111827;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    .upload-progress-text {
+        font-size: 13px;
+        color: var(--text-gray);
+        text-align: center;
+    }
 </style>
 
 @php
@@ -513,10 +638,24 @@
     <!-- Top Card: Header -->
     <div class="dash-card profile-header">
         <div class="profile-info-wrap">
-            <div class="profile-avatar" style="{{ $primaryAvatar ? 'background-image: url('.e($primaryAvatar).')' : '' }}">
-                @if(! $primaryAvatar)
-                    <span>{{ substr($profile->legal_name, 0, 1) }}</span>
-                @endif
+            <div style="position: relative;">
+                <div class="profile-avatar" id="profileAvatar" style="{{ $primaryAvatar ? 'background-image: url('.e($primaryAvatar).')' : '' }}" data-has-image="{{ $primaryAvatar ? 'true' : 'false' }}">
+                    @if(! $primaryAvatar)
+                        <span>{{ substr($profile->legal_name, 0, 1) }}</span>
+                    @endif
+                </div>
+                <div class="profile-avatar-actions" id="profileAvatarActions">
+                    <button type="button" class="profile-avatar-action-btn" id="uploadImageBtn">
+                        <i class="fas fa-upload" style="margin-right: 8px;"></i> Upload Photo
+                    </button>
+                    <button type="button" class="profile-avatar-action-btn" id="replaceImageBtn" style="display: none;">
+                        <i class="fas fa-sync" style="margin-right: 8px;"></i> Replace Photo
+                    </button>
+                    <button type="button" class="profile-avatar-action-btn danger" id="removeImageBtn" style="display: none;">
+                        <i class="fas fa-trash" style="margin-right: 8px;"></i> Remove Photo
+                    </button>
+                </div>
+                <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
             </div>
             <div class="profile-names">
                 <h1>{{ $profile->legal_name }}</h1>
@@ -901,6 +1040,17 @@
     </div>
 
 </div>
+
+<!-- Upload Progress Modal -->
+<div class="upload-progress-modal" id="uploadProgressModal">
+    <div class="upload-progress-content">
+        <div class="upload-progress-title">Uploading Image</div>
+        <div class="upload-progress-bar-container">
+            <div class="upload-progress-bar-fill" id="uploadProgressBar"></div>
+        </div>
+        <div class="upload-progress-text" id="uploadProgressText">0%</div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -940,6 +1090,276 @@
                 width: '100%',
                 placeholder: 'Select options'
             });
+        }
+
+        // Profile Image Upload Functionality
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileAvatarActions = document.getElementById('profileAvatarActions');
+        const profileImageInput = document.getElementById('profileImageInput');
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const replaceImageBtn = document.getElementById('replaceImageBtn');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const uploadProgressModal = document.getElementById('uploadProgressModal');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const uploadProgressText = document.getElementById('uploadProgressText');
+
+        let isUploading = false;
+        let uploadInProgress = false;
+
+        // Toggle edit mode on avatar
+        function toggleAvatarEditMode(isEditMode) {
+            if (!profileAvatar) return;
+            
+            if (isEditMode) {
+                profileAvatar.classList.add('is-editable');
+                const hasImage = profileAvatar.dataset.hasImage === 'true';
+                if (hasImage) {
+                    replaceImageBtn.style.display = 'block';
+                    removeImageBtn.style.display = 'block';
+                    uploadImageBtn.style.display = 'none';
+                } else {
+                    uploadImageBtn.style.display = 'block';
+                    replaceImageBtn.style.display = 'none';
+                    removeImageBtn.style.display = 'none';
+                }
+            } else {
+                profileAvatar.classList.remove('is-editable');
+                profileAvatarActions.classList.remove('show');
+            }
+        }
+
+        // Show/hide actions menu
+        if (profileAvatar && profileAvatarActions) {
+            let actionsTimeout;
+            profileAvatar.addEventListener('click', function(e) {
+                if (!profileAvatar.classList.contains('is-editable')) return;
+                if (uploadInProgress) return;
+                
+                e.stopPropagation();
+                profileAvatarActions.classList.toggle('show');
+            });
+
+            // Close actions menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileAvatar.contains(e.target) && !profileAvatarActions.contains(e.target)) {
+                    profileAvatarActions.classList.remove('show');
+                }
+            });
+        }
+
+        // Handle file input change
+        if (profileImageInput) {
+            profileImageInput.addEventListener('change', function(e) {
+                if (uploadInProgress) {
+                    e.target.value = '';
+                    return;
+                }
+
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Validate file size (6MB)
+                if (file.size > 6 * 1024 * 1024) {
+                    alert('Image size must be less than 6MB.');
+                    e.target.value = '';
+                    return;
+                }
+
+                uploadImage(file);
+                e.target.value = ''; // Reset input
+            });
+        }
+
+        // Upload image function
+        function uploadImage(file) {
+            if (uploadInProgress) {
+                alert('An upload is already in progress. Please wait.');
+                return;
+            }
+
+            uploadInProgress = true;
+            isUploading = true;
+            
+            // Show progress modal
+            uploadProgressModal.classList.add('show');
+            uploadProgressBar.style.width = '0%';
+            uploadProgressText.textContent = '0%';
+
+            const formData = new FormData();
+            formData.append('profile_image', file);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const xhr = new XMLHttpRequest();
+
+            // Track upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    uploadProgressBar.style.width = percentComplete + '%';
+                    uploadProgressText.textContent = Math.round(percentComplete) + '%';
+                }
+            });
+
+            // Handle completion
+            xhr.addEventListener('load', function() {
+                uploadInProgress = false;
+                isUploading = false;
+
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            // Update avatar image
+                            profileAvatar.style.backgroundImage = `url(${response.image_url})`;
+                            profileAvatar.innerHTML = '';
+                            profileAvatar.dataset.hasImage = 'true';
+                            
+                            // Update action buttons
+                            replaceImageBtn.style.display = 'block';
+                            removeImageBtn.style.display = 'block';
+                            uploadImageBtn.style.display = 'none';
+                            
+                            // Close actions menu
+                            profileAvatarActions.classList.remove('show');
+                            
+                            // Show success message
+                            uploadProgressText.textContent = 'Upload complete!';
+                            setTimeout(() => {
+                                uploadProgressModal.classList.remove('show');
+                            }, 1000);
+                        } else {
+                            throw new Error(response.message || 'Upload failed');
+                        }
+                    } catch (e) {
+                        alert('Failed to upload image: ' + (e.message || 'Unknown error'));
+                        uploadProgressModal.classList.remove('show');
+                    }
+                } else {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        alert('Upload failed: ' + (response.message || 'Unknown error'));
+                    } catch (e) {
+                        alert('Upload failed. Please try again.');
+                    }
+                    uploadProgressModal.classList.remove('show');
+                }
+            });
+
+            // Handle errors
+            xhr.addEventListener('error', function() {
+                uploadInProgress = false;
+                isUploading = false;
+                alert('Network error. Please check your connection and try again.');
+                uploadProgressModal.classList.remove('show');
+            });
+
+            // Handle abort
+            xhr.addEventListener('abort', function() {
+                uploadInProgress = false;
+                isUploading = false;
+                uploadProgressModal.classList.remove('show');
+            });
+
+            // Send request
+            xhr.open('POST', '{{ route("talent.profile.upload-image") }}');
+            xhr.send(formData);
+        }
+
+        // Handle upload/replace button clicks
+        if (uploadImageBtn) {
+            uploadImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (uploadInProgress) return;
+                profileImageInput.click();
+            });
+        }
+
+        if (replaceImageBtn) {
+            replaceImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (uploadInProgress) return;
+                profileImageInput.click();
+            });
+        }
+
+        // Handle remove button
+        if (removeImageBtn) {
+            removeImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (uploadInProgress) return;
+                
+                if (!confirm('Are you sure you want to remove your profile image?')) {
+                    return;
+                }
+
+                // Show progress modal
+                uploadProgressModal.classList.add('show');
+                uploadProgressBar.style.width = '100%';
+                uploadProgressText.textContent = 'Removing...';
+
+                fetch('{{ route("talent.profile.remove-image") }}', {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove avatar image
+                        profileAvatar.style.backgroundImage = '';
+                        profileAvatar.innerHTML = '<span>{{ substr($profile->legal_name, 0, 1) }}</span>';
+                        profileAvatar.dataset.hasImage = 'false';
+                        
+                        // Update action buttons
+                        uploadImageBtn.style.display = 'block';
+                        replaceImageBtn.style.display = 'none';
+                        removeImageBtn.style.display = 'none';
+                        
+                        // Close actions menu
+                        profileAvatarActions.classList.remove('show');
+                        
+                        // Show success message
+                        uploadProgressText.textContent = 'Image removed!';
+                        setTimeout(() => {
+                            uploadProgressModal.classList.remove('show');
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Failed to remove image');
+                    }
+                })
+                .catch(error => {
+                    alert('Failed to remove image: ' + (error.message || 'Unknown error'));
+                    uploadProgressModal.classList.remove('show');
+                });
+            });
+        }
+
+        // Toggle edit mode when edit card is shown/hidden
+        const editCard = document.getElementById('editCard');
+        if (editCard) {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const isVisible = !editCard.classList.contains('d-none');
+                        toggleAvatarEditMode(isVisible);
+                    }
+                });
+            });
+            observer.observe(editCard, { attributes: true, attributeFilter: ['class'] });
+            
+            // Initial state
+            const isVisible = !editCard.classList.contains('d-none');
+            toggleAvatarEditMode(isVisible);
         }
     });
 </script>

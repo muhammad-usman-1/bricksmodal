@@ -624,9 +624,9 @@
                         <div class="upload-tile is-editable"
                              data-media-id="{{ $photo['id'] ?? '' }}"
                              data-field="{{ $photo['field'] ?? '' }}">
-                            
+
                             @php $img = $photo ? $resolveUrl($photo['path']) : null; @endphp
-                            
+
                             @if($img)
                                 <img src="{{ $img }}" alt="{{ $photo['label'] ?? 'Profile Photo' }}" class="preview-img">
                             @else
@@ -640,18 +640,18 @@
                             <div class="upload-overlay">
                                 <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                                 <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
-                                <span class="remove-photo-link" 
+                                <span class="remove-photo-link"
                                       style="display: {{ $img ? 'block' : 'none' }};"
                                       onclick="removeMediaImage(this, event)">
                                     Remove Photo
                                 </span>
                             </div>
 
-                            <input type="file" 
-                                   name="{{ ($photo['field'] ?? null) ? $photo['field'] : 'media_files[]' }}" 
-                                   class="media-file-input" 
-                                   accept="image/*" 
-                                   style="display:none" 
+                            <input type="file"
+                                   name="{{ ($photo['field'] ?? null) ? $photo['field'] : 'media_files[]' }}"
+                                   class="media-file-input"
+                                   accept="image/*"
+                                   style="display:none"
                                    onchange="previewMediaImage(this)">
                         </div>
                     @endfor
@@ -664,7 +664,7 @@
             </div>
         </div>
 
-       
+
 
         @if(auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin()))
         <div class="section-card">
@@ -684,7 +684,7 @@
                     <div class="upload-overlay">
                         <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                         <span class="upload-text">{{ $img ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        <span class="remove-photo-link" 
+                        <span class="remove-photo-link"
                               style="display: {{ $img ? 'block' : 'none' }};"
                                onclick="removeMediaImage(this, event)">
                             Remove Photo
@@ -1038,6 +1038,28 @@
 </div>
 
 @include('admin.castingRequirements.partials.application-modals')
+
+<!-- Upload Progress Modal -->
+<div id="upload-progress-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 10000; align-items: center; justify-content: center; flex-direction: column;">
+    <div style="background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">Uploading Images</h3>
+            <button type="button" id="upload-modal-close-btn" style="display: none; background: none; border: none; cursor: pointer; padding: 4px; color: #6b7280;" title="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div id="upload-progress-list" style="max-height: 400px; overflow-y: auto;">
+            <!-- Upload items will be inserted here -->
+        </div>
+        <div id="upload-modal-footer" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center;">
+            <p id="upload-modal-status" style="margin: 0; font-size: 14px; color: #6b7280;">Preparing uploads...</p>
+        </div>
+    </div>
+</div>
+
 <script>
 
     function handleFileSelect(fileInput, file) {
@@ -1045,9 +1067,334 @@
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         fileInput.files = dataTransfer.files;
- 
+
         // Call previewMediaImage directly
         previewMediaImage(fileInput);
+    }
+
+    // Upload Progress Modal Management
+    const uploadModal = document.getElementById('upload-progress-modal');
+    const uploadProgressList = document.getElementById('upload-progress-list');
+    const uploadModalStatus = document.getElementById('upload-modal-status');
+    const uploadModalCloseBtn = document.getElementById('upload-modal-close-btn');
+    const uploadModalTracker = {
+        items: new Map(), // id -> {fileName, progress, status, error}
+        addItem: function(id, fileName) {
+            this.items.set(id, { fileName, progress: 0, status: 'uploading', error: null });
+            this.render();
+        },
+        updateProgress: function(id, progress) {
+            const item = this.items.get(id);
+            if (item) {
+                item.progress = progress;
+                this.render();
+            }
+        },
+        markComplete: function(id) {
+            const item = this.items.get(id);
+            if (item) {
+                item.status = 'complete';
+                item.progress = 100;
+                this.render();
+            }
+            this.checkAllComplete();
+        },
+        markError: function(id, error) {
+            const item = this.items.get(id);
+            if (item) {
+                item.status = 'error';
+                item.error = error;
+                this.render();
+            }
+            this.checkAllComplete();
+        },
+        render: function() {
+            if (!uploadProgressList) return;
+            uploadProgressList.innerHTML = '';
+            let allComplete = true;
+            let hasError = false;
+
+            this.items.forEach((item, id) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 12px; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;';
+
+                const fileName = document.createElement('div');
+                fileName.style.cssText = 'font-size: 14px; font-weight: 500; color: #1f2937; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;';
+                fileName.innerHTML = `
+                    <span>${this.escapeHtml(item.fileName)}</span>
+                    <span style="font-size: 12px; color: ${item.status === 'complete' ? '#10b981' : item.status === 'error' ? '#ef4444' : '#6b7280'};">
+                        ${item.status === 'complete' ? '✓ Ready' : item.status === 'error' ? '✗ Failed' : 'Uploading...'}
+                    </span>
+                `;
+                div.appendChild(fileName);
+
+                if (item.status === 'uploading') {
+                    const progressBar = document.createElement('div');
+                    progressBar.style.cssText = 'width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;';
+                    const fill = document.createElement('div');
+                    fill.style.cssText = `width: ${item.progress}%; height: 100%; background: #10b981; transition: width 0.3s ease;`;
+                    progressBar.appendChild(fill);
+                    div.appendChild(progressBar);
+                    allComplete = false;
+                } else if (item.status === 'error') {
+                    const errorContainer = document.createElement('div');
+                    errorContainer.style.cssText = 'margin-top: 8px;';
+
+                    const errorMsg = document.createElement('div');
+                    errorMsg.style.cssText = 'font-size: 12px; color: #ef4444; margin-bottom: 4px;';
+                    errorMsg.textContent = item.error || 'Upload failed';
+                    errorContainer.appendChild(errorMsg);
+
+                    // Add retry button for failed uploads
+                    const retryBtn = document.createElement('button');
+                    retryBtn.type = 'button';
+                    retryBtn.textContent = 'Retry';
+                    retryBtn.style.cssText = 'font-size: 12px; padding: 4px 12px; background: #10b981; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;';
+                    retryBtn.onclick = () => {
+                        // Retry upload by finding the tile and triggering upload again
+                        const tile = document.querySelector(`[data-upload-id="${id}"]`);
+                        if (tile) {
+                            const fileInput = tile.querySelector('input[type="file"]');
+                            if (fileInput && fileInput.files && fileInput.files[0]) {
+                                // Reset the upload status and retry
+                                uploadModalTracker.items.delete(id);
+                                uploadImageToS3(fileInput, tile);
+                            } else {
+                                // File no longer available, remove from tracker
+                                uploadModalTracker.items.delete(id);
+                                uploadModalTracker.render();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'File Not Available',
+                                    text: 'Please select the file again to retry upload.',
+                                    confirmButtonColor: '#10B981'
+                                });
+                            }
+                        }
+                    };
+                    errorContainer.appendChild(retryBtn);
+                    div.appendChild(errorContainer);
+                    hasError = true;
+                }
+
+                uploadProgressList.appendChild(div);
+            });
+
+            if (allComplete && this.items.size > 0 && uploadModalStatus) {
+                if (hasError) {
+                    uploadModalStatus.innerHTML = 'Some uploads failed. Click "Retry" on failed items or check S3 CORS configuration.<br><small style="color: #9ca3af; margin-top: 4px; display: block;">CORS must allow PUT requests from: ' + window.location.origin + '</small>';
+                    uploadModalStatus.style.color = '#ef4444';
+                } else {
+                    uploadModalStatus.textContent = 'All images uploaded successfully!';
+                    uploadModalStatus.style.color = '#10b981';
+                }
+                if (uploadModalCloseBtn) uploadModalCloseBtn.style.display = 'block';
+            } else if (this.items.size > 0 && uploadModalStatus) {
+                const uploading = Array.from(this.items.values()).filter(i => i.status === 'uploading').length;
+                uploadModalStatus.textContent = `Uploading ${uploading} image${uploading !== 1 ? 's' : ''}...`;
+                uploadModalStatus.style.color = '#6b7280';
+                if (uploadModalCloseBtn) uploadModalCloseBtn.style.display = 'none';
+            }
+        },
+        checkAllComplete: function() {
+            const allComplete = Array.from(this.items.values()).every(item =>
+                item.status === 'complete' || item.status === 'error'
+            );
+            if (allComplete && this.items.size > 0) {
+                // Auto-close after 2 seconds if all successful, or keep open if errors
+                const hasError = Array.from(this.items.values()).some(item => item.status === 'error');
+                if (!hasError) {
+                    setTimeout(() => {
+                        if (Array.from(this.items.values()).every(item => item.status === 'complete')) {
+                            this.hide();
+                        }
+                    }, 2000);
+                }
+            }
+        },
+        show: function() {
+            if (uploadModal) {
+                uploadModal.style.display = 'flex';
+            }
+        },
+        hide: function() {
+            if (uploadModal) {
+                uploadModal.style.display = 'none';
+            }
+        },
+        clear: function() {
+            this.items.clear();
+            this.render();
+        },
+        escapeHtml: function(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    };
+
+    // Close modal button
+    if (uploadModalCloseBtn) {
+        uploadModalCloseBtn.addEventListener('click', () => {
+            uploadModalTracker.hide();
+        });
+    }
+
+    // Close modal when clicking outside (only if all uploads complete)
+    if (uploadModal) {
+        uploadModal.addEventListener('click', (e) => {
+            if (e.target === uploadModal) {
+                const allComplete = Array.from(uploadModalTracker.items.values()).every(item =>
+                    item.status === 'complete' || item.status === 'error'
+                );
+                if (allComplete && uploadModalTracker.items.size > 0) {
+                    uploadModalTracker.hide();
+                }
+            }
+        });
+    }
+
+    // Function to upload image to S3 via presigned URL
+    async function presignProfileImage(file, field) {
+        const talentId = '{{ $talentProfile->id }}';
+        const res = await fetch(`/admin/talent-profiles/${talentId}/presign-profile-image`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                file_name: file.name,
+                file_type: file.type,
+                field: field || null,
+            }),
+        });
+
+        if (!res.ok) {
+            let msg = 'Could not prepare upload.';
+            try {
+                const data = await res.json();
+                msg = data.message || msg;
+            } catch (e) {}
+            throw new Error(msg);
+        }
+
+        return await res.json();
+    }
+
+    function uploadToS3Put(url, headers, file, onProgress) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', url, true);
+            if (headers && headers['Content-Type']) {
+                xhr.setRequestHeader('Content-Type', headers['Content-Type']);
+            } else if (file.type) {
+                xhr.setRequestHeader('Content-Type', file.type);
+            }
+
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    onProgress(Math.round((e.loaded / e.total) * 100));
+                }
+            });
+
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve();
+                } else {
+                    const errorMsg = `Upload failed (S3): ${xhr.status} ${xhr.statusText}`;
+                    console.error('S3 upload error:', xhr.status, xhr.responseText);
+                    reject(new Error(errorMsg));
+                }
+            };
+            xhr.onerror = () => {
+                console.error('Network error during S3 upload', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText
+                });
+                // Check if it's likely a CORS error (status 0 usually indicates CORS)
+                let errorMsg = 'Upload failed (network error).';
+                if (xhr.status === 0) {
+                    errorMsg = 'CORS error: S3 bucket must allow PUT requests from this domain. Please configure CORS on your S3 bucket.';
+                } else if (xhr.status === 403) {
+                    errorMsg = 'Access denied. Check S3 bucket permissions and CORS configuration.';
+                } else if (xhr.status === 404) {
+                    errorMsg = 'S3 endpoint not found. Check bucket name and region configuration.';
+                }
+                reject(new Error(errorMsg));
+            };
+            xhr.onabort = () => reject(new Error('Upload cancelled.'));
+            xhr.send(file);
+        });
+    }
+
+    // Function to upload a single image to S3
+    async function uploadImageToS3(fileInput, tile) {
+        if (!fileInput.files || !fileInput.files[0]) return;
+
+        const file = fileInput.files[0];
+        const field = tile.dataset.field || null;
+        const uploadId = tile.dataset.uploadId || `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Set upload ID on tile for retry functionality
+        if (!tile.dataset.uploadId) {
+            tile.dataset.uploadId = uploadId;
+        }
+
+        // Show modal and add item
+        uploadModalTracker.show();
+        uploadModalTracker.addItem(uploadId, file.name);
+
+        try {
+            const presign = await presignProfileImage(file, field);
+            await uploadToS3Put(presign.url, presign.headers, file, (pct) => {
+                uploadModalTracker.updateProgress(uploadId, pct);
+            });
+
+            // Store the S3 key in a hidden input for form submission
+            const form = document.getElementById('talentEditForm');
+            if (form) {
+                // Remove any existing hidden input for this tile
+                const existingInput = form.querySelector(`input[name="uploaded_keys[]"][data-tile-id="${uploadId}"]`);
+                if (existingInput) {
+                    existingInput.remove();
+                }
+
+                // Create new hidden input with the S3 key
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'uploaded_keys[]';
+                hiddenInput.value = presign.key;
+                hiddenInput.setAttribute('data-tile-id', uploadId);
+                hiddenInput.setAttribute('data-field', field || '');
+                form.appendChild(hiddenInput);
+
+                // Also store the field name in a separate array for backend processing
+                if (field) {
+                    const existingFieldInput = form.querySelector(`input[name="uploaded_fields[]"][data-tile-id="${uploadId}"]`);
+                    if (existingFieldInput) {
+                        existingFieldInput.remove();
+                    }
+                    const fieldInput = document.createElement('input');
+                    fieldInput.type = 'hidden';
+                    fieldInput.name = 'uploaded_fields[]';
+                    fieldInput.value = field;
+                    fieldInput.setAttribute('data-tile-id', uploadId);
+                    form.appendChild(fieldInput);
+                }
+            }
+
+            uploadModalTracker.markComplete(uploadId);
+
+            // Clear the file input after successful upload to prevent re-upload on form submit
+            fileInput.value = '';
+        } catch (e) {
+            const errorMsg = e && e.message ? e.message : 'Upload failed.';
+            uploadModalTracker.markError(uploadId, errorMsg);
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1178,12 +1525,8 @@
             });
         }
 
-        // Handle talent profile form submission with media upload
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                handleMediaImageUpload(e);
-            });
-        }
+        // Images are now uploaded immediately via AJAX when selected in edit mode
+        // No need for form submission handler for image uploads
 
         // Nationality flag update
         const nationalitySelect = document.getElementById('nationality_select');
@@ -1528,7 +1871,7 @@
                 if (uploadText) uploadText.textContent = hasImg ? 'Replace Photo' : 'Upload Photo';
                 if (removeLink) removeLink.style.display = hasImg ? 'block' : 'none';
                 if (placeholder) placeholder.style.display = hasImg ? 'none' : 'grid';
-                
+
                 const fileInput = tile.querySelector('input[type="file"]');
                 if (fileInput && !tile.dataset.clickHandlerAdded) {
                     tile.addEventListener('click', function(e) {
@@ -1556,6 +1899,8 @@
             const field = tile.dataset.field;
             const mediaId = tile.dataset.mediaId;
             const form = document.getElementById('talentEditForm');
+            const shell = document.querySelector('.talent-shell');
+            const isEditing = shell && shell.classList.contains('is-editing');
 
             if (field) {
                 let removeInput = tile.querySelector(`input[name="remove_${field}"]`);
@@ -1596,6 +1941,11 @@
 
                 if (uploadText) uploadText.textContent = 'Replace Photo';
                 if (removeLink) removeLink.style.display = 'block';
+
+                // If in edit mode, trigger AJAX upload to S3
+                if (isEditing) {
+                    uploadImageToS3(input, tile);
+                }
             }
             reader.readAsDataURL(file);
         }
@@ -1604,7 +1954,7 @@
 
     async function compressImage(file, maxSizeMB = 10, quality = 0.7) {
         if (file.size <= maxSizeMB * 1024 * 1024) return file;
-        
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -1615,7 +1965,7 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    
+
                     // Cap dimensions if extremely large
                     const maxDim = 4000;
                     if (width > maxDim || height > maxDim) {
@@ -1627,12 +1977,12 @@
                             height = maxDim;
                         }
                     }
-                    
+
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    
+
                     canvas.toBlob((blob) => {
                         const compressedFile = new File([blob], file.name, {
                             type: 'image/jpeg',
@@ -1666,7 +2016,7 @@
         if (placeholder) placeholder.style.display = 'grid';
         if (uploadText) uploadText.textContent = 'Upload Photo';
         if (removeLink) removeLink.style.display = 'none';
-        
+
         if (fileInput) fileInput.value = '';
 
         if (mediaId) {
@@ -1720,7 +2070,7 @@
 
             const fileInput = tile.querySelector('input[type="file"]');
             fileInput.onchange = function() { previewMediaImage(this); };
-            
+
             tile.querySelector('.remove-photo-link').onclick = function(e) { removeMediaImage(this, e); };
 
             tile.addEventListener('click', function(e) {
@@ -1733,79 +2083,7 @@
         }
     }
 
-    async function handleMediaImageUpload(event) {
-        event.preventDefault();
-
-        const talentEditForm = document.getElementById('talentEditForm');
-        const talentId = '{{ $talentProfile->id }}';
-        const profileImagesGrid = document.getElementById('profileImagesGrid');
-        const mediaFiles = [];
-
-        // Collect all file inputs with files
-        const fileInputs = profileImagesGrid.querySelectorAll('input[type="file"].media-file-input');
-        
-        // Show loading state
-        const saveBtn = talentEditForm.querySelector('.save-btn');
-        const originalBtnText = saveBtn.innerHTML;
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-        for (const input of fileInputs) {
-            if (input.files && input.files[0]) {
-                try {
-                    const compressedFile = await compressImage(input.files[0]);
-                    mediaFiles.push({
-                        file: compressedFile,
-                        tile: input.closest('.upload-tile')
-                    });
-                } catch (err) {
-                    console.error('Compression error:', err);
-                    mediaFiles.push({
-                        file: input.files[0],
-                        tile: input.closest('.upload-tile')
-                    });
-                }
-            }
-        }
-
-        if (mediaFiles.length === 0) {
-            talentEditForm.onsubmit = null;
-            talentEditForm.submit();
-            return;
-        }
-
-        // Upload media files via AJAX
-        const uploadFormData = new FormData();
-        mediaFiles.forEach((item, index) => {
-            uploadFormData.append('media_files[]', item.file);
-        });
-
-        fetch(`/admin/talent-profiles/${talentId}/upload-media`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-            },
-            body: uploadFormData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Clear the media file inputs and submit form
-                fileInputs.forEach(input => input.value = '');
-                talentEditForm.onsubmit = null;
-                talentEditForm.submit();
-            } else {
-                Swal.fire('Error', data.message || 'Unknown error', 'error');
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalBtnText;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire('Error', 'Error uploading images', 'error');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = originalBtnText;
-        });
-    }
+    // Images are now uploaded immediately via AJAX when selected in edit mode
+    // The old handleMediaImageUpload function has been removed
 </script>
 @endsection

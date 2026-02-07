@@ -16,8 +16,11 @@ use App\Models\TalentMedia;
 use App\Models\TalentSetting;
 use App\Support\EmailTemplateManager;
 use Gate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class TalentProfileController extends Controller
@@ -104,7 +107,7 @@ class TalentProfileController extends Controller
         $data = $request->except([
             'headshot_center_path', 'headshot_left_path', 'headshot_right_path',
             'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
-            'id_document_front', 'deleted_media_ids'
+            'id_document_front', 'deleted_media_ids', 'uploaded_keys', 'uploaded_fields'
         ]);
 
         $data['whatsapp_number'] = $this->sanitizePhoneNumber($data['whatsapp_number'] ?? null);
@@ -156,6 +159,39 @@ class TalentProfileController extends Controller
             foreach ($mediaItems as $media) {
                 $this->deletePhysicalFile($media->file_path);
                 $media->delete();
+            }
+        }
+
+        // Handle uploaded S3 keys (from AJAX uploads)
+        if ($request->has('uploaded_keys')) {
+            $uploadedKeys = $request->input('uploaded_keys', []);
+            $uploadedFields = $request->input('uploaded_fields', []);
+            
+            $disk = config('filesystems.cloud', 's3');
+            $storage = \Storage::disk($disk);
+            
+            foreach ($uploadedKeys as $index => $key) {
+                // Get the field name if provided
+                $field = $uploadedFields[$index] ?? null;
+                
+                // Generate the full URL for the S3 key
+                $url = $storage->url($key);
+                
+                if ($field && in_array($field, [
+                    'headshot_center_path', 'headshot_left_path', 'headshot_right_path',
+                    'full_body_front_path', 'full_body_right_path', 'full_body_back_path',
+                    'id_front_path', 'id_document_front'
+                ])) {
+                    // Update the specific field
+                    $data[$field] = $url;
+                } else {
+                    // Create a TalentMedia record for additional photos
+                    TalentMedia::create([
+                        'talent_profile_id' => $talentProfile->id,
+                        'file_path' => $url,
+                        'type' => 'profile',
+                    ]);
+                }
             }
         }
 
@@ -463,6 +499,63 @@ class TalentProfileController extends Controller
         ]);
     }
 
+    public function uploadProfileImage(TalentProfile $talentProfile, Request $request): JsonResponse
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $request->validate([
+            'profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:6144'],
+        ]);
+
+        try {
+            // Delete old image if exists
+            $this->deletePhysicalFile($talentProfile->headshot_center_path);
+            
+            $imagePath = $this->storeTalentFile($talentProfile, $request->file('profile_image'), 'headshot-center');
+            
+            $talentProfile->update([
+                'headshot_center_path' => $imagePath,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile image uploaded successfully.',
+                'image_url' => $imagePath,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload profile image: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload image. Please try again.',
+            ], 500);
+        }
+    }
+
+    public function removeProfileImage(TalentProfile $talentProfile): JsonResponse
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        try {
+            // Delete the file from storage
+            $this->deletePhysicalFile($talentProfile->headshot_center_path);
+
+            $talentProfile->update([
+                'headshot_center_path' => null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile image removed successfully.',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to remove profile image: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove image. Please try again.',
+            ], 500);
+        }
+    }
+
     public function destroyMedia(TalentMedia $talentMedia)
     {
         abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -515,5 +608,118 @@ class TalentProfileController extends Controller
         $digits = preg_replace('/[^0-9]/', '', $number);
 
         return $digits ?: null;
+    }
+
+    /**
+     * Generate a presigned PUT URL for uploading a profile image directly to S3.
+     */
+    public function presignProfileImage(TalentProfile $talentProfile, Request $request): JsonResponse
+    {
+        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $data = $request->validate([
+            'file_name' => ['required', 'string', 'max:255'],
+            'file_type' => ['required', 'string', 'max:100'],
+            'field' => ['nullable', 'string', 'max:255'], // Optional: field name like 'headshot_center_path'
+        ]);
+
+        $fileName = (string) $data['file_name'];
+        $fileType = (string) $data['file_type'];
+        $field = $data['field'] ?? null;
+
+        // Basic allowlist (client-side also restricts to images).
+        $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/heic' => 'heic',
+            'image/heif' => 'heif',
+            'image/bmp' => 'bmp',
+            'image/svg+xml' => 'svg',
+        ];
+
+        if (!array_key_exists($fileType, $allowed)) {
+            return response()->json(['message' => 'Invalid file type.'], 422);
+        }
+
+        $ext = $allowed[$fileType] ?? (pathinfo($fileName, PATHINFO_EXTENSION) ?: 'jpg');
+        $uuid = (string) Str::uuid();
+        
+        // Determine the S3 key based on field type
+        if ($field && in_array($field, ['headshot_center_path', 'headshot_left_path', 'headshot_right_path', 'full_body_front_path', 'full_body_right_path', 'full_body_back_path', 'id_front_path', 'id_document_front'])) {
+            // Standard profile field images
+            $folder = match($field) {
+                'headshot_center_path', 'headshot_left_path', 'headshot_right_path' => 'headshots',
+                'full_body_front_path', 'full_body_right_path', 'full_body_back_path' => 'full-body',
+                'id_front_path', 'id_document_front' => 'id-documents',
+                default => 'profile-photos',
+            };
+            $key = "talent/{$talentProfile->id}/{$folder}/{$uuid}.{$ext}";
+        } else {
+            // Additional media files
+            $key = "talent/{$talentProfile->id}/photos/profile/{$uuid}.{$ext}";
+        }
+
+        $diskName = config('filesystems.cloud', 's3');
+        $diskConfig = config("filesystems.disks.{$diskName}");
+        
+        if (!$diskConfig || $diskConfig['driver'] !== 's3') {
+            return response()->json(['message' => 'S3 disk not configured.'], 500);
+        }
+
+        $bucket = $diskConfig['bucket'] ?? null;
+        if (!$bucket) {
+            return response()->json(['message' => 'S3 bucket not configured.'], 500);
+        }
+
+        // Create S3 client directly from config
+        $s3Config = [
+            'version' => 'latest',
+            'region' => $diskConfig['region'] ?? 'us-east-1',
+            'credentials' => [
+                'key' => $diskConfig['key'] ?? null,
+                'secret' => $diskConfig['secret'] ?? null,
+            ],
+        ];
+
+        // Add endpoint if configured (for S3-compatible services)
+        if (!empty($diskConfig['endpoint'])) {
+            $s3Config['endpoint'] = $diskConfig['endpoint'];
+            if (!empty($diskConfig['use_path_style_endpoint'])) {
+                $s3Config['use_path_style_endpoint'] = true;
+            }
+        }
+
+        try {
+            $client = new \Aws\S3\S3Client($s3Config);
+        } catch (\Exception $e) {
+            Log::error('Failed to create S3 client for presigning', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to initialize S3 client.'], 500);
+        }
+
+        // Create presigned PUT URL - don't include ACL as it may be disabled on bucket
+        $command = $client->getCommand('PutObject', [
+            'Bucket' => $bucket,
+            'Key' => $key,
+            'ContentType' => $fileType,
+        ]);
+
+        try {
+            $presignedRequest = $client->createPresignedRequest($command, '+20 minutes');
+            $presignedUrl = (string) $presignedRequest->getUri();
+        } catch (\Exception $e) {
+            Log::error('Failed to create presigned URL', ['error' => $e->getMessage(), 'key' => $key]);
+            return response()->json(['message' => 'Failed to generate presigned URL.'], 500);
+        }
+
+        return response()->json([
+            'key' => $key,
+            'url' => $presignedUrl,
+            'headers' => [
+                'Content-Type' => $fileType,
+            ],
+        ]);
     }
 }

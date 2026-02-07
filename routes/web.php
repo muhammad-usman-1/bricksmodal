@@ -86,6 +86,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::post('talent-profiles/{talent_profile}/reject', [TalentProfileController::class, 'reject'])->name('talent-profiles.reject');
             Route::post('talent-profiles/{talent_profile}/reactivate', [TalentProfileController::class, 'reactivate'])->name('talent-profiles.reactivate');
             Route::post('talent-profiles/{talent_profile}/upload-media', [TalentProfileController::class, 'uploadMedia'])->name('talent-profiles.upload-media');
+            Route::post('talent-profiles/{talent_profile}/upload-profile-image', [TalentProfileController::class, 'uploadProfileImage'])->name('talent-profiles.upload-profile-image');
+            Route::post('talent-profiles/{talent_profile}/presign-profile-image', [TalentProfileController::class, 'presignProfileImage'])->name('talent-profiles.presign-profile-image');
+            Route::delete('talent-profiles/{talent_profile}/remove-profile-image', [TalentProfileController::class, 'removeProfileImage'])->name('talent-profiles.remove-profile-image');
             Route::post('talent-profiles/{talent_profile}/suspend', [TalentProfileController::class, 'suspend'])->name('talent-profiles.suspend');
             Route::post('talent-profiles/{talent_profile}/unsuspend', [TalentProfileController::class, 'unsuspend'])->name('talent-profiles.unsuspend');
             Route::resource('talent-profiles', TalentProfileController::class);
@@ -222,6 +225,8 @@ Route::prefix('talent')->as('talent.')->group(function () {
             // Additional talent routes will live here.
             Route::get('profile', [TalentPortalProfileController::class, 'show'])->name('profile.show');
             Route::put('profile', [TalentPortalProfileController::class, 'update'])->name('profile.update');
+            Route::post('profile/upload-image', [TalentPortalProfileController::class, 'uploadImage'])->name('profile.upload-image');
+            Route::delete('profile/remove-image', [TalentPortalProfileController::class, 'removeImage'])->name('profile.remove-image');
             Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
             Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');

@@ -7,6 +7,7 @@ use App\Models\Label;
 use App\Models\Language;
 use App\Models\TalentProfile;
 use App\Services\MuxService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -164,6 +165,84 @@ class ProfileController extends Controller
         $digits = preg_replace('/[^0-9]/', '', $number);
 
         return $digits ?: null;
+    }
+
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $user = $request->user('talent');
+        $profile = $this->resolveProfile($user);
+
+        $request->validate([
+            'profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:6144'],
+        ]);
+
+        try {
+            $imagePath = $this->storeTalentFile($profile, $request->file('profile_image'), 'headshot-center');
+            
+            $profile->update([
+                'headshot_center_path' => $imagePath,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile image uploaded successfully.',
+                'image_url' => $imagePath,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload profile image: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload image. Please try again.',
+            ], 500);
+        }
+    }
+
+    public function removeImage(Request $request): JsonResponse
+    {
+        $user = $request->user('talent');
+        $profile = $this->resolveProfile($user);
+
+        try {
+            // Optionally delete the file from storage
+            if ($profile->headshot_center_path) {
+                try {
+                    $disk = config('filesystems.cloud', 's3');
+                    $path = $profile->headshot_center_path;
+                    
+                    // Extract relative path if it's a full URL
+                    if (str_starts_with($path, ['http://', 'https://'])) {
+                        $awsUrl = rtrim((string) env('AWS_URL'), '/');
+                        if ($awsUrl && str_starts_with($path, $awsUrl)) {
+                            $path = ltrim(str_replace($awsUrl, '', $path), '/');
+                        } else {
+                            // If we can't extract the path, just clear the database field
+                            $path = null;
+                        }
+                    }
+                    
+                    if ($path) {
+                        Storage::disk($disk)->delete($path);
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to delete profile image file: ' . $e->getMessage());
+                }
+            }
+
+            $profile->update([
+                'headshot_center_path' => null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile image removed successfully.',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to remove profile image: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove image. Please try again.',
+            ], 500);
+        }
     }
 
     private function resolveProfile($user): TalentProfile

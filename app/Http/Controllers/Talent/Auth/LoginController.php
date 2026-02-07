@@ -92,7 +92,7 @@ class LoginController extends Controller
             'phone_country_code' => $user->phone_country_code,
             'phone_number'       => $user->phone_number,
         ]);
-        
+
         // Store OTP in session for testing purposes (in case database lookup fails)
         $request->session()->put('talent_otp', $otp);
 
@@ -113,14 +113,14 @@ class LoginController extends Controller
             ->first();
 
         $otp = null;
-        
+
         // First try to get from database
         if ($user && $user->otp) {
             // For testing: show OTP if it exists (even if expired or consumed)
             // This makes it easier to test without worrying about expiration
             $otp = $user->otp;
         }
-        
+
         // Fallback: get from session (in case database lookup fails)
         if (!$otp) {
             $otp = $request->session()->get('talent_otp');
