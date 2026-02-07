@@ -15,6 +15,7 @@
     body { background: var(--bg); }
 
     .talent-shell { padding: 8px 0 80px; }
+    .is-editing .talent-shell { padding-top: 130px; } /* Add top padding when edit bar is visible (60px header + 70px bar) */
     .top-actions {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -162,6 +163,30 @@
     .action-bar button, .action-bar form { pointer-events: auto; } /* Re-enable clicks on buttons */
     .btn-reject { background: #f6f7fb; color: #b91c1c; border: 1px solid #f4c7c7; border-radius: 6px; padding: 10px 38px; font-size: 18px; display: inline-flex; align-items: center; gap: 8px; }
     .btn-approve { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 10px 38px; font-size: 18px;  display: inline-flex; align-items: center; gap: 8px; }
+
+    /* Edit mode sticky action bar at top */
+    .edit-action-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 60px; /* Margin from top to account for admin header */
+        padding: 12px 24px;
+        display: none;
+        justify-content: flex-end;
+        gap: 10px;
+        z-index: 1000; /* Higher z-index to ensure it's above other elements */
+        background: transparent;
+        pointer-events: none; /* Let clicks pass through empty space */
+    }
+    .is-editing .edit-action-bar {
+        display: flex;
+    }
+    .edit-action-bar button, .edit-action-bar form { pointer-events: auto; } /* Re-enable clicks on buttons */
+    .btn-save { background: #10B981; color: #fff; border: none; border-radius: 6px; padding: 10px 20px; font-size: 18px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; }
+    .btn-save:hover { background: #059669; }
+    .btn-save:focus { outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    .btn-cancel { background: #f6f7fb; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 38px; font-size: 18px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; }
+    .btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -534,9 +559,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="edit-mode-only">
-                    <button type="button" class="cancel-btn" id="cancelEditBtn">Cancel</button>
-                    <button type="submit" class="save-btn">Save Changes</button>
+                <div class="edit-mode-only" style="display: none;">
+                    <!-- Buttons moved to sticky header bar -->
                 </div>
             </div>
         </div>
@@ -839,6 +863,12 @@
     <form action="{{ route('admin.talent-profiles.unsuspend', $talentProfile->id) }}" method="POST" id="unsuspend-talent-form" style="display:none;">
         @csrf
     </form>
+
+    <!-- Edit mode sticky action bar at top -->
+    <div class="edit-action-bar">
+        <button type="button" class="btn-cancel" id="cancelEditBtnSticky">Cancel</button>
+        <button type="submit" class="btn-save" form="talentEditForm">Save Changes</button>
+    </div>
 
     <div class="action-bar display-mode-only">
         @php
@@ -1333,7 +1363,7 @@
     // Function to upload a single image to S3
     async function uploadImageToS3(fileInput, tile) {
         if (!fileInput.files || !fileInput.files[0]) return;
-        
+
         // Prevent duplicate upload calls
         if (tile.dataset.uploading === 'true') {
             console.log('Upload already in progress for this tile, skipping duplicate call');
@@ -1368,15 +1398,15 @@
                     // Remove by field name (for standard fields)
                     const existingByField = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
                     existingByField.forEach(input => input.remove());
-                    
+
                     const existingFieldsByField = form.querySelectorAll(`input[name="uploaded_fields[]"][value="${field}"]`);
                     existingFieldsByField.forEach(input => input.remove());
                 }
-                
+
                 // Remove by tile ID (for media files)
                 const existingByTile = form.querySelectorAll(`input[name="uploaded_keys[]"][data-tile-id="${uploadId}"]`);
                 existingByTile.forEach(input => input.remove());
-                
+
                 const existingFieldsByTile = form.querySelectorAll(`input[name="uploaded_fields[]"][data-tile-id="${uploadId}"]`);
                 existingFieldsByTile.forEach(input => input.remove());
 
@@ -1401,7 +1431,7 @@
             }
 
             uploadModalTracker.markComplete(uploadId);
-            
+
             // Clear the file input after successful upload to prevent re-upload on form submit
             // Use setTimeout to ensure the upload is fully complete before clearing
             setTimeout(() => {
@@ -1446,7 +1476,7 @@
             fileInputs.forEach(input => {
                 // Remove any existing listeners by cloning and replacing
                 if (input.dataset.handlerAttached) return;
-                
+
                 input.addEventListener('change', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -1456,11 +1486,11 @@
                         previewMediaImage(this);
                     }
                 }, { once: false, capture: true });
-                
+
                 input.dataset.handlerAttached = 'true';
             });
         }
-        
+
         // Initialize file input handlers
         setupFileInputHandlers();
 
@@ -1565,11 +1595,18 @@
             });
         }
 
+        // Handle cancel button (both original and sticky)
+        const cancelEditBtnSticky = document.getElementById('cancelEditBtnSticky');
+        const handleCancel = () => {
+            // To properly cancel, we just reload the page to discard unsaved state
+            window.location.reload();
+        };
+
         if (cancelEditBtn && form) {
-            cancelEditBtn.addEventListener('click', () => {
-                // To properly cancel, we just reload the page to discard unsaved state
-                window.location.reload();
-            });
+            cancelEditBtn.addEventListener('click', handleCancel);
+        }
+        if (cancelEditBtnSticky) {
+            cancelEditBtnSticky.addEventListener('click', handleCancel);
         }
 
         // Images are now uploaded immediately via AJAX when selected in edit mode
@@ -1825,14 +1862,14 @@
 
             // Track if file picker is open to prevent duplicate triggers
             let filePickerOpen = false;
-            
+
             // Click to upload handler (only when not dragging)
             tile.addEventListener('click', function(e) {
                 // Don't trigger if clicking remove button
                 if (e.target.closest('.remove-image-btn')) {
                     return;
                 }
-                
+
                 // Don't trigger if clicking on the file input itself
                 if (e.target === fileInput || e.target.closest('input[type="file"]')) {
                     return;
@@ -1843,12 +1880,12 @@
                     justDropped = false;
                     return;
                 }
-                
+
                 // Don't trigger if file input is currently processing
                 if (fileInput.dataset.processing === 'true') {
                     return;
                 }
-                
+
                 // Don't trigger if file picker is already open
                 if (filePickerOpen) {
                     return;
@@ -1866,12 +1903,12 @@
                     }, 1000);
                 }
             }, false);
-            
+
             // Also track when file input is focused (file picker opened)
             fileInput.addEventListener('focus', function() {
                 filePickerOpen = true;
             });
-            
+
             // Track when file input loses focus (file picker closed)
             fileInput.addEventListener('blur', function() {
                 setTimeout(() => {
@@ -1961,17 +1998,17 @@
                     tile.addEventListener('click', function(e) {
                         // Don't trigger if clicking remove link
                         if (e.target.closest('.remove-photo-link')) return;
-                        
+
                         // Don't trigger if clicking on the file input itself
                         if (e.target === fileInput || e.target.closest('input[type="file"]')) {
                             return;
                         }
-                        
+
                         // Don't trigger if file input is currently processing
                         if (fileInput.dataset.processing === 'true') {
                             return;
                         }
-                        
+
                         e.preventDefault();
                         e.stopPropagation();
                         fileInput.click();
@@ -1989,7 +2026,7 @@
             return;
         }
         input.dataset.processing = 'true';
-        
+
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const reader = new FileReader();
@@ -2016,13 +2053,13 @@
                     removeInput.value = '1';
                     tile.appendChild(removeInput);
                 }
-                
+
                 // Remove any existing uploaded_keys for this field (from previous uploads)
                 const existingUploadedKeys = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
                 existingUploadedKeys.forEach(keyInput => {
                     keyInput.remove();
                 });
-                
+
                 // Remove any existing uploaded_fields for this field
                 const existingUploadedFields = form.querySelectorAll(`input[name="uploaded_fields[]"][value="${field}"]`);
                 existingUploadedFields.forEach(fieldInput => {
@@ -2038,7 +2075,7 @@
                     deletedInput.value = mediaId;
                     form.appendChild(deletedInput);
                 }
-                
+
                 // Remove any existing uploaded_keys for this media (from previous uploads)
                 const existingUploadedKeys = form.querySelectorAll(`input[name="uploaded_keys[]"][data-tile-id="${tile.dataset.uploadId || ''}"]`);
                 existingUploadedKeys.forEach(keyInput => {
@@ -2069,7 +2106,7 @@
                 if (isEditing) {
                     uploadImageToS3(input, tile);
                 }
-                
+
                 // Reset processing flag and re-enable tile after a short delay
                 setTimeout(() => {
                     input.dataset.processing = 'false';
