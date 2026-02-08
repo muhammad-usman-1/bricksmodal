@@ -319,7 +319,7 @@
             <p>Your profile is looking great. There are new casting calls matching your stats today.</p>
         </div>
         <div class="dashboard-header-actions">
-            <a href="" class="btn-header btn-header-dark">Edit Profile</a>
+            <a href="{{ route('talent.profile.show') }}" class="btn-header btn-header-dark">Edit Profile</a>
             <a href="" class="btn-header btn-header-light">My Applications</a>
         </div>
     </div>
