@@ -12,12 +12,13 @@ class OnboardingLabelController extends Controller
     {
         $onboardingLabels = $this->getBilingualLabels('onboarding');
         $castingLabels = $this->getBilingualLabels('casting');
+        $talentLabels = $this->getBilingualLabels('talent');
 
         // Load settings
         $settingsPath = resource_path('lang/label_settings.php');
-        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true];
+        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true];
 
-        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'settings'));
+        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'talentLabels', 'settings'));
     }
 
     public function update(Request $request)
@@ -27,6 +28,7 @@ class OnboardingLabelController extends Controller
             $settings = [
                 'onboarding' => $request->has('settings.onboarding'), // Checkbox presence means true
                 'casting' => $request->has('settings.casting'),
+                'talent' => $request->has('settings.talent'),
             ];
             $this->saveSettings($settings);
         }
@@ -39,6 +41,10 @@ class OnboardingLabelController extends Controller
             $this->processUpdate('casting', $request->input('casting'));
         }
 
+        if ($request->has('talent')) {
+            $this->processUpdate('talent', $request->input('talent'));
+        }
+
         return redirect()->route('admin.onboarding-labels.index')->with('success', 'Changes saved successfully.');
     }
 
@@ -46,8 +52,9 @@ class OnboardingLabelController extends Controller
     {
         $path = resource_path('lang/label_settings.php');
         $content = "<?php\n\nreturn [\n";
-        $content .= "    'onboarding' => " . ($settings['onboarding'] ? 'true' : 'false') . ",\n";
-        $content .= "    'casting' => " . ($settings['casting'] ? 'true' : 'false') . ",\n";
+        $content .= "    'onboarding' => " . ($settings['onboarding'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'casting' => " . ($settings['casting'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'talent' => " . ($settings['talent'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "];\n";
         
         File::put($path, $content);
@@ -97,8 +104,8 @@ class OnboardingLabelController extends Controller
         $content = "<?php\n\nreturn [\n";
         
         foreach ($labels as $key => $value) {
-            // Escape single quotes
-            $safeValue = str_replace("'", "\'", $value);
+            // Escape single quotes and backslashes properly
+            $safeValue = addslashes($value);
             $content .= "    '{$key}' => '{$safeValue}',\n";
         }
         

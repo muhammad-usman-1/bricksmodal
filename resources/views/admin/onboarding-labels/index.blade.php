@@ -63,7 +63,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
                     <h5 class="text-dark font-weight-bold mb-0">Casting Requirement Labels</h5>
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="toggleCasting" name="settings[casting]" value="1" {{ $settings['casting'] ? 'checked' : '' }}>
+                        <input type="checkbox" class="custom-control-input" id="toggleCasting" name="settings[casting]" value="1" {{ $settings['casting'] ?? true ? 'checked' : '' }}>
                         <label class="custom-control-label" for="toggleCasting">Show Arabic Labels</label>
                     </div>
                 </div>
@@ -89,6 +89,42 @@
                                     </td>
                                     <td class="align-middle pr-4">
                                         <input class="form-control border-dark" type="text" name="casting[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
+                    <h5 class="text-dark font-weight-bold mb-0">Talent Portal Labels</h5>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggleTalent" name="settings[talent]" value="1" {{ $settings['talent'] ?? true ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="toggleTalent">Show Arabic Labels</label>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 50%;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pl-4">
+                                    English (Reference)
+                                </th>
+                                <th style="width: 50%; text-align: right;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pr-4">
+                                    Arabic (Translation)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($talentLabels as $key => $values)
+                                <tr class="border-bottom">
+                                    <td class="align-middle pl-4">
+                                        <span class="text-dark font-weight-bold d-block">{{ $values['en'] }}</span>
+                                        <small class="text-muted">{{ $key }}</small>
+                                    </td>
+                                    <td class="align-middle pr-4">
+                                        <input class="form-control border-dark" type="text" name="talent[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
                                     </td>
                                 </tr>
                             @endforeach
@@ -122,9 +158,14 @@
         });
 
         // Toggle Alert Listener
-        $('#toggleOnboarding, #toggleCasting').on('change', function() {
+        $('#toggleOnboarding, #toggleCasting, #toggleTalent').on('change', function() {
             let isChecked = $(this).is(':checked');
-            let label = $(this).attr('id') === 'toggleOnboarding' ? 'Onboarding Labels' : 'Casting Requirement Labels';
+            let labelMap = {
+                'toggleOnboarding': 'Onboarding Labels',
+                'toggleCasting': 'Casting Requirement Labels',
+                'toggleTalent': 'Talent Portal Labels'
+            };
+            let label = labelMap[$(this).attr('id')] || 'Labels';
             let state = isChecked ? 'Enabled' : 'Disabled';
             
             Swal.fire({

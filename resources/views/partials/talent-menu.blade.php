@@ -533,25 +533,25 @@ letter-spacing: 1.4px;">STUDIO</div>
         <li class="c-sidebar-nav-item">
                 <a href="{{ route('talent.dashboard') }}" class="bm-link {{ request()->routeIs('talent.dashboard') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard" style="width: 16px; height: 16px; object-fit: contain;">
-                    Dashboard
+                    {{ \App\Helpers\Bilingual::get('talent.menu_dashboard') }}
             </a>
         </li>
         <li class="c-sidebar-nav-item">
                 <a href="#" class="bm-link" style="cursor: not-allowed; opacity: 0.6;" onclick="return false;">
                     <img src="{{ asset('images/camera.png') }}" alt="My Shoots" style="width: 16px; height: 16px; object-fit: contain;">
-                    My Shoots <span style="font-size: 12px; color: #9ca3af;">(coming soon)</span>
+                    {{ \App\Helpers\Bilingual::get('talent.menu_my_shoots') }} <span style="font-size: 12px; color: #9ca3af;">{{ \App\Helpers\Bilingual::get('talent.menu_coming_soon') }}</span>
             </a>
         </li>
         <li class="c-sidebar-nav-item">
                 <a href="{{ route('talent.profile.show') }}" class="bm-link {{ request()->routeIs('talent.profile.*') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/user.png') }}" alt="My Profile" style="width: 16px; height: 16px; object-fit: contain;">
-                    My Profile
+                    {{ \App\Helpers\Bilingual::get('talent.menu_my_profile') }}
             </a>
         </li>
         <li class="c-sidebar-nav-item">
                 <a href="#" class="bm-link" style="cursor: not-allowed; opacity: 0.6;" onclick="return false;">
                     <img src="{{ asset('images/payment.png') }}" alt="My Payment" style="width: 16px; height: 16px; object-fit: contain;">
-                    My Payment <span style="font-size: 12px; color: #9ca3af;">(coming soon)</span>
+                    {{ \App\Helpers\Bilingual::get('talent.menu_my_payment') }} <span style="font-size: 12px; color: #9ca3af;">{{ \App\Helpers\Bilingual::get('talent.menu_coming_soon') }}</span>
             </a>
         </li>
     </ul>
@@ -573,7 +573,7 @@ letter-spacing: 1.4px;">STUDIO</div>
                         <div class="bm-footer-avatar">{{ $initials }}</div>
                         <div class="bm-footer-meta">
                             <p class="bm-footer-name">{{ $name }}</p>
-                            <p class="bm-footer-role">{{ ucfirst($roleLabel) }}</p>
+                            <p class="bm-footer-role">{{ \App\Helpers\Bilingual::get('talent.menu_talent') }}</p>
                         </div>
                     </div>
                     <button type="button" class="bm-footer-arrow" id="bm-sidebar-toggle" aria-label="Collapse sidebar">
@@ -582,9 +582,9 @@ letter-spacing: 1.4px;">STUDIO</div>
                 </div>
 
                 <div class="bm-footer-dropdown" id="bm-footer-dropdown">
-                    <a href="{{ route('talent.profile.show') }}"><i class="fas fa-user"></i> Profile</a>
-                    <a href="{{ Route::has('talent.settings.index') ? route('talent.settings.index') : '#' }}"><i class="fas fa-cog"></i> Settings</a>
-                    <button type="button" onclick="event.preventDefault(); document.getElementById('talent-logout-form').submit();"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <a href="{{ route('talent.profile.show') }}"><i class="fas fa-user"></i> {{ \App\Helpers\Bilingual::get('talent.menu_profile') }}</a>
+                    <a href="{{ Route::has('talent.settings.index') ? route('talent.settings.index') : '#' }}"><i class="fas fa-cog"></i> {{ \App\Helpers\Bilingual::get('talent.menu_settings') }}</a>
+                    <button type="button" onclick="event.preventDefault(); document.getElementById('talent-logout-form').submit();"><i class="fas fa-sign-out-alt"></i> {{ \App\Helpers\Bilingual::get('talent.menu_logout') }}</button>
                 </div>
             </div>
         @endif

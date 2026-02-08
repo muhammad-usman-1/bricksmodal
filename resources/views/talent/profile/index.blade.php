@@ -670,12 +670,12 @@
                 <h1>{{ $profile->legal_name }}</h1>
                 <div class="profile-meta">
                     <span>
-                        {{ $profile->gender ? ucfirst($profile->gender) : 'Model' }}
+                        {{ $profile->gender ? ucfirst($profile->gender) : \App\Helpers\Bilingual::get('talent.profile_model') }}
                         @if($profile->date_of_birth)
-                            • {{ \Carbon\Carbon::parse($profile->date_of_birth)->age }} Years
+                            • {{ \Carbon\Carbon::parse($profile->date_of_birth)->age }} {{ \App\Helpers\Bilingual::get('talent.profile_years') }}
                         @endif
                     </span>
-                    <span>{{ $profile->location ?? 'Location' }}</span> <!-- Location placeholder -->
+                    <span>{{ $profile->location ?? \App\Helpers\Bilingual::get('talent.profile_location') }}</span>
                 </div>
                 <!-- Static Rating for Visual Parity -->
                 <div class="rating-badge">
@@ -686,7 +686,7 @@
 
         <!-- Edit Profile Link -->
         <button type="button" class="btn-edit-profile" id="editProfileBtn">
-            <i class="fas fa-pen"></i> Edit
+            <i class="fas fa-pen"></i> {{ \App\Helpers\Bilingual::get('talent.profile_edit') }}
         </button>
     </div>
 
@@ -700,115 +700,115 @@
             @method('PUT')
             <div class="edit-card-header">
                 <div>
-                    <h3>Edit profile</h3>
-                    <p>Update your public profile details, measurements, and portfolio.</p>
+                    <h3>{{ \App\Helpers\Bilingual::get('talent.profile_edit_title') }}</h3>
+                    <p>{{ \App\Helpers\Bilingual::get('talent.profile_edit_description') }}</p>
                 </div>
                 <div class="edit-actions">
-                    <button type="button" class="btn-cancel-edit" id="cancelEditBtn">Cancel</button>
-                    <button type="submit" class="btn-save-edit">Save changes</button>
+                    <button type="button" class="btn-cancel-edit" id="cancelEditBtn">{{ \App\Helpers\Bilingual::get('talent.profile_cancel') }}</button>
+                    <button type="submit" class="btn-save-edit">{{ \App\Helpers\Bilingual::get('talent.profile_save_changes') }}</button>
                 </div>
             </div>
 
-            <div class="edit-section-title">Basic details</div>
+            <div class="edit-section-title">{{ \App\Helpers\Bilingual::get('talent.profile_basic_details') }}</div>
             <div class="edit-grid">
                 <div class="form-field">
-                    <label for="legal_name">Legal name</label>
+                    <label for="legal_name">{{ \App\Helpers\Bilingual::get('talent.profile_legal_name') }}</label>
                     <input id="legal_name" type="text" name="legal_name" class="form-control-lite" value="{{ old('legal_name', $profile->legal_name) }}" required>
                 </div>
                 <div class="form-field">
-                    <label for="display_name">Display name</label>
+                    <label for="display_name">{{ \App\Helpers\Bilingual::get('talent.profile_display_name') }}</label>
                     <input id="display_name" type="text" name="display_name" class="form-control-lite" value="{{ old('display_name', $profile->display_name) }}">
                 </div>
                 <div class="form-field">
-                    <label for="email">Email</label>
+                    <label for="email">{{ \App\Helpers\Bilingual::get('talent.profile_email') }}</label>
                     <input id="email" type="email" name="email" class="form-control-lite" value="{{ old('email', $profile->user->email ?? $profile->email) }}" required>
                 </div>
                 <div class="form-field">
-                    <label for="date_of_birth">Date of birth</label>
+                    <label for="date_of_birth">{{ \App\Helpers\Bilingual::get('talent.profile_date_of_birth') }}</label>
                     <input id="date_of_birth" type="date" name="date_of_birth" class="form-control-lite" value="{{ old('date_of_birth', optional($profile->date_of_birth)->format('Y-m-d')) }}">
                 </div>
                 <div class="form-field">
-                    <label for="gender">Gender</label>
+                    <label for="gender">{{ \App\Helpers\Bilingual::get('talent.profile_gender') }}</label>
                     @php $genderValue = old('gender', $profile->gender); @endphp
                     <select id="gender" name="gender" class="form-control-lite">
-                        <option value="">Select gender</option>
-                        <option value="male" {{ $genderValue === 'male' ? 'selected' : '' }}>Male</option>
-                        <option value="female" {{ $genderValue === 'female' ? 'selected' : '' }}>Female</option>
-                        <option value="other" {{ $genderValue === 'other' ? 'selected' : '' }}>Other</option>
-                        <option value="prefer_not_to_say" {{ $genderValue === 'prefer_not_to_say' ? 'selected' : '' }}>Prefer not to say</option>
+                        <option value="">{{ \App\Helpers\Bilingual::get('talent.profile_select_gender') }}</option>
+                        <option value="male" {{ $genderValue === 'male' ? 'selected' : '' }}>{{ \App\Helpers\Bilingual::get('talent.profile_male') }}</option>
+                        <option value="female" {{ $genderValue === 'female' ? 'selected' : '' }}>{{ \App\Helpers\Bilingual::get('talent.profile_female') }}</option>
+                        <option value="other" {{ $genderValue === 'other' ? 'selected' : '' }}>{{ \App\Helpers\Bilingual::get('talent.profile_other') }}</option>
+                        <option value="prefer_not_to_say" {{ $genderValue === 'prefer_not_to_say' ? 'selected' : '' }}>{{ \App\Helpers\Bilingual::get('talent.profile_prefer_not_to_say') }}</option>
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="whatsapp_number">WhatsApp number</label>
+                    <label for="whatsapp_number">{{ \App\Helpers\Bilingual::get('talent.profile_whatsapp_number') }}</label>
                     <input id="whatsapp_number" type="text" name="whatsapp_number" class="form-control-lite" placeholder="+965 5xxxxxxx" value="{{ old('whatsapp_number', $profile->whatsapp_number) }}">
                 </div>
             </div>
 
-            <div class="edit-section-title">Rates & Bio</div>
+            <div class="edit-section-title">{{ \App\Helpers\Bilingual::get('talent.profile_rates_bio') }}</div>
             <div class="edit-grid">
                 <div class="form-field">
-                    <label for="daily_rate">Daily rate</label>
+                    <label for="daily_rate">{{ \App\Helpers\Bilingual::get('talent.profile_daily_rate') }}</label>
                     <input id="daily_rate" type="number" min="0" step="0.01" name="daily_rate" class="form-control-lite" value="{{ old('daily_rate', $profile->daily_rate) }}">
                 </div>
                 <div class="form-field">
-                    <label for="rate">Rate</label>
+                    <label for="rate">{{ \App\Helpers\Bilingual::get('talent.profile_rate') }}</label>
                     <input id="rate" type="number" min="0" step="0.01" name="rate" class="form-control-lite" value="{{ old('rate', $profile->rate) }}">
                 </div>
                 <div class="form-field" style="grid-column: 1 / -1;">
-                    <label for="bio">Bio</label>
-                    <textarea id="bio" name="bio" class="textarea-control" maxlength="1000" placeholder="Tell casting directors about your experience, strengths, and preferences.">{{ old('bio', $profile->bio) }}</textarea>
+                    <label for="bio">{{ \App\Helpers\Bilingual::get('talent.profile_bio') }}</label>
+                    <textarea id="bio" name="bio" class="textarea-control" maxlength="1000" placeholder="{{ \App\Helpers\Bilingual::get('talent.profile_bio_placeholder') }}">{{ old('bio', $profile->bio) }}</textarea>
                 </div>
             </div>
 
-            <div class="edit-section-title">Measurements & Appearance</div>
+            <div class="edit-section-title">{{ \App\Helpers\Bilingual::get('talent.profile_measurements_appearance') }}</div>
             <div class="edit-grid">
                 <div class="form-field">
-                    <label for="height">Height (cm)</label>
+                    <label for="height">{{ \App\Helpers\Bilingual::get('talent.profile_height') }}</label>
                     <input id="height" type="number" step="0.1" min="0" name="height" class="form-control-lite" value="{{ old('height', $profile->height) }}">
                 </div>
                 <div class="form-field">
-                    <label for="weight">Weight (kg)</label>
+                    <label for="weight">{{ \App\Helpers\Bilingual::get('talent.profile_weight') }}</label>
                     <input id="weight" type="number" step="0.1" min="0" name="weight" class="form-control-lite" value="{{ old('weight', $profile->weight) }}">
                 </div>
                 <div class="form-field">
-                    <label for="chest">Chest (cm)</label>
+                    <label for="chest">{{ \App\Helpers\Bilingual::get('talent.profile_chest') }}</label>
                     <input id="chest" type="number" step="0.1" min="0" name="chest" class="form-control-lite" value="{{ old('chest', $profile->chest) }}">
                 </div>
                 <div class="form-field">
-                    <label for="waist">Waist (cm)</label>
+                    <label for="waist">{{ \App\Helpers\Bilingual::get('talent.profile_waist') }}</label>
                     <input id="waist" type="number" step="0.1" min="0" name="waist" class="form-control-lite" value="{{ old('waist', $profile->waist) }}">
                 </div>
                 <div class="form-field">
-                    <label for="hips">Hips (cm)</label>
+                    <label for="hips">{{ \App\Helpers\Bilingual::get('talent.profile_hips') }}</label>
                     <input id="hips" type="number" step="0.1" min="0" name="hips" class="form-control-lite" value="{{ old('hips', $profile->hips) }}">
                 </div>
                 <div class="form-field">
-                    <label for="shoe_size">Shoe size (EU)</label>
+                    <label for="shoe_size">{{ \App\Helpers\Bilingual::get('talent.profile_shoe_size') }}</label>
                     <input id="shoe_size" type="number" step="0.5" min="0" name="shoe_size" class="form-control-lite" value="{{ old('shoe_size', $profile->shoe_size) }}">
                 </div>
                 <div class="form-field">
-                    <label for="skin_tone">Skin tone</label>
+                    <label for="skin_tone">{{ \App\Helpers\Bilingual::get('talent.profile_skin_tone') }}</label>
                     @php $skinTone = old('skin_tone', $profile->skin_tone); @endphp
                     <select id="skin_tone" name="skin_tone" class="form-control-lite">
-                        <option value="">Select skin tone</option>
+                        <option value="">{{ \App\Helpers\Bilingual::get('talent.profile_select_skin_tone') }}</option>
                         @foreach($skinToneOptions as $value => $label)
                             <option value="{{ $value }}" {{ $skinTone === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="hair_color">Hair color</label>
+                    <label for="hair_color">{{ \App\Helpers\Bilingual::get('talent.profile_hair_color') }}</label>
                     <input id="hair_color" type="text" name="hair_color" class="form-control-lite" value="{{ old('hair_color', $profile->hair_color) }}">
                 </div>
                 <div class="form-field">
-                    <label for="eye_color">Eye color</label>
+                    <label for="eye_color">{{ \App\Helpers\Bilingual::get('talent.profile_eye_color') }}</label>
                     <input id="eye_color" type="text" name="eye_color" class="form-control-lite" value="{{ old('eye_color', $profile->eye_color) }}">
                 </div>
             </div>
 
 
             <div class="file-note" style="margin-top: 8px;">
-                Max upload size: 6 MB for photos, 4 MB for ID images, 500 MB for videos.
+                {{ \App\Helpers\Bilingual::get('talent.profile_max_upload_note') }}
             </div>
             
             <!-- Hidden input for remove_video flag -->
@@ -821,16 +821,16 @@
         <!-- 1. Shoots Completed -->
         <div class="stat-card">
             <div class="stat-header">
-                <i class="fas fa-camera"></i> Shoots completed
+                <i class="fas fa-camera"></i> {{ \App\Helpers\Bilingual::get('talent.profile_shoots_completed') }}
             </div>
             <div class="stat-value">{{ $shootsCompleted ?? 0 }}</div>
-            <div class="stat-trend trend-up">Life time</div>
+            <div class="stat-trend trend-up">{{ \App\Helpers\Bilingual::get('talent.profile_lifetime') }}</div>
         </div>
 
         <!-- 2. Profile Views -->
         <div class="stat-card">
             <div class="stat-header">
-                <i class="fas fa-eye"></i> Profile views
+                <i class="fas fa-eye"></i> {{ \App\Helpers\Bilingual::get('talent.profile_views') }}
             </div>
             <div class="stat-value">2,341</div>
             <div class="stat-trend trend-up">+12% increase</div>
@@ -859,23 +859,23 @@
     <div class="dash-card">
         <div class="section-title-row">
             <div class="icon-box"><i class="fas fa-ruler-combined"></i></div>
-            <span>Measurements</span>
+            <span>{{ \App\Helpers\Bilingual::get('talent.profile_measurements_appearance') }}</span>
         </div>
         <div class="measurements-grid">
             <div class="measurement-box">
-                <div class="measure-label">Height</div>
+                <div class="measure-label">{{ \App\Helpers\Bilingual::get('talent.profile_height') }}</div>
                 <div class="measure-value">{{ $profile->height ?? '-' }} <span class="measure-unit">cm</span></div>
             </div>
             <div class="measurement-box">
-                <div class="measure-label">Weight</div>
+                <div class="measure-label">{{ \App\Helpers\Bilingual::get('talent.profile_weight') }}</div>
                 <div class="measure-value">{{ $profile->weight ?? '-' }} <span class="measure-unit">kg</span></div>
             </div>
             <div class="measurement-box">
-                <div class="measure-label">Waist</div>
+                <div class="measure-label">{{ \App\Helpers\Bilingual::get('talent.profile_waist') }}</div>
                 <div class="measure-value">{{ $profile->waist ?? '-' }} <span class="measure-unit">cm</span></div>
             </div>
             <div class="measurement-box">
-                <div class="measure-label">Shoe Size</div>
+                <div class="measure-label">{{ \App\Helpers\Bilingual::get('talent.profile_shoe_size') }}</div>
                 <div class="measure-value">{{ $profile->shoe_size ?? '-' }} <span class="measure-unit">EU</span></div>
             </div>
         </div>
@@ -885,7 +885,7 @@
     <div class="dash-card">
         <div class="section-title-row">
             <div class="icon-box"><i class="fas fa-images"></i></div>
-            <span>Media Portfolio</span>
+            <span>{{ \App\Helpers\Bilingual::get('talent.profile_media_portfolio') }}</span>
         </div>
 
         <!-- Additional Profile Images -->
@@ -905,13 +905,13 @@
                         @else
                             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                         @endif
-                        <div class="upload-overlay">
-                            <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                            <span class="upload-text">{{ $media->file_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                            @if($media->file_path)
-                            <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                            @endif
-                        </div>
+                    <div class="upload-overlay">
+                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                        <span class="upload-text">{{ $media->file_path ? \App\Helpers\Bilingual::get('talent.profile_replace_photo') : \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
+                        @if($media->file_path)
+                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}</span>
+                        @endif
+                    </div>
                         <input type="file" name="additional_photos[]" class="media-file-input" accept="image/*" style="display:none">
                     </div>
                 @endforeach
@@ -922,7 +922,7 @@
         <!-- Profile Video -->
         <div class="portfolio-section" style="margin-top: 32px;">
             <div class="portfolio-header">
-                <h3>Profile Video</h3>
+                <h3>{{ \App\Helpers\Bilingual::get('talent.profile_video') }}</h3>
             </div>
             <div id="video-upload-section" style="margin-top: 16px;">
                 @if($muxPlaybackId)
@@ -941,10 +941,10 @@
                         <!-- Replace/Remove buttons - Only shown in edit mode -->
                         <div id="video-action-buttons" class="video-edit-only" style="margin-top: 12px; display: none; gap: 12px; align-items: center; flex-wrap: wrap;">
                             <button type="button" id="replace-video-btn" class="btn-replace-video" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">
-                                <i class="fas fa-upload" style="margin-right: 6px;"></i> Replace Video
+                                <i class="fas fa-upload" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_replace_video') }}
                             </button>
                             <button type="button" id="remove-video-btn" class="btn-remove-video" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #991b1b; cursor: pointer; transition: all 0.2s;">
-                                <i class="fas fa-trash" style="margin-right: 6px;"></i> Remove Video
+                                <i class="fas fa-trash" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_remove_video') }}
                             </button>
                         </div>
                     </div>
@@ -959,10 +959,10 @@
                                 <i class="fas fa-video" style="font-size: 32px; color: #9ca3af;"></i>
                             </div>
                             <div class="upload-label" data-file-label="video" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
-                                Click to upload or drag and drop
+                                {{ \App\Helpers\Bilingual::get('talent.profile_click_upload_drag_drop') }}
                             </div>
                             <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">
-                                MP4, MOV, AVI, WEBM (Max 500MB)
+                                {{ \App\Helpers\Bilingual::get('talent.profile_video_formats') }}
                             </div>
                             <div class="progress-bar-container" id="video-progress-container" style="display:none; width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 16px; overflow: hidden;">
                                 <div class="progress-bar-fill" id="video-progress-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
@@ -980,11 +980,11 @@
         <!-- Footer / Rates -->
         <div class="rates-container">
             <div class="rate-block">
-                <span class="rate-label">Rate</span>
+                <span class="rate-label">{{ \App\Helpers\Bilingual::get('talent.profile_rate_label') }}</span>
                 <span class="rate-amount">${{ $profile->rate ? number_format($profile->rate, 2) : '0.00' }}</span>
             </div>
             <div class="rate-block" style="text-align:right;">
-                <span class="rate-label">Daily Rate</span>
+                <span class="rate-label">{{ \App\Helpers\Bilingual::get('talent.profile_daily_rate_label') }}</span>
                 <span class="rate-amount">${{ $profile->daily_rate ? number_format($profile->daily_rate, 2) : '0.00' }}/day</span>
             </div>
         </div>
@@ -995,7 +995,7 @@
     <div style="margin-top: 24px;">
         <p style="font-size: 18px; color: #9ca3af; margin:0; display: flex; align-items: center; gap: 6px;">
             <span style="background: #fef3c7; color: #d97706; width: 4px; height: 16px; border-radius: 2px;"></span>
-            Your profile details and portfolio are visible to casting directors. Please ensure they are always up to date.
+            {{ \App\Helpers\Bilingual::get('talent.profile_visible_note') }}
         </p>
     </div>
 
@@ -1660,12 +1660,12 @@
                     const overlay = item.querySelector('.upload-overlay');
                     if (overlay) {
                         const uploadText = overlay.querySelector('.upload-text');
-                        if (uploadText) uploadText.textContent = 'Replace Photo';
+                        if (uploadText) uploadText.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_replace_photo') }}';
                         let removeLink = overlay.querySelector('.remove-photo-link');
                         if (!removeLink) {
                             removeLink = document.createElement('span');
                             removeLink.className = 'remove-photo-link';
-                            removeLink.textContent = 'Remove Photo';
+                            removeLink.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}';
                             removeLink.onclick = (e) => removeMediaImage(removeLink, e);
                             overlay.appendChild(removeLink);
                         }
@@ -1775,7 +1775,7 @@
             const overlay = tile?.querySelector('.upload-overlay');
             if (overlay) {
                 const uploadText = overlay.querySelector('.upload-text');
-                if (uploadText) uploadText.textContent = 'Upload Photo';
+                if (uploadText) uploadText.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}';
                 const removeLink = overlay.querySelector('.remove-photo-link');
                 if (removeLink) removeLink.remove();
             }
@@ -1827,7 +1827,7 @@
                 <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                 <div class="upload-overlay">
                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                    <span class="upload-text">Upload Photo</span>
+                    <span class="upload-text">{{ \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
                 </div>
                 <input type="file" name="additional_photos[]" class="media-file-input" accept="image/*" style="display:none">
             `;
@@ -1857,7 +1857,7 @@
             addMoreBtn.type = 'button';
             addMoreBtn.className = 'add-more-btn';
             addMoreBtn.style.cssText = 'margin-top: 12px; padding: 8px 16px; background: #10b981; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: none;';
-            addMoreBtn.innerHTML = '<i class="fas fa-plus"></i> Add More Photos';
+                    addMoreBtn.innerHTML = '<i class="fas fa-plus"></i> {{ \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}';
             addMoreBtn.onclick = addMorePhotoSlots;
             additionalPhotosSection.appendChild(addMoreBtn);
 
@@ -2033,7 +2033,7 @@
                 videoProgressContainer.style.display = 'block';
                 videoProgressFill.style.width = '0%';
                 videoUploadStatus.style.display = 'block';
-                videoUploadStatus.textContent = 'Uploading video to Mux...';
+                videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_uploading_video') }}';
                 videoUploadStatus.style.color = '#6b7280';
 
                 // Update label
@@ -2071,7 +2071,7 @@
                         
                         if (response.ok) {
                             return response.text().then(html => {
-                                videoUploadStatus.textContent = 'Video uploaded successfully! Refreshing page...';
+                                videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_video_uploaded') }}';
                                 videoUploadStatus.style.color = '#10b981';
                                 
                                 // Reload page after a short delay
@@ -2090,7 +2090,7 @@
                     .catch(error => {
                         clearInterval(progressInterval);
                         videoProgressFill.style.width = '0%';
-                        videoUploadStatus.textContent = 'Upload failed: ' + (error.message || 'Please try again.');
+                        videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}: ' + (error.message || '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}');
                         videoUploadStatus.style.color = '#dc2626';
                         console.error('Video upload error:', error);
                     })
@@ -2118,7 +2118,8 @@
         // Handle remove video button
         if (removeVideoBtn) {
             removeVideoBtn.addEventListener('click', function() {
-                if (!confirm('Are you sure you want to remove your profile video?')) {
+                const confirmMsg = '{{ \App\Helpers\Bilingual::get('talent.profile_remove_video') }}' + '?';
+                if (!confirm(confirmMsg)) {
                     return;
                 }
 

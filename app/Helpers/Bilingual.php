@@ -23,7 +23,7 @@ class Bilingual
 
         // Load settings
         $settingsPath = resource_path('lang/label_settings.php');
-        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true];
+        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true];
 
         // If context is disabled, return only English
         if (isset($settings[$context]) && $settings[$context] === false) {
