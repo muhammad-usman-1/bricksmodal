@@ -205,8 +205,101 @@ class TalentProfileController extends Controller
     {
         $disk = config('filesystems.cloud', 's3');
         
-        // Backend compression fallback for images > 10MB
-        if (strpos($file->getMimeType(), 'image/') !== false && $file->getSize() > 10 * 1024 * 1024) {
+        // Resize and crop images to 9:16 aspect ratio for profile images (NOT for ID documents)
+        $isProfileImage = in_array($folder, ['headshots', 'full-body', 'profile-photos']);
+        $isIdDocument = in_array($folder, ['id-documents', 'id']);
+        
+        if ($isProfileImage && !$isIdDocument && strpos($file->getMimeType(), 'image/') !== false) {
+            try {
+                $path = $file->getRealPath();
+                $mime = $file->getMimeType();
+                $sourceImage = null;
+
+                // Load source image
+                if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                    $sourceImage = imagecreatefromjpeg($path);
+                } elseif ($mime === 'image/png') {
+                    $sourceImage = imagecreatefrompng($path);
+                } elseif ($mime === 'image/webp') {
+                    $sourceImage = imagecreatefromwebp($path);
+                } elseif ($mime === 'image/gif') {
+                    $sourceImage = imagecreatefromgif($path);
+                }
+
+                if ($sourceImage) {
+                    $sourceWidth = imagesx($sourceImage);
+                    $sourceHeight = imagesy($sourceImage);
+                    
+                    // Target aspect ratio: 9:16
+                    $targetAspect = 9 / 16;
+                    $sourceAspect = $sourceWidth / $sourceHeight;
+                    
+                    // Calculate dimensions to crop and resize to 9:16
+                    $targetWidth = 1080; // Base width (can be adjusted)
+                    $targetHeight = 1920; // Base height (9:16 ratio)
+                    
+                    $newWidth = $sourceWidth;
+                    $newHeight = $sourceHeight;
+                    $x = 0;
+                    $y = 0;
+                    
+                    // Crop to 9:16 aspect ratio
+                    if ($sourceAspect > $targetAspect) {
+                        // Source is wider - crop width
+                        $newWidth = (int)($sourceHeight * $targetAspect);
+                        $x = (int)(($sourceWidth - $newWidth) / 2);
+                    } else {
+                        // Source is taller - crop height
+                        $newHeight = (int)($sourceWidth / $targetAspect);
+                        $y = (int)(($sourceHeight - $newHeight) / 2);
+                    }
+                    
+                    // Create cropped image
+                    $croppedImage = imagecreatetruecolor($newWidth, $newHeight);
+                    
+                    // Preserve transparency for PNG
+                    if ($mime === 'image/png') {
+                        imagealphablending($croppedImage, false);
+                        imagesavealpha($croppedImage, true);
+                        $transparent = imagecolorallocatealpha($croppedImage, 0, 0, 0, 127);
+                        imagefill($croppedImage, 0, 0, $transparent);
+                    }
+                    
+                    imagecopyresampled($croppedImage, $sourceImage, 0, 0, $x, $y, $newWidth, $newHeight, $newWidth, $newHeight);
+                    
+                    // Resize to target dimensions
+                    $resizedImage = imagecreatetruecolor($targetWidth, $targetHeight);
+                    
+                    // Preserve transparency for PNG
+                    if ($mime === 'image/png') {
+                        imagealphablending($resizedImage, false);
+                        imagesavealpha($resizedImage, true);
+                        $transparent = imagecolorallocatealpha($resizedImage, 0, 0, 0, 127);
+                        imagefill($resizedImage, 0, 0, $transparent);
+                    }
+                    
+                    imagecopyresampled($resizedImage, $croppedImage, 0, 0, 0, 0, $targetWidth, $targetHeight, $newWidth, $newHeight);
+                    
+                    // Save resized image
+                    $tempPath = tempnam(sys_get_temp_dir(), 'resized_9_16_');
+                    if ($mime === 'image/png') {
+                        imagepng($resizedImage, $tempPath, 9);
+                    } else {
+                        imagejpeg($resizedImage, $tempPath, 90);
+                    }
+                    
+                    imagedestroy($sourceImage);
+                    imagedestroy($croppedImage);
+                    imagedestroy($resizedImage);
+                    
+                    $file = new \Illuminate\Http\File($tempPath);
+                }
+            } catch (\Exception $e) {
+                \Log::warning("Image resize to 9:16 failed: " . $e->getMessage());
+                // Continue with original file if resize fails
+            }
+        } elseif (strpos($file->getMimeType(), 'image/') !== false && $file->getSize() > 10 * 1024 * 1024) {
+            // Backend compression fallback for large images that aren't profile images
             try {
                 $path = $file->getRealPath();
                 $mime = $file->getMimeType();

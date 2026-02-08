@@ -288,8 +288,7 @@
     $activeCount = $stats['approved'] ?? ($talents->where('verification_status', 'approved')->count());
     $totalTalents = $stats['total'] ?? $talents->count();
     $fallbackImg = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="360"><rect width="300" height="360" rx="18" fill="#e5e7eb"/><path d="M150 170c28 0 50-22 50-50s-22-50-50-50-50 22-50 50 22 50 50 50Zm0 20c-42 0-80 19-92 56-2 6 2 12 8 12h168c6 0 10-6 8-12-12-37-50-56-92-56Z" fill="#cbd5e1"/></svg>');
-    $storageDisk = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
-    $toUrl = function($path) use ($storageDisk) {
+    $toUrl = function($path) {
         if (!$path) return null;
         if (is_array($path)) {
             $path = $path['url'] ?? ($path['path'] ?? ($path[0] ?? null));
@@ -298,12 +297,93 @@
         if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', 'data:'])) {
             return $path;
         }
-        $clean = ltrim($path, '/');
-        try {
-            return $storageDisk->url($clean);
-        } catch (\Exception $e) {
-            return asset('storage/' . $clean);
+
+        // Cache key for this URL
+        $cacheKey = 'talent_image_url_' . md5($path);
+        
+        // Try to get from cache first (cache for 6 hours)
+        $cachedUrl = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        if ($cachedUrl !== null) {
+            return $cachedUrl;
         }
+
+        $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
+        $awsUrl = rtrim((string) env('AWS_URL'), '/');
+        $s3Disk = config('filesystems.cloud', 's3');
+        $storage = \Illuminate\Support\Facades\Storage::disk($s3Disk);
+        $defaultDisk = config('filesystems.default', 'public');
+        $defaultStorage = \Illuminate\Support\Facades\Storage::disk($defaultDisk);
+
+        $resolvedUrl = null;
+
+        // If path is already a full URL (likely from S3/CloudFront)
+        if ($isAbsolute) {
+            // If it matches AWS_URL (CloudFront CDN), use it directly for better caching
+            if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+                $resolvedUrl = $path; // Use CloudFront URL directly - it's already optimized
+            } else {
+                // Check if it's an S3 URL that we can convert to CloudFront
+                if ($awsUrl && (strpos($path, '.s3.') !== false || strpos($path, 's3.amazonaws.com') !== false)) {
+                    // Extract the key from S3 URL and construct CloudFront URL
+                    $parsed = parse_url($path);
+                    if (isset($parsed['path'])) {
+                        $key = ltrim($parsed['path'], '/');
+                        $resolvedUrl = rtrim($awsUrl, '/') . '/' . $key;
+                    } else {
+                        $resolvedUrl = $path;
+                    }
+                } else {
+                    $resolvedUrl = $path; // Use as-is if it's already a valid URL
+                }
+            }
+        } else {
+            // Relative path - try to resolve it
+            $clean = ltrim($path, '/');
+            
+            // If AWS_URL (CloudFront) is configured, use it for permanent URLs
+            if ($awsUrl) {
+                try {
+                    // Try to get permanent URL via CloudFront
+                    $resolvedUrl = rtrim($awsUrl, '/') . '/' . $clean;
+                } catch (\Exception $e) {
+                    // Fallback to storage URL
+                    try {
+                        $resolvedUrl = $storage->url($clean);
+                    } catch (\Exception $e2) {
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($clean);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
+                    }
+                }
+            } else {
+                // No CloudFront - try to get permanent URL first
+                try {
+                    $resolvedUrl = $storage->url($clean);
+                } catch (\Exception $e) {
+                    // If permanent URL fails, use temporary URL with longer expiration (7 days for better caching)
+                    try {
+                        $resolvedUrl = $storage->temporaryUrl($clean, now()->addDays(7));
+                    } catch (\Exception $e2) {
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($clean);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Cache the resolved URL for 6 hours
+        if ($resolvedUrl) {
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $resolvedUrl, now()->addHours(6));
+        }
+
+        return $resolvedUrl ?: asset('storage/' . ltrim($path, '/'));
     };
 @endphp
 
@@ -415,7 +495,13 @@
                 <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
                     <div class="talent-img-container">
                         @foreach($allImages as $index => $imgSrc)
-                            <img class="talent-img {{ $index === 0 ? 'active' : '' }}" src="{{ $imgSrc }}" alt="{{ $displayName }} - Image {{ $index + 1 }}" data-index="{{ $index }}">
+                            <img class="talent-img {{ $index === 0 ? 'active' : '' }}" 
+                                 src="{{ $imgSrc }}" 
+                                 alt="{{ $displayName }} - Image {{ $index + 1 }}" 
+                                 data-index="{{ $index }}"
+                                 loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                 decoding="async"
+                                 fetchpriority="{{ $index === 0 ? 'high' : 'low' }}">
                         @endforeach
                     </div>
                     <span class="badge-active {{ $isVerified ? '' : ($isSuspended ? 'badge-suspended' : ($isRejected ? 'badge-rejected' : 'badge-pending')) }}">
@@ -578,10 +664,18 @@
             });
         });
 
-        // Image rotation on hover
+        // Image rotation on hover with preloading
         cards.forEach(card => {
             const images = card.querySelectorAll('.talent-img');
             if (images.length <= 1) return; // No rotation needed if only one image
+
+            // Preload all images for this card to ensure smooth hover transitions
+            images.forEach(img => {
+                if (img.src && !img.complete) {
+                    const preloadImg = new Image();
+                    preloadImg.src = img.src;
+                }
+            });
 
             let rotationInterval = null;
             let currentIndex = 0;

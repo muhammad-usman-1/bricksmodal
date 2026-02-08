@@ -61,7 +61,6 @@
         border-radius: 12px;
         width: 100%;
         aspect-ratio: 9 / 16;
-        min-height: 280px;
         display: grid;
         place-items: center;
         color: var(--ink-500);
@@ -103,6 +102,71 @@
         object-fit: cover;
         border-radius: 12px;
         object-position: center;
+    }
+    /* Profile images maintain 9:16 aspect ratio */
+    .upload-tile:not(.id-doc-tile) img {
+        aspect-ratio: 9 / 16;
+    }
+    /* ID documents display full image with original aspect ratio */
+    .upload-tile.id-doc-tile img {
+        aspect-ratio: auto;
+        object-fit: contain;
+    }
+
+    /* Image modal for viewing images in 9:16 aspect ratio */
+    .image-view-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        cursor: pointer;
+    }
+    .image-view-modal.active {
+        display: flex;
+    }
+    .image-view-container {
+        position: relative;
+        max-width: min(90vw, calc(90vh * 9 / 16));
+        max-height: min(90vh, calc(90vw * 16 / 9));
+        aspect-ratio: 9 / 16;
+        width: auto;
+        height: auto;
+    }
+    .image-view-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        display: block;
+    }
+    .image-view-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: #fff;
+        font-size: 32px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .image-view-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    .upload-tile .preview-img {
+        cursor: pointer;
     }
 
     .upload-overlay {
@@ -405,47 +469,97 @@
         $idDocs = ['id_document_front' => 'ID Document'];
     }
 
-    $resolveUrl = function ($path) {
+    $resolveUrl = function ($path) use ($talentProfile) {
         if (! $path) {
             return null;
         }
 
+        // Cache key for this URL
+        $cacheKey = 'talent_image_url_' . md5($path . '_' . ($talentProfile->id ?? ''));
+
+        // Try to get from cache first (cache for 6 hours)
+        $cachedUrl = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        if ($cachedUrl !== null) {
+            return $cachedUrl;
+        }
+
         $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
         $awsUrl = rtrim((string) env('AWS_URL'), '/');
-        $disk = config('filesystems.default', 'public');
-        $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+        $s3Disk = config('filesystems.cloud', 's3');
+        $storage = \Illuminate\Support\Facades\Storage::disk($s3Disk);
+        $defaultDisk = config('filesystems.default', 'public');
+        $defaultStorage = \Illuminate\Support\Facades\Storage::disk($defaultDisk);
 
-        // If absolute and matches AWS_URL, try to generate a signed URL for private buckets
-        if ($isAbsolute && $awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
-            $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
-            try {
-                return $storage->temporaryUrl($relative, now()->addMinutes(60));
-            } catch (\Exception $e) {
+        $resolvedUrl = null;
+
+        // If path is already a full URL (likely from S3/CloudFront)
+        if ($isAbsolute) {
+            // If it matches AWS_URL (CloudFront CDN), use it directly for better caching
+            if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
+                $resolvedUrl = $path; // Use CloudFront URL directly - it's already optimized
+            } else {
+                // Check if it's an S3 URL that we can convert to CloudFront
+                if ($awsUrl && (strpos($path, '.s3.') !== false || strpos($path, 's3.amazonaws.com') !== false)) {
+                    // Extract the key from S3 URL and construct CloudFront URL
+                    $parsed = parse_url($path);
+                    if (isset($parsed['path'])) {
+                        $key = ltrim($parsed['path'], '/');
+                        $resolvedUrl = rtrim($awsUrl, '/') . '/' . $key;
+                    } else {
+                        $resolvedUrl = $path;
+                    }
+                } else {
+                    $resolvedUrl = $path; // Use as-is if it's already a valid URL
+                }
+            }
+        } else {
+            // Relative path - try to resolve it
+            $cleanPath = ltrim($path, '/');
+
+            // If AWS_URL (CloudFront) is configured, use it for permanent URLs
+            if ($awsUrl) {
                 try {
-                    return $storage->url($relative);
-                } catch (\Exception $e2) {
-                    return $path; // fallback to given URL
+                    // Try to get permanent URL via CloudFront
+                    $resolvedUrl = rtrim($awsUrl, '/') . '/' . $cleanPath;
+                } catch (\Exception $e) {
+                    // Fallback to storage URL
+                    try {
+                        $resolvedUrl = $storage->url($cleanPath);
+                    } catch (\Exception $e2) {
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($cleanPath);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
+                    }
+                }
+            } else {
+                // No CloudFront - try to get permanent URL first
+                try {
+                    $resolvedUrl = $storage->url($cleanPath);
+                } catch (\Exception $e) {
+                    // If permanent URL fails, use temporary URL with longer expiration (7 days for better caching)
+                    try {
+                        $resolvedUrl = $storage->temporaryUrl($cleanPath, now()->addDays(7));
+                    } catch (\Exception $e2) {
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($cleanPath);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
+                    }
                 }
             }
         }
 
-        if ($isAbsolute) {
-            return $path;
+        // Cache the resolved URL for 6 hours
+        if ($resolvedUrl) {
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $resolvedUrl, now()->addHours(6));
         }
 
-        $cleanPath = ltrim($path, '/');
-
-        // Prefer CDN/AWS_URL mapping; url() respects AWS_URL when configured.
-        try {
-            return $storage->url($cleanPath);
-        } catch (\Exception $e) {
-            // Fallback to signed URL if url() fails (e.g., private bucket without AWS_URL)
-            try {
-                return $storage->temporaryUrl($cleanPath, now()->addMinutes(60));
-            } catch (\Exception $e2) {
-                return null;
-            }
-        }
+        return $resolvedUrl;
     };
 
     // Field configurations for easy rendering
@@ -579,7 +693,7 @@
                     @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
                     <div class="upload-tile is-editable" data-field="{{ $field }}">
                         @if($img)
-                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img">
+                            <img src="{{ $img }}" alt="{{ $label }}" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                             <button type="button" class="remove-image-btn" onclick="removeImage(this, event)" title="Remove image">
                                 <i class="fa fa-times"></i>
                             </button>
@@ -652,7 +766,7 @@
                             @php $img = $photo ? $resolveUrl($photo['path']) : null; @endphp
 
                             @if($img)
-                                <img src="{{ $img }}" alt="{{ $photo['label'] ?? 'Profile Photo' }}" class="preview-img">
+                                <img src="{{ $img }}" alt="{{ $photo['label'] ?? 'Profile Photo' }}" class="preview-img" loading="lazy" decoding="async" fetchpriority="low" onclick="openImageModal(this.src, event)">
                             @else
                                 <div class="upload-placeholder">
                                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
@@ -696,7 +810,7 @@
                 @php $img = $resolveUrl($talentProfile->{$field} ?? null); @endphp
                 <div class="upload-tile is-editable id-doc-tile" data-field="{{ $field }}" style="width: 100%; height: auto; aspect-ratio: auto; min-height: 200px;">
                     @if($img)
-                        <img src="{{ $img }}" alt="{{ $label }}" class="preview-img" style="height: auto; object-fit: contain;">
+                        <img src="{{ $img }}" alt="{{ $label }}" class="preview-img" style="height: auto; object-fit: contain;" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                         <div class="upload-placeholder">
                             <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 24px; height: 24px;">
@@ -1360,6 +1474,80 @@
         });
     }
 
+    // Function to resize image to 9:16 aspect ratio
+    async function resizeImageTo9_16(file) {
+        return new Promise((resolve, reject) => {
+            // Check if it's a profile image field (not ID documents)
+            const isProfileImage = file.type && file.type.startsWith('image/');
+            if (!isProfileImage) {
+                resolve(file); // Return original file if not an image
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Target aspect ratio: 9:16
+                    const targetAspect = 9 / 16;
+                    const sourceAspect = img.width / img.height;
+
+                    // Target dimensions (1080x1920 for good quality)
+                    const targetWidth = 1080;
+                    const targetHeight = 1920;
+
+                    let sourceX = 0;
+                    let sourceY = 0;
+                    let sourceWidth = img.width;
+                    let sourceHeight = img.height;
+
+                    // Crop to 9:16 aspect ratio
+                    if (sourceAspect > targetAspect) {
+                        // Source is wider - crop width (center crop)
+                        sourceWidth = Math.round(img.height * targetAspect);
+                        sourceX = Math.round((img.width - sourceWidth) / 2);
+                    } else {
+                        // Source is taller - crop height (center crop)
+                        sourceHeight = Math.round(img.width / targetAspect);
+                        sourceY = Math.round((img.height - sourceHeight) / 2);
+                    }
+
+                    // Set canvas size to target dimensions
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    // Draw cropped and resized image
+                    ctx.drawImage(
+                        img,
+                        sourceX, sourceY, sourceWidth, sourceHeight, // Source rectangle
+                        0, 0, targetWidth, targetHeight // Destination rectangle
+                    );
+
+                    // Convert to blob
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            // Create a new File object with the resized image
+                            const resizedFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: Date.now()
+                            });
+                            resolve(resizedFile);
+                        } else {
+                            reject(new Error('Failed to resize image'));
+                        }
+                    }, file.type, 0.9); // 90% quality
+                };
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+        });
+    }
+
     // Function to upload a single image to S3
     async function uploadImageToS3(fileInput, tile) {
         if (!fileInput.files || !fileInput.files[0]) return;
@@ -1371,7 +1559,7 @@
         }
         tile.dataset.uploading = 'true';
 
-        const file = fileInput.files[0];
+        let file = fileInput.files[0];
         const field = tile.dataset.field || null;
         const uploadId = tile.dataset.uploadId || `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -1385,9 +1573,24 @@
         uploadModalTracker.addItem(uploadId, file.name);
 
         try {
+            // Resize image to 9:16 for profile images (NOT for ID documents)
+            const isProfileImage = field && !field.includes('id_') && !field.includes('document') && !field.includes('id_front') && !field.includes('id_back');
+            const isIdDocument = field && (field.includes('id_') || field.includes('document') || field.includes('id_front') || field.includes('id_back'));
+
+            if (isProfileImage && !isIdDocument) {
+                try {
+                    file = await resizeImageTo9_16(file);
+                    uploadModalTracker.updateProgress(uploadId, 5); // Show progress after resize
+                } catch (resizeError) {
+                    console.warn('Failed to resize image, using original:', resizeError);
+                    // Continue with original file if resize fails
+                }
+            }
+
             const presign = await presignProfileImage(file, field);
             await uploadToS3Put(presign.url, presign.headers, file, (pct) => {
-                uploadModalTracker.updateProgress(uploadId, pct);
+                // Adjust progress: 5% for resize, 95% for upload
+                uploadModalTracker.updateProgress(uploadId, 5 + Math.round(pct * 0.95));
             });
 
             // Store the S3 key in a hidden input for form submission
@@ -2259,5 +2462,55 @@
 
     // Images are now uploaded immediately via AJAX when selected in edit mode
     // The old handleMediaImageUpload function has been removed
+
+    // Image modal functions
+    function openImageModal(imageSrc, event) {
+        // Don't open modal if in edit mode (to allow file upload)
+        const isEditing = document.body.classList.contains('is-editing') || document.querySelector('.is-editing');
+        if (isEditing) {
+            return;
+        }
+
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const modal = document.getElementById('imageViewModal');
+        const modalImg = document.getElementById('modalImageView');
+
+        if (modal && modalImg) {
+            modalImg.src = imageSrc;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+    }
+
+    function closeImageModal(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const modal = document.getElementById('imageViewModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+    });
 </script>
+
+<!-- Image View Modal -->
+<div id="imageViewModal" class="image-view-modal" onclick="closeImageModal(event)">
+    <div class="image-view-container" onclick="event.stopPropagation()">
+        <img id="modalImageView" src="" alt="Profile Image">
+        <span class="image-view-close" onclick="closeImageModal(event)">&times;</span>
+    </div>
+</div>
 @endsection

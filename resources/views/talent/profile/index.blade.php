@@ -521,7 +521,7 @@
 </style>
 
 @php
-    $resolveMediaUrl = function ($path) {
+    $resolveMediaUrl = function ($path) use ($profile) {
         if (! $path) {
             return null;
         }
@@ -534,37 +534,92 @@
             return null;
         }
 
+        // Cache key for this URL
+        $cacheKey = 'talent_image_url_' . md5($path . '_' . ($profile->id ?? ''));
+        
+        // Try to get from cache first (cache for 6 hours)
+        $cachedUrl = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        if ($cachedUrl !== null) {
+            return $cachedUrl;
+        }
+
         $isAbsolute = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']);
         $awsUrl = rtrim((string) env('AWS_URL'), '/');
-        $storage = \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'));
+        $s3Disk = config('filesystems.cloud', 's3');
+        $storage = \Illuminate\Support\Facades\Storage::disk($s3Disk);
+        $defaultDisk = config('filesystems.default', 'public');
+        $defaultStorage = \Illuminate\Support\Facades\Storage::disk($defaultDisk);
 
+        $resolvedUrl = null;
+
+        // If path is already a full URL (likely from S3/CloudFront)
         if ($isAbsolute) {
+            // If it matches AWS_URL (CloudFront CDN), use it directly for better caching
             if ($awsUrl && \Illuminate\Support\Str::startsWith($path, $awsUrl)) {
-                $relative = ltrim(\Illuminate\Support\Str::after($path, $awsUrl), '/');
+                $resolvedUrl = $path; // Use CloudFront URL directly - it's already optimized
+            } else {
+                // Check if it's an S3 URL that we can convert to CloudFront
+                if ($awsUrl && (strpos($path, '.s3.') !== false || strpos($path, 's3.amazonaws.com') !== false)) {
+                    // Extract the key from S3 URL and construct CloudFront URL
+                    $parsed = parse_url($path);
+                    if (isset($parsed['path'])) {
+                        $key = ltrim($parsed['path'], '/');
+                        $resolvedUrl = rtrim($awsUrl, '/') . '/' . $key;
+                    } else {
+                        $resolvedUrl = $path;
+                    }
+                } else {
+                    $resolvedUrl = $path; // Use as-is if it's already a valid URL
+                }
+            }
+        } else {
+            // Relative path - try to resolve it
+            $clean = ltrim($path, '/');
+            
+            // If AWS_URL (CloudFront) is configured, use it for permanent URLs
+            if ($awsUrl) {
                 try {
-                    return $storage->temporaryUrl($relative, now()->addMinutes(60));
+                    // Try to get permanent URL via CloudFront
+                    $resolvedUrl = rtrim($awsUrl, '/') . '/' . $clean;
                 } catch (\Exception $e) {
+                    // Fallback to storage URL
                     try {
-                        return $storage->url($relative);
+                        $resolvedUrl = $storage->url($clean);
                     } catch (\Exception $e2) {
-                        return $path;
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($clean);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
+                    }
+                }
+            } else {
+                // No CloudFront - try to get permanent URL first
+                try {
+                    $resolvedUrl = $storage->url($clean);
+                } catch (\Exception $e) {
+                    // If permanent URL fails, use temporary URL with longer expiration (7 days for better caching)
+                    try {
+                        $resolvedUrl = $storage->temporaryUrl($clean, now()->addDays(7));
+                    } catch (\Exception $e2) {
+                        // Last resort: try default storage
+                        try {
+                            $resolvedUrl = $defaultStorage->url($clean);
+                        } catch (\Exception $e3) {
+                            $resolvedUrl = null;
+                        }
                     }
                 }
             }
-
-            return $path;
         }
 
-        $clean = ltrim($path, '/');
-        try {
-            return $storage->url($clean);
-        } catch (\Exception $e) {
-            try {
-                return $storage->temporaryUrl($clean, now()->addMinutes(60));
-            } catch (\Exception $e2) {
-                return null;
-            }
+        // Cache the resolved URL for 6 hours
+        if ($resolvedUrl) {
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $resolvedUrl, now()->addHours(6));
         }
+
+        return $resolvedUrl;
     };
 
     $primaryAvatar = $resolveMediaUrl($profile->headshot_center_path ?? null);
@@ -809,7 +864,7 @@
                 <!-- Center -->
                 <div class="photo-item is-editable" data-field="headshot_center_path">
                     @if($profile->headshot_center_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_center_path) }}" alt="Center Headshot" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_center_path) }}" alt="Center Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -825,7 +880,7 @@
                 <!-- Left -->
                 <div class="photo-item is-editable" data-field="headshot_left_path">
                     @if($profile->headshot_left_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_left_path) }}" alt="Left Headshot" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_left_path) }}" alt="Left Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -841,7 +896,7 @@
                 <!-- Right -->
                 <div class="photo-item is-editable" data-field="headshot_right_path">
                     @if($profile->headshot_right_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_right_path) }}" alt="Right Headshot" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->headshot_right_path) }}" alt="Right Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -867,7 +922,7 @@
                  <!-- Front -->
                  <div class="photo-item is-editable" data-field="full_body_front_path">
                     @if($profile->full_body_front_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_front_path) }}" alt="Full Body Front" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_front_path) }}" alt="Full Body Front" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -883,7 +938,7 @@
                 <!-- Right -->
                  <div class="photo-item is-editable" data-field="full_body_right_path">
                     @if($profile->full_body_right_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_right_path) }}" alt="Full Body Right" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_right_path) }}" alt="Full Body Right" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -899,7 +954,7 @@
                 <!-- Back -->
                  <div class="photo-item is-editable" data-field="full_body_back_path">
                     @if($profile->full_body_back_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_back_path) }}" alt="Full Body Back" class="preview-img">
+                        <img src="{{ $resolveMediaUrl($profile->full_body_back_path) }}" alt="Full Body Back" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                     @else
                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                     @endif
@@ -928,7 +983,7 @@
                 @foreach($additionalPhotos as $media)
                     <div class="photo-item is-editable" data-media-id="{{ $media->id }}" style="position: relative;">
                         @if($media->file_path)
-                            <img src="{{ $resolveMediaUrl($media->file_path) }}" alt="Additional Photo" class="preview-img">
+                            <img src="{{ $resolveMediaUrl($media->file_path) }}" alt="Additional Photo" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
                         @else
                             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                         @endif
