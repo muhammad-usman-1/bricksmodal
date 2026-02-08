@@ -190,6 +190,42 @@ line-height: 36px;
         text-decoration: none;
     }
 
+    .see-more-container {
+        padding: 16px;
+        text-align: center;
+        border-top: 1px solid #eef1f5;
+    }
+
+    .see-more-btn {
+        color: #7b8191;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px 16px;
+        transition: color 0.2s ease;
+        outline: none;
+    }
+
+    .see-more-btn:hover {
+        color: #0f1524;
+        text-decoration: none;
+    }
+
+    .see-more-btn:focus,
+    .see-more-btn:active {
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .see-more-btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
     .table-wrap {
         overflow-x: auto;
         -ms-overflow-style: none;  /* IE and Edge */
@@ -480,11 +516,11 @@ line-height: 36px;
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="talentsTableBody">
                         @php
                             $talentRows = $talents instanceof \Illuminate\Support\Collection ? $talents : collect($talents);
                         @endphp
-                        @forelse($talentRows as $talent)
+                        @forelse($talentRows as $index => $talent)
                             @php
                                 $name = optional($talent->user)->name ?? ($talent->display_name ?? $talent->legal_name ?? '—');
                                 $user = $talent->user ?? null;
@@ -528,7 +564,7 @@ line-height: 36px;
 
                                 $status = $talent->verification_status ?? 'pending';
                             @endphp
-                            <tr>
+                            <tr class="talent-row" style="display: {{ $index < 7 ? 'table-row' : 'none' }};">
                                 <td>
                                     <div class="talent-cell">
                                         <img class="avatar" src="{{ $avatar }}" alt="{{ $name }}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($name) }}&background=eff2f7&color=0f1524&rounded=true&size=64'">
@@ -577,6 +613,9 @@ line-height: 36px;
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div class="see-more-container">
+                <button type="button" class="see-more-btn" id="seeMoreBtn">See More</button>
             </div>
         </div>
     </div>
@@ -680,6 +719,39 @@ line-height: 36px;
                     }
                 });
             });
+
+            // Handle See More button click - client-side expansion
+            const seeMoreBtn = document.getElementById('seeMoreBtn');
+            const talentRows = document.querySelectorAll('.talent-row');
+            let visibleCount = 7; // Start with 7 visible rows
+
+            if (seeMoreBtn && talentRows.length > 0) {
+                // Hide button if all rows are already visible
+                if (talentRows.length <= visibleCount) {
+                    seeMoreBtn.style.display = 'none';
+                }
+
+                seeMoreBtn.addEventListener('click', function() {
+                    // Show next 7 rows
+                    const nextBatch = Math.min(visibleCount + 7, talentRows.length);
+                    
+                    for (let i = visibleCount; i < nextBatch; i++) {
+                        if (talentRows[i]) {
+                            talentRows[i].style.display = 'table-row';
+                        }
+                    }
+                    
+                    visibleCount = nextBatch;
+
+                    // Hide button if all rows are now visible
+                    if (visibleCount >= talentRows.length) {
+                        seeMoreBtn.style.display = 'none';
+                    }
+                });
+            } else if (seeMoreBtn) {
+                // No rows to show, hide button
+                seeMoreBtn.style.display = 'none';
+            }
         });
     </script>
 @endsection

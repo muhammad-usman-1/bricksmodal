@@ -94,6 +94,7 @@ class ProfileController extends Controller
             'additional_photo_keys.*' => ['string'],
             'deleted_media_ids' => ['nullable', 'array'],
             'deleted_media_ids.*' => ['integer'],
+            'video' => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
         ]);
 
         $user->update([
@@ -240,6 +241,45 @@ class ProfileController extends Controller
                 }
                 $media->delete();
             }
+        }
+
+        // Handle video upload with Mux
+        $muxVideoAssetId = $profile->mux_video_asset_id;
+        if ($request->hasFile('video')) {
+            $videoFile = $request->file('video');
+            Log::info('Video upload started in profile update.', [
+                'filename' => $videoFile->getClientOriginalName(),
+                'size' => $videoFile->getSize(),
+                'mime' => $videoFile->getMimeType(),
+            ]);
+
+            if (!$videoFile->isValid()) {
+                Log::error('Video file is invalid.', ['error' => $videoFile->getErrorMessage()]);
+                return back()->withErrors(['video' => 'File error: ' . $videoFile->getErrorMessage()])->withInput();
+            }
+
+            try {
+                Log::info('Initializing MuxService for profile video upload...');
+                $muxService = new MuxService();
+                Log::info('Calling MuxService::uploadVideo...');
+                $muxVideoAssetId = $muxService->uploadVideo($videoFile);
+                Log::info('Mux upload successful. Asset ID: ' . $muxVideoAssetId);
+                
+                $profile->update([
+                    'mux_video_asset_id' => $muxVideoAssetId,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to upload video to MUX: ' . $e->getMessage());
+                Log::error($e->getTraceAsString());
+                return back()->withErrors(['video' => 'Upload failed: ' . $e->getMessage()])->withInput();
+            }
+        }
+
+        // Handle video removal (check for remove_video flag)
+        if ($request->has('remove_video') && $request->input('remove_video') === '1') {
+            $profile->update([
+                'mux_video_asset_id' => null,
+            ]);
         }
 
         return redirect()

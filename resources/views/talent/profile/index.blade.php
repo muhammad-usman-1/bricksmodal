@@ -294,6 +294,37 @@
     .is-editing .photo-item.is-editable .upload-overlay {
         display: flex !important;
     }
+
+    /* Video upload controls - only visible in edit mode */
+    .video-edit-only {
+        display: none !important;
+    }
+    .is-editing .video-edit-only {
+        display: flex !important;
+    }
+    /* Allow block display when explicitly set */
+    .is-editing #video-upload-area.video-edit-only {
+        display: block !important;
+    }
+    .video-upload-label {
+        cursor: pointer;
+        pointer-events: auto;
+    }
+    /* Only disable when input is disabled AND not in edit mode */
+    #upload_video:disabled ~ .upload-inner,
+    #upload_video:disabled + .upload-inner {
+        opacity: 0.5;
+    }
+    .is-editing #upload_video:disabled ~ .upload-inner,
+    .is-editing #upload_video:disabled + .upload-inner {
+        opacity: 1;
+    }
+    /* Disable label when input is disabled and not in edit mode */
+    #upload_video:disabled ~ * .video-upload-label,
+    body:not(.is-editing) #upload_video:disabled ~ * .video-upload-label {
+        cursor: default;
+        pointer-events: none;
+    }
     .photo-item.is-editable {
         cursor: pointer;
     }
@@ -777,8 +808,11 @@
 
 
             <div class="file-note" style="margin-top: 8px;">
-                Max upload size: 6 MB for photos, 4 MB for ID images.
+                Max upload size: 6 MB for photos, 4 MB for ID images, 500 MB for videos.
             </div>
+            
+            <!-- Hidden input for remove_video flag -->
+            <input type="hidden" name="remove_video" value="0" id="remove_video_input">
         </form>
     </div>
 
@@ -854,122 +888,6 @@
             <span>Media Portfolio</span>
         </div>
 
-        <!-- Headshots -->
-        <div class="portfolio-section">
-            <div class="portfolio-header">
-                <h3>Headshots</h3>
-                <a href="#" class="view-all-link">View all <i class="fas fa-chevron-right" style="font-size:10px;"></i></a>
-            </div>
-            <div class="photo-grid">
-                <!-- Center -->
-                <div class="photo-item is-editable" data-field="headshot_center_path">
-                    @if($profile->headshot_center_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_center_path) }}" alt="Center Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->headshot_center_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->headshot_center_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="headshot_center_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-                <!-- Left -->
-                <div class="photo-item is-editable" data-field="headshot_left_path">
-                    @if($profile->headshot_left_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_left_path) }}" alt="Left Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->headshot_left_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->headshot_left_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="headshot_left_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-                <!-- Right -->
-                <div class="photo-item is-editable" data-field="headshot_right_path">
-                    @if($profile->headshot_right_path)
-                        <img src="{{ $resolveMediaUrl($profile->headshot_right_path) }}" alt="Right Headshot" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->headshot_right_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->headshot_right_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="headshot_right_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-            </div>
-        </div>
-
-        <!-- Full Body -->
-        <div class="portfolio-section">
-            <div class="portfolio-header">
-                <h3>Full Body</h3>
-                <a href="#" class="view-all-link">View all <i class="fas fa-chevron-right" style="font-size:10px;"></i></a>
-            </div>
-            <div class="photo-grid">
-                 <!-- Front -->
-                 <div class="photo-item is-editable" data-field="full_body_front_path">
-                    @if($profile->full_body_front_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_front_path) }}" alt="Full Body Front" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->full_body_front_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->full_body_front_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="full_body_front_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-                <!-- Right -->
-                 <div class="photo-item is-editable" data-field="full_body_right_path">
-                    @if($profile->full_body_right_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_right_path) }}" alt="Full Body Right" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->full_body_right_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->full_body_right_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="full_body_right_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-                <!-- Back -->
-                 <div class="photo-item is-editable" data-field="full_body_back_path">
-                    @if($profile->full_body_back_path)
-                        <img src="{{ $resolveMediaUrl($profile->full_body_back_path) }}" alt="Full Body Back" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                    @else
-                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                    @endif
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $profile->full_body_back_path ? 'Replace Photo' : 'Upload Photo' }}</span>
-                        @if($profile->full_body_back_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">Remove Photo</span>
-                        @endif
-                    </div>
-                    <input type="file" name="full_body_back_path" class="media-file-input" accept="image/*" style="display:none">
-                </div>
-            </div>
-        </div>
-
         <!-- Additional Profile Images -->
         @php
             $additionalPhotos = $profile->media()->where('type', 'profile')->get();
@@ -977,7 +895,7 @@
         @if($additionalPhotos->count() > 0)
         <div class="portfolio-section">
             <div class="portfolio-header">
-                <h3>Additional Photos</h3>
+                <h3>Profile Images</h3>
             </div>
             <div class="photo-grid" id="additionalPhotosGrid">
                 @foreach($additionalPhotos as $media)
@@ -1000,6 +918,64 @@
             </div>
         </div>
         @endif
+
+        <!-- Profile Video -->
+        <div class="portfolio-section" style="margin-top: 32px;">
+            <div class="portfolio-header">
+                <h3>Profile Video</h3>
+            </div>
+            <div id="video-upload-section" style="margin-top: 16px;">
+                @if($muxPlaybackId)
+                    <!-- Video Preview - Always shown when video exists -->
+                    <div id="video-preview-container" style="margin-bottom: 16px;">
+                        <div style="position: relative; width: 100%; max-width: 600px; background: #000; border-radius: 8px; overflow: hidden;">
+                            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                                <iframe 
+                                    src="https://stream.mux.com/{{ $muxPlaybackId }}.m3u8" 
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
+                        </div>
+                        <!-- Replace/Remove buttons - Only shown in edit mode -->
+                        <div id="video-action-buttons" class="video-edit-only" style="margin-top: 12px; display: none; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <button type="button" id="replace-video-btn" class="btn-replace-video" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">
+                                <i class="fas fa-upload" style="margin-right: 6px;"></i> Replace Video
+                            </button>
+                            <button type="button" id="remove-video-btn" class="btn-remove-video" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #991b1b; cursor: pointer; transition: all 0.2s;">
+                                <i class="fas fa-trash" style="margin-right: 6px;"></i> Remove Video
+                            </button>
+                        </div>
+                    </div>
+                @endif
+                
+                <!-- Upload Area - Shown by default when no video, or in edit mode when video exists -->
+                <div id="video-upload-area" style="display: {{ $muxPlaybackId ? 'none' : 'block' }};">
+                    <label class="upload-card video-upload-label" for="upload_video" style="width:100%; margin:0; cursor: default; pointer-events: none; opacity: 0.6;">
+                        <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;" disabled>
+                        <div class="upload-inner" style="padding: 40px 20px; text-align: center; border: 2px dashed #d1d5db; border-radius: 8px; background: #f9fafb; transition: all 0.2s;">
+                            <div class="upload-icon" style="margin-bottom: 12px;">
+                                <i class="fas fa-video" style="font-size: 32px; color: #9ca3af;"></i>
+                            </div>
+                            <div class="upload-label" data-file-label="video" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
+                                Click to upload or drag and drop
+                            </div>
+                            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">
+                                MP4, MOV, AVI, WEBM (Max 500MB)
+                            </div>
+                            <div class="progress-bar-container" id="video-progress-container" style="display:none; width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 16px; overflow: hidden;">
+                                <div class="progress-bar-fill" id="video-progress-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div id="video-upload-status" style="margin-top: 12px; font-size: 13px; color: #6b7280; display: none;"></div>
+                        </div>
+                    </label>
+                    @error('video')
+                        <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+        </div>
 
         <!-- Footer / Rates -->
         <div class="rates-container">
@@ -1534,6 +1510,60 @@
             editCard.classList.remove('d-none');
             document.body.classList.add('is-editing');
             editCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            toggleVideoUploadControls(true);
+        };
+
+        const closeEditCard = () => {
+            if (!editCard) return;
+            editCard.classList.add('d-none');
+            document.body.classList.remove('is-editing');
+            toggleVideoUploadControls(false);
+        };
+
+        const toggleVideoUploadControls = (isEditing) => {
+            const videoUploadArea = document.getElementById('video-upload-area');
+            const videoActionButtons = document.getElementById('video-action-buttons');
+            const videoInput = document.getElementById('upload_video');
+            const videoUploadLabel = document.querySelector('.video-upload-label');
+            const hasVideo = document.getElementById('video-preview-container');
+            
+            if (isEditing) {
+                // Enable video upload in edit mode
+                if (videoInput) {
+                    videoInput.disabled = false;
+                }
+                // Show upload area in edit mode (even if video exists, for replacement)
+                if (videoUploadArea) {
+                    videoUploadArea.style.display = 'block';
+                }
+                if (videoActionButtons) {
+                    videoActionButtons.style.display = 'flex';
+                }
+                // Enable label interactions in edit mode
+                if (videoUploadLabel) {
+                    videoUploadLabel.style.cursor = 'pointer';
+                    videoUploadLabel.style.pointerEvents = 'auto';
+                    videoUploadLabel.style.opacity = '1';
+                }
+            } else {
+                // Disable video upload when not in edit mode
+                if (videoInput) {
+                    videoInput.disabled = true;
+                }
+                if (videoActionButtons) {
+                    videoActionButtons.style.display = 'none';
+                }
+                // Hide upload area if video exists, show if no video (but disabled)
+                if (videoUploadArea) {
+                    videoUploadArea.style.display = hasVideo ? 'none' : 'block';
+                }
+                // Disable label interactions when not in edit mode
+                if (videoUploadLabel) {
+                    videoUploadLabel.style.cursor = 'default';
+                    videoUploadLabel.style.pointerEvents = 'none';
+                    videoUploadLabel.style.opacity = '0.6';
+                }
+            }
         };
 
         if (editBtn) {
@@ -1546,11 +1576,14 @@
         if (cancelBtn && editCard) {
             cancelBtn.addEventListener('click', function (e) {
                 e.preventDefault();
-                editCard.classList.add('d-none');
-                document.body.classList.remove('is-editing');
+                closeEditCard();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
+
+        // Initialize video upload controls based on current state
+        const isInitiallyEditing = editCard && !editCard.classList.contains('d-none');
+        toggleVideoUploadControls(isInitiallyEditing);
 
         if (editCard && editCard.dataset.openOnLoad === '1') {
             openEditCard();
@@ -1888,6 +1921,220 @@
                 }
             }
         });
+
+        // Video Upload Handling
+        const videoInput = document.getElementById('upload_video');
+        const videoProgressContainer = document.getElementById('video-progress-container');
+        const videoProgressFill = document.getElementById('video-progress-fill');
+        const videoUploadStatus = document.getElementById('video-upload-status');
+        const replaceVideoBtn = document.getElementById('replace-video-btn');
+        const removeVideoBtn = document.getElementById('remove-video-btn');
+        const videoPreviewContainer = document.getElementById('video-preview-container');
+        const videoUploadArea = document.getElementById('video-upload-area');
+        const videoUploadLabel = document.querySelector('.video-upload-label');
+
+        // Enable drag and drop only in edit mode
+        if (videoUploadArea && videoUploadLabel) {
+            // Prevent all drag and drop when not in edit mode
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                videoUploadArea.addEventListener(eventName, function(e) {
+                    // Only allow if in edit mode and input is enabled
+                    if (!document.body.classList.contains('is-editing') || videoInput?.disabled) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }, true); // Use capture phase to catch early
+            });
+
+            // Enable drag and drop visual feedback in edit mode only
+            videoUploadArea.addEventListener('dragover', function(e) {
+                if (document.body.classList.contains('is-editing') && !videoInput?.disabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const uploadInner = videoUploadArea.querySelector('.upload-inner');
+                    if (uploadInner) {
+                        uploadInner.style.borderColor = '#10b981';
+                        uploadInner.style.background = '#f0fdf4';
+                    }
+                }
+            });
+
+            videoUploadArea.addEventListener('dragleave', function(e) {
+                if (document.body.classList.contains('is-editing') && !videoInput?.disabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const uploadInner = videoUploadArea.querySelector('.upload-inner');
+                    if (uploadInner) {
+                        uploadInner.style.borderColor = '#d1d5db';
+                        uploadInner.style.background = '#f9fafb';
+                    }
+                }
+            });
+
+            videoUploadArea.addEventListener('drop', function(e) {
+                // Only process if in edit mode and input is enabled
+                if (!document.body.classList.contains('is-editing') || videoInput?.disabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                const uploadInner = videoUploadArea.querySelector('.upload-inner');
+                if (uploadInner) {
+                    uploadInner.style.borderColor = '#d1d5db';
+                    uploadInner.style.background = '#f9fafb';
+                }
+
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0 && files[0].type.startsWith('video/')) {
+                    videoInput.files = files;
+                    videoInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Prevent click when not in edit mode
+            videoUploadLabel.addEventListener('click', function(e) {
+                if (!document.body.classList.contains('is-editing') || videoInput?.disabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            });
+        }
+
+        if (videoInput) {
+            videoInput.addEventListener('change', function(e) {
+                // Don't process if not in edit mode
+                if (!document.body.classList.contains('is-editing') || this.disabled) {
+                    this.value = '';
+                    return;
+                }
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate file type
+                if (!file.type.startsWith('video/')) {
+                    alert('Please select a valid video file.');
+                    this.value = '';
+                    return;
+                }
+
+                // Validate file size (500MB max)
+                const maxSize = 500 * 1024 * 1024; // 500MB
+                if (file.size > maxSize) {
+                    alert('Video file size exceeds maximum allowed size of 500MB.');
+                    this.value = '';
+                    return;
+                }
+
+                // Show progress
+                videoProgressContainer.style.display = 'block';
+                videoProgressFill.style.width = '0%';
+                videoUploadStatus.style.display = 'block';
+                videoUploadStatus.textContent = 'Uploading video to Mux...';
+                videoUploadStatus.style.color = '#6b7280';
+
+                // Update label
+                const label = document.querySelector('[data-file-label="video"]');
+                if (label) {
+                    label.textContent = file.name;
+                }
+
+                // Submit form with video file
+                const form = document.querySelector('form[action*="profile"]');
+                if (form) {
+                    // Simulate progress (since Mux upload happens server-side)
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 2;
+                        if (progress < 95) {
+                            videoProgressFill.style.width = progress + '%';
+                        }
+                    }, 300);
+
+                    // Submit the form
+                    const formData = new FormData(form);
+                    formData.append('video', file);
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        }
+                    })
+                    .then(response => {
+                        clearInterval(progressInterval);
+                        videoProgressFill.style.width = '100%';
+                        
+                        if (response.ok) {
+                            return response.text().then(html => {
+                                videoUploadStatus.textContent = 'Video uploaded successfully! Refreshing page...';
+                                videoUploadStatus.style.color = '#10b981';
+                                
+                                // Reload page after a short delay
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            });
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Upload failed');
+                            }).catch(() => {
+                                throw new Error('Upload failed');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        clearInterval(progressInterval);
+                        videoProgressFill.style.width = '0%';
+                        videoUploadStatus.textContent = 'Upload failed: ' + (error.message || 'Please try again.');
+                        videoUploadStatus.style.color = '#dc2626';
+                        console.error('Video upload error:', error);
+                    })
+                    .finally(() => {
+                        this.value = '';
+                    });
+                }
+            });
+        }
+
+        // Handle replace video button
+        if (replaceVideoBtn) {
+            replaceVideoBtn.addEventListener('click', function() {
+                if (!document.body.classList.contains('is-editing')) return;
+                if (videoPreviewContainer) videoPreviewContainer.style.display = 'none';
+                if (videoUploadArea) {
+                    videoUploadArea.style.display = 'block';
+                    // Ensure input is enabled
+                    if (videoInput) videoInput.disabled = false;
+                }
+                if (videoInput) videoInput.click();
+            });
+        }
+
+        // Handle remove video button
+        if (removeVideoBtn) {
+            removeVideoBtn.addEventListener('click', function() {
+                if (!confirm('Are you sure you want to remove your profile video?')) {
+                    return;
+                }
+
+                const form = document.querySelector('form[action*="profile"]');
+                if (form) {
+                    // Set remove_video flag
+                    const removeInput = document.getElementById('remove_video_input');
+                    if (removeInput) {
+                        removeInput.value = '1';
+                    }
+
+                    // Submit form
+                    form.submit();
+                }
+            });
+        }
     });
 </script>
 @endsection

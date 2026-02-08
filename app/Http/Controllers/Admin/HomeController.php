@@ -33,8 +33,8 @@ class HomeController
             'active_campaigns' => $activeCampaigns,
         ];
 
-        // Get recent 7 talents with the same filters
-        $talents = (clone $baseQuery)->latest()->take(7)->get();
+        // Get all talents (will be hidden client-side, showing 7 by default)
+        $talents = (clone $baseQuery)->latest()->get();
 
         return view('home', compact('stats', 'talents'));
     }
