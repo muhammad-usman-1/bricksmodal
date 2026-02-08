@@ -288,6 +288,8 @@
     $activeCount = $stats['approved'] ?? ($talents->where('verification_status', 'approved')->count());
     $totalTalents = $stats['total'] ?? $talents->count();
     $fallbackImg = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="360"><rect width="300" height="360" rx="18" fill="#e5e7eb"/><path d="M150 170c28 0 50-22 50-50s-22-50-50-50-50 22-50 50 22 50 50 50Zm0 20c-42 0-80 19-92 56-2 6 2 12 8 12h168c6 0 10-6 8-12-12-37-50-56-92-56Z" fill="#cbd5e1"/></svg>');
+    
+    // Define toUrl function first
     $toUrl = function($path) {
         if (!$path) return null;
         if (is_array($path)) {
@@ -385,7 +387,52 @@
 
         return $resolvedUrl ?: asset('storage/' . ltrim($path, '/'));
     };
+    
+    // Collect all profile images for preloading
+    $allProfileImages = [];
+    foreach ($talents as $talent) {
+        $talentImages = [];
+        if ($talent->headshot_left_path) {
+            $img = $toUrl($talent->headshot_left_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->headshot_center_path) {
+            $img = $toUrl($talent->headshot_center_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->headshot_right_path) {
+            $img = $toUrl($talent->headshot_right_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->full_body_front_path) {
+            $img = $toUrl($talent->full_body_front_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->full_body_right_path) {
+            $img = $toUrl($talent->full_body_right_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->full_body_back_path) {
+            $img = $toUrl($talent->full_body_back_path);
+            if ($img) $talentImages[] = $img;
+        }
+        if ($talent->media) {
+            foreach ($talent->media as $mediaItem) {
+                $img = $toUrl($mediaItem->file_path);
+                if ($img) $talentImages[] = $img;
+            }
+        }
+        $allProfileImages = array_merge($allProfileImages, array_filter($talentImages));
+    }
+    // Remove duplicates and filter out data URIs
+    $allProfileImages = array_unique(array_filter($allProfileImages, function($img) {
+        return $img && !\Illuminate\Support\Str::startsWith($img, 'data:');
+    }));
 @endphp
+
+@foreach($allProfileImages as $preloadImg)
+    <link rel="preload" as="image" href="{{ $preloadImg }}" fetchpriority="high">
+@endforeach
 
 <div class="talents-shell">
     <div class="talents-head">
@@ -491,17 +538,19 @@
                 @endphp
                 @php
                     $isSuspended = $status === 'suspended';
+                    $onboardingStep = $talent->onboarding_steps_completed ?? 0;
+                    $hasCompletedStep5 = $onboardingStep >= 5 && $talent->onboarding_step === 'step-5';
                 @endphp
-                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)'>
+                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)' data-onboarding-step="{{ $onboardingStep }}" data-completed-step5="{{ $hasCompletedStep5 ? '1' : '0' }}">
                     <div class="talent-img-container">
                         @foreach($allImages as $index => $imgSrc)
                             <img class="talent-img {{ $index === 0 ? 'active' : '' }}" 
                                  src="{{ $imgSrc }}" 
                                  alt="{{ $displayName }} - Image {{ $index + 1 }}" 
                                  data-index="{{ $index }}"
-                                 loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                 loading="eager"
                                  decoding="async"
-                                 fetchpriority="{{ $index === 0 ? 'high' : 'low' }}">
+                                 fetchpriority="{{ $index === 0 ? 'high' : 'auto' }}">
                         @endforeach
                     </div>
                     <span class="badge-active {{ $isVerified ? '' : ($isSuspended ? 'badge-suspended' : ($isRejected ? 'badge-rejected' : 'badge-pending')) }}">
@@ -599,12 +648,13 @@
 
                 const matchesSearch = !term || name.includes(term);
                 const isActive = status === 'approved' || status === 'verified';
+                const completedStep5 = card.dataset.completedStep5 === '1';
                 
                 let matchesFilter = false;
                 if (filter === 'all') matchesFilter = isActive;
                 if (filter === 'male') matchesFilter = gender === 'male' && isActive;
                 if (filter === 'female') matchesFilter = gender === 'female' && isActive;
-                if (filter === 'pending') matchesFilter = status === 'pending';
+                if (filter === 'pending') matchesFilter = status === 'pending' && completedStep5;
                 // if (filter === 'verified') matchesFilter = isActive; // Removed
                 // if (filter === 'suspended') matchesFilter = status === 'suspended'; // Removed
 
@@ -664,29 +714,168 @@
             });
         });
 
-        // Image rotation on hover with preloading
+        // Cache API for persistent image storage across page visits
+        const imageCacheName = 'talent-profile-images-v1';
+        
+        // Function to cache an image URL
+        async function cacheImage(url) {
+            try {
+                if ('caches' in window) {
+                    const cache = await caches.open(imageCacheName);
+                    // Check if already cached
+                    const cached = await cache.match(url);
+                    if (!cached) {
+                        // Fetch and cache the image
+                        try {
+                            await cache.add(url);
+                        } catch (e) {
+                            // If cache.add fails (CORS), try fetch with proper headers
+                            try {
+                                const response = await fetch(url, { 
+                                    mode: 'cors', 
+                                    credentials: 'omit',
+                                    cache: 'force-cache'
+                                });
+                                if (response.ok) {
+                                    await cache.put(url, response.clone());
+                                }
+                            } catch (fetchError) {
+                                // Silently fail - browser will handle caching
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                // Silently fail - browser native caching will handle it
+            }
+        }
+
+        // Function to load image from cache first, then network
+        async function loadImageWithCache(imgElement, originalUrl) {
+            // Check cache first
+            if ('caches' in window) {
+                try {
+                    const cache = await caches.open(imageCacheName);
+                    const cachedResponse = await cache.match(originalUrl);
+                    
+                    if (cachedResponse) {
+                        // Use cached image - create blob URL
+                        const blob = await cachedResponse.blob();
+                        const objectUrl = URL.createObjectURL(blob);
+                        
+                        // Set image source to cached blob
+                        if (imgElement.tagName === 'IMG') {
+                            imgElement.src = objectUrl;
+                            // Clean up object URL after image loads
+                            imgElement.onload = function() {
+                                URL.revokeObjectURL(objectUrl);
+                            };
+                        }
+                        return Promise.resolve();
+                    }
+                } catch (e) {
+                    // Fall through to normal loading
+                }
+            }
+            
+            // Not in cache, load normally
+            return new Promise((resolve) => {
+                const preloadImg = new Image();
+                preloadImg.onload = () => {
+                    // Cache the image for future visits
+                    cacheImage(originalUrl);
+                    resolve();
+                };
+                preloadImg.onerror = () => {
+                    resolve(); // Continue even if fails
+                };
+                preloadImg.src = originalUrl;
+            });
+        }
+
+        // Preload and cache all images immediately on page load
+        const allImages = document.querySelectorAll('.talent-img');
+        const imagePromises = [];
+        
+        allImages.forEach(img => {
+            const imgSrc = img.src;
+            if (imgSrc && !imgSrc.startsWith('data:')) {
+                if (!img.complete) {
+                    // Image not loaded yet - load from cache or network
+                    const promise = loadImageWithCache(img, imgSrc);
+                    imagePromises.push(promise);
+                } else {
+                    // Image already loaded - cache it for future visits
+                    cacheImage(imgSrc);
+                    imagePromises.push(Promise.resolve());
+                }
+            } else {
+                imagePromises.push(Promise.resolve());
+            }
+        });
+
+        // Wait for all images to load, then ensure they're all cached
+        Promise.all(imagePromises).then(() => {
+            console.log('All profile images loaded and cached for future visits');
+            
+            // Double-check all images are cached
+            allImages.forEach(img => {
+                if (img.src && !img.src.startsWith('data:')) {
+                    cacheImage(img.src);
+                }
+            });
+        });
+
+        // Image rotation on hover (images are now preloaded)
         cards.forEach(card => {
             const images = card.querySelectorAll('.talent-img');
             if (images.length <= 1) return; // No rotation needed if only one image
 
-            // Preload all images for this card to ensure smooth hover transitions
-            images.forEach(img => {
-                if (img.src && !img.complete) {
-                    const preloadImg = new Image();
-                    preloadImg.src = img.src;
+            // Ensure all images for this card are loaded
+            const cardImagePromises = Array.from(images).map(img => {
+                if (img.complete) {
+                    return Promise.resolve();
                 }
+                return new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = resolve; // Continue even if image fails
+                    // Trigger load if not already loading
+                    if (!img.src) {
+                        resolve();
+                    }
+                });
             });
 
             let rotationInterval = null;
             let currentIndex = 0;
+            let imagesReady = false;
+
+            // Mark images as ready once they're loaded
+            Promise.all(cardImagePromises).then(() => {
+                imagesReady = true;
+            });
 
             card.addEventListener('mouseenter', function() {
+                // Only start rotation if images are ready
+                if (!imagesReady) {
+                    // Wait for images to be ready
+                    Promise.all(cardImagePromises).then(() => {
+                        imagesReady = true;
+                        startRotation();
+                    });
+                } else {
+                    startRotation();
+                }
+            });
+
+            function startRotation() {
+                if (rotationInterval) return; // Already rotating
                 rotationInterval = setInterval(() => {
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
                 }, 400);
-            });
+            }
 
             card.addEventListener('mouseleave', function() {
                 if (rotationInterval) {
