@@ -712,7 +712,8 @@
                                         data-name="{{ $projectName }}"
                                         data-location="{{ $location }}"
                                         data-date="{{ $dateText }}"
-                                        data-url="{{ route('talent.projects.show', $castingRequirement) }}">
+                                        data-url="">
+                                        {{--  data-url="{{ route('talent.projects.show', $castingRequirement) }}">  --}}
                                         <i class="fas fa-share-alt"></i> Share
                                     </button>
                                 </div>
