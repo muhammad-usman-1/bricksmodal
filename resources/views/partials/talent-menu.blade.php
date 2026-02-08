@@ -289,7 +289,7 @@
         .bm-link.c-active {
             background: black;
             color: #fff;
-           
+
         }
         .bm-link.c-active i { color: #fff; }
         .bm-link.c-active img {
@@ -537,9 +537,9 @@ letter-spacing: 1.4px;">STUDIO</div>
             </a>
         </li>
         <li class="c-sidebar-nav-item">
-                <a href="{{ Route::has('talent.projects.index') ? route('talent.projects.index') : '#' }}" class="bm-link {{ request()->routeIs('talent.projects.*') ? 'c-active' : '' }}">
+                <a href="#" class="bm-link" style="cursor: not-allowed; opacity: 0.6;" onclick="return false;">
                     <img src="{{ asset('images/camera.png') }}" alt="My Shoots" style="width: 16px; height: 16px; object-fit: contain;">
-                    My Shoots
+                    My Shoots <span style="font-size: 12px; color: #9ca3af;">(coming soon)</span>
             </a>
         </li>
         <li class="c-sidebar-nav-item">
@@ -549,9 +549,9 @@ letter-spacing: 1.4px;">STUDIO</div>
             </a>
         </li>
         <li class="c-sidebar-nav-item">
-                <a href="{{ Route::has('talent.payments.index') ? route('talent.payments.index') : '#' }}" class="bm-link {{ request()->routeIs('talent.payments.*') ? 'c-active' : '' }}">
+                <a href="#" class="bm-link" style="cursor: not-allowed; opacity: 0.6;" onclick="return false;">
                     <img src="{{ asset('images/payment.png') }}" alt="My Payment" style="width: 16px; height: 16px; object-fit: contain;">
-                    My Payment
+                    My Payment <span style="font-size: 12px; color: #9ca3af;">(coming soon)</span>
             </a>
         </li>
     </ul>

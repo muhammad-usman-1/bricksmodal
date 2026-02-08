@@ -219,6 +219,7 @@ Route::prefix('talent')->as('talent.')->group(function () {
         Route::post('onboarding/{step}', [OnboardingController::class, 'store'])->name('onboarding.store');
         Route::get('pending', [OnboardingController::class, 'pending'])->name('pending');
         Route::get('pending-status', [OnboardingController::class, 'pendingStatus'])->name('pending_status');
+        Route::get('rejected', [OnboardingController::class, 'rejected'])->name('rejected');
 
         Route::middleware('talent.onboarded')->group(function () {
             Route::get('dashboard', TalentDashboardController::class)->name('dashboard');
@@ -228,16 +229,16 @@ Route::prefix('talent')->as('talent.')->group(function () {
             Route::post('profile/upload-image', [TalentPortalProfileController::class, 'uploadImage'])->name('profile.upload-image');
             Route::post('profile/presign-additional-photo', [TalentPortalProfileController::class, 'presignAdditionalPhoto'])->name('profile.presign-additional-photo');
             Route::delete('profile/remove-image', [TalentPortalProfileController::class, 'removeImage'])->name('profile.remove-image');
-            Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
-            Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
-            Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');
+            // Route::get('projects', [\App\Http\Controllers\Talent\ProjectController::class, 'index'])->name('projects.index');
+            // Route::get('projects/{castingRequirement}', [\App\Http\Controllers\Talent\ProjectController::class, 'show'])->name('projects.show');
+            // Route::post('projects/{castingRequirement}/apply', [\App\Http\Controllers\Talent\ProjectController::class, 'apply'])->name('projects.apply');
 
-            // Talent Payment Routes
-            Route::get('payments', [\App\Http\Controllers\Talent\PaymentController::class, 'index'])->name('payments.index');
-            Route::get('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'cardDetails'])->name('payments.card-details');
-            Route::post('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'storeCardDetails'])->name('payments.store-card-details');
-            Route::post('payments/{casting_application}/request', [\App\Http\Controllers\Talent\PaymentController::class, 'requestPayment'])->name('payments.request');
-            Route::post('payments/{casting_application}/confirm-received', [\App\Http\Controllers\Talent\PaymentController::class, 'confirmReceived'])->name('payments.confirm-received');
+            // Talent Payment Routes (commented out - coming soon)
+            // Route::get('payments', [\App\Http\Controllers\Talent\PaymentController::class, 'index'])->name('payments.index');
+            // Route::get('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'cardDetails'])->name('payments.card-details');
+            // Route::post('payments/card-details', [\App\Http\Controllers\Talent\PaymentController::class, 'storeCardDetails'])->name('payments.store-card-details');
+            // Route::post('payments/{casting_application}/request', [\App\Http\Controllers\Talent\PaymentController::class, 'requestPayment'])->name('payments.request');
+            // Route::post('payments/{casting_application}/confirm-received', [\App\Http\Controllers\Talent\PaymentController::class, 'confirmReceived'])->name('payments.confirm-received');
 
             // Talent Settings Routes
             Route::get('settings', [\App\Http\Controllers\Talent\SettingsController::class, 'index'])->name('settings.index');

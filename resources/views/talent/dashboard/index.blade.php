@@ -319,8 +319,8 @@
             <p>Your profile is looking great. There are new casting calls matching your stats today.</p>
         </div>
         <div class="dashboard-header-actions">
-            <a href="{{ route('talent.profile.show') }}" class="btn-header btn-header-dark">Edit Profile</a>
-            <a href="{{ route('talent.projects.index') }}" class="btn-header btn-header-light">My Applications</a>
+            <a href="" class="btn-header btn-header-dark">Edit Profile</a>
+            <a href="" class="btn-header btn-header-light">My Applications</a>
         </div>
     </div>
 
@@ -364,7 +364,7 @@
     <div class="casting-calls-section">
         <div class="section-header">
             <h2 class="section-title">New Casting Calls</h2>
-            <a href="{{ route('talent.projects.index') }}" class="section-link">Explore All →</a>
+            <a href="" class="section-link">Explore All →</a>
         </div>
 
         <div class="casting-calls-grid">
@@ -388,7 +388,7 @@
                             <span>{{ $location }}</span>
                         </div>
                     </div>
-                    <a href="{{ route('talent.projects.show', ['castingRequirement' => $project->id]) }}" class="casting-call-button">View Details</a>
+                    <a href="" class="casting-call-button">View Details</a>
                 </div>
             @empty
                 <div class="casting-call-card">

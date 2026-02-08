@@ -819,7 +819,15 @@ class OnboardingController extends Controller
         /** @var \App\Models\User $user */
         $user = $request->user('talent');
 
-        if (! $user->talentProfile) {
+        // Check for existing active (non-deleted) profile
+        $profile = $user->talentProfile;
+
+        // If no active profile exists, check if there's a deleted/rejected one
+        if (! $profile) {
+            $deletedProfile = $user->talentProfile()->withTrashed()->latest()->first();
+            
+            // If there's a deleted profile, we can create a new one
+            // The old profile will remain in database but won't interfere
             return $user->talentProfile()->create([
                 'legal_name'       => $user->name ?? '',
                 'display_name'     => $user->name ?? '',
@@ -827,11 +835,30 @@ class OnboardingController extends Controller
                 'rate'             => 0,
                 'verification_status' => 'pending',
                 'whatsapp_number'  => null,
-                'onboarding_step'  => 'profile',
+                'onboarding_step'  => 'step-1',
+                'onboarding_steps_completed' => 0,
             ]);
         }
 
-        return $user->talentProfile;
+        // If profile exists but is rejected, soft delete it and create a new one
+        if ($profile->verification_status === 'rejected') {
+            // Soft delete the rejected profile to allow creating a new one
+            $profile->delete();
+            
+            // Create a new profile for re-application
+            return $user->talentProfile()->create([
+                'legal_name'       => $user->name ?? '',
+                'display_name'     => $user->name ?? '',
+                'daily_rate'       => 0,
+                'rate'             => 0,
+                'verification_status' => 'pending',
+                'whatsapp_number'  => null,
+                'onboarding_step'  => 'step-1',
+                'onboarding_steps_completed' => 0,
+            ]);
+        }
+
+        return $profile;
     }
 
     public function pending(Request $request)
@@ -865,7 +892,36 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
+        // If rejected, redirect to rejected page
+        if ($profile->verification_status === 'rejected') {
+            return redirect()->route('talent.rejected');
+        }
+
         return view('talent.onboarding.pending-status', compact('profile'));
+    }
+
+    public function rejected(Request $request)
+    {
+        $user = $request->user('talent');
+        
+        // Check for active rejected profile first
+        $profile = $user->talentProfile;
+        
+        // If no active profile or it's not rejected, check deleted profiles
+        if (!$profile || $profile->verification_status !== 'rejected') {
+            $profile = \App\Models\TalentProfile::where('user_id', $user->id)
+                ->where('verification_status', 'rejected')
+                ->withTrashed()
+                ->latest()
+                ->first();
+        }
+
+        // If no rejected profile exists, redirect to onboarding
+        if (!$profile || $profile->verification_status !== 'rejected') {
+            return redirect()->route('talent.onboarding.intro');
+        }
+
+        return view('talent.onboarding.rejected', compact('profile'));
     }
 
     private function redirectToCurrentStep(TalentProfile $profile): RedirectResponse

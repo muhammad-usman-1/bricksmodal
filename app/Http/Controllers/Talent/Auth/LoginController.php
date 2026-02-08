@@ -181,6 +181,11 @@ class LoginController extends Controller
         // Redirect depending on onboarding state. OnboardingController will create a profile if missing.
         $profile = $user->talentProfile;
 
+        // Check if profile is rejected - redirect to rejection page
+        if ($profile && $profile->verification_status === 'rejected') {
+            return redirect()->route('talent.rejected');
+        }
+
         if (! $profile || ! $profile->hasCompletedOnboarding()) {
             $step = $profile?->onboarding_step;
 

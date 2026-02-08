@@ -540,7 +540,7 @@ class TalentProfileController extends Controller
                 if ($user->isAdmin() || $user->is_super_admin) {
                      $talentProfile->forceDelete();
                 } else {
-                    // It's a dedicated talent user - safe to remove after clearing dependencies
+                    // It's a dedicated talent user - delete profile but keep user so they can re-register
                     $talentProfile->forceDelete();
 
                     // Remove any other talent profiles for this user (DB allows multiple; FK would block user DB)
@@ -558,8 +558,10 @@ class TalentProfileController extends Controller
                     // Nullify references in casting_requirements before deleting the user
                     DB::table('casting_requirements')->where('user_id', $user->id)->update(['user_id' => null]);
 
+                    // Don't delete the user - allow them to re-register and complete onboarding again
+                    // Just remove roles if any
                     $user->roles()->detach();
-                    $user->forceDelete();
+                    // Keep user record so they can login and create a new profile
                 }
             } else {
                 $talentProfile->forceDelete();

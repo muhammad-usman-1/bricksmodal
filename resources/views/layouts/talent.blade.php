@@ -170,7 +170,7 @@
 
         <header class="c-header c-header-fixed admin-header" id="admin-main-header">
             <div id="admin-topbar-container">
-                <form id="admin-search-box" action="{{ route('talent.projects.index') }}" method="GET" role="search">
+                <form id="admin-search-box" action="" method="GET" role="search">
                     <i class="fas fa-search"></i>
                     <input type="text" name="q" value="{{ request('q') }}" placeholder="Search shoots or locations..." aria-label="Search" />
                 </form>
@@ -415,7 +415,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://unpkg.com/@coreui/coreui@3.2/dist/js/coreui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
-    
+
     <script>
         function markNotificationAsRead(id) {
             $.ajax({
