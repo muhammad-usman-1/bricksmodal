@@ -739,13 +739,13 @@
                         <div class="field-grid">
                             <div class="field">
                                 <label for="first_name">{{ \App\Helpers\Bilingual::get('onboarding.first_name') }} <span class="required-asterisk">*</span></label>
-                                <input id="first_name" name="first_name" class="control" type="text" placeholder="Enter first name" value="{{ old('first_name', $profile->first_name) }}" required>
-                                <span class="error-text" id="error-first_name" style="color:#dc3545; font-size:12px; margin-top:4px;">First name is required</span>
+                                <input id="first_name" name="first_name" class="control" type="text" placeholder="Enter first name" value="{{ old('first_name', $profile->first_name) }}" required pattern="[a-zA-Z\s]+" autocomplete="given-name">
+                                <span class="error-text" id="error-first_name" style="color:#dc3545; font-size:12px; margin-top:4px;">First name is required (English letters only)</span>
                             </div>
                             <div class="field">
                                 <label for="last_name">{{ \App\Helpers\Bilingual::get('onboarding.last_name') }} <span class="required-asterisk">*</span></label>
-                                <input id="last_name" name="last_name" class="control" type="text" placeholder="Enter last name" value="{{ old('last_name', $profile->last_name) }}" required>
-                                <span class="error-text" id="error-last_name" style="color:#dc3545; font-size:12px; margin-top:4px;">Last name is required</span>
+                                <input id="last_name" name="last_name" class="control" type="text" placeholder="Enter last name" value="{{ old('last_name', $profile->last_name) }}" required pattern="[a-zA-Z\s]+" autocomplete="family-name">
+                                <span class="error-text" id="error-last_name" style="color:#dc3545; font-size:12px; margin-top:4px;">Last name is required (English letters only)</span>
                             </div>
                         </div>
 
@@ -869,12 +869,56 @@
 
                                         // Form Validation
                                         if (form) {
-                                            // Name inputs character restriction
+                                            // Name inputs - English only, auto-capitalize
                                             ['first_name', 'last_name'].forEach(id => {
                                                 const el = document.getElementById(id);
                                                 if(el) {
-                                                    el.addEventListener('input', function() {
-                                                        this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
+                                                    // Function to capitalize name
+                                                    const capitalizeName = (text) => {
+                                                        // Remove any non-English letters and spaces
+                                                        text = text.replace(/[^a-zA-Z\s]/g, '');
+                                                        // Capitalize first letter of each word
+                                                        return text.toLowerCase().replace(/\b\w/g, function(char) {
+                                                            return char.toUpperCase();
+                                                        });
+                                                    };
+                                                    
+                                                    // Prevent Arabic and non-English characters on input
+                                                    el.addEventListener('input', function(e) {
+                                                        const cursorPos = this.selectionStart;
+                                                        const oldValue = this.value;
+                                                        const newValue = capitalizeName(this.value);
+                                                        
+                                                        this.value = newValue;
+                                                        
+                                                        // Restore cursor position (adjust for removed characters)
+                                                        const diff = newValue.length - oldValue.length;
+                                                        this.setSelectionRange(cursorPos + diff, cursorPos + diff);
+                                                    });
+                                                    
+                                                    // Handle paste events
+                                                    el.addEventListener('paste', function(e) {
+                                                        e.preventDefault();
+                                                        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                                                        pastedText = capitalizeName(pastedText);
+                                                        this.value = pastedText;
+                                                    });
+                                                    
+                                                    // Handle keydown to prevent Arabic characters
+                                                    el.addEventListener('keydown', function(e) {
+                                                        // Allow: backspace, delete, tab, escape, enter, arrow keys
+                                                        if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                                                            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                                            (e.keyCode === 65 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 67 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 86 && e.ctrlKey === true) ||
+                                                            (e.keyCode === 88 && e.ctrlKey === true)) {
+                                                            return;
+                                                        }
+                                                        // Block if character is not English letter or space
+                                                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 90)) && (e.keyCode < 96 || e.keyCode > 105) && e.keyCode !== 32) {
+                                                            e.preventDefault();
+                                                        }
                                                     });
                                                 }
                                             });

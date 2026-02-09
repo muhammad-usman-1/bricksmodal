@@ -190,8 +190,8 @@ class OnboardingController extends Controller
             case 'step-1':
                 $eighteenYearsAgo = now()->subYears(18)->format('Y-m-d');
                 $data = $request->validate([
-                    'first_name'        => ['required', 'string', 'max:120'],
-                    'last_name'         => ['required', 'string', 'max:120'],
+                    'first_name'        => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z\s]+$/'],
+                    'last_name'         => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z\s]+$/'],
                     'date_of_birth'     => ['required', 'date', "before_or_equal:$eighteenYearsAgo"],
                     'nationality'       => ['nullable', 'string', 'max:120'],
                     'country_code'      => ['required', 'string', 'max:10'],
@@ -200,9 +200,15 @@ class OnboardingController extends Controller
                     'whatsapp_choice'   => ['required', 'in:same,alt'],
                 ], [
                     'date_of_birth.before_or_equal' => 'You must be at least 18 years old to join.',
+                    'first_name.regex' => 'First name must contain only English letters.',
+                    'last_name.regex' => 'Last name must contain only English letters.',
                 ]);
 
-                $fullName = trim($data['first_name'] . ' ' . $data['last_name']);
+                // Auto-capitalize names: capitalize first letter of each word
+                $firstName = ucwords(strtolower(trim($data['first_name'])));
+                $lastName = ucwords(strtolower(trim($data['last_name'])));
+                
+                $fullName = trim($firstName . ' ' . $lastName);
                 $request->user('talent')->update(['name' => $fullName]);
 
                 $whatsappNumber = ($data['whatsapp_choice'] === 'same')
@@ -210,8 +216,8 @@ class OnboardingController extends Controller
                     : ($data['whatsapp_number'] ?? $data['mobile_number']);
 
                 $profile->update([
-                    'first_name'        => $data['first_name'],
-                    'last_name'         => $data['last_name'],
+                    'first_name'        => $firstName,
+                    'last_name'         => $lastName,
                     'legal_name'        => $fullName,
                     'display_name'      => $fullName,
                     'nationality'       => Arr::get($data, 'nationality'),
