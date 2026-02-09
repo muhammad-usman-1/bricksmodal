@@ -744,16 +744,8 @@
                 </div>
             </div>
 
-            <div class="edit-section-title">{{ \App\Helpers\Bilingual::get('talent.profile_rates_bio') }}</div>
+            <div class="edit-section-title">{{ \App\Helpers\Bilingual::get('talent.profile_bio') }}</div>
             <div class="edit-grid">
-                <div class="form-field">
-                    <label for="daily_rate">{{ \App\Helpers\Bilingual::get('talent.profile_daily_rate') }}</label>
-                    <input id="daily_rate" type="number" min="0" step="0.01" name="daily_rate" class="form-control-lite" value="{{ old('daily_rate', $profile->daily_rate) }}">
-                </div>
-                <div class="form-field">
-                    <label for="rate">{{ \App\Helpers\Bilingual::get('talent.profile_rate') }}</label>
-                    <input id="rate" type="number" min="0" step="0.01" name="rate" class="form-control-lite" value="{{ old('rate', $profile->rate) }}">
-                </div>
                 <div class="form-field" style="grid-column: 1 / -1;">
                     <label for="bio">{{ \App\Helpers\Bilingual::get('talent.profile_bio') }}</label>
                     <textarea id="bio" name="bio" class="textarea-control" maxlength="1000" placeholder="{{ \App\Helpers\Bilingual::get('talent.profile_bio_placeholder') }}">{{ old('bio', $profile->bio) }}</textarea>
@@ -1038,17 +1030,6 @@
             </div>
         </div>
 
-        <!-- Footer / Rates -->
-        <div class="rates-container">
-            <div class="rate-block">
-                <span class="rate-label">{{ \App\Helpers\Bilingual::get('talent.profile_rate_label') }}</span>
-                <span class="rate-amount">${{ $profile->rate ? number_format($profile->rate, 2) : '0.00' }}</span>
-            </div>
-            <div class="rate-block" style="text-align:right;">
-                <span class="rate-label">{{ \App\Helpers\Bilingual::get('talent.profile_daily_rate_label') }}</span>
-                <span class="rate-amount">${{ $profile->daily_rate ? number_format($profile->daily_rate, 2) : '0.00' }}/day</span>
-            </div>
-        </div>
 
     </div>
 
