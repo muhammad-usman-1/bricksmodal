@@ -1183,13 +1183,13 @@
                                         const weightEl = document.getElementById('weight');
                                         if(weightEl && weightEl.value) {
                                             const wVal = parseFloat(weightEl.value);
-                                            if(wVal < 50 || wVal > 200) {
+                                            if(wVal < 40 || wVal > 200) {
                                                 isValid = false;
                                                 weightEl.classList.add('is-invalid');
                                                 weightEl.style.borderColor = '#dc3545';
                                                 const wErr = document.getElementById('error-weight');
                                                 if(wErr) {
-                                                    wErr.textContent = 'Weight must be between 50 and 200 kg.';
+                                                    wErr.textContent = 'Weight must be between 40 and 200 kg.';
                                                     wErr.style.visibility = 'visible';
                                                     attachClearListener(weightEl, wErr);
                                                 }

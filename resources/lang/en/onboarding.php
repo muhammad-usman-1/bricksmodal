@@ -50,4 +50,7 @@ return [
     'select_skin_color' => 'Select skin color',
     'select_size' => 'Select size',
     'document' => 'Document',
+    'civil_id_number' => 'Add your Civil ID number',
+    'civil_id_number_note' => 'If you do not have the ID image, you can submit your Civil ID number instead.',
+    'optional' => 'Optional',
 ];

@@ -248,7 +248,7 @@ class OnboardingController extends Controller
             case 'step-2':
                 $data = $request->validate([
                     'height'            => ['nullable', 'numeric', 'between:50,300'],
-                    'weight'            => ['nullable', 'numeric', 'between:50,200'],
+                    'weight'            => ['nullable', 'numeric', 'between:40,200'],
                     'gender'            => ['required', 'string', 'max:20'],
                     'hijab_preference'  => ['nullable', 'string', 'max:50'],
                     'hair_color'        => ['nullable', 'string', 'max:120'],
