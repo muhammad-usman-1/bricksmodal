@@ -259,19 +259,37 @@ class OnboardingController extends Controller
                 return redirect()->route('talent.onboarding.show', 'step-3');
 
             case 'step-3':
-                $data = $request->validate([
+                // Dress size is only required if gender is 'female'
+                $isFemale = strtolower($profile->gender ?? '') === 'female';
+                
+                $validationRules = [
                     't_shirt_size'      => ['required', 'string', 'max:20'],
-                    'dress_size'        => ['required', 'string', 'max:20'],
                     'shoe_size'         => ['required', 'numeric', 'between:0,100'],
-                ]);
+                ];
+                
+                if ($isFemale) {
+                    $validationRules['dress_size'] = ['required', 'string', 'max:20'];
+                } else {
+                    $validationRules['dress_size'] = ['nullable', 'string', 'max:20'];
+                }
+                
+                $data = $request->validate($validationRules);
 
-                $profile->update([
+                $updateData = [
                     't_shirt_size'      => Arr::get($data, 't_shirt_size'),
-                    'dress_size'        => Arr::get($data, 'dress_size'),
                     'shoe_size'         => Arr::get($data, 'shoe_size'),
                     'onboarding_step'   => 'step-4',
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 3),
-                ]);
+                ];
+                
+                // Only update dress_size if gender is female, otherwise set to null
+                if ($isFemale) {
+                    $updateData['dress_size'] = Arr::get($data, 'dress_size');
+                } else {
+                    $updateData['dress_size'] = null;
+                }
+
+                $profile->update($updateData);
 
                 return redirect()->route('talent.onboarding.show', 'step-4');
 

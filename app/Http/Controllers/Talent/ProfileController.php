@@ -76,8 +76,7 @@ class ProfileController extends Controller
             'shoe_size'        => ['nullable', 'numeric', 'between:0,100'],
             'whatsapp_number'  => ['nullable', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'bio'              => ['nullable', 'string', 'max:1000'],
-            'id_front'         => ['nullable', 'image', 'max:4096'],
-            'id_back'          => ['nullable', 'image', 'max:4096'],
+            // ID documents are not editable by talent - removed from validation
             'headshot_center'  => ['nullable', 'image', 'max:6144'],
             'headshot_left'    => ['nullable', 'image', 'max:6144'],
             'headshot_right'   => ['nullable', 'image', 'max:6144'],
@@ -124,8 +123,7 @@ class ProfileController extends Controller
 
 
         $uploadMap = [
-            'id_front'        => ['column' => 'id_front_path', 'folder' => 'id/front'],
-            'id_back'         => ['column' => 'id_back_path', 'folder' => 'id/back'],
+            // ID documents are not editable by talent - removed from upload map
             'headshot_center' => ['column' => 'headshot_center_path', 'folder' => 'headshot-center'],
             'headshot_left'   => ['column' => 'headshot_left_path', 'folder' => 'headshot-left'],
             'headshot_right'  => ['column' => 'headshot_right_path', 'folder' => 'headshot-right'],

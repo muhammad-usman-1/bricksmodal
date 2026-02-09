@@ -1186,7 +1186,11 @@
                             <p style="font-size: 14px; color: #888; margin-bottom: 0; text-align: right; direction: rtl;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.measurements_info', [], 'ar') }}</p>
                         </div>
 
-                        <div class="field-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
+                        @php
+                            $isFemale = strtolower($profile->gender ?? '') === 'female';
+                            $gridColumns = $isFemale ? 'repeat(3, minmax(0,1fr))' : 'repeat(2, minmax(0,1fr))';
+                        @endphp
+                        <div class="field-grid" id="step3-field-grid" style="grid-template-columns: {{ $gridColumns }}; gap: 16px;">
                             <div class="field" style="display: flex; flex-direction: column;">
                                 <label for="t_shirt_size">{{ \App\Helpers\Bilingual::get('onboarding.t_shirt_size') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative; margin-top: auto;">
@@ -1200,7 +1204,8 @@
                                 </div>
                                 <span class="error-text" id="error-t_shirt_size" style="color:#dc3545; font-size:12px; margin-top:4px;">T-shirt size is required</span>
                             </div>
-                            <div class="field" style="display: flex; flex-direction: column;">
+                            @if($isFemale)
+                            <div class="field" id="dress_size_field" style="display: flex; flex-direction: column;">
                                 <label for="dress_size">{{ \App\Helpers\Bilingual::get('onboarding.dress_size') }} <span class="required-asterisk">*</span></label>
                                 <div style="position:relative; margin-top: auto;">
                                     <select id="dress_size" name="dress_size" class="control" style="appearance:none;" required>
@@ -1213,6 +1218,9 @@
                                 </div>
                                 <span class="error-text" id="error-dress_size" style="color:#dc3545; font-size:12px; margin-top:4px;">Dress size is required</span>
                             </div>
+                            @else
+                            <input type="hidden" name="dress_size" value="">
+                            @endif
                             <div class="field" style="display: flex; flex-direction: column;">
                                 <label for="shoe_size">{{ \App\Helpers\Bilingual::get('onboarding.shoe_size') }} <span class="required-asterisk">*</span></label>
                                 <input id="shoe_size" name="shoe_size" class="control" type="number" step="0.1" placeholder="e.g. 39" value="{{ old('shoe_size', $profile->shoe_size) }}" required style="margin-top: auto;">
@@ -1246,11 +1254,20 @@
                                 if (form) {
                                     form.addEventListener('submit', function(e) {
                                         let isValid = true;
+                                        
+                                        // Check if dress_size field is visible (gender is female)
+                                        const dressSizeField = document.getElementById('dress_size_field');
+                                        const isDressSizeRequired = dressSizeField && dressSizeField.style.display !== 'none';
+                                        
                                         const requiredIds = [
                                             { id: 't_shirt_size', msg: 'T-shirt size is required' },
-                                            { id: 'dress_size', msg: 'Dress size is required' },
                                             { id: 'shoe_size', msg: 'Shoe size is required' }
                                         ];
+                                        
+                                        // Only add dress_size validation if field is visible
+                                        if (isDressSizeRequired) {
+                                            requiredIds.push({ id: 'dress_size', msg: 'Dress size is required' });
+                                        }
 
                                         requiredIds.forEach(item => {
                                             const el = document.getElementById(item.id);

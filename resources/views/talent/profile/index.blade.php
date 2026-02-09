@@ -881,6 +881,64 @@
         </div>
     </div>
 
+    <!-- ID Document Section (Read-Only) -->
+    @php
+        $idDocUrl = null;
+        $hasIdDoc = false;
+        
+        // Check for ID document (prefer id_front_path, then id_document_front)
+        if ($profile->id_front_path) {
+            $idDocPath = $profile->id_front_path;
+            $hasIdDoc = true;
+        } elseif ($profile->id_document_front) {
+            $idDocPath = $profile->id_document_front;
+            $hasIdDoc = true;
+        }
+        
+        if ($hasIdDoc) {
+            // Check if it's already a full URL
+            if (filter_var($idDocPath, FILTER_VALIDATE_URL)) {
+                $idDocUrl = $idDocPath;
+            } else {
+                // Build URL from path
+                $docDisk = config('filesystems.cloud', 's3');
+                $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
+                try {
+                    $idDocUrl = $storageDisk->url($idDocPath);
+                } catch (\Exception $e) {
+                    $idDocUrl = asset('storage/' . $idDocPath);
+                }
+            }
+        }
+    @endphp
+    
+    @if($hasIdDoc && $idDocUrl)
+    <div class="dash-card">
+        <div class="section-title-row">
+            <div class="icon-box"><i class="fas fa-id-card"></i></div>
+            <span>{{ \App\Helpers\Bilingual::get('talent.profile_id_document') ?? 'ID Document' }}</span>
+        </div>
+        <div style="margin-top: 16px;">
+            <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #f9fafb; padding: 16px; display: flex; align-items: center; justify-content: center; min-height: 200px;">
+                @if(str_ends_with(strtolower($idDocUrl), '.pdf'))
+                    <div style="text-align: center;">
+                        <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626; margin-bottom: 12px;"></i>
+                        <div style="font-size: 14px; color: var(--text-gray); margin-bottom: 12px;">ID Document (PDF)</div>
+                        <a href="{{ $idDocUrl }}" target="_blank" style="display: inline-block; padding: 8px 16px; background: #111827; color: #fff; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">
+                            <i class="fas fa-external-link-alt" style="margin-right: 6px;"></i> View Document
+                        </a>
+                    </div>
+                @else
+                    <img src="{{ $idDocUrl }}" alt="ID Document" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" loading="lazy" decoding="async">
+                @endif
+            </div>
+            <p style="margin-top: 12px; font-size: 13px; color: var(--text-gray); text-align: center;">
+                <i class="fas fa-lock" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_id_readonly_note') ?? 'This document is read-only and cannot be edited.' }}
+            </p>
+        </div>
+    </div>
+    @endif
+
     <!-- Media Portfolio -->
     <div class="dash-card">
         <div class="section-title-row">
