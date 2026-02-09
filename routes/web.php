@@ -123,6 +123,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::resource('admin-management', \App\Http\Controllers\Admin\AdminManagementController::class)->parameters([
                 'admin-management' => 'user'
             ]);
+            
+            // Audit Logs (Super Admin Only)
+            Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+            Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
 
             // Role-Permission Management (Super Admin Only)
             Route::get('role-permissions', [\App\Http\Controllers\Admin\RolePermissionController::class, 'index'])->name('role-permissions.index');
@@ -178,6 +182,12 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Onboarding Labels (Arabic Editor)
         Route::get('onboarding-labels', [\App\Http\Controllers\Admin\OnboardingLabelController::class, 'index'])->name('onboarding-labels.index');
         Route::post('onboarding-labels', [\App\Http\Controllers\Admin\OnboardingLabelController::class, 'update'])->name('onboarding-labels.update');
+        
+        // Audit Logs (Super Admin only)
+        Route::middleware('admin.module:audit_logs')->group(function () {
+            Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+            Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
+        });
 
 
         // Talent Media

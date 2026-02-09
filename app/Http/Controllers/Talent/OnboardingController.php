@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Label;
 use App\Models\TalentProfile;
 use App\Models\TalentMedia;
+use App\Models\AuditLog;
 use App\Services\MuxService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -101,6 +102,12 @@ class OnboardingController extends Controller
 
         // Use the step from URL if valid, otherwise fallback to profile progress
         $currentStep = $this->isValidStep($step) ? $step : $this->currentStep($profile);
+        
+        // Log when talent views/accesses an onboarding step
+        $user = $request->user('talent');
+        if ($user && $this->isValidStep($currentStep)) {
+            $this->logOnboardingStepAccess($user, $profile, $currentStep, $request);
+        }
 
         $viewData = [
             'profile'      => $profile,
@@ -229,6 +236,9 @@ class OnboardingController extends Controller
                     'onboarding_steps_completed' => max($profile->onboarding_steps_completed ?? 0, 1),
                 ]);
 
+                // Log onboarding step completion
+                $this->logOnboardingStep($request->user('talent'), $profile, 'step-1', $request);
+                
                 $notificationService->send($request->user('talent'), 'talent_profile_edit', [
                     'step' => 'Basic Info',
                 ]);
@@ -296,6 +306,9 @@ class OnboardingController extends Controller
                 }
 
                 $profile->update($updateData);
+                
+                // Log onboarding step completion
+                $this->logOnboardingStep($request->user('talent'), $profile, 'step-3', $request);
 
                 return redirect()->route('talent.onboarding.show', 'step-4');
 
@@ -516,6 +529,9 @@ class OnboardingController extends Controller
                     'onboarding_completed_at' => now(),
                     'verification_status'     => 'pending',
                 ]);
+                
+                // Log onboarding completion
+                $this->logOnboardingStep($request->user('talent'), $profile, 'step-5', $request, true);
 
                 $notificationService->send($request->user('talent'), 'talent_profile_submission', [
                     'name' => $profile->display_name,
@@ -952,5 +968,66 @@ class OnboardingController extends Controller
     {
         $step = $this->currentStep($profile);
         return redirect()->route('talent.onboarding.show', $step);
+    }
+    
+    /**
+     * Log onboarding step activity (when completing a step)
+     */
+    private function logOnboardingStep($user, $profile, $step, Request $request, $isCompleted = false)
+    {
+        $stepsCompleted = $profile->onboarding_steps_completed ?? 0;
+        $isFullyCompleted = $isCompleted || $profile->hasCompletedOnboarding();
+        
+        // Determine action description
+        $action = "Completed onboarding step: {$step}";
+        if ($isFullyCompleted && $stepsCompleted >= 5) {
+            $action = "Completed full onboarding process";
+        }
+        
+        AuditLog::create([
+            'event_type' => $isFullyCompleted ? 'onboarding_completed' : 'onboarding_step',
+            'user_type' => 'talent',
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'onboarding_step' => $step,
+            'onboarding_steps_completed' => $stepsCompleted,
+            'onboarding_completed' => $isFullyCompleted,
+            'onboarding_action' => $action,
+            'metadata' => [
+                'action_type' => 'step_completion',
+                'step' => $step,
+            ],
+            'created_at' => now(),
+        ]);
+    }
+    
+    /**
+     * Log when talent accesses/views an onboarding step (not completing, just viewing)
+     */
+    private function logOnboardingStepAccess($user, $profile, $step, Request $request)
+    {
+        $stepsCompleted = $profile->onboarding_steps_completed ?? 0;
+        
+        AuditLog::create([
+            'event_type' => 'onboarding_step',
+            'user_type' => 'talent',
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'onboarding_step' => $step,
+            'onboarding_steps_completed' => $stepsCompleted,
+            'onboarding_completed' => false,
+            'onboarding_action' => "Accessing onboarding step: {$step} (Steps completed: {$stepsCompleted}/5)",
+            'metadata' => [
+                'action_type' => 'step_access',
+                'step' => $step,
+            ],
+            'created_at' => now(),
+        ]);
     }
 }

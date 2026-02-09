@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\AuditLog;
 use App\Notifications\AdminAccountCreated;
 use App\Notifications\NewAdminGoogleLogin;
 use Illuminate\Http\Request;
@@ -37,6 +38,9 @@ class LoginController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
+            // Log failed login attempt
+            $this->logLoginFailure($credentials['email'], 'User not found', $request);
+            
             // User doesn't exist - ensure no session is created
             throw ValidationException::withMessages([
                 'email' => ['These credentials do not exist in our records.'],
@@ -61,6 +65,10 @@ class LoginController extends Controller
 
         // Verify password manually before attempting authentication
         if (!Hash::check($credentials['password'], $user->password)) {
+            // Log failed login attempt
+            $userType = $user->isSuperAdmin() ? 'admin' : ($user->isCreative() ? 'creative' : 'admin');
+            $this->logLoginFailure($user->email, 'Invalid password', $request, $userType, $user->id);
+            
             // Invalid password - ensure no session is created
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials. Please check your email and password.'],
@@ -117,6 +125,9 @@ class LoginController extends Controller
 
         // Success - regenerate session for security
         $request->session()->regenerate();
+        
+        // Log successful login
+        $this->logLoginSuccess($authenticatedUser, $request);
 
         return redirect()->intended(route('admin.home'));
     }
@@ -171,18 +182,115 @@ class LoginController extends Controller
 
         Auth::guard('admin')->login($user, $remember);
         $request->session()->regenerate();
+        
+        // Log successful login after 2FA
+        $this->logLoginSuccess($user, $request);
 
         return redirect()->intended($intended);
     }
 
     public function logout(Request $request)
     {
+        $user = Auth::guard('admin')->user();
+        
         Auth::guard('admin')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
+        // Log logout event
+        if ($user) {
+            $this->logLogout($user, $request);
+        }
 
         return redirect()->route('admin.login');
+    }
+    
+    /**
+     * Log successful login
+     */
+    private function logLoginSuccess($user, Request $request)
+    {
+        // Determine exact role: Super Admin > Creative > Admin
+        $userType = 'admin';
+        if ($user->isSuperAdmin()) {
+            $userType = 'super_admin';
+        } elseif ($user->isCreative()) {
+            $userType = 'creative';
+        }
+        
+        AuditLog::create([
+            'event_type' => 'login_success',
+            'user_type' => $userType,
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => true,
+            'metadata' => [
+                'redirect_to' => 'admin_dashboard',
+            ],
+            'created_at' => now(),
+        ]);
+    }
+    
+    /**
+     * Log failed login attempt
+     */
+    private function logLoginFailure($email, $reason, Request $request, $userType = 'admin', $userId = null)
+    {
+        // If user exists, determine exact role
+        if ($userId) {
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                if ($user->isSuperAdmin()) {
+                    $userType = 'super_admin';
+                } elseif ($user->isCreative()) {
+                    $userType = 'creative';
+                } else {
+                    $userType = 'admin';
+                }
+            }
+        }
+        
+        AuditLog::create([
+            'event_type' => 'login_failed',
+            'user_type' => $userType,
+            'user_id' => $userId,
+            'user_email' => $email,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => false,
+            'login_failure_reason' => $reason,
+            'created_at' => now(),
+        ]);
+    }
+    
+    /**
+     * Log logout event
+     */
+    private function logLogout($user, Request $request)
+    {
+        // Determine exact role: Super Admin > Creative > Admin
+        $userType = 'admin';
+        if ($user->isSuperAdmin()) {
+            $userType = 'super_admin';
+        } elseif ($user->isCreative()) {
+            $userType = 'creative';
+        }
+        
+        AuditLog::create([
+            'event_type' => 'logout',
+            'user_type' => $userType,
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => true,
+            'created_at' => now(),
+        ]);
     }
 
     public function redirectToGoogle()

@@ -613,6 +613,13 @@ letter-spacing: 1.4px;">STUDIO</div>
                     User Management
                 </a>
             </li>
+            
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route('admin.audit-logs.index') }}" class="bm-link {{ request()->is('admin/audit-logs*') ? 'c-active' : '' }}">
+                    <i class="fas fa-fw fa-history" style="font-size: 20px;"></i>
+                    Audit Logs
+                </a>
+            </li>
             {{--  <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.role-permissions.index') }}" class="bm-link {{ request()->is('admin/role-permissions*') ? 'c-active' : '' }}">
                     <i class="fas fa-fw fa-key"></i>

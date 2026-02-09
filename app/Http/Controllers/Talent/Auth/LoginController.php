@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Talent\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AuditLog;
 use App\Services\KwtSmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -164,6 +165,10 @@ class LoginController extends Controller
         if (! hash_equals($user->otp, $data['otp'])) {
             // increment attempts
             $user->increment('otp_attempts');
+            
+            // Log failed login attempt
+            $this->logLoginFailure($user->phone_number, 'Invalid OTP', $request, 'talent', $user->id);
+            
             return back()->withErrors(['otp' => 'Invalid OTP.']);
         }
 
@@ -180,8 +185,30 @@ class LoginController extends Controller
 
         // Redirect depending on onboarding state. OnboardingController will create a profile if missing.
         $profile = $user->talentProfile;
-
+        
+        // Determine redirect destination for logging
+        $redirectTo = 'talent_dashboard';
+        $onboardingStep = null;
+        
         // Check if profile is rejected - redirect to rejection page
+        if ($profile && $profile->verification_status === 'rejected') {
+            $redirectTo = 'rejected_page';
+        } elseif (! $profile || ! $profile->hasCompletedOnboarding()) {
+            $step = $profile?->onboarding_step;
+            $redirectTo = 'onboarding';
+            $onboardingStep = $step ?? 'intro';
+            
+            if (! $profile || ! $step || $step === 'profile') {
+                $onboardingStep = 'intro';
+            }
+        } elseif ($profile->verification_status !== 'approved') {
+            $redirectTo = 'pending_status';
+        }
+        
+        // Log successful login with redirect information
+        $this->logLoginSuccess($user, $request, $redirectTo, $onboardingStep);
+
+        // Perform redirects
         if ($profile && $profile->verification_status === 'rejected') {
             return redirect()->route('talent.rejected');
         }
@@ -205,11 +232,111 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $user = Auth::guard('talent')->user();
+        
         Auth::guard('talent')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
+        // Log logout event with onboarding details
+        if ($user) {
+            $this->logLogout($user, $request);
+        }
 
         return redirect()->route('talent.login');
+    }
+    
+    /**
+     * Log successful login event
+     */
+    private function logLoginSuccess($user, Request $request, $redirectTo, $onboardingStep = null)
+    {
+        $profile = $user->talentProfile;
+        $stepsCompleted = $profile?->onboarding_steps_completed ?? 0;
+        $isCompleted = $profile?->hasCompletedOnboarding() ?? false;
+        
+        AuditLog::create([
+            'event_type' => 'login_success',
+            'user_type' => 'talent',
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => true,
+            'login_redirect_to' => $redirectTo,
+            'onboarding_step' => $onboardingStep,
+            'onboarding_steps_completed' => $stepsCompleted,
+            'onboarding_completed' => $isCompleted,
+            'onboarding_action' => "Logged in successfully. Redirected to: {$redirectTo}" . ($onboardingStep ? " (Current step: {$onboardingStep})" : ''),
+            'metadata' => [
+                'redirect_to' => $redirectTo,
+                'onboarding_step' => $onboardingStep,
+                'steps_completed' => $stepsCompleted,
+            ],
+            'created_at' => now(),
+        ]);
+    }
+    
+    /**
+     * Log failed login event
+     */
+    private function logLoginFailure($phoneNumber, $reason, Request $request, $userType = 'talent', $userId = null)
+    {
+        AuditLog::create([
+            'event_type' => 'login_failed',
+            'user_type' => $userType,
+            'user_id' => $userId,
+            'user_phone' => $phoneNumber,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => false,
+            'login_failure_reason' => $reason,
+            'created_at' => now(),
+        ]);
+    }
+    
+    /**
+     * Log logout event
+     */
+    private function logLogout($user, Request $request)
+    {
+        $profile = $user->talentProfile;
+        $currentStep = $profile?->onboarding_step;
+        $stepsCompleted = $profile?->onboarding_steps_completed ?? 0;
+        $isCompleted = $profile?->hasCompletedOnboarding() ?? false;
+        
+        // Determine where they logged out from
+        $logoutFrom = 'unknown';
+        if ($request->is('talent/onboarding/*')) {
+            $logoutFrom = 'onboarding';
+        } elseif ($request->is('talent/dashboard*')) {
+            $logoutFrom = 'dashboard';
+        } elseif ($request->is('talent/profile*')) {
+            $logoutFrom = 'profile';
+        } elseif ($request->is('talent/pending*')) {
+            $logoutFrom = 'pending_status';
+        }
+        
+        AuditLog::create([
+            'event_type' => 'logout',
+            'user_type' => 'talent',
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_phone' => $user->phone_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_successful' => true,
+            'onboarding_step' => $currentStep,
+            'onboarding_steps_completed' => $stepsCompleted,
+            'onboarding_completed' => $isCompleted,
+            'onboarding_action' => "Logged out from: {$logoutFrom}" . ($currentStep ? " (Was on step: {$currentStep})" : ''),
+            'metadata' => [
+                'logout_from' => $logoutFrom,
+                'onboarding_step' => $currentStep,
+            ],
+            'created_at' => now(),
+        ]);
     }
 }
