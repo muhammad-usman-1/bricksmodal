@@ -126,6 +126,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
             
             // Audit Logs (Super Admin Only)
             Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+            Route::get('audit-logs/export', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
             Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
 
             // Role-Permission Management (Super Admin Only)
@@ -186,6 +187,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Audit Logs (Super Admin only)
         Route::middleware('admin.module:audit_logs')->group(function () {
             Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+            Route::get('audit-logs/export', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
             Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
         });
 

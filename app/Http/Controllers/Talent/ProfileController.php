@@ -7,6 +7,7 @@ use App\Models\Label;
 use App\Models\Language;
 use App\Models\TalentProfile;
 use App\Services\MuxService;
+use App\Traits\LogsAuditEvents;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    use LogsAuditEvents;
     public function show(Request $request): View
     {
         $user = $request->user('talent');
@@ -278,6 +280,39 @@ class ProfileController extends Controller
             $profile->update([
                 'mux_video_asset_id' => null,
             ]);
+        }
+
+        // Log profile update by talent
+        $talentUser = $request->user('talent');
+        $changedFields = [];
+        $originalData = $profile->getOriginal();
+        $currentData = $profile->getAttributes();
+        
+        // Check which fields changed
+        foreach ($data as $key => $value) {
+            if (isset($originalData[$key]) && $originalData[$key] != $value) {
+                $changedFields[] = $key;
+            }
+        }
+        
+        if (!empty($changedFields) || $request->hasFile('video') || $request->has('remove_video') || 
+            $request->has('uploaded_keys') || $request->has('deleted_media_ids') || $request->has('additional_photo_keys')) {
+            $this->logAuditEvent(
+                'profile_updated',
+                'talent',
+                $talentUser->id,
+                $talentUser->email,
+                $talentUser->phone_number,
+                $request,
+                "Updated own profile",
+                [
+                    'talent_profile_id' => $profile->id,
+                    'talent_name' => $profile->display_name ?? ($profile->first_name . ' ' . $profile->last_name),
+                    'changed_fields' => $changedFields,
+                    'has_video_change' => $request->hasFile('video') || $request->has('remove_video'),
+                    'has_media_changes' => $request->has('uploaded_keys') || $request->has('deleted_media_ids') || $request->has('additional_photo_keys'),
+                ]
+            );
         }
 
         return redirect()

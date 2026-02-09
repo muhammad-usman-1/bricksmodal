@@ -15,6 +15,7 @@ use App\Models\BankDetail;
 use App\Models\TalentMedia;
 use App\Models\TalentSetting;
 use App\Support\EmailTemplateManager;
+use App\Traits\LogsAuditEvents;
 use Gate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TalentProfileController extends Controller
 {
+    use LogsAuditEvents;
     public function index()
     {
         abort_if(Gate::denies('talent_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -195,8 +197,42 @@ class TalentProfileController extends Controller
             }
         }
 
+        // Get changed fields for logging
+        $changedFields = [];
+        $originalData = $talentProfile->getOriginal();
+        foreach ($data as $key => $value) {
+            if (isset($originalData[$key]) && $originalData[$key] != $value) {
+                $changedFields[] = $key;
+            }
+        }
+
         $talentProfile->update($data);
         $talentProfile->labels()->sync($request->input('labels', []));
+        
+        // Reload to get updated data
+        $talentProfile->load('user');
+
+        // Log profile update by admin
+        if (!empty($changedFields)) {
+            $adminUser = auth()->user();
+            $this->logAuditEvent(
+                'profile_updated',
+                $adminUser->isSuperAdmin() ? 'superadmin' : ($adminUser->isCreative() ? 'creative' : 'admin'),
+                $adminUser->id,
+                $adminUser->email,
+                null,
+                $request,
+                "Updated talent profile: {$talentProfile->display_name} (ID: {$talentProfile->id})",
+                [
+                    'talent_profile_id' => $talentProfile->id,
+                    'talent_name' => $talentProfile->display_name ?? ($talentProfile->first_name . ' ' . $talentProfile->last_name),
+                    'talent_email' => $talentProfile->user->email ?? null,
+                    'talent_phone' => $talentProfile->user->phone_number ?? null,
+                    'admin_name' => $adminUser->name,
+                    'changed_fields' => $changedFields,
+                ]
+            );
+        }
 
         return redirect()->route('admin.talent-profiles.show', $talentProfile)->with('message', trans('global.update_success'));
     }
@@ -385,6 +421,10 @@ class TalentProfileController extends Controller
         abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $notes = $request->input('notes');
+        $adminUser = auth()->user();
+        
+        // Load user relationship before logging
+        $talentProfile->load('user');
 
         $talentProfile->update([
             'verification_status' => 'approved',
@@ -392,6 +432,25 @@ class TalentProfileController extends Controller
             'onboarding_step'     => 'completed',
             'onboarding_completed_at' => $talentProfile->onboarding_completed_at ?? now(),
         ]);
+
+        // Log talent acceptance
+        $this->logAuditEvent(
+            'talent_accepted',
+            $adminUser->isSuperAdmin() ? 'superadmin' : ($adminUser->isCreative() ? 'creative' : 'admin'),
+            $adminUser->id,
+            $adminUser->email,
+            null,
+            $request,
+            "Accepted talent: {$talentProfile->display_name} (ID: {$talentProfile->id})",
+            [
+                'talent_profile_id' => $talentProfile->id,
+                'talent_name' => $talentProfile->display_name ?? ($talentProfile->first_name . ' ' . $talentProfile->last_name),
+                'talent_email' => $talentProfile->user->email ?? null,
+                'talent_phone' => $talentProfile->user->phone_number ?? null,
+                'admin_name' => $adminUser->name,
+                'notes' => $notes,
+            ]
+        );
 
         $this->triggerNotification($talentProfile, 'talent_profile_approval', $notes);
 

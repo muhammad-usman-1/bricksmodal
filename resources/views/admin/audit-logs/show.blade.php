@@ -107,6 +107,10 @@
                     <span class="badge badge-success">Onboarding Completed</span>
                 @elseif($auditLog->event_type == 'signup')
                     <span class="badge badge-info">Signup</span>
+                @elseif($auditLog->event_type == 'talent_accepted')
+                    <span class="badge badge-success">Talent Accepted</span>
+                @elseif($auditLog->event_type == 'profile_updated')
+                    <span class="badge badge-warning">Profile Updated</span>
                 @else
                     <span class="badge">{{ $auditLog->event_type }}</span>
                 @endif
@@ -122,37 +126,51 @@
             <div class="detail-label">User ID</div>
             <div class="detail-value">{{ $auditLog->user_id ?? 'N/A' }}</div>
         </div>
+        @if($auditLog->user && $auditLog->user->name)
+        <div class="detail-row">
+            <div class="detail-label">Name</div>
+            <div class="detail-value">{{ $auditLog->user->name }}</div>
+        </div>
+        @endif
         <div class="detail-row">
             <div class="detail-label">Email</div>
             <div class="detail-value">{{ $auditLog->user_email ?? 'N/A' }}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Phone</div>
-            <div class="detail-value">`n                @if($auditLog->user_phone)`n                    +965 {{ $auditLog->user_phone }}`n                @else`n                    N/A`n                @endif`n            </div>
+            <div class="detail-value">
+                @if($auditLog->user_phone)
+                    +965 {{ $auditLog->user_phone }}
+                @else
+                    N/A
+                @endif
+            </div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Timestamp</div>
             <div class="detail-value">
-                {{ $auditLog->created_at->format('F d, Y H:i:s') }}
+                {{ $auditLog->created_at->setTimezone('Asia/Kuwait')->format('F d, Y H:i:s') }} GMT+3
             </div>
         </div>
         <div class="detail-row">
             <div class="detail-label">IP Address</div>
-            <div class="detail-value">{{ $auditLog->ip_address ?? 'N/A' }}</div>
+            <div class="detail-value" style="word-break: break-all;">{{ $auditLog->ip_address ?? 'N/A' }}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">User Agent</div>
-            <div class="detail-value">{{ $auditLog->user_agent ?? 'N/A' }}</div>
+            <div class="detail-value" style="word-break: break-all; white-space: normal;">{{ $auditLog->user_agent ?? 'N/A' }}</div>
         </div>
         @if($auditLog->onboarding_step)
         <div class="detail-row">
             <div class="detail-label">Onboarding Step</div>
             <div class="detail-value">{{ $auditLog->onboarding_step }}</div>
         </div>
+        @if($auditLog->event_type == 'signup')
         <div class="detail-row">
             <div class="detail-label">Steps Completed</div>
             <div class="detail-value">{{ $auditLog->onboarding_steps_completed ?? 0 }}/5</div>
         </div>
+        @endif
         <div class="detail-row">
             <div class="detail-label">Onboarding Completed</div>
             <div class="detail-value">

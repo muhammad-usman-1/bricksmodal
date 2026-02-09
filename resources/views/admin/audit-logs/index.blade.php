@@ -249,6 +249,8 @@
                         <option value="onboarding_step" {{ request('event_type') == 'onboarding_step' ? 'selected' : '' }}>Onboarding Step</option>
                         <option value="onboarding_completed" {{ request('event_type') == 'onboarding_completed' ? 'selected' : '' }}>Onboarding Completed</option>
                         <option value="signup" {{ request('event_type') == 'signup' ? 'selected' : '' }}>Signup</option>
+                        <option value="talent_accepted" {{ request('event_type') == 'talent_accepted' ? 'selected' : '' }}>Talent Accepted</option>
+                        <option value="profile_updated" {{ request('event_type') == 'profile_updated' ? 'selected' : '' }}>Profile Updated</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -276,6 +278,7 @@
             <div class="filter-actions">
                 <button type="submit" class="btn-filter">Apply Filters</button>
                 <a href="{{ route('admin.audit-logs.index') }}" class="btn-filter btn-reset">Reset</a>
+                <a href="{{ route('admin.audit-logs.export', request()->query()) }}" class="btn-filter" style="background: #10b981; color: white;">Export CSV</a>
             </div>
         </form>
     </div>
@@ -298,8 +301,8 @@
                 @foreach($logs as $log)
                 <tr>
                     <td>
-                        <div>{{ $log->created_at->format('M d, Y') }}</div>
-                        <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->format('H:i:s') }}</div>
+                        <div>{{ $log->created_at->setTimezone('Asia/Kuwait')->format('M d, Y') }}</div>
+                        <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->setTimezone('Asia/Kuwait')->format('H:i:s') }} GMT+3</div>
                     </td>
                     <td>
                         @if($log->event_type == 'login_success')
@@ -314,6 +317,10 @@
                             <span class="badge badge-success">Onboarding Completed</span>
                         @elseif($log->event_type == 'signup')
                             <span class="badge badge-info">Signup</span>
+                        @elseif($log->event_type == 'talent_accepted')
+                            <span class="badge badge-success">Talent Accepted</span>
+                        @elseif($log->event_type == 'profile_updated')
+                            <span class="badge badge-warning">Profile Updated</span>
                         @else
                             <span class="badge">{{ $log->event_type }}</span>
                         @endif
@@ -325,7 +332,14 @@
                     </td>
                     <td>
                         <div>
-                            @if($log->user_email)
+                            @if($log->user && $log->user->name)
+                                <strong>{{ $log->user->name }}</strong>
+                                @if($log->user_email)
+                                    <div style="color: var(--ink-500); font-size: 12px; margin-top: 2px;">{{ $log->user_email }}</div>
+                                @elseif($log->user_phone)
+                                    <div style="color: var(--ink-500); font-size: 12px; margin-top: 2px;">+965 {{ $log->user_phone }}</div>
+                                @endif
+                            @elseif($log->user_email)
                                 {{ $log->user_email }}
                             @elseif($log->user_phone)
                                 +965 {{ $log->user_phone }}
@@ -338,9 +352,41 @@
                         @endif
                     </td>
                     <td>
-                        @if($log->onboarding_step)
+                        @if($log->event_type == 'talent_accepted')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['admin_name']))
+                                <div><strong>Accepted by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->event_type == 'profile_updated')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['admin_name']))
+                                <div><strong>Updated by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @elseif($log->user_type == 'talent')
+                                <div><strong>Updated by:</strong> Talent</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['changed_fields']) && is_array($log->metadata['changed_fields']))
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">
+                                    <strong>Fields:</strong> {{ implode(', ', array_slice($log->metadata['changed_fields'], 0, 5)) }}
+                                    @if(count($log->metadata['changed_fields']) > 5)
+                                        <span>...</span>
+                                    @endif
+                                </div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->onboarding_step)
                             <div><strong>Step:</strong> {{ $log->onboarding_step }}</div>
-                            <div><strong>Completed:</strong> {{ $log->onboarding_steps_completed ?? 0 }}/5</div>
+                            @if($log->event_type == 'signup')
+                                <div><strong>Completed:</strong> {{ $log->onboarding_steps_completed ?? 0 }}/5</div>
+                            @endif
                             @if($log->onboarding_action)
                                 <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
                             @endif
@@ -351,10 +397,10 @@
                         @endif
                     </td>
                     <td>
-                        <div>{{ $log->ip_address ?? 'N/A' }}</div>
+                        <div style="word-break: break-all;">{{ $log->ip_address ?? 'N/A' }}</div>
                         @if($log->user_agent)
-                            <div style="color: var(--ink-500); font-size: 11px; margin-top: 4px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $log->user_agent }}">
-                                {{ Str::limit($log->user_agent, 40) }}
+                            <div style="color: var(--ink-500); font-size: 11px; margin-top: 4px; word-break: break-all; white-space: normal;">
+                                {{ $log->user_agent }}
                             </div>
                         @endif
                     </td>
