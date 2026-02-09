@@ -103,11 +103,28 @@
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
     }
     .btn-reset {
         background: #f3f4f6;
         color: var(--ink-700);
         border: 1px solid var(--border);
+        text-decoration: none;
+    }
+    .btn-reset:hover {
+        background: #f3f4f6;
+        color: var(--ink-700);
+        text-decoration: none;
+        border-color: var(--border);
+    }
+    .btn-reset:focus,
+    .btn-reset:active {
+        background: #f3f4f6;
+        color: var(--ink-700);
+        text-decoration: none;
+        border-color: var(--border);
+        outline: none;
     }
 
     .logs-table-card {
