@@ -288,7 +288,7 @@
     $activeCount = $stats['approved'] ?? ($talents->where('verification_status', 'approved')->count());
     $totalTalents = $stats['total'] ?? $talents->count();
     $fallbackImg = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="360"><rect width="300" height="360" rx="18" fill="#e5e7eb"/><path d="M150 170c28 0 50-22 50-50s-22-50-50-50-50 22-50 50 22 50 50 50Zm0 20c-42 0-80 19-92 56-2 6 2 12 8 12h168c6 0 10-6 8-12-12-37-50-56-92-56Z" fill="#cbd5e1"/></svg>');
-    
+
     // Define toUrl function first
     $toUrl = function($path) {
         if (!$path) return null;
@@ -302,7 +302,7 @@
 
         // Cache key for this URL
         $cacheKey = 'talent_image_url_' . md5($path);
-        
+
         // Try to get from cache first (cache for 6 hours)
         $cachedUrl = \Illuminate\Support\Facades\Cache::get($cacheKey);
         if ($cachedUrl !== null) {
@@ -341,7 +341,7 @@
         } else {
             // Relative path - try to resolve it
             $clean = ltrim($path, '/');
-            
+
             // If AWS_URL (CloudFront) is configured, use it for permanent URLs
             if ($awsUrl) {
                 try {
@@ -387,7 +387,7 @@
 
         return $resolvedUrl ?: asset('storage/' . ltrim($path, '/'));
     };
-    
+
     // Collect all profile images for preloading
     $allProfileImages = [];
     foreach ($talents as $talent) {
@@ -544,9 +544,9 @@
                 <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)' data-onboarding-step="{{ $onboardingStep }}" data-completed-step5="{{ $hasCompletedStep5 ? '1' : '0' }}">
                     <div class="talent-img-container">
                         @foreach($allImages as $index => $imgSrc)
-                            <img class="talent-img {{ $index === 0 ? 'active' : '' }}" 
-                                 src="{{ $imgSrc }}" 
-                                 alt="{{ $displayName }} - Image {{ $index + 1 }}" 
+                            <img class="talent-img {{ $index === 0 ? 'active' : '' }}"
+                                 src="{{ $imgSrc }}"
+                                 alt="{{ $displayName }} - Image {{ $index + 1 }}"
                                  data-index="{{ $index }}"
                                  loading="eager"
                                  decoding="async"
@@ -649,7 +649,7 @@
                 const matchesSearch = !term || name.includes(term);
                 const isActive = status === 'approved' || status === 'verified';
                 const completedStep5 = card.dataset.completedStep5 === '1';
-                
+
                 let matchesFilter = false;
                 if (filter === 'all') matchesFilter = isActive;
                 if (filter === 'male') matchesFilter = gender === 'male' && isActive;
@@ -716,7 +716,7 @@
 
         // Cache API for persistent image storage across page visits
         const imageCacheName = 'talent-profile-images-v1';
-        
+
         // Function to cache an image URL
         async function cacheImage(url) {
             try {
@@ -731,8 +731,8 @@
                         } catch (e) {
                             // If cache.add fails (CORS), try fetch with proper headers
                             try {
-                                const response = await fetch(url, { 
-                                    mode: 'cors', 
+                                const response = await fetch(url, {
+                                    mode: 'cors',
                                     credentials: 'omit',
                                     cache: 'force-cache'
                                 });
@@ -757,12 +757,12 @@
                 try {
                     const cache = await caches.open(imageCacheName);
                     const cachedResponse = await cache.match(originalUrl);
-                    
+
                     if (cachedResponse) {
                         // Use cached image - create blob URL
                         const blob = await cachedResponse.blob();
                         const objectUrl = URL.createObjectURL(blob);
-                        
+
                         // Set image source to cached blob
                         if (imgElement.tagName === 'IMG') {
                             imgElement.src = objectUrl;
@@ -777,7 +777,7 @@
                     // Fall through to normal loading
                 }
             }
-            
+
             // Not in cache, load normally
             return new Promise((resolve) => {
                 const preloadImg = new Image();
@@ -796,7 +796,7 @@
         // Preload and cache all images immediately on page load
         const allImages = document.querySelectorAll('.talent-img');
         const imagePromises = [];
-        
+
         allImages.forEach(img => {
             const imgSrc = img.src;
             if (imgSrc && !imgSrc.startsWith('data:')) {
@@ -817,7 +817,7 @@
         // Wait for all images to load, then ensure they're all cached
         Promise.all(imagePromises).then(() => {
             console.log('All profile images loaded and cached for future visits');
-            
+
             // Double-check all images are cached
             allImages.forEach(img => {
                 if (img.src && !img.src.startsWith('data:')) {
@@ -831,51 +831,25 @@
             const images = card.querySelectorAll('.talent-img');
             if (images.length <= 1) return; // No rotation needed if only one image
 
-            // Ensure all images for this card are loaded
-            const cardImagePromises = Array.from(images).map(img => {
-                if (img.complete) {
-                    return Promise.resolve();
-                }
-                return new Promise((resolve) => {
-                    img.onload = resolve;
-                    img.onerror = resolve; // Continue even if image fails
-                    // Trigger load if not already loading
-                    if (!img.src) {
-                        resolve();
-                    }
-                });
-            });
-
             let rotationInterval = null;
             let currentIndex = 0;
-            let imagesReady = false;
-
-            // Mark images as ready once they're loaded
-            Promise.all(cardImagePromises).then(() => {
-                imagesReady = true;
-            });
 
             card.addEventListener('mouseenter', function() {
-                // Only start rotation if images are ready
-                if (!imagesReady) {
-                    // Wait for images to be ready
-                    Promise.all(cardImagePromises).then(() => {
-                        imagesReady = true;
-                        startRotation();
-                    });
-                } else {
-                    startRotation();
-                }
-            });
-
-            function startRotation() {
+                // Start rotation immediately on hover - no delay
                 if (rotationInterval) return; // Already rotating
+
+                // Change to next image immediately (no pause)
+                images[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+
+                // Continue rotation with fast interval (no pause)
                 rotationInterval = setInterval(() => {
                     images[currentIndex].classList.remove('active');
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
-                }, 400);
-            }
+                }, 150); // Fast rotation - 150ms between changes
+            });
 
             card.addEventListener('mouseleave', function() {
                 if (rotationInterval) {
