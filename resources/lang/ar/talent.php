@@ -73,4 +73,7 @@ return [
     'profile_model' => 'عارض',
     'profile_years' => 'سنوات',
     'profile_location' => 'الموقع',
+    'profile_id_document' => 'مستند الهوية',
+    'profile_id_readonly_note' => 'هذا المستند للقراءة فقط ولا يمكن تعديله.',
+    'profile_add_more_images' => 'إضافة المزيد من صور الملف الشخصي',
 ];

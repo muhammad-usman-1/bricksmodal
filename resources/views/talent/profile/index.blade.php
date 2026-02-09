@@ -913,13 +913,13 @@
     @endphp
     
     @if($hasIdDoc && $idDocUrl)
-    <div class="dash-card">
+    <div class="dash-card" style="width: 100%;">
         <div class="section-title-row">
             <div class="icon-box"><i class="fas fa-id-card"></i></div>
-            <span>{{ \App\Helpers\Bilingual::get('talent.profile_id_document') ?? 'ID Document' }}</span>
+            <span>{{ \App\Helpers\Bilingual::get('talent.profile_id_document') }}</span>
         </div>
         <div style="margin-top: 16px;">
-            <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #f9fafb; padding: 16px; display: flex; align-items: center; justify-content: center; min-height: 200px;">
+            <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #f9fafb; padding: 16px; display: flex; align-items: center; justify-content: center; width: 100%;">
                 @if(str_ends_with(strtolower($idDocUrl), '.pdf'))
                     <div style="text-align: center;">
                         <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626; margin-bottom: 12px;"></i>
@@ -929,11 +929,11 @@
                         </a>
                     </div>
                 @else
-                    <img src="{{ $idDocUrl }}" alt="ID Document" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" loading="lazy" decoding="async">
+                    <img src="{{ $idDocUrl }}" alt="ID Document" style="width: 100%; height: auto; object-fit: contain; border-radius: 4px; display: block;" loading="lazy" decoding="async">
                 @endif
             </div>
             <p style="margin-top: 12px; font-size: 13px; color: var(--text-gray); text-align: center;">
-                <i class="fas fa-lock" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_id_readonly_note') ?? 'This document is read-only and cannot be edited.' }}
+                <i class="fas fa-lock" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_id_readonly_note') }}
             </p>
         </div>
     </div>
@@ -963,6 +963,9 @@
                         @else
                             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
                         @endif
+                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.2); z-index: 10; display: none;">
+                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s ease; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>
+                        </div>
                     <div class="upload-overlay">
                         <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                         <span class="upload-text">{{ $media->file_path ? \App\Helpers\Bilingual::get('talent.profile_replace_photo') : \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
@@ -1655,7 +1658,7 @@
             });
         }
 
-        // Setup photo-item upload handlers (similar to talentprofile/show)
+        // Setup photo-item upload handlers (similar to onboarding step 5)
         const editForm = document.querySelector('.is-editing') || document.body;
         const photoItems = document.querySelectorAll('.photo-item.is-editable');
 
@@ -1670,6 +1673,7 @@
             item.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-photo-link')) return;
                 if (e.target === fileInput) return;
+                if (e.target.closest('.upload-progress-container')) return;
                 if (justDropped) {
                     justDropped = false;
                     return;
@@ -1697,15 +1701,25 @@
                 if (this.dataset.processing === 'true') return;
 
                 const file = this.files[0];
-                const field = item.dataset.field;
+                const mediaId = item.dataset.mediaId;
                 this.dataset.processing = 'true';
+
+                // Show progress container
+                const progressContainer = item.querySelector('.upload-progress-container');
+                const progressBar = item.querySelector('.upload-progress-bar');
+                if (progressContainer) {
+                    progressContainer.style.display = 'block';
+                }
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                }
 
                 // Preview image immediately
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     let img = item.querySelector('img.preview-img');
                     if (!img) {
-                        const placeholder = item.querySelector('div:not(.upload-overlay)');
+                        const placeholder = item.querySelector('div:not(.upload-overlay):not(.upload-progress-container)');
                         if (placeholder) placeholder.remove();
                         img = document.createElement('img');
                         img.className = 'preview-img';
@@ -1732,17 +1746,21 @@
                 reader.readAsDataURL(file);
 
                 // Upload to S3 via AJAX
-                uploadImageToS3(file, field, item, fileInput);
+                uploadImageToS3(file, mediaId, item, fileInput);
             });
         });
 
-        // Function to upload image to S3 (similar to talentprofile/show)
-        async function uploadImageToS3(file, field, tile, input) {
+        // Function to upload image to S3 (similar to onboarding step 5)
+        async function uploadImageToS3(file, mediaId, tile, input) {
             if (tile.dataset.uploading === 'true') return;
             tile.dataset.uploading = 'true';
 
-            const uploadId = `upload_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+            const uploadId = `upload_${mediaId || Date.now()}_${Math.random().toString(16).slice(2)}`;
+            uploadModalTracker.show();
             uploadModalTracker.addItem(uploadId, file.name);
+
+            const progressContainer = tile.querySelector('.upload-progress-container');
+            const progressBar = tile.querySelector('.upload-progress-bar');
 
             try {
                 // Get presigned URL
@@ -1757,48 +1775,76 @@
                     body: JSON.stringify({
                         file_name: file.name,
                         file_type: file.type,
-                        field: field,
                     }),
                 });
 
                 if (!presignRes.ok) {
-                    throw new Error('Failed to get upload URL');
+                    let msg = 'Failed to get upload URL';
+                    try {
+                        const data = await presignRes.json();
+                        msg = data.message || msg;
+                    } catch (e) {}
+                    throw new Error(msg);
                 }
 
                 const { url, headers, key } = await presignRes.json();
 
-                // Upload to S3
+                // Upload to S3 with progress tracking
                 await uploadToS3Put(url, headers, file, (progress) => {
+                    // Update modal progress
                     uploadModalTracker.updateProgress(uploadId, progress);
+                    // Update tile progress bar
+                    if (progressBar) {
+                        progressBar.style.width = `${progress}%`;
+                    }
                 });
 
                 uploadModalTracker.markComplete(uploadId);
 
+                // Hide progress bar after a short delay
+                if (progressContainer) {
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        if (progressBar) progressBar.style.width = '0%';
+                    }, 1000);
+                }
+
                 // Store S3 key in hidden input
                 const form = document.querySelector('form[action*="profile"]');
                 if (form) {
-                    // Remove old hidden inputs for this field
-                    const existingInputs = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
-                    existingInputs.forEach(inp => inp.remove());
+                    // Remove old hidden inputs for this media item
+                    if (mediaId) {
+                        const existingInputs = form.querySelectorAll(`input[name="updated_media_keys[]"][data-media-id="${mediaId}"]`);
+                        existingInputs.forEach(inp => inp.remove());
+                        const existingMediaIds = form.querySelectorAll(`input[name="updated_media_ids[]"][value="${mediaId}"]`);
+                        existingMediaIds.forEach(inp => inp.remove());
+                    }
 
-                    // Add new hidden input
+                    // Add new hidden inputs
                     const keyInput = document.createElement('input');
                     keyInput.type = 'hidden';
-                    keyInput.name = 'uploaded_keys[]';
+                    keyInput.name = mediaId ? 'updated_media_keys[]' : 'uploaded_keys[]';
                     keyInput.value = key;
-                    keyInput.dataset.field = field;
+                    if (mediaId) {
+                        keyInput.dataset.mediaId = mediaId;
+                    }
                     form.appendChild(keyInput);
 
-                    const fieldInput = document.createElement('input');
-                    fieldInput.type = 'hidden';
-                    fieldInput.name = 'uploaded_fields[]';
-                    fieldInput.value = field;
-                    fieldInput.dataset.field = field;
-                    form.appendChild(fieldInput);
+                    if (mediaId) {
+                        const mediaIdInput = document.createElement('input');
+                        mediaIdInput.type = 'hidden';
+                        mediaIdInput.name = 'updated_media_ids[]';
+                        mediaIdInput.value = mediaId;
+                        form.appendChild(mediaIdInput);
+                    }
                 }
 
             } catch (error) {
                 uploadModalTracker.markError(uploadId, error.message);
+                if (progressBar) {
+                    progressBar.style.background = '#ef4444';
+                }
+                alert(error.message || 'Upload failed. Please try again.');
             } finally {
                 input.dataset.processing = 'false';
                 tile.dataset.uploading = 'false';
@@ -1814,13 +1860,20 @@
             }
 
             const tile = link.closest('.photo-item');
-            const field = tile?.dataset.field;
+            if (!tile) return;
+
             const mediaId = tile?.dataset.mediaId;
 
             // Remove preview
             const img = tile?.querySelector('img.preview-img');
             if (img) {
                 img.remove();
+            }
+
+            // Remove progress bar if visible
+            const progressContainer = tile.querySelector('.upload-progress-container');
+            if (progressContainer) {
+                progressContainer.style.display = 'none';
             }
 
             // Add placeholder
@@ -1840,37 +1893,29 @@
 
             // Mark for deletion
             const form = document.querySelector('form[action*="profile"]');
-            if (form && field) {
-                // Remove uploaded_keys for this field
-                const keyInputs = form.querySelectorAll(`input[name="uploaded_keys[]"][data-field="${field}"]`);
-                keyInputs.forEach(inp => inp.remove());
-                const fieldInputs = form.querySelectorAll(`input[name="uploaded_fields[]"][data-field="${field}"]`);
-                fieldInputs.forEach(inp => inp.remove());
+            if (form) {
+                // Remove any uploaded/updated keys for this media item
+                if (mediaId) {
+                    const keyInputs = form.querySelectorAll(`input[name="updated_media_keys[]"][data-media-id="${mediaId}"]`);
+                    keyInputs.forEach(inp => inp.remove());
+                    const mediaIdInputs = form.querySelectorAll(`input[name="updated_media_ids[]"][value="${mediaId}"]`);
+                    mediaIdInputs.forEach(inp => inp.remove());
+                }
 
-                // Add deletion marker if it's a hardcoded field
-                if (field && !mediaId) {
-                    let deleteInput = form.querySelector(`input[name="deleted_fields[]"][value="${field}"]`);
-                    if (!deleteInput) {
-                        deleteInput = document.createElement('input');
-                        deleteInput.type = 'hidden';
-                        deleteInput.name = 'deleted_fields[]';
-                        deleteInput.value = field;
-                        form.appendChild(deleteInput);
+                // Add deletion marker for media ID
+                if (mediaId) {
+                    let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
+                    if (!deletedInput) {
+                        deletedInput = document.createElement('input');
+                        deletedInput.type = 'hidden';
+                        deletedInput.name = 'deleted_media_ids[]';
+                        deletedInput.value = mediaId;
+                        form.appendChild(deletedInput);
                     }
                 }
             }
-
-            if (mediaId && form) {
-                let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
-                if (!deletedInput) {
-                    deletedInput = document.createElement('input');
-                    deletedInput.type = 'hidden';
-                    deletedInput.name = 'deleted_media_ids[]';
-                    deletedInput.value = mediaId;
-                    form.appendChild(deletedInput);
-                }
-            }
         }
+        window.removeMediaImage = removeMediaImage;
 
         // Add more photos button functionality
         function addMorePhotoSlots(e) {
@@ -1883,6 +1928,9 @@
             newItem.style.cssText = 'position: relative;';
             newItem.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
+                <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.2); z-index: 10; display: none;">
+                    <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s ease; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>
+                </div>
                 <div class="upload-overlay">
                     <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                     <span class="upload-text">{{ \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
@@ -1892,20 +1940,80 @@
 
             grid.appendChild(newItem);
 
-            // Setup handlers for new item
+            // Setup handlers for new item (similar to existing items)
             const fileInput = newItem.querySelector('input[type="file"]');
             if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        handleFilesSelected([this.files[0]]);
+                let filePickerOpen = false;
+                
+                newItem.addEventListener('click', function(e) {
+                    if (e.target.closest('.remove-photo-link')) return;
+                    if (e.target.closest('.upload-progress-container')) return;
+                    if (fileInput.dataset.processing === 'true') return;
+                    if (filePickerOpen) return;
+                    
+                    const isEditing = !editCard.classList.contains('d-none');
+                    if (isEditing) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        filePickerOpen = true;
+                        fileInput.click();
+                        setTimeout(() => { filePickerOpen = false; }, 1000);
                     }
                 });
-            }
 
-            newItem.addEventListener('click', function(e) {
-                if (e.target.closest('.remove-photo-link')) return;
-                if (fileInput) fileInput.click();
-            });
+                fileInput.addEventListener('change', function(e) {
+                    e.stopImmediatePropagation();
+                    if (!this.files || !this.files[0]) return;
+                    if (this.dataset.processing === 'true') return;
+
+                    const file = this.files[0];
+                    this.dataset.processing = 'true';
+
+                    // Show progress container
+                    const progressContainer = newItem.querySelector('.upload-progress-container');
+                    const progressBar = newItem.querySelector('.upload-progress-bar');
+                    if (progressContainer) {
+                        progressContainer.style.display = 'block';
+                    }
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
+                    }
+
+                    // Preview image immediately
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        let img = newItem.querySelector('img.preview-img');
+                        if (!img) {
+                            const placeholder = newItem.querySelector('div:not(.upload-overlay):not(.upload-progress-container)');
+                            if (placeholder) placeholder.remove();
+                            img = document.createElement('img');
+                            img.className = 'preview-img';
+                            img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; display: block;';
+                            newItem.insertBefore(img, newItem.firstChild);
+                        }
+                        img.src = e.target.result;
+
+                        // Update overlay
+                        const overlay = newItem.querySelector('.upload-overlay');
+                        if (overlay) {
+                            const uploadText = overlay.querySelector('.upload-text');
+                            if (uploadText) uploadText.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_replace_photo') }}';
+                            let removeLink = overlay.querySelector('.remove-photo-link');
+                            if (!removeLink) {
+                                removeLink = document.createElement('span');
+                                removeLink.className = 'remove-photo-link';
+                                removeLink.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}';
+                                removeLink.onclick = (e) => removeMediaImage(removeLink, e);
+                                overlay.appendChild(removeLink);
+                            }
+                        }
+                    };
+                    reader.readAsDataURL(file);
+
+                    // Upload to S3 via AJAX (no mediaId for new items)
+                    uploadImageToS3(file, null, newItem, fileInput);
+                });
+            }
         }
 
         // Add "Add More Photos" button to additional photos section
@@ -1915,7 +2023,7 @@
             addMoreBtn.type = 'button';
             addMoreBtn.className = 'add-more-btn';
             addMoreBtn.style.cssText = 'margin-top: 12px; padding: 8px 16px; background: #10b981; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: none;';
-                    addMoreBtn.innerHTML = '<i class="fas fa-plus"></i> {{ \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}';
+                    addMoreBtn.innerHTML = '<i class="fas fa-plus"></i> {{ \App\Helpers\Bilingual::get('talent.profile_add_more_images') ?? 'Add more Profile Images' }}';
             addMoreBtn.onclick = addMorePhotoSlots;
             additionalPhotosSection.appendChild(addMoreBtn);
 
@@ -2088,11 +2196,17 @@
                 }
 
                 // Show progress
-                videoProgressContainer.style.display = 'block';
-                videoProgressFill.style.width = '0%';
-                videoUploadStatus.style.display = 'block';
-                videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_uploading_video') }}';
-                videoUploadStatus.style.color = '#6b7280';
+                if (videoProgressContainer) {
+                    videoProgressContainer.style.display = 'block';
+                }
+                if (videoProgressFill) {
+                    videoProgressFill.style.width = '0%';
+                }
+                if (videoUploadStatus) {
+                    videoUploadStatus.style.display = 'block';
+                    videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_uploading_video') }}';
+                    videoUploadStatus.style.color = '#6b7280';
+                }
 
                 // Update label
                 const label = document.querySelector('[data-file-label="video"]');
@@ -2100,61 +2214,92 @@
                     label.textContent = file.name;
                 }
 
-                // Submit form with video file
+                // Submit form with video file (like onboarding step 5)
                 const form = document.querySelector('form[action*="profile"]');
                 if (form) {
-                    // Simulate progress (since Mux upload happens server-side)
-                    let progress = 0;
-                    const progressInterval = setInterval(() => {
-                        progress += 2;
-                        if (progress < 95) {
-                            videoProgressFill.style.width = progress + '%';
-                        }
-                    }, 300);
-
-                    // Submit the form
+                    // Build FormData with all form fields + video file
                     const formData = new FormData(form);
                     formData.append('video', file);
 
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
+                    // Use XMLHttpRequest for better file upload support and progress tracking
+                    const xhr = new XMLHttpRequest();
+
+                    // Track upload progress
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable && videoProgressFill) {
+                            // Show upload progress (0-90% for file upload, then wait for Mux processing)
+                            const uploadProgress = Math.min(90, Math.round((e.loaded / e.total) * 90));
+                            videoProgressFill.style.width = uploadProgress + '%';
                         }
-                    })
-                    .then(response => {
-                        clearInterval(progressInterval);
-                        videoProgressFill.style.width = '100%';
-                        
-                        if (response.ok) {
-                            return response.text().then(html => {
+                    });
+
+                    // Handle completion
+                    xhr.addEventListener('load', () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            // Success - show 100% and reload
+                            if (videoProgressFill) {
+                                videoProgressFill.style.width = '100%';
+                            }
+                            if (videoUploadStatus) {
                                 videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_video_uploaded') }}';
                                 videoUploadStatus.style.color = '#10b981';
-                                
-                                // Reload page after a short delay
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1000);
-                            });
+                            }
+                            
+                            // Reload page after a short delay to show updated video
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         } else {
-                            return response.json().then(data => {
-                                throw new Error(data.message || 'Upload failed');
-                            }).catch(() => {
-                                throw new Error('Upload failed');
-                            });
+                            // Handle errors
+                            let errorMsg = 'Upload failed';
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                errorMsg = response.message || response.error || errorMsg;
+                            } catch (e) {
+                                // Try to extract error from HTML response
+                                const errorMatch = xhr.responseText.match(/<div[^>]*class="[^"]*error[^"]*"[^>]*>([^<]+)<\/div>/i);
+                                if (errorMatch) {
+                                    errorMsg = errorMatch[1];
+                                }
+                            }
+                            
+                            if (videoProgressFill) {
+                                videoProgressFill.style.width = '0%';
+                            }
+                            if (videoUploadStatus) {
+                                videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}: ' + errorMsg;
+                                videoUploadStatus.style.color = '#dc2626';
+                            }
+                            alert('Video upload failed: ' + errorMsg);
+                            this.value = '';
                         }
-                    })
-                    .catch(error => {
-                        clearInterval(progressInterval);
-                        videoProgressFill.style.width = '0%';
-                        videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}: ' + (error.message || '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}');
-                        videoUploadStatus.style.color = '#dc2626';
-                        console.error('Video upload error:', error);
-                    })
-                    .finally(() => {
+                    });
+
+                    // Handle errors
+                    xhr.addEventListener('error', () => {
+                        if (videoProgressFill) {
+                            videoProgressFill.style.width = '0%';
+                        }
+                        if (videoUploadStatus) {
+                            videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_upload_failed') }}';
+                            videoUploadStatus.style.color = '#dc2626';
+                        }
+                        alert('Network error. Please check your connection and try again.');
                         this.value = '';
                     });
+
+                    // Handle abort
+                    xhr.addEventListener('abort', () => {
+                        if (videoProgressFill) {
+                            videoProgressFill.style.width = '0%';
+                        }
+                        this.value = '';
+                    });
+
+                    // Start upload
+                    xhr.open('POST', form.action, true);
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    xhr.send(formData);
                 }
             });
         }

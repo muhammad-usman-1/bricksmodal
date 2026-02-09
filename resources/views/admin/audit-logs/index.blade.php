@@ -409,9 +409,7 @@
             </tbody>
         </table>
 
-        <div style="margin-top: 20px;">
-            {{ $logs->links() }}
-        </div>
+       
         @else
         <div class="no-logs">
             <p>No audit logs found.</p>

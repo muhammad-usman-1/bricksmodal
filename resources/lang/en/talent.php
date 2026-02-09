@@ -73,4 +73,7 @@ return [
     'profile_model' => 'Model',
     'profile_years' => 'Years',
     'profile_location' => 'Location',
+    'profile_id_document' => 'ID Document',
+    'profile_id_readonly_note' => 'This document is read-only and cannot be edited.',
+    'profile_add_more_images' => 'Add more Profile Images',
 ];

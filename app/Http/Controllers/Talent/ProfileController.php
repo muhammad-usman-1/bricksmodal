@@ -95,6 +95,10 @@ class ProfileController extends Controller
             'additional_photo_keys.*' => ['string'],
             'deleted_media_ids' => ['nullable', 'array'],
             'deleted_media_ids.*' => ['integer'],
+            'updated_media_keys' => ['nullable', 'array'],
+            'updated_media_keys.*' => ['string'],
+            'updated_media_ids' => ['nullable', 'array'],
+            'updated_media_ids.*' => ['integer'],
             'video' => ['nullable', 'file', 'mimes:mp4,mpeg,mov,avi,webm', 'max:512000'],
         ]);
 
@@ -210,6 +214,50 @@ class ProfileController extends Controller
             }
         }
 
+        // Handle TalentMedia updates (replacing existing photos)
+        if ($request->has('updated_media_keys') && $request->has('updated_media_ids')) {
+            $updatedKeys = $request->input('updated_media_keys', []);
+            $updatedIds = $request->input('updated_media_ids', []);
+            $disk = config('filesystems.cloud', 's3');
+            $storage = Storage::disk($disk);
+            
+            // Match keys with IDs (they should be in the same order)
+            foreach ($updatedKeys as $index => $key) {
+                $mediaId = $updatedIds[$index] ?? null;
+                if ($mediaId) {
+                    $media = \App\Models\TalentMedia::where('id', $mediaId)
+                        ->where('talent_profile_id', $profile->id)
+                        ->first();
+                    
+                    if ($media) {
+                        // Delete old file from storage
+                        try {
+                            $oldPath = $media->file_path;
+                            if ($oldPath && (str_starts_with($oldPath, 'http://') || str_starts_with($oldPath, 'https://'))) {
+                                $awsUrl = rtrim((string) env('AWS_URL'), '/');
+                                if ($awsUrl && str_starts_with($oldPath, $awsUrl)) {
+                                    $oldPath = ltrim(str_replace($awsUrl, '', $oldPath), '/');
+                                } else {
+                                    $oldPath = null;
+                                }
+                            }
+                            if ($oldPath) {
+                                Storage::disk($disk)->delete($oldPath);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to delete old media file: ' . $e->getMessage());
+                        }
+                        
+                        // Update with new file path
+                        $url = $storage->url($key);
+                        $media->update([
+                            'file_path' => $url,
+                        ]);
+                    }
+                }
+            }
+        }
+
         // Handle TalentMedia deletions
         if ($request->has('deleted_media_ids')) {
             $deletedIds = $request->input('deleted_media_ids');
@@ -224,7 +272,7 @@ class ProfileController extends Controller
                     $path = $media->file_path;
                     
                     // Extract relative path if it's a full URL
-                    if (str_starts_with($path, ['http://', 'https://'])) {
+                    if ($path && (str_starts_with($path, 'http://') || str_starts_with($path, 'https://'))) {
                         $awsUrl = rtrim((string) env('AWS_URL'), '/');
                         if ($awsUrl && str_starts_with($path, $awsUrl)) {
                             $path = ltrim(str_replace($awsUrl, '', $path), '/');
@@ -383,7 +431,7 @@ class ProfileController extends Controller
                     $path = $profile->headshot_center_path;
                     
                     // Extract relative path if it's a full URL
-                    if (str_starts_with($path, ['http://', 'https://'])) {
+                    if ($path && (str_starts_with($path, 'http://') || str_starts_with($path, 'https://'))) {
                         $awsUrl = rtrim((string) env('AWS_URL'), '/');
                         if ($awsUrl && str_starts_with($path, $awsUrl)) {
                             $path = ltrim(str_replace($awsUrl, '', $path), '/');
