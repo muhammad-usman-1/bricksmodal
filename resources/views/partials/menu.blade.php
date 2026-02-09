@@ -616,7 +616,7 @@ letter-spacing: 1.4px;">STUDIO</div>
             
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.audit-logs.index') }}" class="bm-link {{ request()->is('admin/audit-logs*') ? 'c-active' : '' }}">
-                    <i class="fas fa-fw fa-history" style="font-size: 20px;"></i>
+                    <img src="{{ asset('images/recent.png') }}" alt="Audit Logs" style="object-fit: contain;">
                     Audit Logs
                 </a>
             </li>
