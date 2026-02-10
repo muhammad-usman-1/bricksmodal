@@ -213,21 +213,22 @@ class LoginController extends Controller
             return redirect()->route('talent.rejected');
         }
 
-        if (! $profile || ! $profile->hasCompletedOnboarding()) {
-            // New flow: OTP -> Terms (first time) -> Intro -> Onboarding step-1
-            // If terms already accepted, skip Terms and go straight to Intro.
-            if (! $profile || ! $profile->terms_accepted_at) {
-                return redirect()->route('talent.onboarding.terms');
+        // IMPORTANT: If onboarding is completed, skip Terms & Conditions entirely
+        // and go directly to dashboard or pending status
+        if ($profile && $profile->hasCompletedOnboarding()) {
+            if ($profile->verification_status !== 'approved') {
+                return redirect()->route('talent.pending_status');
             }
-
-            return redirect()->route('talent.onboarding.intro');
+            return redirect()->intended(route('talent.dashboard'));
         }
 
-        if ($profile->verification_status !== 'approved') {
-            return redirect()->route('talent.pending_status');
+        // Only for users who haven't completed onboarding:
+        // New flow: OTP -> Terms (first time) -> Intro -> Onboarding step-1
+        if (! $profile || ! $profile->terms_accepted_at) {
+            return redirect()->route('talent.onboarding.terms');
         }
 
-        return redirect()->intended(route('talent.dashboard'));
+        return redirect()->route('talent.onboarding.intro');
     }
 
     public function logout(Request $request)
