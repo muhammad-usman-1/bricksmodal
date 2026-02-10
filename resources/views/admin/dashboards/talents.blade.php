@@ -773,7 +773,7 @@
                     $onboardingStep = $talent->onboarding_steps_completed ?? 0;
                     $hasCompletedStep5 = $onboardingStep >= 5 && $talent->onboarding_step === 'step-5';
                 @endphp
-                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)' data-onboarding-step="{{ $onboardingStep }}" data-completed-step5="{{ $hasCompletedStep5 ? '1' : '0' }}">
+                <div class="talent-card" data-gender="{{ $gender }}" data-status="{{ $status }}" data-name="{{ Str::lower($displayName) }}" data-url="{{ route('admin.talent-profiles.show', $talent->id) }}" data-images='@json($allImages)' data-onboarding-step="{{ $onboardingStep }}" data-completed-step5="{{ $hasCompletedStep5 ? '1' : '0' }}" style="display: none;">
                     <div class="talent-img-container">
                         @foreach($allImages as $index => $imgSrc)
                             <img class="talent-img {{ $index === 0 ? 'active' : '' }}"
@@ -824,6 +824,28 @@
                 </div>
             @endforeach
         </div>
+
+        <!-- Immediate filter script to prevent flash of all talents -->
+        <script>
+            (function() {
+                // Apply filter immediately before page fully loads
+                const cards = document.querySelectorAll('.talent-card');
+                const defaultFilter = 'all'; // Default to 'all' which shows approved
+                
+                cards.forEach(card => {
+                    const status = (card.dataset.status || '').toLowerCase();
+                    const gender = card.dataset.gender || '';
+                    
+                    // Only show approved/verified talents by default
+                    const isApproved = status === 'approved' || status === 'verified';
+                    if (isApproved) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            })();
+        </script>
 
         <div id="emptyState" class="empty-state d-none">
             <div class="empty-state-content">
@@ -977,6 +999,8 @@
                 const gender = card.dataset.gender || '';
                 const status = (card.dataset.status || '').toLowerCase();
                 const name = card.dataset.name || '';
+                const onboardingStep = parseInt(card.dataset.onboardingStep || '0', 10);
+                const completedStep5 = card.dataset.completedStep5 === '1';
 
                 const matchesSearch = !term || name.includes(term);
 
@@ -993,8 +1017,8 @@
                     // Female filter should only show approved/verified female talents
                     matchesFilter = gender === 'female' && (status === 'approved' || status === 'verified');
                 } else if (filter === 'pending') {
-                    // Pending filter should only show pending talents
-                    matchesFilter = status === 'pending';
+                    // Pending filter should only show pending talents who have completed onboarding
+                    matchesFilter = status === 'pending' && (onboardingStep >= 5 || completedStep5);
                 } else if (filter === 'rejected') {
                     // Rejected filter should only show rejected talents
                     matchesFilter = status === 'rejected';
@@ -1004,8 +1028,14 @@
                 }
 
                 const isVisible = matchesSearch && matchesFilter;
-                card.style.display = isVisible ? '' : 'none';
-                if (isVisible) visibleCount++;
+                if (isVisible) {
+                    card.style.display = '';
+                    card.classList.add('filter-visible');
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                    card.classList.remove('filter-visible');
+                }
             });
 
             // Handle empty state
@@ -1048,8 +1078,16 @@
 
         searchInput?.addEventListener('input', applyFilters);
 
-        // Initial apply
-        applyFilters();
+        // Apply filters immediately on page load (before any delay)
+        // Use requestAnimationFrame to ensure DOM is ready but apply immediately
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                requestAnimationFrame(applyFilters);
+            });
+        } else {
+            // DOM is already loaded, apply immediately
+            requestAnimationFrame(applyFilters);
+        }
 
         // Make cards clickable
         cards.forEach(card => {

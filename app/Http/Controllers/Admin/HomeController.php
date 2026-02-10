@@ -18,7 +18,7 @@ class HomeController
                     $roleQuery->whereIn('title', ['admin', 'superadmin', 'creative']);
                 });
             })
-            ->where('onboarding_steps_completed', '>=', 3); // Only show talents who completed at least step 3
+            ->where('onboarding_steps_completed', '>=', 5); // Only show talents who completed onboarding (step 5)
 
         // Calculate stats with the same filters
         $total = (clone $baseQuery)->count();
