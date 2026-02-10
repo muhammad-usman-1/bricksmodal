@@ -975,20 +975,33 @@
             let visibleCount = 0;
             cards.forEach(card => {
                 const gender = card.dataset.gender || '';
-                const status = card.dataset.status || '';
+                const status = (card.dataset.status || '').toLowerCase();
                 const name = card.dataset.name || '';
 
                 const matchesSearch = !term || name.includes(term);
-                const isActive = status === 'approved' || status === 'verified';
-                const completedStep5 = card.dataset.completedStep5 === '1';
 
                 let matchesFilter = false;
-                if (filter === 'all') matchesFilter = isActive;
-                if (filter === 'male') matchesFilter = gender === 'male' && isActive;
-                if (filter === 'female') matchesFilter = gender === 'female' && isActive;
-                if (filter === 'pending') matchesFilter = status === 'pending' && completedStep5;
-                // if (filter === 'verified') matchesFilter = isActive; // Removed
-                // if (filter === 'suspended') matchesFilter = status === 'suspended'; // Removed
+                
+                // Filter by status first, then by gender if applicable
+                if (filter === 'all') {
+                    // All Talents button should only show approved/verified talents
+                    matchesFilter = status === 'approved' || status === 'verified';
+                } else if (filter === 'male') {
+                    // Male filter should only show approved/verified male talents
+                    matchesFilter = gender === 'male' && (status === 'approved' || status === 'verified');
+                } else if (filter === 'female') {
+                    // Female filter should only show approved/verified female talents
+                    matchesFilter = gender === 'female' && (status === 'approved' || status === 'verified');
+                } else if (filter === 'pending') {
+                    // Pending filter should only show pending talents
+                    matchesFilter = status === 'pending';
+                } else if (filter === 'rejected') {
+                    // Rejected filter should only show rejected talents
+                    matchesFilter = status === 'rejected';
+                } else if (filter === 'suspended') {
+                    // Suspended filter should only show suspended talents
+                    matchesFilter = status === 'suspended';
+                }
 
                 const isVisible = matchesSearch && matchesFilter;
                 card.style.display = isVisible ? '' : 'none';
@@ -1006,6 +1019,12 @@
                     if (filter === 'pending') {
                         emptyStateTitle.textContent = 'No pending talents';
                         emptyStateText.textContent = 'There are no pending talents to review at the moment.';
+                    } else if (filter === 'rejected') {
+                        emptyStateTitle.textContent = 'No rejected talents';
+                        emptyStateText.textContent = 'There are no rejected talents at the moment.';
+                    } else if (filter === 'suspended') {
+                        emptyStateTitle.textContent = 'No suspended talents';
+                        emptyStateText.textContent = 'There are no suspended talents at the moment.';
                     } else if (term) {
                         emptyStateTitle.textContent = 'No results found';
                         emptyStateText.textContent = `We couldn't find any talents matching "${term}".`;
