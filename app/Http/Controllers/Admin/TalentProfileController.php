@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\MassDestroyTalentProfileRequest;
 use App\Http\Requests\StoreTalentProfileRequest;
 use App\Http\Requests\UpdateTalentProfileRequest;
+use App\Models\AuditLog;
 use App\Models\Language;
 use App\Models\TalentProfile;
 use App\Models\User;
@@ -493,10 +494,38 @@ class TalentProfileController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
+        // Load user relationship before logging
+        $talentProfile->load('user');
+
         $talentProfile->update([
             'verification_status' => 'rejected',
             'verification_notes'  => $data['notes'] ?? null,
             'onboarding_step'     => 'pending-approval',
+        ]);
+        
+        // Log Account Rejection event
+        $adminUser = auth()->user();
+        $user = $talentProfile->user;
+        AuditLog::create([
+            'event_type' => 'account_rejection',
+            'user_type' => 'admin',
+            'user_id' => $adminUser->id ?? null,
+            'user_email' => $adminUser->email ?? null,
+            'user_phone' => null,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'onboarding_action' => 'Account Rejection - Talent account rejected',
+            'metadata' => [
+                'talent_profile_id' => $talentProfile->id,
+                'talent_name' => $talentProfile->display_name ?? ($talentProfile->first_name . ' ' . $talentProfile->last_name),
+                'talent_email' => $user->email ?? null,
+                'talent_phone' => $user->phone_number ?? null,
+                'admin_name' => $adminUser->name ?? 'System',
+                'admin_email' => $adminUser->email ?? null,
+                'verification_status' => 'rejected',
+                'rejection_notes' => $data['notes'] ?? null,
+            ],
+            'created_at' => now(),
         ]);
 
         $this->triggerNotification($talentProfile, 'talent_profile_rejection', $data['notes'] ?? null);
@@ -536,6 +565,30 @@ class TalentProfileController extends Controller
 
         $talentProfile->update([
             'verification_status' => 'suspended',
+        ]);
+        
+        // Log Account Suspension event
+        $adminUser = auth()->user();
+        $user = $talentProfile->user;
+        AuditLog::create([
+            'event_type' => 'account_suspension',
+            'user_type' => 'admin',
+            'user_id' => $adminUser->id ?? null,
+            'user_email' => $adminUser->email ?? null,
+            'user_phone' => null,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'onboarding_action' => 'Account Suspension - Talent account suspended',
+            'metadata' => [
+                'talent_profile_id' => $talentProfile->id,
+                'talent_name' => $talentProfile->display_name ?? ($talentProfile->first_name . ' ' . $talentProfile->last_name),
+                'talent_email' => $user->email ?? null,
+                'talent_phone' => $user->phone_number ?? null,
+                'admin_name' => $adminUser->name ?? 'System',
+                'admin_email' => $adminUser->email ?? null,
+                'verification_status' => 'suspended',
+            ],
+            'created_at' => now(),
         ]);
 
         return back()->with('success', 'Talent suspended successfully.');
@@ -592,6 +645,28 @@ class TalentProfileController extends Controller
     {
         DB::transaction(function () use ($talentProfile, $notify) {
             $user = $talentProfile->user;
+            
+            // Log Account Deletion event before deletion
+            $adminUser = auth()->user();
+            AuditLog::create([
+                'event_type' => 'account_deletion',
+                'user_type' => 'admin',
+                'user_id' => $adminUser->id ?? null,
+                'user_email' => $adminUser->email ?? null,
+                'user_phone' => null,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'onboarding_action' => 'Account Deletion - Talent profile deleted',
+                'metadata' => [
+                    'talent_profile_id' => $talentProfile->id,
+                    'talent_name' => $talentProfile->display_name ?? ($talentProfile->first_name . ' ' . $talentProfile->last_name),
+                    'talent_email' => $user->email ?? null,
+                    'talent_phone' => $user->phone_number ?? null,
+                    'admin_name' => $adminUser->name ?? 'System',
+                    'admin_email' => $adminUser->email ?? null,
+                ],
+                'created_at' => now(),
+            ]);
 
             if ($notify && $user) {
                 $this->notifyTalent($talentProfile, 'deleted', trans('notifications.talent_profile_deleted'));

@@ -529,6 +529,28 @@ class OnboardingController extends Controller
                 
                 // Log onboarding completion
                 $this->logOnboardingStep($request->user('talent'), $profile, 'step-5', $request, true);
+                
+                // Log Account Created event
+                AuditLog::create([
+                    'event_type' => 'account_created',
+                    'user_type' => 'talent',
+                    'user_id' => $request->user('talent')->id,
+                    'user_email' => $request->user('talent')->email,
+                    'user_phone' => $request->user('talent')->phone_number,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'onboarding_step' => 'step-5',
+                    'onboarding_steps_completed' => 5,
+                    'onboarding_completed' => true,
+                    'onboarding_action' => 'Account Created - Onboarding completed successfully',
+                    'metadata' => [
+                        'talent_profile_id' => $profile->id,
+                        'talent_name' => $profile->display_name ?? ($profile->first_name . ' ' . $profile->last_name),
+                        'talent_email' => $request->user('talent')->email,
+                        'talent_phone' => $request->user('talent')->phone_number,
+                    ],
+                    'created_at' => now(),
+                ]);
 
                 $notificationService->send($request->user('talent'), 'talent_profile_submission', [
                     'name' => $profile->display_name,

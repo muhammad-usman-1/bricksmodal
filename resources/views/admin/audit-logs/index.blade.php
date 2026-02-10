@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     :root {
         --bg: #f7f8fb;
@@ -106,6 +107,9 @@
         text-decoration: none;
         display: inline-block;
     }
+    .btn-filter:hover {
+        text-decoration: none;
+    }
     .btn-reset {
         background: #f3f4f6;
         color: var(--ink-700);
@@ -126,6 +130,38 @@
         border-color: var(--border);
         outline: none;
     }
+    .btn-refresh {
+        background: #7e8e95;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-refresh:hover {
+        background: #7e8e95;
+        text-decoration: none;
+        color: white;
+    }
+    .btn-export-csv {
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
 
     .logs-table-card {
         background: var(--card);
@@ -193,6 +229,42 @@
         padding: 60px 20px;
         color: var(--ink-500);
     }
+
+    .see-more-container {
+        padding: 16px;
+        text-align: center;
+        border-top: 1px solid var(--border);
+    }
+
+    .see-more-btn {
+        color: #7b8191;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px 16px;
+        transition: color 0.2s ease;
+        outline: none;
+    }
+
+    .see-more-btn:hover {
+        color: #0f1524;
+        text-decoration: none;
+    }
+
+    .see-more-btn:focus,
+    .see-more-btn:active {
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .see-more-btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
 </style>
 
 <div class="audit-logs-shell">
@@ -249,6 +321,10 @@
                         <option value="onboarding_step" {{ request('event_type') == 'onboarding_step' ? 'selected' : '' }}>Onboarding Step</option>
                         <option value="onboarding_completed" {{ request('event_type') == 'onboarding_completed' ? 'selected' : '' }}>Onboarding Completed</option>
                         <option value="signup" {{ request('event_type') == 'signup' ? 'selected' : '' }}>Signup</option>
+                        <option value="account_created" {{ request('event_type') == 'account_created' ? 'selected' : '' }}>Account Created</option>
+                        <option value="account_deletion" {{ request('event_type') == 'account_deletion' ? 'selected' : '' }}>Account Deletion</option>
+                        <option value="account_suspension" {{ request('event_type') == 'account_suspension' ? 'selected' : '' }}>Account Suspension</option>
+                        <option value="account_rejection" {{ request('event_type') == 'account_rejection' ? 'selected' : '' }}>Account Rejection</option>
                         <option value="talent_accepted" {{ request('event_type') == 'talent_accepted' ? 'selected' : '' }}>Talent Accepted</option>
                         <option value="profile_updated" {{ request('event_type') == 'profile_updated' ? 'selected' : '' }}>Profile Updated</option>
                     </select>
@@ -278,15 +354,23 @@
             <div class="filter-actions">
                 <button type="submit" class="btn-filter">Apply Filters</button>
                 <a href="{{ route('admin.audit-logs.index') }}" class="btn-filter btn-reset">Reset</a>
-                <a href="{{ route('admin.audit-logs.export', request()->query()) }}" class="btn-filter" style="background: #10b981; color: white;">Export CSV</a>
+                <button type="button" class="btn-refresh" id="refreshBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    Refresh
+                </button>
+                <button type="button" class="btn-export-csv" id="exportCsvBtn">Export CSV</button>
             </div>
         </form>
     </div>
 
     <!-- Logs Table -->
-    <div class="logs-table-card">
+    <div class="logs-table-card" id="logsTableContainer">
         @if($logs->count() > 0)
-        <table class="logs-table">
+        <table class="logs-table" id="logsTable">
             <thead>
                 <tr>
                     <th>Time</th>
@@ -298,8 +382,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($logs as $log)
-                <tr>
+                @foreach($logs as $index => $log)
+                <tr class="log-row" style="{{ $index >= 7 ? 'display: none;' : '' }}">
                     <td>
                         <div>{{ $log->created_at->setTimezone('Asia/Kuwait')->format('M d, Y') }}</div>
                         <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->setTimezone('Asia/Kuwait')->format('H:i:s') }} GMT+3</div>
@@ -317,6 +401,14 @@
                             <span class="badge badge-success">Onboarding Completed</span>
                         @elseif($log->event_type == 'signup')
                             <span class="badge badge-info">Signup</span>
+                        @elseif($log->event_type == 'account_created')
+                            <span class="badge badge-success">Account Created</span>
+                        @elseif($log->event_type == 'account_deletion')
+                            <span class="badge badge-danger">Account Deletion</span>
+                        @elseif($log->event_type == 'account_suspension')
+                            <span class="badge badge-warning">Account Suspension</span>
+                        @elseif($log->event_type == 'account_rejection')
+                            <span class="badge badge-danger">Account Rejection</span>
                         @elseif($log->event_type == 'talent_accepted')
                             <span class="badge badge-success">Talent Accepted</span>
                         @elseif($log->event_type == 'profile_updated')
@@ -358,6 +450,46 @@
                             @endif
                             @if($log->metadata && isset($log->metadata['admin_name']))
                                 <div><strong>Accepted by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->event_type == 'account_created')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->event_type == 'account_deletion')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['admin_name']))
+                                <div><strong>Deleted by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->event_type == 'account_suspension')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['admin_name']))
+                                <div><strong>Suspended by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @endif
+                            @if($log->onboarding_action)
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
+                            @endif
+                        @elseif($log->event_type == 'account_rejection')
+                            @if($log->metadata && isset($log->metadata['talent_name']))
+                                <div><strong>Talent:</strong> {{ $log->metadata['talent_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['admin_name']))
+                                <div><strong>Rejected by:</strong> {{ $log->metadata['admin_name'] }}</div>
+                            @endif
+                            @if($log->metadata && isset($log->metadata['rejection_notes']) && $log->metadata['rejection_notes'])
+                                <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;"><strong>Notes:</strong> {{ $log->metadata['rejection_notes'] }}</div>
                             @endif
                             @if($log->onboarding_action)
                                 <div style="color: var(--ink-500); font-size: 12px; margin-top: 4px;">{{ $log->onboarding_action }}</div>
@@ -408,8 +540,11 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="see-more-container">
+            <button type="button" class="see-more-btn" id="seeMoreBtn">See More</button>
+        </div>
 
-       
+
         @else
         <div class="no-logs">
             <p>No audit logs found.</p>
@@ -417,4 +552,183 @@
         @endif
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle See More button click - client-side expansion
+        const seeMoreBtn = document.getElementById('seeMoreBtn');
+        const logRows = document.querySelectorAll('.log-row');
+        let visibleCount = 7; // Start with 7 visible rows
+
+        if (seeMoreBtn && logRows.length > 0) {
+            // Hide button if all rows are already visible
+            if (logRows.length <= visibleCount) {
+                seeMoreBtn.style.display = 'none';
+            }
+
+            seeMoreBtn.addEventListener('click', function() {
+                // Show next 7 rows
+                const nextBatch = Math.min(visibleCount + 7, logRows.length);
+
+                for (let i = visibleCount; i < nextBatch; i++) {
+                    if (logRows[i]) {
+                        logRows[i].style.display = 'table-row';
+                    }
+                }
+
+                visibleCount = nextBatch;
+
+                // Hide button if all rows are now visible
+                if (visibleCount >= logRows.length) {
+                    seeMoreBtn.style.display = 'none';
+                }
+            });
+        } else if (seeMoreBtn) {
+            // No rows to show, hide button
+            seeMoreBtn.style.display = 'none';
+        }
+
+        // Handle Refresh button - reload only the table
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                const btn = this;
+                const originalHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refreshing...';
+
+                // Get current filter parameters
+                const params = new URLSearchParams(window.location.search);
+
+                // Fetch updated table content
+                fetch('{{ route("admin.audit-logs.index") }}?' + params.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html',
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary container to parse the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    // Extract the table container content
+                    const newTableContainer = tempDiv.querySelector('#logsTableContainer');
+                    if (newTableContainer) {
+                        const currentContainer = document.getElementById('logsTableContainer');
+                        const currentHtml = currentContainer.innerHTML;
+                        currentContainer.innerHTML = newTableContainer.innerHTML;
+
+                        // Reinitialize See More functionality
+                        setTimeout(() => {
+                            initializeSeeMore();
+                        }, 100);
+                    }
+
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                })
+                .catch(error => {
+                    console.error('Error refreshing table:', error);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to refresh the table. Please try again.',
+                        });
+                    } else {
+                        alert('Failed to refresh the table. Please try again.');
+                    }
+                });
+            });
+        }
+
+        // Handle Export CSV button with SweetAlert
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Export Audit Logs',
+                    html: `
+                        <div style="text-align: left; margin-top: 20px;">
+                            <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select number of records to export:</label>
+                            <select id="exportLimit" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                                <option value="50">50 records</option>
+                                <option value="100">100 records</option>
+                                <option value="250">250 records</option>
+                                <option value="500">500 records</option>
+                                <option value="1000">1,000 records</option>
+                                <option value="full">Full table (All records)</option>
+                            </select>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Export',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280',
+                    didOpen: () => {
+                        const select = document.getElementById('exportLimit');
+                        select.focus();
+                    },
+                    preConfirm: () => {
+                        const select = document.getElementById('exportLimit');
+                        return select.value;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const limit = result.value;
+                        const params = new URLSearchParams(window.location.search);
+                        params.set('limit', limit);
+
+                        // Create and trigger download
+                        window.location.href = '{{ route("admin.audit-logs.export") }}?' + params.toString();
+                    }
+                });
+            });
+        }
+
+        function initializeSeeMore() {
+            const seeMoreBtn = document.getElementById('seeMoreBtn');
+            const logRows = document.querySelectorAll('.log-row');
+            let visibleCount = 7;
+
+            if (seeMoreBtn && logRows.length > 0) {
+                if (logRows.length <= visibleCount) {
+                    seeMoreBtn.style.display = 'none';
+                } else {
+                    seeMoreBtn.style.display = 'block';
+                }
+
+                seeMoreBtn.addEventListener('click', function() {
+                    const nextBatch = Math.min(visibleCount + 7, logRows.length);
+
+                    for (let i = visibleCount; i < nextBatch; i++) {
+                        if (logRows[i]) {
+                            logRows[i].style.display = 'table-row';
+                        }
+                    }
+
+                    visibleCount = nextBatch;
+
+                    if (visibleCount >= logRows.length) {
+                        seeMoreBtn.style.display = 'none';
+                    }
+                });
+            } else if (seeMoreBtn) {
+                seeMoreBtn.style.display = 'none';
+            }
+        }
+    });
+</script>
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 @endsection

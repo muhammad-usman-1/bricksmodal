@@ -104,6 +104,12 @@ class AuditLogController extends Controller
             });
         }
         
+        // Apply limit if specified (not 'full')
+        $limit = $request->input('limit', 'full');
+        if ($limit !== 'full' && is_numeric($limit)) {
+            $query->limit((int)$limit);
+        }
+        
         $logs = $query->get();
         
         $filename = 'audit_logs_' . now()->format('Y-m-d_His') . '.csv';
