@@ -197,6 +197,20 @@ class TalentProfileController extends Controller
             }
         }
 
+        // Auto-update display_name when first_name or last_name changes
+        // This ensures display_name always reflects the current first_name + last_name
+        if (isset($data['first_name']) || isset($data['last_name'])) {
+            $firstName = trim($data['first_name'] ?? $talentProfile->first_name ?? '');
+            $lastName = trim($data['last_name'] ?? $talentProfile->last_name ?? '');
+            
+            // Build display_name from first_name and last_name
+            $newDisplayName = trim($firstName . ' ' . $lastName);
+            
+            // Always update display_name when first_name or last_name changes
+            // This ensures the grid view shows the updated name
+            $data['display_name'] = $newDisplayName ?: null;
+        }
+
         // Get changed fields for logging
         $changedFields = [];
         $originalData = $talentProfile->getOriginal();
