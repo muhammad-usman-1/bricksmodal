@@ -265,28 +265,28 @@
                     <span class="badge-num">2</span>
                     <span class="needs-text">
                         <strong>Physical Attributes</strong>
-                        <span>Height, weight, hair color, eye color, and body measurements</span>
+                        <span>Height, weight, gender, hair color, eye color, skin tone, tattoos, and piercings</span>
                     </span>
                 </li>
                 <li class="needs-item">
                     <span class="badge-num">3</span>
                     <span class="needs-text">
-                        <strong>Additional Details</strong>
-                        <span>Tattoos, piercings, and other distinguishing features</span>
+                        <strong>Body Measurements</strong>
+                        <span>T-shirt size, dress size (if applicable), and shoe size</span>
                     </span>
                 </li>
                 <li class="needs-item">
                     <span class="badge-num">4</span>
                     <span class="needs-text">
                         <strong>ID Verification</strong>
-                        <span>Upload front and back of your government-issued ID</span>
+                        <span>Upload your government-issued ID (Civil ID or Passport)</span>
                     </span>
                 </li>
                 <li class="needs-item">
                     <span class="badge-num">5</span>
                     <span class="needs-text">
                         <strong>Photos & Video</strong>
-                        <span>Upload additional photos and a short video to showcase yourself</span>
+                        <span>Upload additional photos and a short profile video</span>
                     </span>
                 </li>
             </ul>
