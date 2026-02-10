@@ -969,12 +969,291 @@ class TalentProfileController extends Controller
             return response()->json(['message' => 'Failed to generate presigned URL.'], 500);
         }
 
-        return response()->json([
-            'key' => $key,
-            'url' => $presignedUrl,
-            'headers' => [
-                'Content-Type' => $fileType,
-            ],
-        ]);
+            return response()->json([
+                'key' => $key,
+                'url' => $presignedUrl,
+                'headers' => [
+                    'Content-Type' => $fileType,
+                ],
+            ]);
+        }
+
+        /**
+         * Combine two talent profiles into one
+         * Only accessible by Super Admin
+         */
+        public function combine(Request $request)
+        {
+            // Check if user is Super Admin
+            $user = auth()->user();
+            if (!$user || (!$user->isSuperAdmin() && !($user->is_super_admin ?? false))) {
+                abort(403, 'This action is only available to Super Admins.');
+            }
+
+            $request->validate([
+                'primary_profile_id' => 'required|exists:talent_profiles,id',
+                'secondary_profile_id' => 'required|exists:talent_profiles,id|different:primary_profile_id',
+                'primary_phone' => 'required|in:primary,secondary',
+                'profile_data' => 'required|in:primary,secondary,merge',
+                'images' => 'required|in:primary,secondary,merge',
+            ]);
+
+            $primaryProfile = TalentProfile::with(['languages', 'labels', 'media', 'settings', 'castingApplications'])->findOrFail($request->primary_profile_id);
+            $secondaryProfile = TalentProfile::with(['languages', 'labels', 'media', 'settings', 'castingApplications'])->findOrFail($request->secondary_profile_id);
+
+            try {
+                DB::beginTransaction();
+
+                // Determine primary phone number
+                $primaryPhone = $request->primary_phone === 'primary' 
+                    ? ($primaryProfile->mobile_number ?? $primaryProfile->whatsapp_number)
+                    : ($secondaryProfile->mobile_number ?? $secondaryProfile->whatsapp_number);
+                
+                $secondaryPhone = $request->primary_phone === 'primary'
+                    ? ($secondaryProfile->mobile_number ?? $secondaryProfile->whatsapp_number)
+                    : ($primaryProfile->mobile_number ?? $primaryProfile->whatsapp_number);
+
+                // Set phone numbers
+                $primaryProfile->mobile_number = $primaryPhone;
+                $primaryProfile->secondary_phone_number = $secondaryPhone;
+
+                // Merge profile data based on selected option
+                $this->mergeProfileData($primaryProfile, $secondaryProfile, $request->profile_data);
+
+                // Merge images based on selected option
+                $this->mergeImages($primaryProfile, $secondaryProfile, $request->images);
+
+                // Merge relationships
+                $this->mergeRelationships($primaryProfile, $secondaryProfile);
+
+                // Transfer casting applications
+                CastingApplication::where('talent_profile_id', $secondaryProfile->id)
+                    ->update(['talent_profile_id' => $primaryProfile->id]);
+
+                // Log the combine action
+                $adminUser = auth()->user();
+                $this->logAuditEvent(
+                    'profiles_combined',
+                    'superadmin',
+                    $adminUser->id,
+                    $adminUser->email,
+                    null,
+                    $request,
+                    "Combined talent profiles: {$secondaryProfile->display_name} (ID: {$secondaryProfile->id}) into {$primaryProfile->display_name} (ID: {$primaryProfile->id})",
+                    [
+                        'primary_profile_id' => $primaryProfile->id,
+                        'primary_profile_name' => $primaryProfile->display_name ?? ($primaryProfile->first_name . ' ' . $primaryProfile->last_name),
+                        'secondary_profile_id' => $secondaryProfile->id,
+                        'secondary_profile_name' => $secondaryProfile->display_name ?? ($secondaryProfile->first_name . ' ' . $secondaryProfile->last_name),
+                        'merge_options' => [
+                            'primary_phone' => $request->primary_phone,
+                            'profile_data' => $request->profile_data,
+                            'images' => $request->images,
+                        ],
+                        'admin_name' => $adminUser->name,
+                    ]
+                );
+
+                // Delete secondary profile
+                $this->removeTalentProfile($secondaryProfile, false);
+
+                // Save primary profile with merged data
+                $primaryProfile->save();
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Profiles successfully combined. The secondary profile has been merged into the primary profile.',
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Failed to combine talent profiles: ' . $e->getMessage(), [
+                    'primary_id' => $request->primary_profile_id,
+                    'secondary_id' => $request->secondary_profile_id,
+                    'error' => $e->getTraceAsString(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to combine profiles: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
+
+        /**
+         * Merge profile data from secondary into primary based on merge strategy
+         */
+        private function mergeProfileData(TalentProfile $primary, TalentProfile $secondary, string $strategy)
+        {
+            $fillableFields = [
+                'first_name', 'last_name', 'legal_name', 'display_name', 'nationality',
+                'bio', 'date_of_birth', 'gender', 'height', 'weight', 'chest', 'waist', 'hips',
+                'skin_tone', 'hair_color', 'eye_color', 't_shirt_size', 'dress_size', 'shoe_size',
+                'civil_id_number', 'country_code', 'card_number', 'card_holder_name',
+                'verification_status', 'verification_notes', 'daily_rate', 'rate',
+                'hijab_preference', 'has_visible_tattoos', 'has_piercings',
+                'onboarding_step', 'onboarding_steps_completed', 'onboarding_completed_at',
+                'terms_accepted_at', 'mux_video_asset_id',
+            ];
+
+            switch ($strategy) {
+                case 'primary':
+                    // Keep primary data, only fill missing fields from secondary
+                    foreach ($fillableFields as $field) {
+                        if (empty($primary->$field) && !empty($secondary->$field)) {
+                            $primary->$field = $secondary->$field;
+                        }
+                    }
+                    break;
+
+                case 'secondary':
+                    // Replace primary with secondary data, but keep primary if secondary is empty
+                    foreach ($fillableFields as $field) {
+                        if (!empty($secondary->$field)) {
+                            $primary->$field = $secondary->$field;
+                        }
+                    }
+                    break;
+
+                case 'merge':
+                    // Intelligent merge: keep most complete data
+                    foreach ($fillableFields as $field) {
+                        $primaryValue = $primary->$field;
+                        $secondaryValue = $secondary->$field;
+
+                        // If primary is empty, use secondary
+                        if (empty($primaryValue) && !empty($secondaryValue)) {
+                            $primary->$field = $secondaryValue;
+                        }
+                        // If secondary is more recent/complete, prefer it for certain fields
+                        elseif (!empty($secondaryValue) && in_array($field, ['bio', 'verification_notes'])) {
+                            // For text fields, prefer longer/more complete version
+                            if (strlen($secondaryValue) > strlen($primaryValue ?? '')) {
+                                $primary->$field = $secondaryValue;
+                            }
+                        }
+                        // For dates, prefer more recent
+                        elseif (!empty($secondaryValue) && in_array($field, ['onboarding_completed_at', 'terms_accepted_at'])) {
+                            if ($secondaryValue && (!$primaryValue || $secondaryValue > $primaryValue)) {
+                                $primary->$field = $secondaryValue;
+                            }
+                        }
+                        // For numeric fields, prefer higher values (like rates)
+                        elseif (!empty($secondaryValue) && in_array($field, ['daily_rate', 'rate', 'onboarding_steps_completed'])) {
+                            if ($secondaryValue > ($primaryValue ?? 0)) {
+                                $primary->$field = $secondaryValue;
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        /**
+         * Merge images from secondary into primary based on merge strategy
+         */
+        private function mergeImages(TalentProfile $primary, TalentProfile $secondary, string $strategy)
+        {
+            $imageFields = [
+                'headshot_left_path',
+                'headshot_center_path',
+                'headshot_right_path',
+                'full_body_front_path',
+                'full_body_right_path',
+                'full_body_back_path',
+                'id_front_path',
+                'id_back_path',
+            ];
+
+            switch ($strategy) {
+                case 'primary':
+                    // Keep primary images, only fill missing from secondary
+                    foreach ($imageFields as $field) {
+                        if (empty($primary->$field) && !empty($secondary->$field)) {
+                            $primary->$field = $secondary->$field;
+                        }
+                    }
+                    // Merge TalentMedia records (keep all unique images)
+                    $primaryMediaPaths = $primary->media->pluck('file_path')->toArray();
+                    foreach ($secondary->media as $media) {
+                        if (!in_array($media->file_path, $primaryMediaPaths)) {
+                            $media->talent_profile_id = $primary->id;
+                            $media->save();
+                        }
+                    }
+                    break;
+
+                case 'secondary':
+                    // Replace primary images with secondary images
+                    foreach ($imageFields as $field) {
+                        if (!empty($secondary->$field)) {
+                            // Delete old primary image file if exists
+                            if (!empty($primary->$field) && $primary->$field !== $secondary->$field) {
+                                $this->deletePhysicalFile($primary->$field);
+                            }
+                            $primary->$field = $secondary->$field;
+                        }
+                    }
+                    // Transfer all TalentMedia records
+                    foreach ($secondary->media as $media) {
+                        $media->talent_profile_id = $primary->id;
+                        $media->save();
+                    }
+                    break;
+
+                case 'merge':
+                    // Merge all images: keep primary, add missing from secondary
+                    foreach ($imageFields as $field) {
+                        if (empty($primary->$field) && !empty($secondary->$field)) {
+                            $primary->$field = $secondary->$field;
+                        }
+                    }
+                    // Merge TalentMedia records (keep all unique images)
+                    $primaryMediaPaths = $primary->media->pluck('file_path')->toArray();
+                    foreach ($secondary->media as $media) {
+                        if (!in_array($media->file_path, $primaryMediaPaths)) {
+                            $media->talent_profile_id = $primary->id;
+                            $media->save();
+                        }
+                    }
+                    break;
+            }
+        }
+
+        /**
+         * Merge relationships (languages, labels) from secondary into primary
+         */
+        private function mergeRelationships(TalentProfile $primary, TalentProfile $secondary)
+        {
+            // Merge languages (union of both)
+            $primaryLanguageIds = $primary->languages->pluck('id')->toArray();
+            $secondaryLanguageIds = $secondary->languages->pluck('id')->toArray();
+            $allLanguageIds = array_unique(array_merge($primaryLanguageIds, $secondaryLanguageIds));
+            $primary->languages()->sync($allLanguageIds);
+
+            // Merge labels (union of both)
+            $primaryLabelIds = $primary->labels->pluck('id')->toArray();
+            $secondaryLabelIds = $secondary->labels->pluck('id')->toArray();
+            $allLabelIds = array_unique(array_merge($primaryLabelIds, $secondaryLabelIds));
+            $primary->labels()->sync($allLabelIds);
+
+            // Merge settings (prefer primary, but fill missing from secondary)
+            if ($secondary->settings && !$primary->settings) {
+                $secondarySettings = $secondary->settings->toArray();
+                unset($secondarySettings['id'], $secondarySettings['talent_profile_id'], $secondarySettings['created_at'], $secondarySettings['updated_at']);
+                TalentSetting::create(array_merge($secondarySettings, ['talent_profile_id' => $primary->id]));
+            } elseif ($secondary->settings && $primary->settings) {
+                // Merge settings data
+                $secondarySettings = $secondary->settings->toArray();
+                unset($secondarySettings['id'], $secondarySettings['talent_profile_id'], $secondarySettings['created_at'], $secondarySettings['updated_at']);
+                foreach ($secondarySettings as $key => $value) {
+                    if (empty($primary->settings->$key) && !empty($value)) {
+                        $primary->settings->$key = $value;
+                    }
+                }
+                $primary->settings->save();
+            }
+        }
     }
-}

@@ -91,6 +91,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
             Route::delete('talent-profiles/{talent_profile}/remove-profile-image', [TalentProfileController::class, 'removeProfileImage'])->name('talent-profiles.remove-profile-image');
             Route::post('talent-profiles/{talent_profile}/suspend', [TalentProfileController::class, 'suspend'])->name('talent-profiles.suspend');
             Route::post('talent-profiles/{talent_profile}/unsuspend', [TalentProfileController::class, 'unsuspend'])->name('talent-profiles.unsuspend');
+            Route::post('talent-profiles/combine', [TalentProfileController::class, 'combine'])->name('talent-profiles.combine')->middleware('super.admin');
             Route::resource('talent-profiles', TalentProfileController::class);
         });
 

@@ -282,6 +282,233 @@
         z-index: 50;
 
     }
+
+    /* Combine Profiles Modal Styles */
+    .combine-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    .combine-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .combine-modal-content {
+        background: #fff;
+        border-radius: 16px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .combine-modal-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .combine-modal-header h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--ink-900);
+    }
+    .combine-modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--ink-500);
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+    .combine-modal-close:hover {
+        background: #f3f5f9;
+        color: var(--ink-900);
+    }
+    .combine-modal-body {
+        padding: 24px;
+    }
+    .profile-select-section {
+        margin-bottom: 32px;
+    }
+    .profile-select-section h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ink-900);
+        margin-bottom: 12px;
+    }
+    .profile-select-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .profile-select-card {
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .profile-select-card:hover {
+        border-color: #000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .profile-select-card.selected {
+        border-color: #000;
+        background: #f9fafb;
+    }
+    .profile-select-card.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .profile-select-card h5 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink-900);
+    }
+    .profile-select-card .profile-info {
+        font-size: 12px;
+        color: var(--ink-500);
+        margin-bottom: 4px;
+    }
+    .merge-options-section {
+        margin-top: 32px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+    }
+    .merge-options-section h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ink-900);
+        margin-bottom: 20px;
+    }
+    .merge-option-group {
+        margin-bottom: 24px;
+    }
+    .merge-option-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink-700);
+        margin-bottom: 8px;
+    }
+    .merge-option-group .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .merge-option-group .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .merge-option-group .radio-option:hover {
+        background: #f9fafb;
+        border-color: #000;
+    }
+    .merge-option-group .radio-option input[type="radio"] {
+        margin: 0;
+    }
+    .merge-option-group .radio-option label {
+        margin: 0;
+        font-weight: 400;
+        cursor: pointer;
+        flex: 1;
+    }
+    .image-merge-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+    }
+    .image-merge-option {
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .image-merge-option:hover {
+        border-color: #000;
+    }
+    .image-merge-option.selected {
+        border-color: #000;
+        background: #f9fafb;
+    }
+    .image-merge-option input[type="radio"] {
+        margin-bottom: 8px;
+    }
+    .image-merge-option label {
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        display: block;
+    }
+    .combine-modal-footer {
+        padding: 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+    .btn-combine {
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-combine:hover:not(:disabled) {
+        background: #111;
+    }
+    .btn-combine:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .btn-cancel {
+        background: #fff;
+        color: var(--ink-700);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-cancel:hover {
+        background: #f9fafb;
+    }
 </style>
 
 @php
@@ -455,6 +682,11 @@
                 <a href="{{ route('admin.talent-profiles.rejected') }}" class="header-dropdown-item">
                     <i class="fas fa-times-circle"></i> Reject Talent
                 </a>
+                @if(auth()->user()->isSuperAdmin())
+                <button type="button" class="header-dropdown-item" id="combineProfilesBtn">
+                    <i class="fas fa-code-branch"></i> Combine Profiles
+                </button>
+                @endif
             </div>
         </div>
     </div>
@@ -604,6 +836,108 @@
         </div>
     @endif
 </div>
+
+<!-- Combine Profiles Modal -->
+@if(auth()->user()->isSuperAdmin())
+<div class="combine-modal" id="combineModal">
+    <div class="combine-modal-content">
+        <div class="combine-modal-header">
+            <h3><i class="fas fa-code-branch"></i> Combine Talent Profiles</h3>
+            <button type="button" class="combine-modal-close" id="closeCombineModal">&times;</button>
+        </div>
+        <div class="combine-modal-body">
+            <form id="combineProfilesForm">
+                <div class="profile-select-section">
+                    <h4>Select Two Profiles to Combine</h4>
+                    <div class="profile-select-grid">
+                        <div>
+                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">Primary Profile (will be kept)</h5>
+                            <select name="primary_profile_id" id="primaryProfileSelect" class="search-input" required>
+                                <option value="">Select primary profile...</option>
+                                @foreach($talents as $talent)
+                                    <option value="{{ $talent->id }}" data-name="{{ $talent->display_name ?? $talent->legal_name }}" data-phone="{{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }}">
+                                        {{ $talent->display_name ?? $talent->legal_name }} ({{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="primaryProfileInfo" style="margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; display: none;">
+                                <div style="font-size: 12px; color: var(--ink-500);">Selected Profile:</div>
+                                <div id="primaryProfileDetails" style="font-size: 14px; font-weight: 600; color: var(--ink-900); margin-top: 4px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">Secondary Profile (will be merged into primary)</h5>
+                            <select name="secondary_profile_id" id="secondaryProfileSelect" class="search-input" required>
+                                <option value="">Select secondary profile...</option>
+                                @foreach($talents as $talent)
+                                    <option value="{{ $talent->id }}" data-name="{{ $talent->display_name ?? $talent->legal_name }}" data-phone="{{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }}">
+                                        {{ $talent->display_name ?? $talent->legal_name }} ({{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="secondaryProfileInfo" style="margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; display: none;">
+                                <div style="font-size: 12px; color: var(--ink-500);">Selected Profile:</div>
+                                <div id="secondaryProfileDetails" style="font-size: 14px; font-weight: 600; color: var(--ink-900); margin-top: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="merge-options-section" id="mergeOptionsSection" style="display: none;">
+                    <h4>Merge Options</h4>
+
+                    <div class="merge-option-group">
+                        <label>Primary Phone Number</label>
+                        <div class="radio-group" id="phoneNumberOptions">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="merge-option-group">
+                        <label>Profile Data to Keep</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="profile_data" id="profileDataPrimary" value="primary" checked>
+                                <label for="profileDataPrimary">Keep primary profile data (merge missing fields from secondary)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="profile_data" id="profileDataSecondary" value="secondary">
+                                <label for="profileDataSecondary">Keep secondary profile data (merge missing fields from primary)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="profile_data" id="profileDataMerge" value="merge">
+                                <label for="profileDataMerge">Merge intelligently (keep most complete data)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="merge-option-group">
+                        <label>Images to Keep</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="images" id="imagesPrimary" value="primary" checked>
+                                <label for="imagesPrimary">Keep primary profile images</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="images" id="imagesSecondary" value="secondary">
+                                <label for="imagesSecondary">Keep secondary profile images</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="images" id="imagesMerge" value="merge">
+                                <label for="imagesMerge">Merge images (keep all unique images)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="combine-modal-footer">
+            <button type="button" class="btn-cancel" id="cancelCombineBtn">Cancel</button>
+            <button type="button" class="btn-combine" id="submitCombineBtn" disabled>Combine Profiles</button>
+        </div>
+    </div>
+</div>
+@endif
 
 <div class="talent-footer">
     <a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn">
@@ -910,6 +1244,230 @@
                 });
             });
         });
+
+        @if(auth()->user()->isSuperAdmin())
+        // Combine Profiles Modal Functionality
+        const combineModal = document.getElementById('combineModal');
+        const combineProfilesBtn = document.getElementById('combineProfilesBtn');
+        const closeCombineModal = document.getElementById('closeCombineModal');
+        const cancelCombineBtn = document.getElementById('cancelCombineBtn');
+        const submitCombineBtn = document.getElementById('submitCombineBtn');
+        const primaryProfileSelect = document.getElementById('primaryProfileSelect');
+        const secondaryProfileSelect = document.getElementById('secondaryProfileSelect');
+        const mergeOptionsSection = document.getElementById('mergeOptionsSection');
+        const phoneNumberOptions = document.getElementById('phoneNumberOptions');
+
+        function openCombineModal() {
+            if (combineModal) {
+                combineModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeCombineModalFunc() {
+            if (combineModal) {
+                combineModal.classList.remove('active');
+                document.body.style.overflow = '';
+                // Reset form
+                document.getElementById('combineProfilesForm').reset();
+                mergeOptionsSection.style.display = 'none';
+                submitCombineBtn.disabled = true;
+                document.getElementById('primaryProfileInfo').style.display = 'none';
+                document.getElementById('secondaryProfileInfo').style.display = 'none';
+            }
+        }
+
+        function updatePhoneNumberOptions() {
+            const primaryId = primaryProfileSelect.value;
+            const secondaryId = secondaryProfileSelect.value;
+            
+            if (!primaryId || !secondaryId) {
+                phoneNumberOptions.innerHTML = '';
+                return;
+            }
+
+            const primaryOption = primaryProfileSelect.options[primaryProfileSelect.selectedIndex];
+            const secondaryOption = secondaryProfileSelect.options[secondaryProfileSelect.selectedIndex];
+            const primaryPhone = primaryOption.dataset.phone || 'N/A';
+            const secondaryPhone = secondaryOption.dataset.phone || 'N/A';
+
+            phoneNumberOptions.innerHTML = `
+                <div class="radio-option">
+                    <input type="radio" name="primary_phone" id="phonePrimary" value="primary" checked>
+                    <label for="phonePrimary">Primary Profile: ${primaryPhone}</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" name="primary_phone" id="phoneSecondary" value="secondary">
+                    <label for="phoneSecondary">Secondary Profile: ${secondaryPhone}</label>
+                </div>
+            `;
+        }
+
+        function updateProfileInfo() {
+            const primaryId = primaryProfileSelect.value;
+            const secondaryId = secondaryProfileSelect.value;
+            
+            if (primaryId) {
+                const option = primaryProfileSelect.options[primaryProfileSelect.selectedIndex];
+                const name = option.dataset.name || 'N/A';
+                const phone = option.dataset.phone || 'N/A';
+                document.getElementById('primaryProfileDetails').textContent = `${name} (${phone})`;
+                document.getElementById('primaryProfileInfo').style.display = 'block';
+            } else {
+                document.getElementById('primaryProfileInfo').style.display = 'none';
+            }
+
+            if (secondaryId) {
+                const option = secondaryProfileSelect.options[secondaryProfileSelect.selectedIndex];
+                const name = option.dataset.name || 'N/A';
+                const phone = option.dataset.phone || 'N/A';
+                document.getElementById('secondaryProfileDetails').textContent = `${name} (${phone})`;
+                document.getElementById('secondaryProfileInfo').style.display = 'block';
+            } else {
+                document.getElementById('secondaryProfileInfo').style.display = 'none';
+            }
+
+            // Disable secondary profile option in primary select and vice versa
+            Array.from(primaryProfileSelect.options).forEach(opt => {
+                opt.disabled = opt.value === secondaryId;
+            });
+            Array.from(secondaryProfileSelect.options).forEach(opt => {
+                opt.disabled = opt.value === primaryId;
+            });
+
+            // Show merge options if both profiles are selected
+            if (primaryId && secondaryId && primaryId !== secondaryId) {
+                mergeOptionsSection.style.display = 'block';
+                updatePhoneNumberOptions();
+                submitCombineBtn.disabled = false;
+            } else {
+                mergeOptionsSection.style.display = 'none';
+                submitCombineBtn.disabled = true;
+            }
+        }
+
+        if (combineProfilesBtn) {
+            combineProfilesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openCombineModal();
+            });
+        }
+
+        if (closeCombineModal) {
+            closeCombineModal.addEventListener('click', closeCombineModalFunc);
+        }
+
+        if (cancelCombineBtn) {
+            cancelCombineBtn.addEventListener('click', closeCombineModalFunc);
+        }
+
+        // Close modal when clicking outside
+        if (combineModal) {
+            combineModal.addEventListener('click', function(e) {
+                if (e.target === combineModal) {
+                    closeCombineModalFunc();
+                }
+            });
+        }
+
+        if (primaryProfileSelect) {
+            primaryProfileSelect.addEventListener('change', updateProfileInfo);
+        }
+
+        if (secondaryProfileSelect) {
+            secondaryProfileSelect.addEventListener('change', updateProfileInfo);
+        }
+
+        if (submitCombineBtn) {
+            submitCombineBtn.addEventListener('click', function() {
+                const primaryId = primaryProfileSelect.value;
+                const secondaryId = secondaryProfileSelect.value;
+
+                if (!primaryId || !secondaryId || primaryId === secondaryId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please select two different profiles to combine.'
+                    });
+                    return;
+                }
+
+                const formData = {
+                    primary_profile_id: primaryId,
+                    secondary_profile_id: secondaryId,
+                    primary_phone: document.querySelector('input[name="primary_phone"]:checked')?.value || 'primary',
+                    profile_data: document.querySelector('input[name="profile_data"]:checked')?.value || 'primary',
+                    images: document.querySelector('input[name="images"]:checked')?.value || 'primary',
+                };
+
+                // Close modal first
+                closeCombineModalFunc();
+
+                // Confirm before combining
+                Swal.fire({
+                    title: 'Combine Profiles?',
+                    text: 'This action will merge the secondary profile into the primary profile. The secondary profile will be deleted. This cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#000',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, combine them',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Combining profiles...',
+                            text: 'Please wait while we merge the profiles.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit the combine request
+                        fetch('{{ route("admin.talent-profiles.combine") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(formData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Profiles Combined!',
+                                    text: data.message || 'The profiles have been successfully combined.',
+                                    confirmButtonColor: '#000'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message || 'Failed to combine profiles. Please try again.'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while combining profiles. Please try again.'
+                            });
+                        });
+                    }
+                });
+            });
+        }
+        @endif
     });
 </script>
 @endsection

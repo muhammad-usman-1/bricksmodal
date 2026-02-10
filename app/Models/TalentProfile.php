@@ -86,6 +86,7 @@ class TalentProfile extends Model
         'whatsapp_number',
         'country_code',
         'mobile_number',
+        'secondary_phone_number',
         'card_number',
         'card_holder_name',
         'user_id',
