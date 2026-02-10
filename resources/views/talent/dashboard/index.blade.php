@@ -360,7 +360,7 @@
         </div>
     </div>
 
-    <!-- New Casting Calls Section -->
+    {{--  <!-- New Casting Calls Section -->
     <div class="casting-calls-section">
         <div class="section-header">
             <h2 class="section-title">New Casting Calls</h2>
@@ -397,6 +397,6 @@
                 </div>
             @endforelse
         </div>
-    </div>
+    </div>  --}}
 </div>
 @endsection
