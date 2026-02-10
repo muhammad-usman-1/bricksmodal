@@ -222,6 +222,8 @@ Route::prefix('talent')->as('talent.')->group(function () {
     Route::middleware('auth:talent')->group(function () {
         Route::get('onboarding', [OnboardingController::class, 'start'])->name('onboarding.start');
         Route::get('onboarding/intro', [OnboardingController::class, 'intro'])->name('onboarding.intro');
+        Route::get('onboarding/terms', [OnboardingController::class, 'terms'])->name('onboarding.terms');
+        Route::post('onboarding/terms/accept', [OnboardingController::class, 'acceptTerms'])->name('onboarding.terms.accept');
         Route::post('onboarding/save-step', [OnboardingController::class, 'saveStep'])->name('onboarding.save-step');
         Route::post('onboarding/presign-additional-photo', [OnboardingController::class, 'presignAdditionalPhoto'])
             ->name('onboarding.presign-additional-photo');

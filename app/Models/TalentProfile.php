@@ -102,6 +102,7 @@ class TalentProfile extends Model
         'onboarding_step',
         'onboarding_steps_completed',
         'onboarding_completed_at',
+        'terms_accepted_at',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -114,6 +115,7 @@ class TalentProfile extends Model
     protected $casts = [
         'date_of_birth'           => 'date',
         'onboarding_completed_at' => 'datetime',
+        'terms_accepted_at'       => 'datetime',
         'height'                  => 'float',
         'weight'                  => 'float',
         'chest'                   => 'float',

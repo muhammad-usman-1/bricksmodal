@@ -68,11 +68,58 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
-        // Always show intro screen, which will redirect to step-1 when user clicks "Get Started"
+        // Enforce flow: Terms must be accepted before Intro.
+        if (! $profile->terms_accepted_at) {
+            return redirect()->route('talent.onboarding.terms');
+        }
+
+        $startRoute = route('talent.onboarding.show', 'step-1');
+
+        // Intro comes after Terms. Get Started takes the talent to onboarding step-1.
         return view('talent.onboarding.intro', [
             'profile'     => $profile,
-            'startRoute'  => route('talent.onboarding.show', 'step-1'),
+            'startRoute'  => $startRoute,
         ]);
+    }
+
+    public function terms(Request $request): View|RedirectResponse
+    {
+        $profile = $this->profile($request);
+
+        if ($profile->hasCompletedOnboarding()) {
+            if ($profile->verification_status !== 'approved') {
+                if (session('onboarding_just_completed')) {
+                    return redirect()->route('talent.pending');
+                }
+                return redirect()->route('talent.pending_status');
+            }
+            return redirect()->route('talent.dashboard');
+        }
+
+        // If already accepted, skip straight to Intro (then onboarding step-1)
+        if ($profile->terms_accepted_at) {
+            return redirect()->route('talent.onboarding.intro');
+        }
+
+        return view('talent.onboarding.terms', [
+            'profile' => $profile,
+        ]);
+    }
+
+    public function acceptTerms(Request $request): RedirectResponse
+    {
+        $profile = $this->profile($request);
+
+        $request->validate([
+            'accept_terms' => ['required', 'in:1'],
+        ]);
+
+        $profile->update([
+            'terms_accepted_at' => now(),
+        ]);
+
+        // Continue the flow: Terms -> Intro -> Onboarding step-1
+        return redirect()->route('talent.onboarding.intro');
     }
 
     public function show(Request $request, string $step): View|RedirectResponse

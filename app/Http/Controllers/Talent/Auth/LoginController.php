@@ -214,7 +214,12 @@ class LoginController extends Controller
         }
 
         if (! $profile || ! $profile->hasCompletedOnboarding()) {
-            // Always redirect to intro screen first, then intro will redirect to step-1
+            // New flow: OTP -> Terms (first time) -> Intro -> Onboarding step-1
+            // If terms already accepted, skip Terms and go straight to Intro.
+            if (! $profile || ! $profile->terms_accepted_at) {
+                return redirect()->route('talent.onboarding.terms');
+            }
+
             return redirect()->route('talent.onboarding.intro');
         }
 
