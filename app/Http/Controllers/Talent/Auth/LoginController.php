@@ -214,13 +214,8 @@ class LoginController extends Controller
         }
 
         if (! $profile || ! $profile->hasCompletedOnboarding()) {
-            $step = $profile?->onboarding_step;
-
-            if (! $profile || ! $step || $step === 'profile') {
-                return redirect()->route('talent.onboarding.intro');
-            }
-
-            return redirect()->route('talent.onboarding.start');
+            // Always redirect to intro screen first, then intro will redirect to step-1
+            return redirect()->route('talent.onboarding.intro');
         }
 
         if ($profile->verification_status !== 'approved') {

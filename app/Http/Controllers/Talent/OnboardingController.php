@@ -68,10 +68,7 @@ class OnboardingController extends Controller
             return redirect()->route('talent.dashboard');
         }
 
-        if ($profile->onboarding_step && $profile->onboarding_step !== 'profile') {
-            return $this->redirectToCurrentStep($profile);
-        }
-
+        // Always show intro screen, which will redirect to step-1 when user clicks "Get Started"
         return view('talent.onboarding.intro', [
             'profile'     => $profile,
             'startRoute'  => route('talent.onboarding.show', 'step-1'),

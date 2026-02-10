@@ -894,9 +894,12 @@
                                             @php
                                                 $nationalityCode = strtolower($f['value']);
                                                 $countryName = $countries[$nationalityCode] ?? ucfirst($f['value']);
+                                                $isUnspecified = strtolower($f['value']) === 'unspecified';
                                             @endphp
                                             <div style="display: flex; align-items: center; gap: 10px;">
+                                                @if(!$isUnspecified && $nationalityCode && strlen($nationalityCode) === 2)
                                                 <span class="fi fi-{{ $nationalityCode }}" style="width: auto; height: 18px; aspect-ratio: 4 / 3; display: inline-block;" title="{{ $countryName }}"></span>
+                                                @endif
                                                 <span style="font-weight: 500;">{{ $countryName }}</span>
                                             </div>
                                         @else
@@ -920,9 +923,14 @@
                                             </select>
                                         @elseif($f['type'] === 'nationality')
                                             <div class="nationality-wrapper" style="display: flex; align-items: center; gap: 8px;">
-                                                <span id="nationality_flag_edit" class="fi nationality-flag {{ $f['value'] ? 'fi-' . strtolower($f['value']) : '' }}" style="display: {{ $f['value'] ? 'inline-block' : 'none' }}; width: auto; height: 18px; aspect-ratio: 4 / 3;"></span>
+                                                @php
+                                                    $isUnspecified = strtolower($f['value'] ?? '') === 'unspecified';
+                                                    $shouldShowFlag = $f['value'] && !$isUnspecified && strlen(strtolower($f['value'])) === 2;
+                                                @endphp
+                                                <span id="nationality_flag_edit" class="fi nationality-flag {{ $shouldShowFlag ? 'fi-' . strtolower($f['value']) : '' }}" style="display: {{ $shouldShowFlag ? 'inline-block' : 'none' }}; width: auto; height: 18px; aspect-ratio: 4 / 3;"></span>
                                                 <select name="{{ $f['name'] }}" id="nationality_select" class="inline-edit-input" style="flex: 1;">
                                                     <option value="">Select nationality</option>
+                                                    <option value="Unspecified" {{ (string)$f['value'] === 'Unspecified' ? 'selected' : '' }}>Unspecified</option>
                                                     @foreach($countries as $code => $name)
                                                         <option value="{{ $code }}" {{ (string)$f['value'] === (string)$code ? 'selected' : '' }}>{{ $name }}</option>
                                                     @endforeach
@@ -1822,7 +1830,7 @@
         if (nationalitySelect && nationalityFlag) {
             nationalitySelect.addEventListener('change', function() {
                 const selectedValue = this.value;
-                if (selectedValue && selectedValue !== '') {
+                if (selectedValue && selectedValue !== '' && selectedValue.toLowerCase() !== 'unspecified' && selectedValue.length === 2) {
                     // Remove all existing flag classes
                     nationalityFlag.className = 'fi nationality-flag';
                     // Add the new flag class

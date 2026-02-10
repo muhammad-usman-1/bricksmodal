@@ -573,13 +573,11 @@
                     </div>
                     <div class="card-overlay">
                         <div class="overlay-top">
+                            @if($flagCode && strtolower($flagCode) !== 'unspecified' && strlen($flagCode) === 2)
                             <div class="overlay-flag">
-                                @if($flagCode && strlen($flagCode) === 2)
-                                    <span class="fi fi-{{ strtolower($flagCode) }}" title="{{ $flagCode }}"></span>
-                                @else
-                                    <div style="background:#444; color:#fff; font-size:8px; width:50%; height:50%; display:grid; place-items:center;">{{ strtoupper(substr($flagCode ?? '??',0,2)) }}</div>
-                                @endif
+                                <span class="fi fi-{{ strtolower($flagCode) }}" title="{{ $flagCode }}"></span>
                             </div>
+                            @endif
                             <span class="overlay-meta-info">{{ strtoupper($gender ?: 'N/A') }} {{ $ageText }}</span>
                         </div>
                         <p class="talent-name">{{ $displayName }}</p>

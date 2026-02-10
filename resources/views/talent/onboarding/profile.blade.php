@@ -774,6 +774,7 @@
                                     <span id="nationality_flag" class="fi nationality-flag" style="display:none;"></span>
                                     <select id="nationality" name="nationality" class="control nationality-select" required>
                                         <option value="">{{ \App\Helpers\Bilingual::get('onboarding.select_nationality') }}</option>
+                                        <option value="Unspecified" {{ old('nationality', $profile->nationality) == 'Unspecified' ? 'selected' : '' }}>Unspecified</option>
                                         @foreach($countries as $code => $name)
                                             <option value="{{ $code }}" {{ old('nationality', $profile->nationality) == $code ? 'selected' : '' }}>{{ $name }}</option>
                                         @endforeach
@@ -1440,15 +1441,8 @@
                     @csrf
                     <div class="step-panel is-active" data-step="5">
                         <div id="portfolio-photos-section" style="margin-top: 0;">
-                            <div style="margin-bottom:12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="margin-bottom:12px;">
                                 <label style="margin-bottom: 0;">{{ \App\Helpers\Bilingual::get('onboarding.add_photos') }}</label>
-                                <button type="button" id="camera-capture-btn" style="background: none; border: none; outline: none; box-shadow: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Take photo with camera">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                                        <circle cx="12" cy="13" r="4"></circle>
-                                    </svg>
-                                </button>
-                                <input type="file" id="camera_capture_input" accept="image/*" capture="environment" style="display: none;">
                             </div>
                             <div class="field">
                                 <label class="upload-card" for="additional_photos_input" style="width:100%; margin:0;">
@@ -1500,19 +1494,6 @@
                         </div>
                     </div>
                 </form>
-
-                <!-- Camera Modal -->
-                <div id="camera-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
-                    <div style="position: relative; width: 90%; max-width: 640px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <video id="camera-feed" autoplay playsinline style="width: 100%; height: auto; display: block; background: #000;"></video>
-                        <canvas id="camera-canvas" style="display: none;"></canvas>
-
-                        <div style="padding: 16px; background: #fff; display: flex; justify-content: center; gap: 16px;">
-                            <button type="button" id="camera-cancel-btn" style="padding: 8px 16px; border-radius: 4px; border: 1px solid #d1d5db; background: #fff; cursor: pointer;">Cancel</button>
-                            <button type="button" id="camera-shutter-btn" class="btn-primary" style="padding: 8px 24px; border-radius: 4px; border: none; background: #10b981; color: #fff; font-weight: 600; cursor: pointer;">Capture Photo</button>
-                        </div>
-                    </div>
-                </div>
                 @endif
 
                 <!-- Upload Progress Modal -->
@@ -1567,7 +1548,7 @@
             function toggleNationalityFlag() {
                 if (natSelect && natFlag) {
                     const code = natSelect.value ? natSelect.value.toLowerCase() : '';
-                    if (code) {
+                    if (code && code !== 'unspecified') {
                         natFlag.className = `fi nationality-flag fi-${code}`;
                         natFlag.style.display = 'block';
                     } else {
@@ -2245,69 +2226,6 @@
                   // Global-ish state for Step 5 photos.
                   window.step5PhotoItems = window.step5PhotoItems || [];
                   window.step5UploadsInFlight = window.step5UploadsInFlight || 0;
-
-                  // Camera Capture Logic
-                  const cameraBtn = document.getElementById('camera-capture-btn');
-                  const cameraInput = document.getElementById('camera_capture_input');
-                  const cameraModal = document.getElementById('camera-modal');
-                  const cameraVideo = document.getElementById('camera-feed');
-                  const cameraCanvas = document.getElementById('camera-canvas');
-                  const shutterBtn = document.getElementById('camera-shutter-btn');
-                  const cancelBtn = document.getElementById('camera-cancel-btn');
-                  let stream = null;
-
-                  if (cameraBtn) {
-                      cameraBtn.addEventListener('click', async () => {
-                          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                          if (isMobile && cameraInput) {
-                              cameraInput.click();
-                          } else if (cameraModal && cameraVideo) {
-                              try {
-                                  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                                  cameraVideo.srcObject = stream;
-                                  cameraModal.style.display = 'flex';
-                              } catch (err) {
-                                  console.error("Camera access denied or error:", err);
-                                  if(cameraInput) cameraInput.click(); // Fallback
-                              }
-                          }
-                      });
-                  }
-
-                  if (cameraInput) {
-                      cameraInput.addEventListener('change', (e) => {
-                          addFiles(e.target.files);
-                          cameraInput.value = '';
-                      });
-                  }
-
-                  // Webcam Modal Logic
-                  if (shutterBtn && cameraVideo && cameraCanvas) {
-                      shutterBtn.addEventListener('click', () => {
-                          const context = cameraCanvas.getContext('2d');
-                          cameraCanvas.width = cameraVideo.videoWidth;
-                          cameraCanvas.height = cameraVideo.videoHeight;
-                          context.drawImage(cameraVideo, 0, 0, cameraVideo.videoWidth, cameraVideo.videoHeight);
-
-                          cameraCanvas.toBlob(blob => {
-                              const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-                              addFiles([file]);
-                              stopCamera();
-                          }, 'image/jpeg');
-                      });
-                  }
-
-                  if (cancelBtn) {
-                      cancelBtn.addEventListener('click', stopCamera);
-                  }
-
-                  function stopCamera() {
-                      if (stream) {
-                          stream.getTracks().forEach(track => track.stop());
-                      }
-                      if (cameraModal) cameraModal.style.display = 'none';
-                  }
 
                   if (multiUploadArea && multiInput) {
                       multiInput.addEventListener('change', (e) => {
