@@ -21,6 +21,14 @@ class SearchController extends Controller
         $canSeeTalents = $admin && ($admin->isSuperAdmin() || $admin->hasModulePermission('talent_management'));
         $canSeeShoots = $admin && ($admin->isSuperAdmin() || $admin->hasModulePermission('project_management'));
 
+        // If search query is numeric, check if it's a talent ID and redirect directly
+        if ($q !== '' && $canSeeTalents && is_numeric($q)) {
+            $talentProfile = TalentProfile::find($q);
+            if ($talentProfile) {
+                return redirect()->route('admin.talent-profiles.show', $talentProfile->id);
+            }
+        }
+
         $talents = collect();
         $shoots = collect();
 
@@ -28,7 +36,8 @@ class SearchController extends Controller
             $talents = TalentProfile::query()
                 ->with('user:id,email')
                 ->where(function ($query) use ($q) {
-                    $query->where('display_name', 'like', '%' . $q . '%')
+                    $query->where('id', $q) // Search by ID
+                        ->orWhere('display_name', 'like', '%' . $q . '%')
                         ->orWhere('first_name', 'like', '%' . $q . '%')
                         ->orWhere('last_name', 'like', '%' . $q . '%')
                         ->orWhere('legal_name', 'like', '%' . $q . '%')

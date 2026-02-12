@@ -152,8 +152,35 @@ height:auto;
         </button>
         <form id="admin-search-box" action="{{ route('admin.search') }}" method="GET" role="search">
             <i class="fas fa-search"></i>
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Search talents, shoots, or campaigns..." aria-label="Search" />
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by talent ID, name, or email..." aria-label="Search" id="admin-search-input" />
         </form>
+        <script>
+            // Handle instant redirect for numeric talent ID searches
+            (function() {
+                const searchInput = document.getElementById('admin-search-input');
+                const searchForm = document.getElementById('admin-search-box');
+                let searchTimeout;
+
+                if (!searchInput || !searchForm) return;
+
+                // Handle Enter key press
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const query = this.value.trim();
+                        
+                        // If query is numeric, redirect directly to talent profile
+                        if (query !== '' && /^\d+$/.test(query)) {
+                            window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
+                            return;
+                        }
+                        
+                        // Otherwise submit the form normally
+                        searchForm.submit();
+                    }
+                });
+            })();
+        </script>
         <div id="admin-icons-group">
             <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
                 <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Add New" style="margin-left: 0 !important;">
