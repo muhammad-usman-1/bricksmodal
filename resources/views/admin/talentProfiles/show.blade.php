@@ -575,7 +575,6 @@
         ['label' => 'Mobile number', 'name' => 'mobile_number', 'value' => $talentProfile->mobile_number, 'type' => 'text'],
         ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
         ['label' => 'IBAN', 'name' => 'iban', 'value' => $talentProfile->iban ?? null, 'type' => 'text'],
-        ['label' => 'Rate', 'name' => 'rate', 'value' => $talentProfile->rate, 'type' => 'number'],
         ['label' => 'Verification status', 'name' => 'verification_status', 'value' => $talentProfile->verification_status, 'type' => 'select', 'options' => \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT],
         ['label' => 'Verification notes', 'name' => 'verification_notes', 'value' => $talentProfile->verification_notes, 'type' => 'textarea'],
         ['label' => 'Card holder name', 'name' => 'card_holder_name', 'value' => $talentProfile->card_holder_name, 'type' => 'text'],
@@ -713,6 +712,121 @@
                 @endforeach
             </div>
         </div> --}}
+
+        @php
+            // Collect all available profile images (similar to Profile Images section)
+            $standardPhotoFields = [
+                'headshot_center_path' => 'Headshot (Center)',
+                'headshot_left_path'   => 'Headshot (Left)',
+                'headshot_right_path'  => 'Headshot (Right)',
+                'full_body_front_path' => 'Full Body (Front)',
+                'full_body_right_path' => 'Full Body (Right)',
+                'full_body_back_path'  => 'Full Body (Back)',
+            ];
+
+            $allPhotos = [];
+            foreach ($standardPhotoFields as $field => $label) {
+                $path = $talentProfile->{$field};
+                if ($path) {
+                    $allPhotos[] = $path;
+                }
+            }
+
+            // Collect from media relationship
+            $mediaItems = $talentProfile->media()->get();
+            foreach ($mediaItems as $media) {
+                if ($media->file_path) {
+                    $allPhotos[] = $media->file_path;
+                }
+            }
+
+            // Get random profile image
+            $randomImagePath = null;
+            if (!empty($allPhotos)) {
+                $randomImagePath = $allPhotos[array_rand($allPhotos)];
+            }
+            $profileImage = $randomImagePath ? $resolveUrl($randomImagePath) : null;
+            
+            // Get talent name
+            $talentName = $talentProfile->display_name ?? $talentProfile->legal_name ?? 'Not Set';
+            
+            // Get mobile number with country code
+            $mobileNumber = $talentProfile->mobile_number ?? ($talentProfile->user->phone_number ?? null);
+            $phoneDisplay = $mobileNumber ? '+965 ' . $mobileNumber : 'Not Set';
+            
+            // Get status
+            $status = $talentProfile->verification_status ?? 'pending';
+            $statusLabels = [
+                'approved' => 'Approved',
+                'pending' => 'Pending',
+                'rejected' => 'Rejected',
+                'suspended' => 'Suspended',
+            ];
+            $statusLabel = $statusLabels[$status] ?? ucfirst($status);
+            $statusClass = match($status) {
+                'approved' => 'status-approved',
+                'pending' => 'status-pending',
+                'rejected' => 'status-rejected',
+                'suspended' => 'status-suspended',
+                default => 'status-pending',
+            };
+        @endphp
+
+        <!-- Profile Summary Card -->
+        <div class="section-card profile-summary-card" style="margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Profile Image -->
+                <div class="profile-summary-image" style="width: 80px; height: 80px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                    @if($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $talentName }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    @else
+                        <span style="font-size: 32px; font-weight: 600; color: #9ca3af;">{{ strtoupper(substr($talentName, 0, 1)) }}</span>
+                    @endif
+                </div>
+                
+                <!-- Profile Info -->
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Name and Profile Number -->
+                    <div>
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: var(--ink-900);">#{{ $talentProfile->id }} - {{ $talentName }}</h2>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <span class="status-badge {{ $statusClass }}" style="display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                            {{ $statusLabel }}
+                        </span>
+                    </div>
+                    
+                    <!-- Mobile Number -->
+                    <div style="color: var(--ink-500); font-size: 14px;">
+                        <span>{{ $phoneDisplay }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .profile-summary-card {
+                width: 100%;
+            }
+            .status-badge.status-approved {
+                background: #e6f7ed;
+                color: #15803d;
+            }
+            .status-badge.status-pending {
+                background: #fffbeb;
+                color: #f59e0b;
+            }
+            .status-badge.status-rejected {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+            .status-badge.status-suspended {
+                background: #f3f4f6;
+                color: #6b7280;
+            }
+        </style>
 
         <div class="info-grid">
             @php
