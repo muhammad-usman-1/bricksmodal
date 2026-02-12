@@ -480,6 +480,64 @@
                     confirmButtonColor: '#000000',
                 });
             @endif
+
+            // Handle admin search box for talent ID validation
+            const searchInput = document.getElementById('admin-search-input');
+            const searchForm = document.getElementById('admin-search-box');
+
+            if (searchInput && searchForm && typeof Swal !== 'undefined') {
+                searchForm.addEventListener('submit', async function(e) {
+                    const query = searchInput.value.trim();
+                    
+                    // If query is numeric (pure ID), check if talent exists before submitting
+                    if (query !== '' && /^\d+$/.test(query)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        try {
+                            // Check if talent exists via AJAX
+                            const response = await fetch("{{ route('admin.search.check-talent', ':id') }}".replace(':id', query), {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+
+                            const data = await response.json();
+
+                            if (data.exists) {
+                                // Talent exists, redirect to profile
+                                window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
+                            } else {
+                                // Talent doesn't exist, show SweetAlert only (don't navigate)
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Talent Not Found',
+                                    text: 'No talent exists with ID #' + query,
+                                    confirmButtonColor: '#000000',
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error checking talent:', error);
+                            // On error, show SweetAlert
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Talent Not Found',
+                                text: 'No talent exists with ID #' + query,
+                                confirmButtonColor: '#000000',
+                            });
+                        }
+                        return false;
+                    }
+                    
+                    // For non-numeric queries, allow normal form submission
+                });
+            }
         });
     </script>
     <script>

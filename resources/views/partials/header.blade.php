@@ -154,68 +154,6 @@ height:auto;
             <i class="fas fa-search"></i>
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by talent ID, name, or email..." aria-label="Search" id="admin-search-input" />
         </form>
-        <script>
-            // Handle instant redirect for numeric talent ID searches with validation
-            (function() {
-                const searchInput = document.getElementById('admin-search-input');
-                const searchForm = document.getElementById('admin-search-box');
-
-                if (!searchInput || !searchForm) return;
-
-                // Ensure SweetAlert is loaded
-                if (typeof Swal === 'undefined') {
-                    console.warn('SweetAlert2 is not loaded');
-                    return;
-                }
-
-                // Handle form submission
-                searchForm.addEventListener('submit', async function(e) {
-                    const query = searchInput.value.trim();
-                    
-                    // If query is numeric (pure ID), check if talent exists before submitting
-                    if (query !== '' && /^\d+$/.test(query)) {
-                        e.preventDefault();
-                        
-                        try {
-                            // Check if talent exists via AJAX
-                            const response = await fetch("{{ route('admin.search.check-talent', ':id') }}".replace(':id', query), {
-                                method: 'GET',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json'
-                                }
-                            });
-
-                            const data = await response.json();
-
-                            if (data.exists) {
-                                // Talent exists, redirect to profile
-                                window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
-                            } else {
-                                // Talent doesn't exist, show SweetAlert only (don't navigate)
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Talent Not Found',
-                                    text: 'No talent exists with ID #' + query,
-                                    confirmButtonColor: '#000000',
-                                });
-                            }
-                        } catch (error) {
-                            // On error, show SweetAlert
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Talent Not Found',
-                                text: 'No talent exists with ID #' + query,
-                                confirmButtonColor: '#000000',
-                            });
-                        }
-                        return false;
-                    }
-                    
-                    // For non-numeric queries, allow normal form submission
-                });
-            })();
-        </script>
         <div id="admin-icons-group">
             <div class="dropdown" style="display: flex !important; align-items: center !important; margin-left: 18px !important;">
                 <a class="header-icon-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Add New" style="margin-left: 0 !important;">
