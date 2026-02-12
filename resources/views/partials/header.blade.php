@@ -155,23 +155,60 @@ height:auto;
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by talent ID, name, or email..." aria-label="Search" id="admin-search-input" />
         </form>
         <script>
-            // Handle instant redirect for numeric talent ID searches
+            // Handle instant redirect for numeric talent ID searches with validation
             (function() {
                 const searchInput = document.getElementById('admin-search-input');
                 const searchForm = document.getElementById('admin-search-box');
-                let searchTimeout;
 
                 if (!searchInput || !searchForm) return;
 
+                // Ensure SweetAlert is loaded
+                if (typeof Swal === 'undefined') {
+                    console.warn('SweetAlert2 is not loaded');
+                    return;
+                }
+
                 // Handle Enter key press
-                searchInput.addEventListener('keydown', function(e) {
+                searchInput.addEventListener('keydown', async function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         const query = this.value.trim();
                         
-                        // If query is numeric, redirect directly to talent profile
+                        // If query is numeric, check if talent exists before redirecting
                         if (query !== '' && /^\d+$/.test(query)) {
-                            window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
+                            try {
+                                // Check if talent exists via AJAX
+                                const response = await fetch("{{ route('admin.search.check-talent', ':id') }}".replace(':id', query), {
+                                    method: 'GET',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    }
+                                });
+
+                                const data = await response.json();
+
+                                if (data.exists) {
+                                    // Talent exists, redirect to profile
+                                    window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
+                                } else {
+                                    // Talent doesn't exist, show SweetAlert
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Talent Not Found',
+                                        text: 'No talent exists with ID #' + query,
+                                        confirmButtonColor: '#000000',
+                                    });
+                                }
+                            } catch (error) {
+                                // On error, show SweetAlert
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Talent Not Found',
+                                    text: 'No talent exists with ID #' + query,
+                                    confirmButtonColor: '#000000',
+                                });
+                            }
                             return;
                         }
                         

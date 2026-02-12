@@ -73,6 +73,20 @@ class SearchController extends Controller
             'canSeeShoots' => $canSeeShoots,
         ]);
     }
+
+    public function checkTalent($id)
+    {
+        $admin = auth('admin')->user();
+        $canSeeTalents = $admin && ($admin->isSuperAdmin() || $admin->hasModulePermission('talent_management'));
+
+        if (!$canSeeTalents) {
+            return response()->json(['exists' => false], 403);
+        }
+
+        $exists = TalentProfile::where('id', $id)->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
 }
 
 
