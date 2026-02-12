@@ -168,40 +168,31 @@ height:auto;
                     return;
                 }
 
-                // Handle Enter key press
-                searchInput.addEventListener('keydown', async function(e) {
-                    if (e.key === 'Enter') {
+                // Handle form submission
+                searchForm.addEventListener('submit', async function(e) {
+                    const query = searchInput.value.trim();
+                    
+                    // If query is numeric (pure ID), check if talent exists before submitting
+                    if (query !== '' && /^\d+$/.test(query)) {
                         e.preventDefault();
-                        const query = this.value.trim();
                         
-                        // If query is numeric, check if talent exists before redirecting
-                        if (query !== '' && /^\d+$/.test(query)) {
-                            try {
-                                // Check if talent exists via AJAX
-                                const response = await fetch("{{ route('admin.search.check-talent', ':id') }}".replace(':id', query), {
-                                    method: 'GET',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'Accept': 'application/json'
-                                    }
-                                });
-
-                                const data = await response.json();
-
-                                if (data.exists) {
-                                    // Talent exists, redirect to profile
-                                    window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
-                                } else {
-                                    // Talent doesn't exist, show SweetAlert
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Talent Not Found',
-                                        text: 'No talent exists with ID #' + query,
-                                        confirmButtonColor: '#000000',
-                                    });
+                        try {
+                            // Check if talent exists via AJAX
+                            const response = await fetch("{{ route('admin.search.check-talent', ':id') }}".replace(':id', query), {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
                                 }
-                            } catch (error) {
-                                // On error, show SweetAlert
+                            });
+
+                            const data = await response.json();
+
+                            if (data.exists) {
+                                // Talent exists, redirect to profile
+                                window.location.href = "{{ route('admin.talent-profiles.show', ':id') }}".replace(':id', query);
+                            } else {
+                                // Talent doesn't exist, show SweetAlert only (don't navigate)
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Talent Not Found',
@@ -209,12 +200,19 @@ height:auto;
                                     confirmButtonColor: '#000000',
                                 });
                             }
-                            return;
+                        } catch (error) {
+                            // On error, show SweetAlert
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Talent Not Found',
+                                text: 'No talent exists with ID #' + query,
+                                confirmButtonColor: '#000000',
+                            });
                         }
-                        
-                        // Otherwise submit the form normally
-                        searchForm.submit();
+                        return false;
                     }
+                    
+                    // For non-numeric queries, allow normal form submission
                 });
             })();
         </script>

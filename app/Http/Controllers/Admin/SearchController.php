@@ -21,12 +21,21 @@ class SearchController extends Controller
         $canSeeTalents = $admin && ($admin->isSuperAdmin() || $admin->hasModulePermission('talent_management'));
         $canSeeShoots = $admin && ($admin->isSuperAdmin() || $admin->hasModulePermission('project_management'));
 
-        // If search query is numeric, check if it's a talent ID and redirect directly
-        if ($q !== '' && $canSeeTalents && is_numeric($q)) {
+        // If search query is numeric (pure ID search), check if it's a talent ID
+        // If it exists, redirect; if not, don't show search results (will be handled by JavaScript)
+        if ($q !== '' && $canSeeTalents && is_numeric($q) && preg_match('/^\d+$/', $q)) {
             $talentProfile = TalentProfile::find($q);
             if ($talentProfile) {
                 return redirect()->route('admin.talent-profiles.show', $talentProfile->id);
             }
+            // If ID doesn't exist, return empty results (JavaScript will show SweetAlert)
+            return view('admin.search.index', [
+                'q' => $q,
+                'talents' => collect(),
+                'shoots' => collect(),
+                'canSeeTalents' => $canSeeTalents,
+                'canSeeShoots' => $canSeeShoots,
+            ]);
         }
 
         $talents = collect();
@@ -36,8 +45,7 @@ class SearchController extends Controller
             $talents = TalentProfile::query()
                 ->with('user:id,email')
                 ->where(function ($query) use ($q) {
-                    $query->where('id', $q) // Search by ID
-                        ->orWhere('display_name', 'like', '%' . $q . '%')
+                    $query->where('display_name', 'like', '%' . $q . '%')
                         ->orWhere('first_name', 'like', '%' . $q . '%')
                         ->orWhere('last_name', 'like', '%' . $q . '%')
                         ->orWhere('legal_name', 'like', '%' . $q . '%')
