@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TalentProfile;
+use App\Models\AuditLog;
 use Gate;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,6 +20,21 @@ class TalentsDashboardController extends Controller
             ->where('onboarding_steps_completed', '>=', 3)
             ->latest()
             ->get();
+
+        // Get last login dates from audit logs for all talent users
+        $userIds = $talents->pluck('user_id')->filter()->toArray();
+        $lastLogins = AuditLog::where('event_type', 'login_success')
+            ->where('user_type', 'talent')
+            ->whereIn('user_id', $userIds)
+            ->selectRaw('user_id, MAX(created_at) as last_login')
+            ->groupBy('user_id')
+            ->pluck('last_login', 'user_id')
+            ->toArray();
+
+        // Attach last login to each talent
+        $talents->each(function ($talent) use ($lastLogins) {
+            $talent->last_login = $lastLogins[$talent->user_id] ?? null;
+        });
 
         $stats = [
             'total'    => TalentProfile::count(),

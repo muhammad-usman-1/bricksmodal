@@ -134,6 +134,13 @@
             border-color: #b7bec6;
             box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
         }
+        #phone.is-invalid {
+            border-color: #dc3545;
+        }
+        #phone.is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
         .submit-btn {
             width: 100%;
             height: 52px;
@@ -207,7 +214,7 @@
             </div>
         @endif
 
-        <form id="auth-form" method="POST" action="{{ route('talent.login.submit') }}">
+        <form id="auth-form" method="POST" action="{{ route('talent.login.submit') }}" novalidate>
             @csrf
 
             <label class="field-label" for="phone">Phone Number</label>
@@ -220,11 +227,11 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2L8.09 9.91a16 16 0 0 0 6 6l1.34-1.34a2 2 0 0 1 2-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
-                    <input id="phone" type="tel" placeholder="00000000" maxlength="8" required>
+                    <input id="phone" type="tel" placeholder="00000000" maxlength="8">
                 </div>
             </div>
-            <div id="phone-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: -10px; margin-bottom: 12px; text-align: left;">
-                Phone number cannot be less than 8 digits
+            <div id="phone-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: 8px; margin-bottom: 12px; text-align: left;">
+                Phone number is required.
             </div>
 
             <input type="hidden" name="phone_country_code" id="phone_country_code">
@@ -248,16 +255,40 @@
             const form = document.getElementById('auth-form');
             const errorMsg = document.getElementById('phone-error');
 
+            function validatePhone() {
+                const inputValue = phoneInput.value.trim();
+                const phoneNumber = inputValue.replace(/\D/g, '');
+                
+                if (phoneNumber.length === 0) {
+                    phoneInput.classList.add('is-invalid');
+                    errorMsg.textContent = 'Phone number is required.';
+                    errorMsg.style.display = 'block';
+                    return false;
+                } else if (phoneNumber.length < 8) {
+                    phoneInput.classList.add('is-invalid');
+                    errorMsg.textContent = 'Phone number cannot be less than 8 digits';
+                    errorMsg.style.display = 'block';
+                    return false;
+                } else {
+                    phoneInput.classList.remove('is-invalid');
+                    errorMsg.style.display = 'none';
+                    return true;
+                }
+            }
+
             // Only allow digits in phone input
             phoneInput.addEventListener('input', function(e) {
                 e.target.value = e.target.value.replace(/\D/g, '');
-
-                // Remove error state
+                
+                // Validate on input if there was an error
                 if (phoneInput.classList.contains('is-invalid')) {
-                    phoneInput.classList.remove('is-invalid');
-                    phoneInput.style.borderColor = '#e6e6e6';
-                    errorMsg.style.display = 'none';
+                    validatePhone();
                 }
+            });
+
+            // Validate on blur (when user leaves the field)
+            phoneInput.addEventListener('blur', function() {
+                validatePhone();
             });
 
             // Handle Enter key on phone input
@@ -270,17 +301,13 @@
             });
 
             form.addEventListener('submit', function(e) {
-                const inputValue = phoneInput.value.trim();
-                const phoneNumber = inputValue.replace(/\D/g, '');
-
-                if (phoneNumber.length < 8) {
+                if (!validatePhone()) {
                     e.preventDefault();
-                    phoneInput.classList.add('is-invalid');
-                    phoneInput.style.borderColor = '#dc3545';
-                    errorMsg.style.display = 'block';
                     return;
                 }
 
+                const inputValue = phoneInput.value.trim();
+                const phoneNumber = inputValue.replace(/\D/g, '');
                 const countryCode = '+965';
 
                 document.getElementById('phone_country_code').value = countryCode;

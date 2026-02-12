@@ -234,9 +234,10 @@
     .card-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.3); margin-bottom: 12px; transition: none; }
 
     .overlay-bottom { display: flex; justify-content: space-between; align-items: flex-end; transition: none; }
-    .joined-info { display: flex; flex-direction: column; gap: 2px; transition: none; }
-    .joined-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; transition: none; }
-    .joined-date { font-size: 12px; font-weight: 500; color: #fff; transition: none; }
+    .profile-number { font-size: 30px; font-weight: 600; color: #fff; transition: none; }
+    .joined-info { display: flex; flex-direction: column; gap: 2px; transition: none; margin-left: 12px; }
+    .joined-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 700; transition: none; }
+    .joined-date { font-size: 14px; font-weight: 500; color: #fff; transition: none; }
 
     @media (max-width: 640px) {
         .talent-card { height: 280px; }
@@ -715,7 +716,7 @@
                     $dob = optional($talent->date_of_birth);
                     $age = $dob ? $dob->age : null;
                     $ageText = $age ? "• $age YEARS" : '';
-                    $joinedAt = optional($talent->created_at)->format('d M Y') ?? '--';
+                    $lastLogin = $talent->last_login ? \Carbon\Carbon::parse($talent->last_login)->format('M d, Y') : '--';
                     $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
                     $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/w40/' . strtolower($flagCode) . '.png' : null;
                     $avatarCandidate = $talent->headshot_center_path ?? ($talent->headshot_left_path ?? $talent->headshot_right_path);
@@ -815,9 +816,10 @@
                         <p class="talent-name">{{ $displayName }}</p>
                         <div class="card-divider"></div>
                         <div class="overlay-bottom">
+                            <span class="profile-number">#{{ $talent->id }}</span>
                             <div class="joined-info">
-                                <span class="joined-label">Joined</span>
-                                <span class="joined-date">{{ $joinedAt }}</span>
+                                <span class="joined-label">Last login</span>
+                                <span class="joined-date">{{ $lastLogin }}</span>
                             </div>
                         </div>
                     </div>
@@ -831,11 +833,11 @@
                 // Apply filter immediately before page fully loads
                 const cards = document.querySelectorAll('.talent-card');
                 const defaultFilter = 'all'; // Default to 'all' which shows approved
-                
+
                 cards.forEach(card => {
                     const status = (card.dataset.status || '').toLowerCase();
                     const gender = card.dataset.gender || '';
-                    
+
                     // Only show approved/verified talents by default
                     const isApproved = status === 'approved' || status === 'verified';
                     if (isApproved) {
@@ -1005,7 +1007,7 @@
                 const matchesSearch = !term || name.includes(term);
 
                 let matchesFilter = false;
-                
+
                 // Filter by status first, then by gender if applicable
                 if (filter === 'all') {
                     // All Talents button should only show approved/verified talents
@@ -1337,7 +1339,7 @@
         function updatePhoneNumberOptions() {
             const primaryId = primaryProfileSelect.value;
             const secondaryId = secondaryProfileSelect.value;
-            
+
             if (!primaryId || !secondaryId) {
                 phoneNumberOptions.innerHTML = '';
                 return;
@@ -1363,7 +1365,7 @@
         function updateProfileInfo() {
             const primaryId = primaryProfileSelect.value;
             const secondaryId = secondaryProfileSelect.value;
-            
+
             if (primaryId) {
                 const option = primaryProfileSelect.options[primaryProfileSelect.selectedIndex];
                 const name = option.dataset.name || 'N/A';
