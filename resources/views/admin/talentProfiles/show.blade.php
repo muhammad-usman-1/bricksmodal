@@ -572,8 +572,9 @@
     ];
 
     $accountFields = [
-        ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
         ['label' => 'Mobile number', 'name' => 'mobile_number', 'value' => $talentProfile->mobile_number, 'type' => 'text'],
+        ['label' => 'WhatsApp number', 'name' => 'whatsapp_number', 'value' => $talentProfile->whatsapp_number, 'type' => 'text', 'required' => true],
+        ['label' => 'IBAN', 'name' => 'iban', 'value' => $talentProfile->iban ?? null, 'type' => 'text'],
         ['label' => 'Rate', 'name' => 'rate', 'value' => $talentProfile->rate, 'type' => 'number'],
         ['label' => 'Verification status', 'name' => 'verification_status', 'value' => $talentProfile->verification_status, 'type' => 'select', 'options' => \App\Models\TalentProfile::VERIFICATION_STATUS_SELECT],
         ['label' => 'Verification notes', 'name' => 'verification_notes', 'value' => $talentProfile->verification_notes, 'type' => 'textarea'],
@@ -715,17 +716,19 @@
 
         <div class="info-grid">
             @php
-                // Filter out Mobile Number, WhatsApp Number, and Creative Role from Account Information
-                // Only hide these fields for regular admins - Super Admin should see all fields
+                // Filter out Mobile Number, WhatsApp Number, Creative Role, and IBAN from Account Information
+                // Super Admin and Regular Admin see all fields
+                // Creative role hides: Mobile Number, WhatsApp Number, Creative Role, and IBAN
                 $isSuperAdmin = auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin());
+                $isCreative = method_exists(auth()->user(), 'isCreative') && auth()->user()->isCreative();
                 
-                if ($isSuperAdmin) {
-                    // Super Admin sees all fields
+                if ($isSuperAdmin || !$isCreative) {
+                    // Super Admin and Regular Admin see all fields
                     $filteredAccountFields = $accountFields;
                 } else {
-                    // Regular Admin - hide Mobile Number, WhatsApp Number, and Creative Role
+                    // Creative role - hide Mobile Number, WhatsApp Number, Creative Role, and IBAN
                     $filteredAccountFields = array_values(array_filter($accountFields, function($field) {
-                        return !in_array($field['name'], ['mobile_number', 'whatsapp_number', 'creative_role']);
+                        return !in_array($field['name'], ['mobile_number', 'whatsapp_number', 'creative_role', 'iban']);
                     }));
                 }
                 
