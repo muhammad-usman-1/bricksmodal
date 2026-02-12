@@ -713,6 +713,148 @@
             </div>
         </div> --}}
 
+        <div class="info-grid">
+            @php
+                // Filter out Mobile Number, WhatsApp Number, and Creative Role from Account Information
+                // Only hide these fields for regular admins - Super Admin should see all fields
+                $isSuperAdmin = auth()->user()->is_super_admin || (method_exists(auth()->user(), 'isSuperAdmin') && auth()->user()->isSuperAdmin());
+                
+                if ($isSuperAdmin) {
+                    // Super Admin sees all fields
+                    $filteredAccountFields = $accountFields;
+                } else {
+                    // Regular Admin - hide Mobile Number, WhatsApp Number, and Creative Role
+                    $filteredAccountFields = array_values(array_filter($accountFields, function($field) {
+                        return !in_array($field['name'], ['mobile_number', 'whatsapp_number', 'creative_role']);
+                    }));
+                }
+                
+                $sections = [
+                    ['title' => 'Profile information', 'fields' => $profileFields],
+                    ['title' => 'Account information', 'fields' => $filteredAccountFields],
+                    ['title' => 'Measurements', 'fields' => $measurementFields],
+                    ['title' => 'Appearance details', 'fields' => $appearanceFields],
+                ];
+            @endphp
+
+            @foreach($sections as $section)
+                @if(in_array($section['title'], ['Profile information', 'Account information']))
+                <div class="section-card">
+                    <div class="section-title">{{ $section['title'] }}</div>
+                    <table class="info-table">
+                        @foreach($section['fields'] as $f)
+                            @if(isset($f['hide_in_edit']) && $f['hide_in_edit'])
+                                <tr class="edit-mode-only" style="display: none;">
+                                    <td>{{ $f['label'] }}</td>
+                                    <td>
+                                        <input type="hidden" name="{{ $f['name'] }}" value="{{ $f['value'] }}">
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr @if(isset($f['data-field'])) data-field-row="{{ $f['data-field'] }}" @endif>
+                                <td>{{ $f['label'] }}</td>
+                                <td>
+                                    <div class="display-mode-only {{ is_null($f['value']) || $f['value'] === '' ? 'not-set' : '' }}">
+                                        @if($f['type'] === 'select' && isset($f['options']))
+                                            {{ $f['options'][$f['value']] ?? $notSet }}
+                                        @elseif($f['type'] === 'boolean')
+                                            {{ is_null($f['value']) ? $notSet : ($f['value'] ? 'Yes' : 'No') }}
+                                        @elseif($f['name'] === 'hijab_preference')
+                                            @if($f['value'] === 'wear_hijab')
+                                                Yes
+                                            @elseif($f['value'] === 'no_hijab')
+                                                No
+                                            @else
+                                                {{ $notSet }}
+                                            @endif
+                                        @elseif($f['name'] === 'nationality' && $f['value'])
+                                            @php
+                                                $nationalityCode = strtolower($f['value']);
+                                                $countryName = $countries[$nationalityCode] ?? ucfirst($f['value']);
+                                                $isUnspecified = strtolower($f['value']) === 'unspecified';
+                                            @endphp
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                @if(!$isUnspecified && $nationalityCode && strlen($nationalityCode) === 2)
+                                                <span class="fi fi-{{ $nationalityCode }}" style="width: auto; height: 18px; aspect-ratio: 4 / 3; display: inline-block;" title="{{ $countryName }}"></span>
+                                                @endif
+                                                <span style="font-weight: 500;">{{ $countryName }}</span>
+                                            </div>
+                                        @else
+                                            {{ $f['value'] ?? $notSet }}
+                                        @endif
+                                    </div>
+                                    <div class="edit-mode-only" @if(isset($f['data-field'])) data-field="{{ $f['data-field'] }}" @endif>
+                                        @if($f['type'] === 'textarea')
+                                            <textarea name="{{ $f['name'] }}" class="inline-edit-input" rows="3">{{ $f['value'] }}</textarea>
+                                        @elseif($f['type'] === 'select')
+                                            <select name="{{ $f['name'] }}" class="inline-edit-input">
+                                                <option value="">Select {{ $f['label'] }}</option>
+                                                @foreach($f['options'] as $key => $label)
+                                                    <option value="{{ $key }}" {{ (string)$f['value'] === (string)$key ? 'selected' : '' }}>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        @elseif($f['type'] === 'boolean')
+                                            <select name="{{ $f['name'] }}" class="inline-edit-input">
+                                                <option value="1" {{ $f['value'] == 1 ? 'selected' : '' }}>Yes</option>
+                                                <option value="0" {{ $f['value'] == 0 ? 'selected' : '' }}>No</option>
+                                            </select>
+                                        @elseif($f['type'] === 'nationality')
+                                            <div class="nationality-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                                                @php
+                                                    $isUnspecified = strtolower($f['value'] ?? '') === 'unspecified';
+                                                    $shouldShowFlag = $f['value'] && !$isUnspecified && strlen(strtolower($f['value'])) === 2;
+                                                @endphp
+                                                <span id="nationality_flag_edit" class="fi nationality-flag {{ $shouldShowFlag ? 'fi-' . strtolower($f['value']) : '' }}" style="display: {{ $shouldShowFlag ? 'inline-block' : 'none' }}; width: auto; height: 18px; aspect-ratio: 4 / 3;"></span>
+                                                <select name="{{ $f['name'] }}" id="nationality_select" class="inline-edit-input" style="flex: 1;">
+                                                    <option value="">Select nationality</option>
+                                                    <option value="Unspecified" {{ (string)$f['value'] === 'Unspecified' ? 'selected' : '' }}>Unspecified</option>
+                                                    @foreach($countries as $code => $name)
+                                                        <option value="{{ $code }}" {{ (string)$f['value'] === (string)$code ? 'selected' : '' }}>{{ $name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @elseif($f['type'] === 'hijab')
+                                            <select name="{{ $f['name'] }}" id="hijab_preference_select" class="inline-edit-input">
+                                                <option value="">Select</option>
+                                                <option value="wear_hijab" {{ $f['value'] === 'wear_hijab' ? 'selected' : '' }}>Yes</option>
+                                                <option value="no_hijab" {{ $f['value'] === 'no_hijab' ? 'selected' : '' }}>No</option>
+                                            </select>
+                                        @else
+                                            <input type="{{ $f['type'] }}" name="{{ $f['name'] }}" value="{{ $f['value'] }}"
+                                                class="inline-edit-input"
+                                                {{ ($f['required'] ?? false) ? 'required' : '' }}
+                                                @if($f['name'] === 'date_of_birth') max="{{ now()->subYears(18)->format('Y-m-d') }}" @endif>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        @if($section['title'] === 'Profile information')
+                            <tr>
+                                <td>Labels</td>
+                                <td>
+                                    <div class="display-mode-only">
+                                        {{ $talentProfile->labels->pluck('name')->filter()->implode(', ') ?: $notSet }}
+                                    </div>
+                                    <div class="edit-mode-only">
+                                        <select name="labels[]" class="inline-edit-input" multiple style="height: 100px;">
+                                            @foreach($labels as $label)
+                                                <option value="{{ $label->id }}" {{ in_array($label->id, $talentProfile->labels->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                                    {{ $label->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                    </table>
+                </div>
+                @endif
+            @endforeach
+        </div>
+
         <div class="section-card">
             <div class="section-title">Profile Images</div>
             <div id="profileImagesContainer">
@@ -854,8 +996,6 @@
         <div class="info-grid">
             @php
                 $sections = [
-                    ['title' => 'Profile information', 'fields' => $profileFields],
-                    ['title' => 'Account information', 'fields' => $accountFields],
                     ['title' => 'Measurements', 'fields' => $measurementFields],
                     ['title' => 'Appearance details', 'fields' => $appearanceFields],
                 ];
@@ -952,26 +1092,6 @@
                                 </td>
                             </tr>
                         @endforeach
-
-                        @if($section['title'] === 'Profile information')
-                            <tr>
-                                <td>Labels</td>
-                                <td>
-                                    <div class="display-mode-only">
-                                        {{ $talentProfile->labels->pluck('name')->filter()->implode(', ') ?: $notSet }}
-                                    </div>
-                                    <div class="edit-mode-only">
-                                        <select name="labels[]" class="inline-edit-input" multiple style="height: 100px;">
-                                            @foreach($labels as $label)
-                                                <option value="{{ $label->id }}" {{ in_array($label->id, $talentProfile->labels->pluck('id')->toArray()) ? 'selected' : '' }}>
-                                                    {{ $label->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endif
                     </table>
                 </div>
             @endforeach
