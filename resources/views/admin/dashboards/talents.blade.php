@@ -665,11 +665,11 @@
 <div class="talents-shell">
     <div class="talents-head">
         <div>
-            <h5>Talents</h5>
+            <h5>{{ \App\Helpers\Bilingual::get('admin_talents.talents') }}</h5>
             <div class="meta">
-                <strong>{{ $activeCount }} active talents</strong>
+                <strong>{{ $activeCount }} {{ \App\Helpers\Bilingual::get('admin_talents.active_talents') }}</strong>
                 <span>•</span>
-                <span>Manage and verify profiles</span>
+                <span>{{ \App\Helpers\Bilingual::get('admin_talents.manage_and_verify') }}</span>
             </div>
         </div>
         <div class="header-actions">
@@ -678,14 +678,14 @@
             </button>
             <div class="header-dropdown" id="headerDropdown">
                 <a href="{{ route('admin.talent-profiles.suspended') }}" class="header-dropdown-item">
-                    <i class="fas fa-pause-circle"></i> Suspend Talent
+                    <i class="fas fa-pause-circle"></i> {{ \App\Helpers\Bilingual::get('admin_talents.suspend_talent') }}
                 </a>
                 <a href="{{ route('admin.talent-profiles.rejected') }}" class="header-dropdown-item">
-                    <i class="fas fa-times-circle"></i> Reject Talent
+                    <i class="fas fa-times-circle"></i> {{ \App\Helpers\Bilingual::get('admin_talents.reject_talent') }}
                 </a>
                 @if(auth()->user()->isSuperAdmin())
                 <button type="button" class="header-dropdown-item" id="combineProfilesBtn">
-                    <i class="fas fa-code-branch"></i> Combine Profiles
+                    <i class="fas fa-code-branch"></i> {{ \App\Helpers\Bilingual::get('admin_talents.combine_profiles') }}
                 </button>
                 @endif
             </div>
@@ -693,13 +693,13 @@
     </div>
 
     <div class="search-row">
-        <input type="text" id="talentSearch" class="search-input" placeholder="Search talents...">
+        <input type="text" id="talentSearch" class="search-input" placeholder="{{ \App\Helpers\Bilingual::get('admin_talents.search_talents') }}">
     </div>
     <div class="filter-pills" id="filterPills">
-        <button class="pill-btn active" data-filter="all">All Talents</button>
-        <button class="pill-btn" data-filter="male">Male</button>
-        <button class="pill-btn" data-filter="female">Female</button>
-        <button class="pill-btn" data-filter="pending">Pending</button>
+        <button class="pill-btn active" data-filter="all">{{ \App\Helpers\Bilingual::get('admin_talents.all_talents') }}</button>
+        <button class="pill-btn" data-filter="male">{{ \App\Helpers\Bilingual::get('admin_talents.male') }}</button>
+        <button class="pill-btn" data-filter="female">{{ \App\Helpers\Bilingual::get('admin_talents.female') }}</button>
+        <button class="pill-btn" data-filter="pending">{{ \App\Helpers\Bilingual::get('admin_talents.pending') }}</button>
     </div>
 
     @if($talents->isEmpty())
@@ -715,7 +715,7 @@
                     $isRejected = $status === 'rejected';
                     $dob = optional($talent->date_of_birth);
                     $age = $dob ? $dob->age : null;
-                    $ageText = $age ? "• $age YEARS" : '';
+                    $ageText = $age ? "• $age " . \App\Helpers\Bilingual::get('admin_talents.years') : '';
                     $lastLogin = $talent->last_login ? \Carbon\Carbon::parse($talent->last_login)->format('M d, Y') : '--';
                     $flagCode = $talent->nationality ?? $talent->country_code ?? $talent->country ?? null;
                     $flagUrl = $flagCode && strlen($flagCode) === 2 ? 'https://flagcdn.com/w40/' . strtolower($flagCode) . '.png' : null;
@@ -787,19 +787,19 @@
                         @endforeach
                     </div>
                     <span class="badge-active {{ $isVerified ? '' : ($isSuspended ? 'badge-suspended' : ($isRejected ? 'badge-rejected' : 'badge-pending')) }}">
-                        {{ $isVerified ? 'Active' : ($isSuspended ? 'Suspended' : ($isRejected ? 'Rejected' : 'Pending')) }}
+                        {{ $isVerified ? \App\Helpers\Bilingual::get('admin_talents.active') : ($isSuspended ? \App\Helpers\Bilingual::get('admin_talents.suspended') : ($isRejected ? \App\Helpers\Bilingual::get('admin_talents.rejected') : \App\Helpers\Bilingual::get('admin_talents.pending'))) }}
                     </span>
                     <div class="card-ellipsis actions-dropdown-container">
                         <span class="dropdown-toggle-btn"><i class="fas fa-ellipsis-v"></i></span>
                         <div class="actions-dropdown-menu">
                             <a href="{{ route('admin.talent-profiles.show', $talent->id) }}" class="actions-dropdown-item">
-                                <i class="far fa-eye"></i> View Profile
+                                <i class="far fa-eye"></i> {{ \App\Helpers\Bilingual::get('admin_talents.view_profile') }}
                             </a>
                             <form action="{{ route('admin.talent-profiles.destroy', $talent->id) }}" method="POST" class="delete-talent-form" data-swal-confirm="Are you sure? All the data will be deleted." style="margin:0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="actions-dropdown-item text-danger">
-                                    <i class="far fa-trash-alt"></i> Delete
+                                    <i class="far fa-trash-alt"></i> {{ \App\Helpers\Bilingual::get('admin_talents.delete') }}
                                 </button>
                             </form>
                         </div>
@@ -818,7 +818,7 @@
                         <div class="overlay-bottom">
                             <span class="profile-number">#{{ $talent->id }}</span>
                             <div class="joined-info">
-                                <span class="joined-label">Last login</span>
+                                <span class="joined-label">{{ \App\Helpers\Bilingual::get('admin_talents.last_login') }}</span>
                                 <span class="joined-date">{{ $lastLogin }}</span>
                             </div>
                         </div>
@@ -854,8 +854,8 @@
                 <div class="empty-icon">
                     <i class="fas fa-search"></i>
                 </div>
-                <h3 id="emptyStateTitle">No talents found</h3>
-                <p id="emptyStateText">We couldn't find any talents matching your criteria.</p>
+                <h3 id="emptyStateTitle">{{ \App\Helpers\Bilingual::get('admin_talents.no_talents_found') }}</h3>
+                <p id="emptyStateText">{{ \App\Helpers\Bilingual::get('admin_talents.no_talents_matching') }}</p>
             </div>
         </div>
     @endif
@@ -866,18 +866,18 @@
 <div class="combine-modal" id="combineModal">
     <div class="combine-modal-content">
         <div class="combine-modal-header">
-            <h3><i class="fas fa-code-branch"></i> Combine Talent Profiles</h3>
+            <h3><i class="fas fa-code-branch"></i> {{ \App\Helpers\Bilingual::get('admin_talents.combine_profiles_modal_title') }}</h3>
             <button type="button" class="combine-modal-close" id="closeCombineModal">&times;</button>
         </div>
         <div class="combine-modal-body">
             <form id="combineProfilesForm">
                 <div class="profile-select-section">
-                    <h4>Select Two Profiles to Combine</h4>
+                    <h4>{{ \App\Helpers\Bilingual::get('admin_talents.select_two_profiles') }}</h4>
                     <div class="profile-select-grid">
                         <div>
-                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">Primary Profile (will be kept)</h5>
+                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">{{ \App\Helpers\Bilingual::get('admin_talents.primary_profile') }}</h5>
                             <select name="primary_profile_id" id="primaryProfileSelect" class="search-input" required>
-                                <option value="">Select primary profile...</option>
+                                <option value="">{{ \App\Helpers\Bilingual::get('admin_talents.select_primary_profile') }}</option>
                                 @foreach($talents as $talent)
                                     <option value="{{ $talent->id }}" data-name="{{ $talent->display_name ?? $talent->legal_name }}" data-phone="{{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }}">
                                         {{ $talent->display_name ?? $talent->legal_name }} ({{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }})
@@ -890,9 +890,9 @@
                             </div>
                         </div>
                         <div>
-                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">Secondary Profile (will be merged into primary)</h5>
+                            <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;">{{ \App\Helpers\Bilingual::get('admin_talents.secondary_profile') }}</h5>
                             <select name="secondary_profile_id" id="secondaryProfileSelect" class="search-input" required>
-                                <option value="">Select secondary profile...</option>
+                                <option value="">{{ \App\Helpers\Bilingual::get('admin_talents.select_secondary_profile') }}</option>
                                 @foreach($talents as $talent)
                                     <option value="{{ $talent->id }}" data-name="{{ $talent->display_name ?? $talent->legal_name }}" data-phone="{{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }}">
                                         {{ $talent->display_name ?? $talent->legal_name }} ({{ $talent->mobile_number ?? $talent->whatsapp_number ?? 'N/A' }})
@@ -908,47 +908,47 @@
                 </div>
 
                 <div class="merge-options-section" id="mergeOptionsSection" style="display: none;">
-                    <h4>Merge Options</h4>
+                    <h4>{{ \App\Helpers\Bilingual::get('admin_talents.merge_options') }}</h4>
 
                     <div class="merge-option-group">
-                        <label>Primary Phone Number</label>
+                        <label>{{ \App\Helpers\Bilingual::get('admin_talents.primary_phone_number') }}</label>
                         <div class="radio-group" id="phoneNumberOptions">
                             <!-- Will be populated dynamically -->
                         </div>
                     </div>
 
                     <div class="merge-option-group">
-                        <label>Profile Data to Keep</label>
+                        <label>{{ \App\Helpers\Bilingual::get('admin_talents.profile_data_to_keep') }}</label>
                         <div class="radio-group">
                             <div class="radio-option">
                                 <input type="radio" name="profile_data" id="profileDataPrimary" value="primary" checked>
-                                <label for="profileDataPrimary">Keep primary profile data (merge missing fields from secondary)</label>
+                                <label for="profileDataPrimary">{{ \App\Helpers\Bilingual::get('admin_talents.keep_primary_data') }}</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" name="profile_data" id="profileDataSecondary" value="secondary">
-                                <label for="profileDataSecondary">Keep secondary profile data (merge missing fields from primary)</label>
+                                <label for="profileDataSecondary">{{ \App\Helpers\Bilingual::get('admin_talents.keep_secondary_data') }}</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" name="profile_data" id="profileDataMerge" value="merge">
-                                <label for="profileDataMerge">Merge intelligently (keep most complete data)</label>
+                                <label for="profileDataMerge">{{ \App\Helpers\Bilingual::get('admin_talents.merge_intelligently') }}</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="merge-option-group">
-                        <label>Images to Keep</label>
+                        <label>{{ \App\Helpers\Bilingual::get('admin_talents.images_to_keep') }}</label>
                         <div class="radio-group">
                             <div class="radio-option">
                                 <input type="radio" name="images" id="imagesPrimary" value="primary" checked>
-                                <label for="imagesPrimary">Keep primary profile images</label>
+                                <label for="imagesPrimary">{{ \App\Helpers\Bilingual::get('admin_talents.keep_primary_images') }}</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" name="images" id="imagesSecondary" value="secondary">
-                                <label for="imagesSecondary">Keep secondary profile images</label>
+                                <label for="imagesSecondary">{{ \App\Helpers\Bilingual::get('admin_talents.keep_secondary_images') }}</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" name="images" id="imagesMerge" value="merge">
-                                <label for="imagesMerge">Merge images (keep all unique images)</label>
+                                <label for="imagesMerge">{{ \App\Helpers\Bilingual::get('admin_talents.merge_images') }}</label>
                             </div>
                         </div>
                     </div>
@@ -956,8 +956,8 @@
             </form>
         </div>
         <div class="combine-modal-footer">
-            <button type="button" class="btn-cancel" id="cancelCombineBtn">Cancel</button>
-            <button type="button" class="btn-combine" id="submitCombineBtn" disabled>Combine Profiles</button>
+            <button type="button" class="btn-cancel" id="cancelCombineBtn">{{ \App\Helpers\Bilingual::get('admin_talents.cancel') }}</button>
+            <button type="button" class="btn-combine" id="submitCombineBtn" disabled>{{ \App\Helpers\Bilingual::get('admin_talents.combine_profiles') }}</button>
         </div>
     </div>
 </div>
@@ -965,7 +965,7 @@
 
 <div class="talent-footer">
     <a href="{{ route('admin.talent-profiles.create') }}" class="add-talent-btn">
-        <i class="fas fa-plus"></i> Add Talent
+        <i class="fas fa-plus"></i> {{ \App\Helpers\Bilingual::get('admin_talents.add_talent') }}
     </a>
 </div>
 
@@ -1049,20 +1049,21 @@
                 if (visibleCount === 0) {
                     emptyState.classList.remove('d-none');
                     if (filter === 'pending') {
-                        emptyStateTitle.textContent = 'No pending talents';
-                        emptyStateText.textContent = 'There are no pending talents to review at the moment.';
+                        emptyStateTitle.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_pending_talents") }}';
+                        emptyStateText.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_pending_talents_text") }}';
                     } else if (filter === 'rejected') {
-                        emptyStateTitle.textContent = 'No rejected talents';
-                        emptyStateText.textContent = 'There are no rejected talents at the moment.';
+                        emptyStateTitle.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_rejected_talents") }}';
+                        emptyStateText.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_rejected_talents_text") }}';
                     } else if (filter === 'suspended') {
-                        emptyStateTitle.textContent = 'No suspended talents';
-                        emptyStateText.textContent = 'There are no suspended talents at the moment.';
+                        emptyStateTitle.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_suspended_talents") }}';
+                        emptyStateText.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_suspended_talents_text") }}';
                     } else if (term) {
-                        emptyStateTitle.textContent = 'No results found';
-                        emptyStateText.textContent = `We couldn't find any talents matching "${term}".`;
+                        emptyStateTitle.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_results_found") }}';
+                        const noResultsText = '{{ \App\Helpers\Bilingual::get("admin_talents.no_results_matching") }}';
+                        emptyStateText.textContent = noResultsText.replace('{term}', term);
                     } else {
-                        emptyStateTitle.textContent = 'No talents found';
-                        emptyStateText.textContent = "We couldn't find any talents matching your criteria.";
+                        emptyStateTitle.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_talents_found") }}';
+                        emptyStateText.textContent = '{{ \App\Helpers\Bilingual::get("admin_talents.no_talents_matching") }}';
                     }
                 } else {
                     emptyState.classList.add('d-none');
@@ -1465,20 +1466,20 @@
 
                 // Confirm before combining
                 Swal.fire({
-                    title: 'Combine Profiles?',
-                    text: 'This action will merge the secondary profile into the primary profile. The secondary profile will be deleted. This cannot be undone.',
+                    title: '{{ \App\Helpers\Bilingual::get("admin_talents.combine_profiles_confirm_title") }}',
+                    text: '{{ \App\Helpers\Bilingual::get("admin_talents.combine_profiles_confirm_text") }}',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#000',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, combine them',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: '{{ \App\Helpers\Bilingual::get("admin_talents.yes_combine_them") }}',
+                    cancelButtonText: '{{ \App\Helpers\Bilingual::get("admin_talents.cancel") }}'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // Show loading
                         Swal.fire({
-                            title: 'Combining profiles...',
-                            text: 'Please wait while we merge the profiles.',
+                            title: '{{ \App\Helpers\Bilingual::get("admin_talents.combining_profiles") }}',
+                            text: '{{ \App\Helpers\Bilingual::get("admin_talents.please_wait_merge") }}',
                             allowOutsideClick: false,
                             allowEscapeKey: false,
                             didOpen: () => {

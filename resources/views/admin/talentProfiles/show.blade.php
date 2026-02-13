@@ -638,13 +638,13 @@
 
         <div class="top-actions">
             <div class="top-actions-left">
-                <a class="back-link" href="{{ route('admin.talents.dashboard') }}"><i class="fas fa-arrow-left"></i> Back to list</a>
+                <a class="back-link" href="{{ route('admin.talents.dashboard') }}"><i class="fas fa-arrow-left"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.back') }}</a>
             </div>
             <div class="top-actions-center">
             </div>
             <div class="top-actions-right">
                 <div class="display-mode-only top-actions-right-display">
-                    <button type="button" class="edit-btn" id="startEditBtn" style="display:none;">Edit profile</button>
+                    <button type="button" class="edit-btn" id="startEditBtn" style="display:none;">{{ \App\Helpers\Bilingual::get('admin_talent_profile.edit') }}</button>
 
                     <div class="actions-menu" id="talentActionsMenu">
                         <button type="button" class="actions-trigger" id="talentActionsBtn" aria-haspopup="true" aria-expanded="false" aria-label="Actions">
@@ -662,12 +662,12 @@
                                     </button>
                                 @endif
                                 <button type="button" class="actions-item" id="talentActionEdit">
-                                    <i class="far fa-edit"></i> Edit
+                                    <i class="far fa-edit"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.edit') }}
                                 </button>
                             @endcan
                             @can('talent_profile_delete')
                                 <button type="button" class="actions-item danger" id="talentActionDelete">
-                                    <i class="far fa-trash-alt"></i> Delete
+                                    <i class="far fa-trash-alt"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.delete') }}
                                 </button>
                             @endcan
                         </div>
@@ -757,10 +757,10 @@
             // Get status
             $status = $talentProfile->verification_status ?? 'pending';
             $statusLabels = [
-                'approved' => 'Approved',
-                'pending' => 'Pending',
-                'rejected' => 'Rejected',
-                'suspended' => 'Suspended',
+                'approved' => \App\Helpers\Bilingual::get('admin_talent_profile.approved'),
+                'pending' => \App\Helpers\Bilingual::get('admin_talent_profile.pending'),
+                'rejected' => \App\Helpers\Bilingual::get('admin_talent_profile.rejected'),
+                'suspended' => \App\Helpers\Bilingual::get('admin_talent_profile.suspended'),
             ];
             $statusLabel = $statusLabels[$status] ?? ucfirst($status);
             $statusClass = match($status) {
@@ -1225,8 +1225,8 @@
 
     <!-- Edit mode sticky action bar at top -->
     <div class="edit-action-bar">
-        <button type="button" class="btn-cancel" id="cancelEditBtnSticky">Cancel</button>
-        <button type="submit" class="btn-save" form="talentEditForm">Save Changes</button>
+        <button type="button" class="btn-cancel" id="cancelEditBtnSticky">{{ \App\Helpers\Bilingual::get('admin_talent_profile.cancel') }}</button>
+        <button type="submit" class="btn-save" form="talentEditForm">{{ \App\Helpers\Bilingual::get('admin_talent_profile.save') }}</button>
     </div>
 
     <div class="action-bar display-mode-only">
@@ -1239,11 +1239,11 @@
             <form action="{{ route('admin.talent-profiles.reject', $talentProfile) }}" method="POST" style="margin:0;" id="reject-talent-form">
                 @csrf
                 <input type="hidden" name="notes" id="rejectNotesInput" value="">
-                <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> Reject</button>
+                <button type="button" class="btn-reject" id="rejectTalentBtn"><i class="fas fa-times"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.reject') }}</button>
             </form>
             <form action="{{ route('admin.talent-profiles.approve', $talentProfile) }}" method="POST" style="margin:0;">
                 @csrf
-                <button type="submit" class="btn-approve"><i class="fas fa-check"></i> Accept</button>
+                <button type="submit" class="btn-approve"><i class="fas fa-check"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.approve') }}</button>
             </form>
         @endif
     </div>

@@ -873,38 +873,14 @@
         </div>
     </div>
 
-    <!-- ID Document Section (Read-Only) -->
+    {{-- ID Document Section (Hidden - Talents cannot see ID documents) --}}
     @php
+        // ID document section is hidden from talents for privacy/security reasons
         $idDocUrl = null;
         $hasIdDoc = false;
-        
-        // Check for ID document (prefer id_front_path, then id_document_front)
-        if ($profile->id_front_path) {
-            $idDocPath = $profile->id_front_path;
-            $hasIdDoc = true;
-        } elseif ($profile->id_document_front) {
-            $idDocPath = $profile->id_document_front;
-            $hasIdDoc = true;
-        }
-        
-        if ($hasIdDoc) {
-            // Check if it's already a full URL
-            if (filter_var($idDocPath, FILTER_VALIDATE_URL)) {
-                $idDocUrl = $idDocPath;
-            } else {
-                // Build URL from path
-                $docDisk = config('filesystems.cloud', 's3');
-                $storageDisk = \Illuminate\Support\Facades\Storage::disk($docDisk);
-                try {
-                    $idDocUrl = $storageDisk->url($idDocPath);
-                } catch (\Exception $e) {
-                    $idDocUrl = asset('storage/' . $idDocPath);
-                }
-            }
-        }
     @endphp
     
-    @if($hasIdDoc && $idDocUrl)
+    {{-- @if($hasIdDoc && $idDocUrl)
     <div class="dash-card" style="width: 100%;">
         <div class="section-title-row">
             <div class="icon-box"><i class="fas fa-id-card"></i></div>
@@ -929,7 +905,7 @@
             </p>
         </div>
     </div>
-    @endif
+    @endif --}}
 
     <!-- Media Portfolio -->
     <div class="dash-card">

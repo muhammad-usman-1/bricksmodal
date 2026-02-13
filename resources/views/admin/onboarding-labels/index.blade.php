@@ -204,6 +204,78 @@
                     </table>
                 </div>
 
+                <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
+                    <h5 class="text-dark font-weight-bold mb-0">Admin Talents Dashboard Labels</h5>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggleAdminTalents" name="settings[admin_talents]" value="1" {{ $settings['admin_talents'] ?? true ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="toggleAdminTalents">Show Arabic Labels</label>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 50%;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pl-4">
+                                    English (Reference)
+                                </th>
+                                <th style="width: 50%; text-align: right;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pr-4">
+                                    Arabic (Translation)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($adminTalentsLabels as $key => $values)
+                                <tr class="border-bottom">
+                                    <td class="align-middle pl-4">
+                                        <span class="text-dark font-weight-bold d-block">{{ $values['en'] }}</span>
+                                        <small class="text-muted">{{ $key }}</small>
+                                    </td>
+                                    <td class="align-middle pr-4">
+                                        <input class="form-control border-dark" type="text" name="admin_talents[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
+                    <h5 class="text-dark font-weight-bold mb-0">Admin Talent Profile Labels</h5>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggleAdminTalentProfile" name="settings[admin_talent_profile]" value="1" {{ $settings['admin_talent_profile'] ?? true ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="toggleAdminTalentProfile">Show Arabic Labels</label>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 50%;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pl-4">
+                                    English (Reference)
+                                </th>
+                                <th style="width: 50%; text-align: right;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pr-4">
+                                    Arabic (Translation)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($adminTalentProfileLabels as $key => $values)
+                                <tr class="border-bottom">
+                                    <td class="align-middle pl-4">
+                                        <span class="text-dark font-weight-bold d-block">{{ $values['en'] }}</span>
+                                        <small class="text-muted">{{ $key }}</small>
+                                    </td>
+                                    <td class="align-middle pr-4">
+                                        <input class="form-control border-dark" type="text" name="admin_talent_profile[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="form-group mt-4 p-4 text-right border-top mb-0">
                     <button class="btn btn-dark px-5 py-2" type="submit" style="background-color: #000; border-color: #000;">
                         Save Changes
@@ -230,14 +302,16 @@
         });
 
         // Toggle Alert Listener
-        $('#toggleOnboarding, #toggleCasting, #toggleTalent, #toggleAdminSidebar, #toggleAdminHome').on('change', function() {
+        $('#toggleOnboarding, #toggleCasting, #toggleTalent, #toggleAdminSidebar, #toggleAdminHome, #toggleAdminTalents, #toggleAdminTalentProfile').on('change', function() {
             let isChecked = $(this).is(':checked');
             let labelMap = {
                 'toggleOnboarding': 'Onboarding Labels',
                 'toggleCasting': 'Casting Requirement Labels',
                 'toggleTalent': 'Talent Portal Labels',
                 'toggleAdminSidebar': 'Admin Sidebar Labels',
-                'toggleAdminHome': 'Admin Home Page Labels'
+                'toggleAdminHome': 'Admin Home Page Labels',
+                'toggleAdminTalents': 'Admin Talents Dashboard Labels',
+                'toggleAdminTalentProfile': 'Admin Talent Profile Labels'
             };
             let label = labelMap[$(this).attr('id')] || 'Labels';
             let state = isChecked ? 'Enabled' : 'Disabled';

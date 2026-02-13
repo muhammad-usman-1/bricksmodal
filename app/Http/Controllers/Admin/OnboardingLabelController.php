@@ -15,12 +15,14 @@ class OnboardingLabelController extends Controller
         $talentLabels = $this->getBilingualLabels('talent');
         $adminSidebarLabels = $this->getBilingualLabels('admin_sidebar');
         $adminHomeLabels = $this->getBilingualLabels('admin_home');
+        $adminTalentsLabels = $this->getBilingualLabels('admin_talents');
+        $adminTalentProfileLabels = $this->getBilingualLabels('admin_talent_profile');
 
         // Load settings
         $settingsPath = resource_path('lang/label_settings.php');
-        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true, 'admin_sidebar' => true, 'admin_home' => true];
+        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true, 'admin_sidebar' => true, 'admin_home' => true, 'admin_talents' => true, 'admin_talent_profile' => true];
 
-        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'talentLabels', 'adminSidebarLabels', 'adminHomeLabels', 'settings'));
+        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'talentLabels', 'adminSidebarLabels', 'adminHomeLabels', 'adminTalentsLabels', 'adminTalentProfileLabels', 'settings'));
     }
 
     public function update(Request $request)
@@ -33,6 +35,8 @@ class OnboardingLabelController extends Controller
                 'talent' => $request->has('settings.talent'),
                 'admin_sidebar' => $request->has('settings.admin_sidebar'),
                 'admin_home' => $request->has('settings.admin_home'),
+                'admin_talents' => $request->has('settings.admin_talents'),
+                'admin_talent_profile' => $request->has('settings.admin_talent_profile'),
             ];
             $this->saveSettings($settings);
         }
@@ -57,6 +61,14 @@ class OnboardingLabelController extends Controller
             $this->processUpdate('admin_home', $request->input('admin_home'));
         }
 
+        if ($request->has('admin_talents')) {
+            $this->processUpdate('admin_talents', $request->input('admin_talents'));
+        }
+
+        if ($request->has('admin_talent_profile')) {
+            $this->processUpdate('admin_talent_profile', $request->input('admin_talent_profile'));
+        }
+
         return redirect()->route('admin.onboarding-labels.index')->with('success', 'Changes saved successfully.');
     }
 
@@ -69,6 +81,8 @@ class OnboardingLabelController extends Controller
         $content .= "    'talent' => " . ($settings['talent'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "    'admin_sidebar' => " . ($settings['admin_sidebar'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "    'admin_home' => " . ($settings['admin_home'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'admin_talents' => " . ($settings['admin_talents'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'admin_talent_profile' => " . ($settings['admin_talent_profile'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "];\n";
         
         File::put($path, $content);
