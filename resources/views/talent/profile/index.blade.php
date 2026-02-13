@@ -567,7 +567,7 @@
 
         // Cache key for this URL
         $cacheKey = 'talent_image_url_' . md5($path . '_' . ($profile->id ?? ''));
-        
+
         // Try to get from cache first (cache for 6 hours)
         $cachedUrl = \Illuminate\Support\Facades\Cache::get($cacheKey);
         if ($cachedUrl !== null) {
@@ -606,7 +606,7 @@
         } else {
             // Relative path - try to resolve it
             $clean = ltrim($path, '/');
-            
+
             // If AWS_URL (CloudFront) is configured, use it for permanent URLs
             if ($awsUrl) {
                 try {
@@ -802,7 +802,7 @@
             <div class="file-note" style="margin-top: 8px;">
                 {{ \App\Helpers\Bilingual::get('talent.profile_max_upload_note') }}
             </div>
-            
+
             <!-- Hidden input for remove_video flag -->
             <input type="hidden" name="remove_video" value="0" id="remove_video_input">
         </form>
@@ -879,7 +879,7 @@
         $idDocUrl = null;
         $hasIdDoc = false;
     @endphp
-    
+
     {{-- @if($hasIdDoc && $idDocUrl)
     <div class="dash-card" style="width: 100%;">
         <div class="section-title-row">
@@ -959,8 +959,8 @@
                     <div id="video-preview-container" style="margin-bottom: 16px;">
                         <div style="position: relative; width: 100%; max-width: 600px; background: #000; border-radius: 8px; overflow: hidden;">
                             <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-                                <iframe 
-                                    src="https://stream.mux.com/{{ $muxPlaybackId }}.m3u8" 
+                                <iframe
+                                    src="https://stream.mux.com/{{ $muxPlaybackId }}.m3u8"
                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
                                     allow="autoplay; encrypted-media"
                                     allowfullscreen
@@ -978,7 +978,7 @@
                         </div>
                     </div>
                 @endif
-                
+
                 <!-- Upload Area - Shown by default when no video, or in edit mode when video exists -->
                 <div id="video-upload-area" style="display: {{ $muxPlaybackId ? 'none' : 'block' }};">
                     <label class="upload-card video-upload-label" for="upload_video" style="width:100%; margin:0; cursor: default; pointer-events: none; opacity: 0.6;">
@@ -1544,7 +1544,7 @@
             const videoInput = document.getElementById('upload_video');
             const videoUploadLabel = document.querySelector('.video-upload-label');
             const hasVideo = document.getElementById('video-preview-container');
-            
+
             if (isEditing) {
                 // Enable video upload in edit mode
                 if (videoInput) {
@@ -1780,7 +1780,7 @@
                     // Add new hidden inputs
                     const keyInput = document.createElement('input');
                     keyInput.type = 'hidden';
-                    keyInput.name = mediaId ? 'updated_media_keys[]' : 'uploaded_keys[]';
+                    keyInput.name = mediaId ? 'updated_media_keys[]' : 'additional_photo_keys[]';
                     keyInput.value = key;
                     if (mediaId) {
                         keyInput.dataset.mediaId = mediaId;
@@ -1901,13 +1901,13 @@
             const fileInput = newItem.querySelector('input[type="file"]');
             if (fileInput) {
                 let filePickerOpen = false;
-                
+
                 newItem.addEventListener('click', function(e) {
                     if (e.target.closest('.remove-photo-link')) return;
                     if (e.target.closest('.upload-progress-container')) return;
                     if (fileInput.dataset.processing === 'true') return;
                     if (filePickerOpen) return;
-                    
+
                     const isEditing = !editCard.classList.contains('d-none');
                     if (isEditing) {
                         e.preventDefault();
@@ -2201,7 +2201,7 @@
                                 videoUploadStatus.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_video_uploaded') }}';
                                 videoUploadStatus.style.color = '#10b981';
                             }
-                            
+
                             // Reload page after a short delay to show updated video
                             setTimeout(() => {
                                 window.location.reload();
@@ -2219,7 +2219,7 @@
                                     errorMsg = errorMatch[1];
                                 }
                             }
-                            
+
                             if (videoProgressFill) {
                                 videoProgressFill.style.width = '0%';
                             }
