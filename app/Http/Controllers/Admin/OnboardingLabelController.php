@@ -13,12 +13,14 @@ class OnboardingLabelController extends Controller
         $onboardingLabels = $this->getBilingualLabels('onboarding');
         $castingLabels = $this->getBilingualLabels('casting');
         $talentLabels = $this->getBilingualLabels('talent');
+        $adminSidebarLabels = $this->getBilingualLabels('admin_sidebar');
+        $adminHomeLabels = $this->getBilingualLabels('admin_home');
 
         // Load settings
         $settingsPath = resource_path('lang/label_settings.php');
-        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true];
+        $settings = File::exists($settingsPath) ? include $settingsPath : ['onboarding' => true, 'casting' => true, 'talent' => true, 'admin_sidebar' => true, 'admin_home' => true];
 
-        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'talentLabels', 'settings'));
+        return view('admin.onboarding-labels.index', compact('onboardingLabels', 'castingLabels', 'talentLabels', 'adminSidebarLabels', 'adminHomeLabels', 'settings'));
     }
 
     public function update(Request $request)
@@ -29,6 +31,8 @@ class OnboardingLabelController extends Controller
                 'onboarding' => $request->has('settings.onboarding'), // Checkbox presence means true
                 'casting' => $request->has('settings.casting'),
                 'talent' => $request->has('settings.talent'),
+                'admin_sidebar' => $request->has('settings.admin_sidebar'),
+                'admin_home' => $request->has('settings.admin_home'),
             ];
             $this->saveSettings($settings);
         }
@@ -45,6 +49,14 @@ class OnboardingLabelController extends Controller
             $this->processUpdate('talent', $request->input('talent'));
         }
 
+        if ($request->has('admin_sidebar')) {
+            $this->processUpdate('admin_sidebar', $request->input('admin_sidebar'));
+        }
+
+        if ($request->has('admin_home')) {
+            $this->processUpdate('admin_home', $request->input('admin_home'));
+        }
+
         return redirect()->route('admin.onboarding-labels.index')->with('success', 'Changes saved successfully.');
     }
 
@@ -55,6 +67,8 @@ class OnboardingLabelController extends Controller
         $content .= "    'onboarding' => " . ($settings['onboarding'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "    'casting' => " . ($settings['casting'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "    'talent' => " . ($settings['talent'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'admin_sidebar' => " . ($settings['admin_sidebar'] ?? true ? 'true' : 'false') . ",\n";
+        $content .= "    'admin_home' => " . ($settings['admin_home'] ?? true ? 'true' : 'false') . ",\n";
         $content .= "];\n";
         
         File::put($path, $content);

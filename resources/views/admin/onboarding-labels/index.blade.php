@@ -132,6 +132,78 @@
                     </table>
                 </div>
 
+                <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
+                    <h5 class="text-dark font-weight-bold mb-0">Admin Sidebar Labels</h5>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggleAdminSidebar" name="settings[admin_sidebar]" value="1" {{ $settings['admin_sidebar'] ?? true ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="toggleAdminSidebar">Show Arabic Labels</label>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 50%;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pl-4">
+                                    English (Reference)
+                                </th>
+                                <th style="width: 50%; text-align: right;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pr-4">
+                                    Arabic (Translation)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($adminSidebarLabels as $key => $values)
+                                <tr class="border-bottom">
+                                    <td class="align-middle pl-4">
+                                        <span class="text-dark font-weight-bold d-block">{{ $values['en'] }}</span>
+                                        <small class="text-muted">{{ $key }}</small>
+                                    </td>
+                                    <td class="align-middle pr-4">
+                                        <input class="form-control border-dark" type="text" name="admin_sidebar[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-0 p-4 border-top">
+                    <h5 class="text-dark font-weight-bold mb-0">Admin Home Page Labels</h5>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggleAdminHome" name="settings[admin_home]" value="1" {{ $settings['admin_home'] ?? true ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="toggleAdminHome">Show Arabic Labels</label>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 50%;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pl-4">
+                                    English (Reference)
+                                </th>
+                                <th style="width: 50%; text-align: right;" class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 pr-4">
+                                    Arabic (Translation)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($adminHomeLabels as $key => $values)
+                                <tr class="border-bottom">
+                                    <td class="align-middle pl-4">
+                                        <span class="text-dark font-weight-bold d-block">{{ $values['en'] }}</span>
+                                        <small class="text-muted">{{ $key }}</small>
+                                    </td>
+                                    <td class="align-middle pr-4">
+                                        <input class="form-control border-dark" type="text" name="admin_home[{{ $key }}]" value="{{ $values['ar'] }}" style="text-align: right; direction: rtl; background-color: #fff; border-radius: 4px;">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="form-group mt-4 p-4 text-right border-top mb-0">
                     <button class="btn btn-dark px-5 py-2" type="submit" style="background-color: #000; border-color: #000;">
                         Save Changes
@@ -158,12 +230,14 @@
         });
 
         // Toggle Alert Listener
-        $('#toggleOnboarding, #toggleCasting, #toggleTalent').on('change', function() {
+        $('#toggleOnboarding, #toggleCasting, #toggleTalent, #toggleAdminSidebar, #toggleAdminHome').on('change', function() {
             let isChecked = $(this).is(':checked');
             let labelMap = {
                 'toggleOnboarding': 'Onboarding Labels',
                 'toggleCasting': 'Casting Requirement Labels',
-                'toggleTalent': 'Talent Portal Labels'
+                'toggleTalent': 'Talent Portal Labels',
+                'toggleAdminSidebar': 'Admin Sidebar Labels',
+                'toggleAdminHome': 'Admin Home Page Labels'
             };
             let label = labelMap[$(this).attr('id')] || 'Labels';
             let state = isChecked ? 'Enabled' : 'Disabled';

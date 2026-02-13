@@ -129,6 +129,7 @@
             line-height: 0 !important;
             margin: 0 auto !important;
             display: flex !important;
+            white-space: nowrap !important;
         }
 
         /* Hide all text and non-icon elements in links */
@@ -280,12 +281,14 @@
             padding: 10px 12px;
             border-radius: 10px;
             color: black;
-
             font-size: 14px;
             text-decoration: none;
-            
         }
         .bm-link:hover { background: #eef1f6; color: black;   text-decoration: none;}
+        .bm-link img {
+            display: block;
+            flex-shrink: 0;
+        }
         .bm-link i { color: #374151; width: 16px; text-align: center; }
         .bm-link.c-active {
             background: black;
@@ -471,7 +474,7 @@
             padding: 10px 12px;
             border-radius: 10px;
             color: black;
-            
+
             font-size: 14px;
             text-decoration: none;
             cursor: pointer;
@@ -542,7 +545,7 @@ letter-spacing: 1.4px;">STUDIO</div>
         <li class="c-sidebar-nav-item">
             <a href="{{ route('admin.home') }}" class="bm-link {{ request()->is('admin') ? 'c-active' : '' }}">
                 <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard" style="object-fit: contain;">
-                Dashboard
+                {{ \App\Helpers\Bilingual::get('admin_sidebar.dashboard') }}
             </a>
         </li>
         {{--  <li class="c-sidebar-nav-item">
@@ -573,7 +576,7 @@ letter-spacing: 1.4px;">STUDIO</div>
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.talents.dashboard') }}" class="bm-link {{ (request()->is('admin/talents*') || request()->is('admin/talent-profiles*') || request()->routeIs('admin.talents.*') || request()->routeIs('admin.talent-profiles.*')) ? 'c-active' : '' }}">
                     <img src="{{ asset('images/talent.png') }}" alt="Talents" style="object-fit: contain;">
-                    {{ trans('global.talents_dashboard') }}
+                    {{ \App\Helpers\Bilingual::get('admin_sidebar.talents') }}
                 </a>
             </li>
         @endif
@@ -583,14 +586,14 @@ letter-spacing: 1.4px;">STUDIO</div>
                     <a href="{{ route('admin.projects.dashboard') }}" class="bm-link-dropdown-toggle {{ (request()->is('admin/projects*') || request()->is('admin/casting-requirements*') || request()->routeIs('admin.projects.*') || request()->routeIs('admin.casting-requirements.*')) ? 'c-active' : '' }}" style="text-decoration:none;">
                         <span style="display:flex; align-items:center; gap:10px;">
                             <img src="{{ asset('images/camera.png') }}" alt="Shoots" style="object-fit: contain;">
-                            Shoots
+                            {{ \App\Helpers\Bilingual::get('admin_sidebar.shoots') }}
                         </span>
                         <i class="fas fa-chevron-down bm-dropdown-arrow" onclick="event.preventDefault(); this.closest('.bm-nav-dropdown').classList.toggle('show');" style="cursor:pointer; padding:6px;"></i>
                     </a>
                     <ul class="bm-dropdown-items">
                         <li>
                             <a href="{{ route('admin.projects.progress') }}" class="bm-sub-link {{ request()->routeIs('admin.projects.progress') ? 'active-sub' : '' }}" style= "font-size:14px; text-align:left;">
-                                Shoots Progress
+                                {{ \App\Helpers\Bilingual::get('admin_sidebar.shoots_progress') }}
                             </a>
                         </li>
                     </ul>
@@ -601,23 +604,21 @@ letter-spacing: 1.4px;">STUDIO</div>
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.payments.dashboard') }}" class="bm-link {{ (request()->is('admin/payments*') || request()->is('admin/payment-requests*') || request()->routeIs('admin.payments.*') || request()->routeIs('admin.payment-requests.*')) ? 'c-active' : '' }}">
                     <img src="{{ asset('images/payment.png') }}" alt="Payments" style="object-fit: contain;">
-                    Payments
+                    {{ \App\Helpers\Bilingual::get('admin_sidebar.payments') }}
                 </a>
             </li>
         @endif
         @if($adminUser && $adminUser->isSuperAdmin())
-
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.admin-management.index') }}" class="bm-link {{ request()->is('admin/admin-management*') ? 'c-active' : '' }}">
-                    <img src="{{ asset('images/user.png') }}" alt="User Management" style=" object-fit: contain;">
-                    User Management
+                    <img src="{{ asset('images/user.png') }}" alt="User Management" style="object-fit: contain;">
+                    {{ \App\Helpers\Bilingual::get('admin_sidebar.user_management') }}
                 </a>
             </li>
-            
             <li class="c-sidebar-nav-item">
                 <a href="{{ route('admin.audit-logs.index') }}" class="bm-link {{ request()->is('admin/audit-logs*') ? 'c-active' : '' }}">
                     <img src="{{ asset('images/recent.png') }}" alt="Audit Logs" style="object-fit: contain;">
-                    Audit Logs
+                    {{ \App\Helpers\Bilingual::get('admin_sidebar.audit_logs') }}
                 </a>
             </li>
             {{--  <li class="c-sidebar-nav-item">
@@ -770,18 +771,18 @@ letter-spacing: 1.4px;">STUDIO</div>
 
                 <div class="bm-footer-dropdown" id="bm-footer-dropdown">
                     <a href="{{ route('admin.settings.index') }}">
-                        <i class="fas fa-cog"></i> Settings
+                        <i class="fas fa-cog"></i> {{ \App\Helpers\Bilingual::get('admin_sidebar.settings') }}
                     </a>
                     <a href="{{ route('admin.profile.show') }}">
-                        <i class="fas fa-user"></i> Profile
+                        <i class="fas fa-user"></i> {{ \App\Helpers\Bilingual::get('admin_sidebar.profile') }}
                     </a>
                     <a href="{{ route('profile.password.edit') }}">
-                        <i class="fas fa-shield-alt"></i> Privacy Setup
+                        <i class="fas fa-shield-alt"></i> {{ \App\Helpers\Bilingual::get('admin_sidebar.privacy_setup') }}
                     </a>
                     <form method="POST" action="{{ route('admin.logout') }}" style="margin:0;">
                         @csrf
                         <button type="submit">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                            <i class="fas fa-sign-out-alt"></i> {{ \App\Helpers\Bilingual::get('admin_sidebar.logout') }}
                         </button>
                     </form>
                 </div>

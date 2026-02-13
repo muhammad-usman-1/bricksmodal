@@ -445,8 +445,8 @@ line-height: 36px;
     </div>  --}}
 
     <div class="overview">
-        <h5>Dashboard Overview</h5>
-        <div class="sub">Welcome back, here’s what’s happening today.</div>
+        <h5>{{ \App\Helpers\Bilingual::get('admin_home.dashboard_overview') }}</h5>
+        <div class="sub">{{ \App\Helpers\Bilingual::get('admin_home.welcome_back') }}</div>
     </div>
 
     <div class="stat-grid">
@@ -458,7 +458,7 @@ line-height: 36px;
         @endphp
         <div class="stat-card">
             <div>
-                <p class="stat-title">Total Talents</p>
+                <p class="stat-title">{{ \App\Helpers\Bilingual::get('admin_home.total_talents') }}</p>
                 <p class="stat-value">{{ $total }}</p>
                 <span class="stat-pill">+12% vs last month</span>
             </div>
@@ -468,7 +468,7 @@ line-height: 36px;
         </div>
         <div class="stat-card">
             <div>
-                <p class="stat-title">Pending Verification</p>
+                <p class="stat-title">{{ \App\Helpers\Bilingual::get('admin_home.pending_verification') }}</p>
                 <p class="stat-value">{{ $pending }}</p>
                 <span class="stat-pill">+12% new requests</span>
             </div>
@@ -478,7 +478,7 @@ line-height: 36px;
         </div>
         <div class="stat-card">
             <div>
-                <p class="stat-title">Active Shoots</p>
+                <p class="stat-title">{{ \App\Helpers\Bilingual::get('admin_home.active_shoots') }}</p>
                 <p class="stat-value">{{ $active }}</p>
                 <span class="stat-pill">+32% ongoing now</span>
             </div>
@@ -488,7 +488,7 @@ line-height: 36px;
         </div>
         <div class="stat-card">
             <div>
-                <p class="stat-title">Recent Sign-ups</p>
+                <p class="stat-title">{{ \App\Helpers\Bilingual::get('admin_home.recent_signups') }}</p>
                 <p class="stat-value">{{ $recent }}</p>
                 <span class="stat-pill">+12% this week</span>
             </div>
@@ -500,19 +500,19 @@ line-height: 36px;
 
     <div class="panel">
         <div class="panel-head">
-            <h6 class="panel-title">Recent Talent Sign-ups</h6>
-            <a class="panel-link" href="{{ route('admin.talents.dashboard') }}">View All</a>
+            <h6 class="panel-title">{{ \App\Helpers\Bilingual::get('admin_home.recent_talent_signups') }}</h6>
+            <a class="panel-link" href="{{ route('admin.talents.dashboard') }}">{{ \App\Helpers\Bilingual::get('admin_home.view_all') }}</a>
         </div>
         <div class="panel-body">
             <div class="table-wrap">
                 <table class="talent-table">
                     <thead>
                         <tr>
-                            <th>Talent</th>
-                            <th>Gender</th>
-                            <th>Stats (H / W)</th>
-                            <th>Date Joined</th>
-                            <th>Status</th>
+                            <th>{{ \App\Helpers\Bilingual::get('admin_home.talent') }}</th>
+                            <th>{{ \App\Helpers\Bilingual::get('admin_home.gender') }}</th>
+                            <th>{{ \App\Helpers\Bilingual::get('admin_home.stats') }}</th>
+                            <th>{{ \App\Helpers\Bilingual::get('admin_home.date_joined') }}</th>
+                            <th>{{ \App\Helpers\Bilingual::get('admin_home.status') }}</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -581,9 +581,9 @@ line-height: 36px;
                                 <td>{{ $talent->created_at ? $talent->created_at->format('Y-m-d') : '—' }}</td>
                                 <td>
                                     @if(in_array($status, ['approved','verified']))
-                                        <span class="badge-status badge-verified">Verified</span>
+                                        <span class="badge-status badge-verified">{{ \App\Helpers\Bilingual::get('admin_home.verified') }}</span>
                                     @elseif($status === 'pending')
-                                        <span class="badge-status badge-pending">Pending</span>
+                                        <span class="badge-status badge-pending">{{ \App\Helpers\Bilingual::get('admin_home.pending') }}</span>
                                     @else
                                         <span class="badge-status badge-rejected">{{ ucfirst($status) }}</span>
                                     @endif
@@ -608,14 +608,14 @@ line-height: 36px;
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" style="text-align:center; padding:22px; color: var(--ink-500);">No recent talents found</td>
+                                <td colspan="6" style="text-align:center; padding:22px; color: var(--ink-500);">{{ \App\Helpers\Bilingual::get('admin_home.no_recent_talents') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div class="see-more-container">
-                <button type="button" class="see-more-btn" id="seeMoreBtn">See More</button>
+                <button type="button" class="see-more-btn" id="seeMoreBtn">{{ \App\Helpers\Bilingual::get('admin_home.see_more') }}</button>
             </div>
         </div>
     </div>

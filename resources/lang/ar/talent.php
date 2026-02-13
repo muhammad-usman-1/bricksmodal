@@ -1,7 +1,6 @@
 <?php
 
 return [
-    // Menu Items
     'menu_dashboard' => 'لوحة التحكم',
     'menu_my_shoots' => 'جلساتي',
     'menu_my_profile' => 'ملفي الشخصي',
@@ -11,8 +10,6 @@ return [
     'menu_settings' => 'الإعدادات',
     'menu_logout' => 'تسجيل الخروج',
     'menu_talent' => 'موهبة',
-    
-    // Profile Page
     'profile_edit' => 'تعديل',
     'profile_edit_title' => 'تعديل الملف الشخصي',
     'profile_edit_description' => 'قم بتحديث تفاصيل ملفك الشخصي العام والقياسات والمحفظة.',
