@@ -69,7 +69,7 @@
             padding: 4px;
             background: #f3f4f6;
             border-radius: 24px;
-            margin-bottom: 0px;
+            margin-bottom: 24px;
         }
 
         .lang-btn {
@@ -344,11 +344,11 @@
                 <div class="logo-wrap">
                     <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Logo" style="width: 140px;">
                 </div>
-                
-                <div class="lang-toggle">
-                    <button type="button" class="lang-btn active" data-lang="en">English</button>
-                    <button type="button" class="lang-btn" data-lang="ar">عربي</button>
-                </div>
+            </div>
+
+            <div class="lang-toggle">
+                <button type="button" class="lang-btn active" data-lang="en">English</button>
+                <button type="button" class="lang-btn" data-lang="ar">عربي</button>
             </div>
 
             <div id="mobile-content-en">
