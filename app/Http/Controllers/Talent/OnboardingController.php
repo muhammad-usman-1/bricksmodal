@@ -164,8 +164,11 @@ class OnboardingController extends Controller
         $profile->loadMissing('labels');
         $viewData['labels'] = Label::orderBy('name')->get();
 
-        // Always use the unified onboarding view
-        return view("talent.onboarding.profile", array_merge($viewData, [
+        // Detect device type and return appropriate view
+        $isMobile = $this->isMobileDevice($request);
+        $viewName = $isMobile ? "talent.onboarding.profile-mobile" : "talent.onboarding.profile";
+        
+        return view($viewName, array_merge($viewData, [
             'countries' => $this->getCountries()
         ]));
     }
@@ -1095,5 +1098,48 @@ class OnboardingController extends Controller
             ],
             'created_at' => now(),
         ]);
+    }
+
+    /**
+     * Detect if the request is from a mobile device based on User-Agent
+     * Uses 768px breakpoint logic (mobile devices typically have mobile user agents)
+     */
+    private function isMobileDevice(Request $request): bool
+    {
+        $userAgent = $request->userAgent() ?? '';
+        
+        // Common mobile device patterns
+        $mobilePatterns = [
+            'Mobile',
+            'Android',
+            'iPhone',
+            'iPad',
+            'iPod',
+            'BlackBerry',
+            'Windows Phone',
+            'Opera Mini',
+            'IEMobile',
+            'Mobile Safari',
+        ];
+        
+        // Check if user agent contains mobile patterns
+        foreach ($mobilePatterns as $pattern) {
+            if (stripos($userAgent, $pattern) !== false) {
+                // Exception: iPad Pro and tablets might be considered desktop
+                // But for simplicity, we'll treat iPad as mobile for now
+                // You can add more sophisticated logic if needed
+                return true;
+            }
+        }
+        
+        // Also check for screen width in query parameter or header if available
+        // Some modern apps send screen width info
+        $screenWidth = $request->header('X-Screen-Width') ?? $request->query('screen_width');
+        if ($screenWidth && is_numeric($screenWidth)) {
+            return (int)$screenWidth < 768;
+        }
+        
+        // Default: assume desktop if no mobile indicators found
+        return false;
     }
 }
