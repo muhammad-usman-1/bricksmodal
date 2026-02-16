@@ -108,12 +108,13 @@
 
         .mobile-auth-card .otp-grid {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 24px;
         }
 
         .mobile-auth-card .otp-input {
-            width: 65px;
+            flex: 1;
+            max-width: 65px;
             height: 65px;
             border: 1px solid #000000;
             border-radius: 12px;
@@ -146,6 +147,11 @@
             cursor: pointer;
             margin-top: 10px;
             margin-bottom: 16px;
+            transition: background 0.2s;
+        }
+
+        .mobile-auth-card .submit-btn:active {
+            background: #333;
         }
 
         .mobile-auth-card .meta {
@@ -155,15 +161,16 @@
         }
 
         .mobile-auth-card .meta a {
-            color: #1a1a1a;
+            color: #6b7280;
             text-decoration: underline;
         }
 
         .mobile-auth-card .alt-link {
-            font-family: 'Arimo', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 14px;
             color: #6b7280;
             text-decoration: none;
+            font-weight: 500;
         }
 
         .logo {
@@ -299,6 +306,14 @@
             }
             .mobile-auth-card .lead {
                 font-size: 13px;
+            }
+            .mobile-auth-card .otp-grid {
+                gap: 8px;
+            }
+            .mobile-auth-card .otp-input {
+                max-width: 60px;
+                height: 60px;
+                font-size: 22px;
             }
         }
     </style>
