@@ -512,7 +512,7 @@
         </div>
 
         <div class="signup-text">
-            <span id="mobile-signup-en">Don't have an profile? <a href="{{ route('talent.register') }}">Apply Now</a></span>
+            <span id="mobile-signup-en">Don't have an profile? <a href="">Apply Now</a></span>
             <span id="mobile-signup-ar" style="display: none; direction: rtl; text-align: right;">ليس لديك ملف تعريف؟ <a href="{{ route('talent.register') }}">قدم الآن</a></span>
         </div>
     </div>
