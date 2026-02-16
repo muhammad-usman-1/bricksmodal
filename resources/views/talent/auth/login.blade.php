@@ -52,7 +52,12 @@
             padding: 40px 28px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             text-align: left;
-          
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .mobile-auth-card * {
+            box-sizing: border-box;
         }
 
         .mobile-header {
@@ -377,6 +382,23 @@
             }
             .mobile-auth-card {
                 display: block;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            body {
+                padding: 20px 12px;
+            }
+            .mobile-auth-card {
+                padding: 32px 20px;
+                max-width: 100%;
+            }
+            .mobile-auth-card h1 {
+                font-size: 38px;
+            }
+            .mobile-auth-card .lead {
+                font-size: 13px;
+                white-space: normal;
             }
         }
     </style>
