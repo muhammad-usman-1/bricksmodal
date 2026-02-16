@@ -1,10 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
-            font-family: 'Arimo', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .auth-shell {
@@ -25,6 +28,139 @@
             text-align: center;
         }
 
+        /* Mobile Card Styles */
+        .mobile-auth-card {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px 28px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .mobile-header .logo-wrap {
+            margin-bottom: 0 !important;
+        }
+
+        .mobile-auth-card h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 44px;
+            line-height: 1.1;
+            margin: 0 0 16px;
+            color: #1a1a1a;
+            text-align: left;
+            letter-spacing: -0.02em;
+        }
+
+        .lang-toggle {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px;
+            background: #f3f4f6;
+            border-radius: 24px;
+            margin-bottom: 0px;
+        }
+
+        .lang-btn {
+            padding: 6px 18px;
+            border: none;
+            border-radius: 20px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: #ffffff;
+            color: #1a1a1a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            font-weight: 700;
+        }
+
+        .mobile-auth-card .lead {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: #6a7682;
+            margin: 0 0 40px;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .mobile-auth-card .otp-grid {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mobile-auth-card .otp-input {
+            width: 65px;
+            height: 65px;
+            border: 1px solid #000000;
+            border-radius: 12px;
+            background: #ffffff;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            outline: none;
+        }
+
+        .mobile-auth-card .otp-input:focus {
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.05);
+        }
+
+        .mobile-auth-card .submit-btn {
+            width: 100%;
+            height: 60px;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 16px;
+        }
+
+        .mobile-auth-card .meta {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 14px;
+        }
+
+        .mobile-auth-card .meta a {
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+
+        .mobile-auth-card .alt-link {
+            font-family: 'Arimo', sans-serif;
+            font-size: 14px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+
         .logo {
             width: 150px;
             margin: 0 auto 6px;
@@ -36,9 +172,11 @@
             text-transform: uppercase;
             color: #7b7b7b;
             margin-bottom: 20px;
+            font-family: 'Arimo', sans-serif;
         }
 
-        h1 {
+        .auth-card h1 {
+            font-family: 'Arimo', sans-serif;
             font-weight: 400;
             font-size: 20px;
             line-height: 30px;
@@ -46,7 +184,8 @@
             color: #1a1a1a;
         }
 
-        .lead {
+        .auth-card .lead {
+            font-family: 'Arimo', sans-serif;
             font-size: 13px;
             line-height: 1.6;
             color: #4f4f4f;
@@ -94,10 +233,7 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-
         }
-
-       
 
         .meta {
             font-size: 12px;
@@ -135,9 +271,19 @@
             margin-bottom: 15px;
             text-align: center;
         }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                display: none;
+            }
+            .mobile-auth-card {
+                display: block;
+            }
+        }
     </style>
 
     <div class="auth-shell">
+        <!-- Desktop Card -->
         <div class="auth-card">
             <img class="logo" src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
             <div class="eyebrow">Studio</div>
@@ -167,18 +313,15 @@
                 </div>
             @endif
 
-            <form id="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
+            <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
                 @csrf
-
                 <div class="otp-grid">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                     <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                 </div>
-
-                <input type="hidden" name="otp" id="otp-hidden" value="{{ old('otp') }}">
-
+                <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
                 <button type="submit" class="submit-btn">
                     Verify & Login
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -187,13 +330,79 @@
                         <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                     </svg>
                 </button>
-
                 <div class="meta">
-                    <span id="countdown">55 secs left.</span>
+                    <span class="countdown">55 secs left.</span>
                     <a href="{{ route('talent.login.submit') }}">Resend code</a>
                 </div>
-
                 <a class="alt-link" href="{{ route('talent.login') }}"><span>Change Phone Number</span></a>
+            </form>
+        </div>
+
+        <!-- Mobile Card -->
+        <div class="mobile-auth-card">
+            <div class="mobile-header">
+                <div class="logo-wrap">
+                    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Logo" style="width: 140px;">
+                </div>
+                
+                <div class="lang-toggle">
+                    <button type="button" class="lang-btn active" data-lang="en">English</button>
+                    <button type="button" class="lang-btn" data-lang="ar">عربي</button>
+                </div>
+            </div>
+
+            <div id="mobile-content-en">
+                <h1>Verify Your<br>Identity</h1>
+                <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+            </div>
+
+            <div id="mobile-content-ar" style="display: none; direction: rtl; text-align: right;">
+                <h1 style="font-family: 'Arimo', sans-serif; text-align: right;">تحقق من<br>هويتك</h1>
+                <p class="lead" style="font-family: 'Arimo', sans-serif; text-align: right;">أدخل الرمز المرسل إلى<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+            </div>
+
+            @if(isset($debugging) && isset($otp) && !empty($otp))
+                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+                    <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #92400e; letter-spacing: 6px;">{{ $otp }}</div>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="error-message" style="text-align: left;">
+                    @foreach ($errors->all() as $error)
+                        {{ $error }}
+                    @endforeach
+                </div>
+            @endif
+
+            <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
+                @csrf
+                <div class="otp-grid">
+                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
+                <button type="submit" class="submit-btn" style="height: 60px;">
+                    <span id="mobile-btn-en">Verify & Login</span>
+                    <span id="mobile-btn-ar" style="display: none;">تحقق وتسجيل الدخول</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 17v-3" />
+                        <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                </button>
+                <div class="meta">
+                    <span class="countdown" data-en=" secs left." data-ar=" ثانية متبقية.">55 secs left.</span>
+                    <a href="{{ route('talent.login.submit') }}" id="mobile-resend-en">Resend code</a>
+                    <a href="{{ route('talent.login.submit') }}" id="mobile-resend-ar" style="display: none; direction: rtl; text-align: right;">إعادة إرسال الرمز</a>
+                </div>
+                <a class="alt-link" href="{{ route('talent.login') }}">
+                    <span id="mobile-change-en">Change Phone Number</span>
+                    <span id="mobile-change-ar" style="display: none;">تغيير رقم الهاتف</span>
+                </a>
             </form>
         </div>
     </div>
@@ -201,64 +410,127 @@
 
 @section('scripts')
     <script>
-        // OTP auto-advance, digits only, paste support, hidden field combine + 55s timer
         (function() {
-            const inputs = Array.from(document.querySelectorAll('.otp-input'));
-            const hidden = document.getElementById('otp-hidden');
-            const grid = document.querySelector('.otp-grid');
+            // Mobile Language Toggle Logic
+            const langBtns = document.querySelectorAll('.lang-btn');
+            const contentEn = document.getElementById('mobile-content-en');
+            const contentAr = document.getElementById('mobile-content-ar');
+            const btnTEn = document.getElementById('mobile-btn-en');
+            const btnTAr = document.getElementById('mobile-btn-ar');
+            const resendEn = document.getElementById('mobile-resend-en');
+            const resendAr = document.getElementById('mobile-resend-ar');
+            const changeEn = document.getElementById('mobile-change-en');
+            const changeAr = document.getElementById('mobile-change-ar');
+            const countdownEls = document.querySelectorAll('.countdown');
+            
+            let systemLang = 'en';
 
-            function setHidden() {
-                hidden.value = inputs.map(i => i.value || '').join('');
-            }
-
-            inputs.forEach((el, i) => {
-                el.addEventListener('keydown', e => {
-                    if (e.key === 'Backspace' && !el.value && i > 0) {
-                        inputs[i - 1].focus();
-                        return;
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    langBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    systemLang = btn.dataset.lang;
+                    const isAr = systemLang === 'ar';
+                    
+                    if (isAr) {
+                        contentEn.style.display = 'none';
+                        contentAr.style.display = 'block';
+                        btnTEn.style.display = 'none';
+                        btnTAr.style.display = 'inline';
+                        resendEn.style.display = 'none';
+                        resendAr.style.display = 'inline';
+                        changeEn.style.display = 'none';
+                        changeAr.style.display = 'inline';
+                    } else {
+                        contentEn.style.display = 'block';
+                        contentAr.style.display = 'none';
+                        btnTEn.style.display = 'inline';
+                        btnTAr.style.display = 'none';
+                        resendEn.style.display = 'inline';
+                        resendAr.style.display = 'none';
+                        changeEn.style.display = 'inline';
+                        changeAr.style.display = 'none';
                     }
-                    if (e.key === 'ArrowLeft' && i > 0) {
-                        e.preventDefault();
-                        inputs[i - 1].focus();
-                    }
-                    if (e.key === 'ArrowRight' && i < inputs.length - 1) {
-                        e.preventDefault();
-                        inputs[i + 1].focus();
-                    }
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const btn = document.querySelector('.submit-btn');
-                        if (btn) btn.click();
-                    }
-                    if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
-                        e.preventDefault();
-                    }
+                    updateCountdownDisplay();
                 });
-                el.addEventListener('input', () => {
-                    el.value = el.value.replace(/\D/g, '').slice(0, 1);
-                    if (el.value && i < inputs.length - 1) inputs[i + 1].focus();
+            });
+
+            const forms = document.querySelectorAll('.otp-form');
+            
+            forms.forEach(form => {
+                const inputs = Array.from(form.querySelectorAll('.otp-input'));
+                const hidden = form.querySelector('.otp-hidden');
+                const grid = form.querySelector('.otp-grid');
+
+                function setHidden() {
+                    hidden.value = inputs.map(i => i.value || '').join('');
+                }
+
+                inputs.forEach((el, i) => {
+                    el.addEventListener('keydown', e => {
+                        if (e.key === 'Backspace' && !el.value && i > 0) {
+                            inputs[i - 1].focus();
+                            return;
+                        }
+                        if (e.key === 'ArrowLeft' && i > 0) {
+                            e.preventDefault();
+                            inputs[i - 1].focus();
+                        }
+                        if (e.key === 'ArrowRight' && i < inputs.length - 1) {
+                            e.preventDefault();
+                            inputs[i + 1].focus();
+                        }
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            form.querySelector('.submit-btn')?.click();
+                        }
+                        if (!/^\d$/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                    });
+                    el.addEventListener('input', () => {
+                        el.value = el.value.replace(/\D/g, '').slice(0, 1);
+                        if (el.value && i < inputs.length - 1) inputs[i + 1].focus();
+                        setHidden();
+                    });
+                });
+
+                grid.addEventListener('paste', e => {
+                    const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, inputs.length);
+                    if (!txt) return;
+                    e.preventDefault();
+                    inputs.forEach((el, idx) => el.value = txt[idx] || '');
+                    (txt.length < inputs.length ? inputs[txt.length] || inputs[inputs.length-1] : inputs[inputs.length - 1]).focus();
                     setHidden();
                 });
             });
 
-            // paste whole code (e.g. "1234")
-            grid.addEventListener('paste', e => {
-                const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, inputs.length);
-                if (!txt) return;
-                e.preventDefault();
-                inputs.forEach((el, idx) => el.value = txt[idx] || '');
-                (txt.length < inputs.length ? inputs[txt.length] : inputs[inputs.length - 1]).focus();
-                setHidden();
-            });
+            // Auto-focus first visible input
+            setTimeout(() => {
+                const visibleInputs = Array.from(document.querySelectorAll('.otp-input')).filter(el => el.offsetParent !== null);
+                if (visibleInputs.length > 0) visibleInputs[0].focus();
+            }, 100);
 
-            // focus first on load
-            inputs[0]?.focus();
-
-            // countdown 55s
+            // Synchronized countdown
             let s = 55;
-            const el = document.getElementById('countdown');
+            
+            const updateCountdownDisplay = () => {
+                countdownEls.forEach(el => {
+                    const suffix = systemLang === 'ar' ? el.dataset.ar : el.dataset.en;
+                    if (systemLang === 'ar') {
+                        el.style.direction = 'rtl';
+                        el.style.textAlign = 'right';
+                    } else {
+                        el.style.direction = 'ltr';
+                        el.style.textAlign = 'left';
+                    }
+                    el.textContent = `${s}${suffix}`;
+                });
+            };
+
             const tick = () => {
-                el.textContent = `${s} secs left.`;
+                updateCountdownDisplay();
                 if (s-- <= 0) clearInterval(iv);
             };
             const iv = setInterval(tick, 1000);
