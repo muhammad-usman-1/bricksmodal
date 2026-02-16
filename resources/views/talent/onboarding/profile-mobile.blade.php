@@ -1044,6 +1044,9 @@
                         <input type="radio" name="has_visible_tattoos" value="1" {{ old('has_visible_tattoos', $profile->has_visible_tattoos ?? 0) == 1 ? 'checked' : '' }}>
                         <span class="toggle-slider"></span>
                     </label>
+                    @error('has_visible_tattoos')
+                        <span class="error-text show" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <!-- Visible Piercings -->
@@ -1054,6 +1057,9 @@
                         <input type="radio" name="has_piercings" value="1" {{ old('has_piercings', $profile->has_piercings ?? 0) == 1 ? 'checked' : '' }}>
                         <span class="toggle-slider"></span>
                     </label>
+                    @error('has_piercings')
+                        <span class="error-text show" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <!-- Visible Scars (Optional - not saved in backend yet) -->
@@ -1066,6 +1072,17 @@
                     </label>
                 </div>
             </div>
+            
+            <!-- Display backend validation errors -->
+            @if($errors->any())
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 16px;">
+                    <ul style="margin: 0; padding-left: 20px; color: #991b1b; font-size: 14px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <!-- Next Button -->
             <button type="submit" class="next-button">
@@ -1535,7 +1552,8 @@
         chipGroups.forEach(group => {
             const chips = group.querySelectorAll('.chip');
             chips.forEach(chip => {
-                chip.addEventListener('click', function() {
+                chip.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const value = this.dataset.value;
                     const hiddenInput = group.parentElement.querySelector('input[type="hidden"]');
                     
@@ -1544,38 +1562,103 @@
                     
                     if (hiddenInput) {
                         hiddenInput.value = value;
+                        // Clear any error state
+                        hiddenInput.classList.remove('is-invalid');
+                        const errEl = document.getElementById('error-' + hiddenInput.id);
+                        if (errEl) errEl.classList.remove('show');
                     }
                 });
             });
         });
 
-        // Toggle Switch Logic - handled by CSS, but ensure proper state on load
+        // Toggle Switch Logic
         const toggleSwitches = document.querySelectorAll('.toggle-switch');
         toggleSwitches.forEach(toggle => {
             const radios = toggle.querySelectorAll('input[type="radio"]');
+            const slider = toggle.querySelector('.toggle-slider');
+            
+            // Make the toggle switch clickable (but not the label wrapper)
+            const toggleWrapper = toggle.closest('.toggle-item');
+            if (toggleWrapper) {
+                toggleWrapper.style.cursor = 'pointer';
+                toggleWrapper.addEventListener('click', function(e) {
+                    // Don't prevent default if clicking directly on radio
+                    if (e.target.type === 'radio') return;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Find the currently checked radio
+                    const checkedRadio = toggle.querySelector('input[type="radio"]:checked');
+                    // Toggle to the other value
+                    if (checkedRadio && checkedRadio.value === '0') {
+                        const otherRadio = toggle.querySelector('input[type="radio"][value="1"]');
+                        if (otherRadio) {
+                            otherRadio.checked = true;
+                            checkedRadio.checked = false;
+                            otherRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (checkedRadio && checkedRadio.value === '1') {
+                        const otherRadio = toggle.querySelector('input[type="radio"][value="0"]');
+                        if (otherRadio) {
+                            otherRadio.checked = true;
+                            checkedRadio.checked = false;
+                            otherRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else {
+                        // If nothing checked, check the first one (value 0)
+                        const firstRadio = toggle.querySelector('input[type="radio"][value="0"]');
+                        if (firstRadio) {
+                            firstRadio.checked = true;
+                            firstRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                });
+            }
+            
+            // Update visual state on change
             radios.forEach(radio => {
                 radio.addEventListener('change', function() {
-                    // CSS handles the visual state
+                    // CSS handles the visual state based on which radio is checked
+                    if (this.value === '1') {
+                        if (slider) {
+                            slider.style.backgroundColor = '#000000';
+                        }
+                    } else {
+                        if (slider) {
+                            slider.style.backgroundColor = '#d1d5db';
+                        }
+                    }
                 });
+                
+                // Initialize state
+                if (radio.checked) {
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
         });
 
         // Form Validation
         step2Form.addEventListener('submit', function(e) {
             let isValid = true;
-            const requiredFields = [
-                { id: 'mobile_height', msg: 'Height is required', min: 50, max: 300, errorMsg: 'Height must be between 50 and 300 cm' },
-                { id: 'mobile_weight', msg: 'Weight is required', min: 40, max: 200, errorMsg: 'Weight must be between 40 and 200 kg' },
-                { id: 'mobile_skin_tone', msg: 'Skin color is required' },
-                { id: 'mobile_hair_color', msg: 'Hair color is required' },
-                { id: 'mobile_eye_color', msg: 'Eye color is required' }
-            ];
+            
+            // Clear previous errors
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.error-text.show').forEach(el => el.classList.remove('show'));
 
-            // Validate height and weight ranges
+            // Validate height
             const heightEl = document.getElementById('mobile_height');
-            if (heightEl && heightEl.value) {
+            if (!heightEl || !heightEl.value || heightEl.value.trim() === '') {
+                isValid = false;
+                heightEl.classList.add('is-invalid');
+                const errEl = document.getElementById('error-mobile_height');
+                if (errEl) {
+                    errEl.textContent = 'Height is required';
+                    errEl.classList.add('show');
+                }
+            } else {
                 const hVal = parseFloat(heightEl.value);
-                if (hVal < 50 || hVal > 300) {
+                if (isNaN(hVal) || hVal < 50 || hVal > 300) {
                     isValid = false;
                     heightEl.classList.add('is-invalid');
                     const errEl = document.getElementById('error-mobile_height');
@@ -1586,10 +1669,19 @@
                 }
             }
 
+            // Validate weight
             const weightEl = document.getElementById('mobile_weight');
-            if (weightEl && weightEl.value) {
+            if (!weightEl || !weightEl.value || weightEl.value.trim() === '') {
+                isValid = false;
+                weightEl.classList.add('is-invalid');
+                const errEl = document.getElementById('error-mobile_weight');
+                if (errEl) {
+                    errEl.textContent = 'Weight is required';
+                    errEl.classList.add('show');
+                }
+            } else {
                 const wVal = parseFloat(weightEl.value);
-                if (wVal < 40 || wVal > 200) {
+                if (isNaN(wVal) || wVal < 40 || wVal > 200) {
                     isValid = false;
                     weightEl.classList.add('is-invalid');
                     const errEl = document.getElementById('error-mobile_weight');
@@ -1600,36 +1692,86 @@
                 }
             }
 
-            // Validate other required fields
-            requiredFields.forEach(field => {
-                const el = document.getElementById(field.id);
-                const errEl = document.getElementById('error-' + field.id);
+            // Validate gender
+            const genderEl = document.getElementById('mobile_gender');
+            if (!genderEl || !genderEl.value) {
+                isValid = false;
+                alert('Please select your gender');
+            }
 
-                if (el && !el.value.trim()) {
-                    isValid = false;
-                    el.classList.add('is-invalid');
-                    if (errEl) {
-                        errEl.textContent = field.msg;
-                        errEl.classList.add('show');
-                    }
-
-                    el.addEventListener('input', function() {
-                        this.classList.remove('is-invalid');
-                        if (errEl) errEl.classList.remove('show');
-                    }, { once: true });
-
-                    if (el.tagName === 'SELECT') {
-                        el.addEventListener('change', function() {
-                            this.classList.remove('is-invalid');
-                            if (errEl) errEl.classList.remove('show');
-                        }, { once: true });
-                    }
+            // Validate skin tone
+            const skinToneEl = document.getElementById('mobile_skin_tone');
+            if (!skinToneEl || !skinToneEl.value || skinToneEl.value.trim() === '') {
+                isValid = false;
+                skinToneEl.classList.add('is-invalid');
+                const errEl = document.getElementById('error-mobile_skin_tone');
+                if (errEl) {
+                    errEl.textContent = 'Skin color is required';
+                    errEl.classList.add('show');
                 }
-            });
+            }
+
+            // Validate hair color
+            const hairColorEl = document.getElementById('mobile_hair_color');
+            if (!hairColorEl || !hairColorEl.value || hairColorEl.value.trim() === '') {
+                isValid = false;
+                hairColorEl.classList.add('is-invalid');
+                const errEl = document.getElementById('error-mobile_hair_color');
+                if (errEl) {
+                    errEl.textContent = 'Hair color is required';
+                    errEl.classList.add('show');
+                }
+            }
+
+            // Validate eye color
+            const eyeColorEl = document.getElementById('mobile_eye_color');
+            if (!eyeColorEl || !eyeColorEl.value || eyeColorEl.value.trim() === '') {
+                isValid = false;
+                eyeColorEl.classList.add('is-invalid');
+                const errEl = document.getElementById('error-mobile_eye_color');
+                if (errEl) {
+                    errEl.textContent = 'Eye color is required';
+                    errEl.classList.add('show');
+                }
+            }
+
+            // Validate toggle switches (has_visible_tattoos and has_piercings)
+            // These should always have a checked value due to default checked state, but verify
+            const tattoosRadios = document.querySelectorAll('input[name="has_visible_tattoos"]');
+            const tattoosChecked = Array.from(tattoosRadios).some(r => r.checked);
+            if (!tattoosChecked) {
+                isValid = false;
+                // Ensure at least one is checked
+                const firstTattooRadio = tattoosRadios[0];
+                if (firstTattooRadio) {
+                    firstTattooRadio.checked = true;
+                }
+            }
+
+            const piercingsRadios = document.querySelectorAll('input[name="has_piercings"]');
+            const piercingsChecked = Array.from(piercingsRadios).some(r => r.checked);
+            if (!piercingsChecked) {
+                isValid = false;
+                // Ensure at least one is checked
+                const firstPiercingRadio = piercingsRadios[0];
+                if (firstPiercingRadio) {
+                    firstPiercingRadio.checked = true;
+                }
+            }
 
             if (!isValid) {
                 e.preventDefault();
+                // Scroll to first error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+                return false;
             }
+            
+            // Form is valid, allow submission
+            return true;
         });
 
     }
@@ -1660,35 +1802,64 @@
                 }
             }
 
-            // Validate other required fields
-            requiredFields.forEach(field => {
-                const el = document.getElementById(field.id);
-                const errEl = document.getElementById('error-' + field.id);
-
-                if (el && !el.value.trim()) {
-                    isValid = false;
-                    el.classList.add('is-invalid');
-                    if (errEl) {
-                        errEl.textContent = field.msg;
-                        errEl.classList.add('show');
-                    }
-
-                    el.addEventListener('input', function() {
-                        this.classList.remove('is-invalid');
-                        if (errEl) errEl.classList.remove('show');
-                    }, { once: true });
-
-                    if (el.tagName === 'SELECT') {
-                        el.addEventListener('change', function() {
-                            this.classList.remove('is-invalid');
-                            if (errEl) errEl.classList.remove('show');
-                        }, { once: true });
-                    }
+            // Validate skin tone
+            const skinToneEl = document.getElementById('mobile_skin_tone');
+            if (!skinToneEl || !skinToneEl.value || skinToneEl.value.trim() === '') {
+                isValid = false;
+                const errEl = document.getElementById('error-mobile_skin_tone');
+                if (errEl) {
+                    errEl.textContent = 'Skin color is required';
+                    errEl.classList.add('show');
                 }
-            });
+            }
+
+            // Validate hair color
+            const hairColorEl = document.getElementById('mobile_hair_color');
+            if (!hairColorEl || !hairColorEl.value || hairColorEl.value.trim() === '') {
+                isValid = false;
+                const errEl = document.getElementById('error-mobile_hair_color');
+                if (errEl) {
+                    errEl.textContent = 'Hair color is required';
+                    errEl.classList.add('show');
+                }
+            }
+
+            // Validate eye color
+            const eyeColorEl = document.getElementById('mobile_eye_color');
+            if (!eyeColorEl || !eyeColorEl.value || eyeColorEl.value.trim() === '') {
+                isValid = false;
+                const errEl = document.getElementById('error-mobile_eye_color');
+                if (errEl) {
+                    errEl.textContent = 'Eye color is required';
+                    errEl.classList.add('show');
+                }
+            }
+
+            // Validate gender
+            const genderEl = document.getElementById('mobile_gender');
+            if (!genderEl || !genderEl.value) {
+                isValid = false;
+                alert('Please select your gender');
+            }
+
+            // Validate toggle switches (has_visible_tattoos and has_piercings)
+            const tattoosRadios = document.querySelectorAll('input[name="has_visible_tattoos"]');
+            const tattoosChecked = Array.from(tattoosRadios).some(r => r.checked);
+            if (!tattoosChecked) {
+                isValid = false;
+                alert('Please select an option for visible tattoos');
+            }
+
+            const piercingsRadios = document.querySelectorAll('input[name="has_piercings"]');
+            const piercingsChecked = Array.from(piercingsRadios).some(r => r.checked);
+            if (!piercingsChecked) {
+                isValid = false;
+                alert('Please select an option for visible piercings');
+            }
 
             if (!isValid) {
                 e.preventDefault();
+                return false;
             }
         });
 
