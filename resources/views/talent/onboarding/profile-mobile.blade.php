@@ -969,6 +969,7 @@
                     </button>
                 </div>
                 <input type="hidden" name="gender" id="mobile_gender" value="{{ old('gender', $profile->gender ?? 'male') }}" required>
+                <input type="hidden" name="hijab_preference" id="mobile_hijab_preference" value="">
             </div>
 
             <!-- Skin Color Selection -->
@@ -1280,26 +1281,6 @@
                 </div>
             </div>
 
-            <!-- Profile Photo Upload -->
-            <div class="form-field">
-                <label class="profile-photo-upload" for="mobile_profile_photo">
-                    <input id="mobile_profile_photo" name="profile_photo" type="file" accept="image/*" style="display:none;">
-                    <div class="profile-photo-circle" id="mobile_profile_photo_preview">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </div>
-                    <button type="button" class="profile-photo-btn" onclick="document.getElementById('mobile_profile_photo').click()">
-                        Upload profile photo
-                    </button>
-                    <div class="progress-bar-container-mobile" id="mobile_profile_photo_progress" style="display:none; margin-top: 12px;">
-                        <div class="progress-bar-fill-mobile" id="mobile_profile_photo_progress_fill" style="width: 0%;"></div>
-                    </div>
-                    <input type="hidden" id="mobile_profile_photo_key" name="profile_photo_key" value="">
-                </label>
-            </div>
-
             <!-- Additional Photos Upload -->
             <div class="form-field">
                 <label class="form-label">{{ \App\Helpers\Bilingual::get('onboarding.add_photos') }}</label>
@@ -1341,7 +1322,6 @@
                         </div>
                     </div>
                 </label>
-                <input type="hidden" id="mobile_video_key" name="video_key" value="">
                 @error('video')
                     <span class="error-text show" style="margin-top: 8px;">{{ $message }}</span>
                 @enderror
@@ -1939,7 +1919,7 @@
         });
     }
 
-    // Step 5 - Profile Photos and Video Upload Logic
+    // Step 5 - Additional Photos and Video Upload Logic
     const step5Form = document.getElementById('mobile-step5-form');
     if (step5Form) {
         // Global state for Step 5 photos
@@ -2057,76 +2037,6 @@
                 xhr.send(file);
             });
         };
-
-        // Profile Photo Upload
-        const profilePhotoInput = document.getElementById('mobile_profile_photo');
-        const profilePhotoPreview = document.getElementById('mobile_profile_photo_preview');
-        const profilePhotoKey = document.getElementById('mobile_profile_photo_key');
-        const profilePhotoProgress = document.getElementById('mobile_profile_photo_progress');
-        const profilePhotoProgressFill = document.getElementById('mobile_profile_photo_progress_fill');
-
-        if (profilePhotoInput) {
-            profilePhotoInput.addEventListener('change', async function() {
-                if (this.files.length === 0) return;
-
-                const file = this.files[0];
-                if (!file.type.startsWith('image/')) {
-                    alert('Only image files are allowed.');
-                    this.value = '';
-                    return;
-                }
-
-                profilePhotoProgress.style.display = 'block';
-                profilePhotoProgressFill.style.width = '0%';
-
-                try {
-                    const compressedFile = await compressImage(file, 10, 0.75);
-                    
-                    // Show preview
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        profilePhotoPreview.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
-                    };
-                    reader.readAsDataURL(compressedFile);
-
-                    // Get presigned URL
-                    const presignRes = await fetch('{{ route("talent.onboarding.presign-additional-photo") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        credentials: 'same-origin',
-                        body: JSON.stringify({
-                            file_name: compressedFile.name,
-                            file_type: compressedFile.type,
-                        }),
-                    });
-
-                    if (!presignRes.ok) {
-                        throw new Error('Could not prepare upload.');
-                    }
-
-                    const presign = await presignRes.json();
-
-                    // Upload to S3
-                    await uploadToS3Put(presign.url, presign.headers, compressedFile, (pct) => {
-                        profilePhotoProgressFill.style.width = `${pct}%`;
-                    });
-
-                    profilePhotoKey.value = presign.key;
-                    profilePhotoProgress.style.display = 'none';
-                    
-                    // Clear file input
-                    this.value = '';
-                } catch (err) {
-                    console.error('Profile photo upload failed', err);
-                    profilePhotoProgress.style.display = 'none';
-                    alert(err.message || 'Profile photo upload failed.');
-                }
-            });
-        }
 
         // Additional Photos Upload
         const additionalPhotosInput = document.getElementById('mobile_additional_photos');
@@ -2303,15 +2213,15 @@
             });
         }
 
-        // Video Upload
+        // Video Upload - handled via traditional file upload (not S3 presigned)
+        // Backend expects 'video' file input, not video_key
         const videoInput = document.getElementById('mobile_video_upload');
         const videoLabel = document.getElementById('mobile_video_label');
-        const videoKey = document.getElementById('mobile_video_key');
         const videoProgress = document.getElementById('mobile_video_progress');
         const videoProgressFill = document.getElementById('mobile_video_progress_fill');
 
         if (videoInput) {
-            videoInput.addEventListener('change', async function() {
+            videoInput.addEventListener('change', function() {
                 if (this.files.length === 0) return;
 
                 const file = this.files[0];
@@ -2321,49 +2231,23 @@
                     return;
                 }
 
+                // Show progress (simulated since video uploads via form submission)
                 videoProgress.style.display = 'block';
                 videoProgressFill.style.width = '0%';
-                videoLabel.textContent = 'Uploading...';
+                videoLabel.textContent = 'Video selected - will upload on submit';
 
-                try {
-                    // Get presigned URL (using same endpoint as photos for now, backend should handle video)
-                    const presignRes = await fetch('{{ route("talent.onboarding.presign-additional-photo") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        credentials: 'same-origin',
-                        body: JSON.stringify({
-                            file_name: file.name,
-                            file_type: file.type,
-                        }),
-                    });
-
-                    if (!presignRes.ok) {
-                        throw new Error('Could not prepare upload.');
+                // Simulate progress for UX
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    videoProgressFill.style.width = `${Math.min(progress, 90)}%`;
+                    if (progress >= 90) {
+                        clearInterval(interval);
                     }
+                }, 100);
 
-                    const presign = await presignRes.json();
-
-                    // Upload to S3
-                    await uploadToS3Put(presign.url, presign.headers, file, (pct) => {
-                        videoProgressFill.style.width = `${pct}%`;
-                    });
-
-                    videoKey.value = presign.key;
-                    videoLabel.textContent = `Video uploaded (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
-                    videoProgress.style.display = 'none';
-                    
-                    // Clear file input
-                    this.value = '';
-                } catch (err) {
-                    console.error('Video upload failed', err);
-                    videoProgress.style.display = 'none';
-                    videoLabel.textContent = 'Add Video Optional (0)';
-                    alert(err.message || 'Video upload failed.');
-                }
+                // Update label
+                videoLabel.textContent = `Video: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
             });
         }
 
@@ -2383,6 +2267,9 @@
                 alert('Please wait for all uploads to complete.');
                 return false;
             }
+
+            // Ensure all photo keys are synced before submit
+            syncPhotoKeys();
         });
     }
 })();

@@ -453,14 +453,13 @@
 
         <div id="mobile-content-en">
             <h1>Welcome<br>Back</h1>
+            <p class="lead">Enter your phone number to access the model portal</p>
         </div>
 
         <div id="mobile-content-ar" style="display: none; direction: rtl; text-align: right;">
             <h1 style="font-family: 'Arimo', sans-serif; text-align: right;">مرحباً<br>بعودتك</h1>
+            <p class="lead" style="font-family: 'Arimo', sans-serif; white-space: normal; text-align: right;">أدخل رقم هاتفك للوصول إلى بوابة النماذج</p>
         </div>
-
-        <p class="lead" id="mobile-lead-en">Enter your phone number to access the model portal</p>
-        <p class="lead" id="mobile-lead-ar" style="display: none; font-family: 'Arimo', sans-serif; direction: rtl; text-align: right; white-space: normal;">أدخل رقم هاتفك للوصول إلى بوابة النماذج</p>
 
         @if ($errors->any())
             <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px;">
@@ -524,8 +523,6 @@
             const langBtns = document.querySelectorAll('.lang-btn');
             const contentEn = document.getElementById('mobile-content-en');
             const contentAr = document.getElementById('mobile-content-ar');
-            const leadEn = document.getElementById('mobile-lead-en');
-            const leadAr = document.getElementById('mobile-lead-ar');
             const labelEn = document.getElementById('mobile-label-en');
             const labelAr = document.getElementById('mobile-label-ar');
             const btnEn = document.getElementById('mobile-btn-en');
@@ -546,8 +543,6 @@
                     if (isAr) {
                         contentEn.style.display = 'none';
                         contentAr.style.display = 'block';
-                        leadEn.style.display = 'none';
-                        leadAr.style.display = 'block';
                         labelEn.style.display = 'none';
                         labelAr.style.display = 'block';
                         btnEn.style.display = 'none';
@@ -560,8 +555,6 @@
                     } else {
                         contentEn.style.display = 'block';
                         contentAr.style.display = 'none';
-                        leadEn.style.display = 'block';
-                        leadAr.style.display = 'none';
                         labelEn.style.display = 'block';
                         labelAr.style.display = 'none';
                         btnEn.style.display = 'inline';
