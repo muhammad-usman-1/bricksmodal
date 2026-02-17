@@ -53,6 +53,71 @@
             align-items: center;
             margin-bottom: 24px;
             padding-top: 10px;
+            gap: 12px;
+        }
+
+        .mobile-header-left,
+        .mobile-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .mobile-header-left {
+            flex: 1;
+        }
+
+        .mobile-header-right {
+            flex: 0 0 auto;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #1c2435;
+            padding: 0;
+            flex: 0 0 auto;
+        }
+
+        .icon-btn:hover {
+            border-color: #000000;
+        }
+
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .logout-form,
+        .mobile-logout-form {
+            margin: 0;
+        }
+
+        .top-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .rtl .top-title-row {
+            flex-direction: row-reverse;
+        }
+
+        .top-title-row .icon-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
         }
 
         .mobile-logo {
@@ -428,6 +493,53 @@
         .next-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .step-action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .rtl .step-action-row {
+            flex-direction: row-reverse;
+        }
+
+        .step-action-row .next-button {
+            margin-top: 0;
+            width: auto;
+            flex: 1;
+        }
+
+        .back-button {
+            width: auto;
+            flex: 1;
+            padding: 16px 24px;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            margin-top: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+            border-color: #000000;
+        }
+
+        .back-button:active {
+            transform: translateY(0);
         }
 
         .chevron-icon {
@@ -863,23 +975,51 @@
 <div class="mobile-onboarding-container">
     <div class="mobile-card">
         <div class="mobile-header">
-            <div class="logo-wrap">
-                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS" class="mobile-logo">
+            <div class="mobile-header-left">
+                <div class="logo-wrap">
+                    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS" class="mobile-logo">
+                </div>
             </div>
-            
-            <div class="lang-toggle">
-                <button type="button" class="lang-btn active" data-lang="en">English</button>
-                <button type="button" class="lang-btn" data-lang="ar">عربي</button>
+
+            <div class="mobile-header-right">
+                <div class="lang-toggle">
+                    <button type="button" class="lang-btn active" data-lang="en">English</button>
+                    <button type="button" class="lang-btn" data-lang="ar">عربي</button>
+                </div>
             </div>
         </div>
 
         <div id="en-header">
-            <h1 class="mobile-title">JOIN THE COMMUNITY</h1>
+            <div class="top-title-row">
+                <h1 class="mobile-title">JOIN THE COMMUNITY</h1>
+                <form method="POST" action="{{ route('talent.logout') }}" class="mobile-logout-form">
+                    @csrf
+                    <button type="submit" class="icon-btn" aria-label="Logout" title="Logout">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <path d="M16 17l5-5-5-5"></path>
+                            <path d="M21 12H9"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
             <p class="mobile-subtitle">Create your account to get started</p>
         </div>
 
         <div id="ar-header" style="display: none; direction: rtl; text-align: right;">
-            <h1 class="mobile-title" style="font-family: 'Arimo', sans-serif; text-align: right;">انضم إلى المجتمع</h1>
+            <div class="top-title-row">
+                <h1 class="mobile-title" style="font-family: 'Arimo', sans-serif; text-align: right;">انضم إلى المجتمع</h1>
+                <form method="POST" action="{{ route('talent.logout') }}" class="mobile-logout-form">
+                    @csrf
+                    <button type="submit" class="icon-btn" aria-label="Logout" title="Logout">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <path d="M16 17l5-5-5-5"></path>
+                            <path d="M21 12H9"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
             <p class="mobile-subtitle" style="font-family: 'Arimo', sans-serif; text-align: right;">أنشئ حسابك للبدء</p>
         </div>
             
@@ -915,9 +1055,9 @@
                     name="first_name" 
                     class="form-input" 
                     type="text" 
-                    placeholder="John" 
-                    data-en-placeholder="John"
-                    data-ar-placeholder="جون"
+                    placeholder="First name" 
+                    data-en-placeholder="First name" 
+                    data-ar-placeholder="الاسم الأول"
                     value="{{ old('first_name', $profile->first_name) }}" 
                     required 
                     pattern="[a-zA-Z\s]+" 
@@ -941,9 +1081,9 @@
                     name="last_name" 
                     class="form-input" 
                     type="text" 
-                    placeholder="Doe" 
-                    data-en-placeholder="Doe"
-                    data-ar-placeholder="دو"
+                    placeholder=" Last name" 
+                    data-en-placeholder="Last name"
+                    data-ar-placeholder="الاسم الأخير"
                     value="{{ old('last_name', $profile->last_name) }}" 
                     required 
                     pattern="[a-zA-Z\s]+" 
@@ -1331,14 +1471,19 @@
                 </div>
             @endif
 
-            <!-- Next Button -->
-            <button type="submit" class="next-button">
-                <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
-                <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
-                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </button>
+            <div class="step-action-row">
+                <a href="{{ route('talent.onboarding.show', 'step-1') }}" class="back-button">
+                    <span class="lang-en">Back</span>
+                    <span class="lang-ar" style="display:none;">رجوع</span>
+                </a>
+                <button type="submit" class="next-button">
+                    <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
+                    <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
         </form>
         @endif
 
@@ -1442,14 +1587,19 @@
                 </span>
             </div>
 
-            <!-- Next Button -->
-            <button type="submit" class="next-button">
-                <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
-                <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
-                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </button>
+            <div class="step-action-row">
+                <a href="{{ route('talent.onboarding.show', 'step-2') }}" class="back-button">
+                    <span class="lang-en">Back</span>
+                    <span class="lang-ar" style="display:none;">رجوع</span>
+                </a>
+                <button type="submit" class="next-button">
+                    <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
+                    <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
         </form>
         @endif
 
@@ -1522,14 +1672,19 @@
                 </span>
             </div>
 
-            <!-- Next Button -->
-            <button type="submit" class="next-button" id="mobile_step4_submit">
-                <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
-                <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
-                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </button>
+            <div class="step-action-row">
+                <a href="{{ route('talent.onboarding.show', 'step-3') }}" class="back-button">
+                    <span class="lang-en">Back</span>
+                    <span class="lang-ar" style="display:none;">رجوع</span>
+                </a>
+                <button type="submit" class="next-button" id="mobile_step4_submit">
+                    <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'en') }}</span>
+                    <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.next', [], 'ar') }}</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
         </form>
         @endif
 
@@ -1608,10 +1763,16 @@
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" class="next-button" id="mobile_step5_submit">
-                <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.submit_application', [], 'en') }}</span>
-                <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.submit_application', [], 'ar') }}</span>
-            </button>
+            <div class="step-action-row">
+                <a href="{{ route('talent.onboarding.show', 'step-4') }}" class="back-button">
+                    <span class="lang-en">Back</span>
+                    <span class="lang-ar" style="display:none;">رجوع</span>
+                </a>
+                <button type="submit" class="next-button" id="mobile_step5_submit">
+                    <span class="lang-en">{{ \Illuminate\Support\Facades\Lang::get('onboarding.submit_application', [], 'en') }}</span>
+                    <span class="lang-ar" style="display:none;">{{ \Illuminate\Support\Facades\Lang::get('onboarding.submit_application', [], 'ar') }}</span>
+                </button>
+            </div>
         </form>
         @endif
 
@@ -1631,6 +1792,39 @@
     const langBtns = document.querySelectorAll('.lang-btn');
     const enHeader = document.getElementById('en-header');
     const arHeader = document.getElementById('ar-header');
+
+    // Logout confirmation (match desktop profile.blade.php behavior)
+    const mobileLogoutForms = document.querySelectorAll('form.mobile-logout-form');
+    if (mobileLogoutForms && mobileLogoutForms.length > 0) {
+        mobileLogoutForms.forEach((logoutForm) => {
+            logoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const doSubmit = () => logoutForm.submit();
+
+                if (typeof Swal !== 'undefined' && Swal && typeof Swal.fire === 'function') {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Even if you log out, all the data filled so far in the completed steps will be saved.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1a1a1a',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, Log me out',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) doSubmit();
+                    });
+                } else {
+                    // Fallback if SweetAlert isn't loaded on this page
+                    if (window.confirm('Are you sure you want to log out?')) {
+                        doSubmit();
+                    }
+                }
+            });
+        });
+    }
     
     // Toggle function
     function setLanguage(lang) {
