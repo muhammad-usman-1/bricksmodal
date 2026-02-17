@@ -343,15 +343,9 @@
         filter: brightness(0) invert(1);
         object-fit: contain;
     }
+    /* Photo removal disabled for talents (no remove UI) */
     .photo-item .remove-photo-link {
-        color: #ff4d4f !important;
-        font-size: 11px;
-        margin-top: 8px;
-        cursor: pointer;
-        text-decoration: underline;
-    }
-    .photo-item .remove-photo-link:hover {
-        color: #ff7875 !important;
+        display: none !important;
     }
 
     /* Footer / Rates */
@@ -808,6 +802,103 @@
         </form>
     </div>
 
+    <!-- Media Portfolio -->
+    <div class="dash-card media-portfolio-card" id="mediaPortfolioCard">
+        <div class="section-title-row">
+            <div class="icon-box"><i class="fas fa-images"></i></div>
+            <span>{{ \App\Helpers\Bilingual::get('talent.profile_media_portfolio') }}</span>
+        </div>
+
+        <!-- Additional Profile Images -->
+        @php
+            $additionalPhotos = $profile->media()->where('type', 'profile')->get();
+        @endphp
+        @if($additionalPhotos->count() > 0)
+        <div class="portfolio-section">
+            <div class="portfolio-header">
+                <h3>Profile Images</h3>
+            </div>
+            <div class="photo-grid" id="additionalPhotosGrid">
+                @foreach($additionalPhotos as $media)
+                    <div class="photo-item is-editable" data-media-id="{{ $media->id }}" style="position: relative;">
+                        @if($media->file_path)
+                            <img src="{{ $resolveMediaUrl($media->file_path) }}" alt="Additional Photo" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
+                        @else
+                            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
+                        @endif
+                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.2); z-index: 10; display: none;">
+                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s ease; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>
+                        </div>
+                    <div class="upload-overlay">
+                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                        <span class="upload-text">{{ $media->file_path ? \App\Helpers\Bilingual::get('talent.profile_replace_photo') : \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
+                    </div>
+                        <input type="file" name="additional_photos[]" class="media-file-input" accept="image/*" style="display:none">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Profile Video -->
+        <div class="portfolio-section" style="margin-top: 32px;">
+            <div class="portfolio-header">
+                <h3>{{ \App\Helpers\Bilingual::get('talent.profile_video') }}</h3>
+            </div>
+            <div id="video-upload-section" style="margin-top: 16px;">
+                @if($muxPlaybackId)
+                    <!-- Video Preview - Always shown when video exists -->
+                    <div id="video-preview-container" style="margin-bottom: 16px;">
+                        <div style="position: relative; width: 100%; max-width: 600px; background: #000; border-radius: 8px; overflow: hidden;">
+                            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                                <iframe
+                                    src="https://stream.mux.com/{{ $muxPlaybackId }}.m3u8"
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
+                        </div>
+                        <!-- Replace/Remove buttons - Only shown in edit mode -->
+                        <div id="video-action-buttons" class="video-edit-only" style="margin-top: 12px; display: none; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <button type="button" id="replace-video-btn" class="btn-replace-video" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">
+                                <i class="fas fa-upload" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_replace_video') }}
+                            </button>
+                            <button type="button" id="remove-video-btn" class="btn-remove-video" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #991b1b; cursor: pointer; transition: all 0.2s;">
+                                <i class="fas fa-trash" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_remove_video') }}
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Upload Area - Shown by default when no video, or in edit mode when video exists -->
+                <div id="video-upload-area" style="display: {{ $muxPlaybackId ? 'none' : 'block' }};">
+                    <label class="upload-card video-upload-label" for="upload_video" style="width:100%; margin:0; cursor: default; pointer-events: none; opacity: 0.6;">
+                        <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;" disabled>
+                        <div class="upload-inner" style="padding: 40px 20px; text-align: center; border: 2px dashed #d1d5db; border-radius: 8px; background: #f9fafb; transition: all 0.2s;">
+                            <div class="upload-icon" style="margin-bottom: 12px;">
+                                <i class="fas fa-video" style="font-size: 32px; color: #9ca3af;"></i>
+                            </div>
+                            <div class="upload-label" data-file-label="video" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
+                                {{ \App\Helpers\Bilingual::get('talent.profile_click_upload_drag_drop') }}
+                            </div>
+                            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">
+                                {{ \App\Helpers\Bilingual::get('talent.profile_video_formats') }}
+                            </div>
+                            <div class="progress-bar-container" id="video-progress-container" style="display:none; width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 16px; overflow: hidden;">
+                                <div class="progress-bar-fill" id="video-progress-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div id="video-upload-status" style="margin-top: 12px; font-size: 13px; color: #6b7280; display: none;"></div>
+                        </div>
+                    </label>
+                    @error('video')
+                        <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Row -->
     <div class="stats-grid">
         <!-- 1. Shoots Completed -->
@@ -906,108 +997,6 @@
         </div>
     </div>
     @endif --}}
-
-    <!-- Media Portfolio -->
-    <div class="dash-card">
-        <div class="section-title-row">
-            <div class="icon-box"><i class="fas fa-images"></i></div>
-            <span>{{ \App\Helpers\Bilingual::get('talent.profile_media_portfolio') }}</span>
-        </div>
-
-        <!-- Additional Profile Images -->
-        @php
-            $additionalPhotos = $profile->media()->where('type', 'profile')->get();
-        @endphp
-        @if($additionalPhotos->count() > 0)
-        <div class="portfolio-section">
-            <div class="portfolio-header">
-                <h3>Profile Images</h3>
-            </div>
-            <div class="photo-grid" id="additionalPhotosGrid">
-                @foreach($additionalPhotos as $media)
-                    <div class="photo-item is-editable" data-media-id="{{ $media->id }}" style="position: relative;">
-                        @if($media->file_path)
-                            <img src="{{ $resolveMediaUrl($media->file_path) }}" alt="Additional Photo" class="preview-img" loading="lazy" decoding="async" fetchpriority="low">
-                        @else
-                            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d1d5db; font-size:12px;">No Image</div>
-                        @endif
-                        <div class="upload-progress-container" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.2); z-index: 10; display: none;">
-                            <div class="upload-progress-bar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s ease; box-shadow: 0 0 2px rgba(0,0,0,0.5);"></div>
-                        </div>
-                    <div class="upload-overlay">
-                        <img src="{{ asset('images/upload.png') }}" alt="Upload" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                        <span class="upload-text">{{ $media->file_path ? \App\Helpers\Bilingual::get('talent.profile_replace_photo') : \App\Helpers\Bilingual::get('talent.profile_upload_photo') }}</span>
-                        @if($media->file_path)
-                        <span class="remove-photo-link" onclick="removeMediaImage(this, event)">{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}</span>
-                        @endif
-                    </div>
-                        <input type="file" name="additional_photos[]" class="media-file-input" accept="image/*" style="display:none">
-                    </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        <!-- Profile Video -->
-        <div class="portfolio-section" style="margin-top: 32px;">
-            <div class="portfolio-header">
-                <h3>{{ \App\Helpers\Bilingual::get('talent.profile_video') }}</h3>
-            </div>
-            <div id="video-upload-section" style="margin-top: 16px;">
-                @if($muxPlaybackId)
-                    <!-- Video Preview - Always shown when video exists -->
-                    <div id="video-preview-container" style="margin-bottom: 16px;">
-                        <div style="position: relative; width: 100%; max-width: 600px; background: #000; border-radius: 8px; overflow: hidden;">
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-                                <iframe
-                                    src="https://stream.mux.com/{{ $muxPlaybackId }}.m3u8"
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    allow="autoplay; encrypted-media"
-                                    allowfullscreen
-                                ></iframe>
-                            </div>
-                        </div>
-                        <!-- Replace/Remove buttons - Only shown in edit mode -->
-                        <div id="video-action-buttons" class="video-edit-only" style="margin-top: 12px; display: none; gap: 12px; align-items: center; flex-wrap: wrap;">
-                            <button type="button" id="replace-video-btn" class="btn-replace-video" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">
-                                <i class="fas fa-upload" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_replace_video') }}
-                            </button>
-                            <button type="button" id="remove-video-btn" class="btn-remove-video" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #991b1b; cursor: pointer; transition: all 0.2s;">
-                                <i class="fas fa-trash" style="margin-right: 6px;"></i> {{ \App\Helpers\Bilingual::get('talent.profile_remove_video') }}
-                            </button>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Upload Area - Shown by default when no video, or in edit mode when video exists -->
-                <div id="video-upload-area" style="display: {{ $muxPlaybackId ? 'none' : 'block' }};">
-                    <label class="upload-card video-upload-label" for="upload_video" style="width:100%; margin:0; cursor: default; pointer-events: none; opacity: 0.6;">
-                        <input id="upload_video" name="video" type="file" accept="video/*" style="display:none;" disabled>
-                        <div class="upload-inner" style="padding: 40px 20px; text-align: center; border: 2px dashed #d1d5db; border-radius: 8px; background: #f9fafb; transition: all 0.2s;">
-                            <div class="upload-icon" style="margin-bottom: 12px;">
-                                <i class="fas fa-video" style="font-size: 32px; color: #9ca3af;"></i>
-                            </div>
-                            <div class="upload-label" data-file-label="video" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
-                                {{ \App\Helpers\Bilingual::get('talent.profile_click_upload_drag_drop') }}
-                            </div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">
-                                {{ \App\Helpers\Bilingual::get('talent.profile_video_formats') }}
-                            </div>
-                            <div class="progress-bar-container" id="video-progress-container" style="display:none; width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 16px; overflow: hidden;">
-                                <div class="progress-bar-fill" id="video-progress-fill" style="width: 0%; height: 100%; background: #10b981; transition: width 0.3s ease;"></div>
-                            </div>
-                            <div id="video-upload-status" style="margin-top: 12px; font-size: 13px; color: #6b7280; display: none;"></div>
-                        </div>
-                    </label>
-                    @error('video')
-                        <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-        </div>
-
-
-    </div>
 
     <!-- Note on Terms/Policies in footer -->
     <div style="margin-top: 24px;">
@@ -1522,11 +1511,44 @@
         const editBtn = document.getElementById('editProfileBtn');
         const editCard = document.getElementById('editCard');
         const cancelBtn = document.getElementById('cancelEditBtn');
+        const mediaPortfolioCard = document.getElementById('mediaPortfolioCard');
+
+        // Mobile-only: move Media Portfolio above Basic Details when editing
+        const isMobile = () => window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        const mediaPortfolioOriginalParent = mediaPortfolioCard ? mediaPortfolioCard.parentElement : null;
+        const mediaPortfolioOriginalNext = mediaPortfolioCard ? mediaPortfolioCard.nextElementSibling : null;
+
+        const moveMediaPortfolioIntoEditCard = () => {
+            if (!mediaPortfolioCard || !editCard) return;
+            if (!isMobile()) return;
+            const formEl = editCard.querySelector('form');
+            if (!formEl) return;
+            const firstSectionTitle = formEl.querySelector('.edit-section-title');
+            if (!firstSectionTitle) return;
+
+            // Only move if not already inside the edit form
+            if (mediaPortfolioCard.parentElement !== formEl) {
+                formEl.insertBefore(mediaPortfolioCard, firstSectionTitle);
+            }
+        };
+
+        const restoreMediaPortfolioPosition = () => {
+            if (!mediaPortfolioCard || !mediaPortfolioOriginalParent) return;
+            // Only restore if it's been moved into edit form
+            if (mediaPortfolioCard.parentElement !== mediaPortfolioOriginalParent) {
+                if (mediaPortfolioOriginalNext) {
+                    mediaPortfolioOriginalParent.insertBefore(mediaPortfolioCard, mediaPortfolioOriginalNext);
+                } else {
+                    mediaPortfolioOriginalParent.appendChild(mediaPortfolioCard);
+                }
+            }
+        };
 
         const openEditCard = () => {
             if (!editCard) return;
             editCard.classList.remove('d-none');
             document.body.classList.add('is-editing');
+            moveMediaPortfolioIntoEditCard();
             editCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
             toggleVideoUploadControls(true);
         };
@@ -1536,6 +1558,7 @@
             editCard.classList.add('d-none');
             document.body.classList.remove('is-editing');
             toggleVideoUploadControls(false);
+            restoreMediaPortfolioPosition();
         };
 
         const toggleVideoUploadControls = (isEditing) => {
@@ -1607,6 +1630,13 @@
             openEditCard();
             document.body.classList.add('is-editing');
         }
+
+        // If user resizes from mobile->desktop while editing, put the portfolio back
+        window.addEventListener('resize', () => {
+            if (!document.body.classList.contains('is-editing')) return;
+            if (!isMobile()) restoreMediaPortfolioPosition();
+            if (isMobile()) moveMediaPortfolioIntoEditCard();
+        });
 
         if (window.jQuery && $('.select2').length) {
             $('.select2').select2({
@@ -1690,14 +1720,6 @@
                     if (overlay) {
                         const uploadText = overlay.querySelector('.upload-text');
                         if (uploadText) uploadText.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_replace_photo') }}';
-                        let removeLink = overlay.querySelector('.remove-photo-link');
-                        if (!removeLink) {
-                            removeLink = document.createElement('span');
-                            removeLink.className = 'remove-photo-link';
-                            removeLink.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}';
-                            removeLink.onclick = (e) => removeMediaImage(removeLink, e);
-                            overlay.appendChild(removeLink);
-                        }
                     }
                 };
                 reader.readAsDataURL(file);
@@ -1809,12 +1831,13 @@
             }
         }
 
-        // Function to remove media image
+        // Function to remove media image (DISABLED for talents)
         function removeMediaImage(link, e) {
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
+            return;
 
             const tile = link.closest('.photo-item');
             if (!tile) return;
@@ -1955,14 +1978,6 @@
                         if (overlay) {
                             const uploadText = overlay.querySelector('.upload-text');
                             if (uploadText) uploadText.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_replace_photo') }}';
-                            let removeLink = overlay.querySelector('.remove-photo-link');
-                            if (!removeLink) {
-                                removeLink = document.createElement('span');
-                                removeLink.className = 'remove-photo-link';
-                                removeLink.textContent = '{{ \App\Helpers\Bilingual::get('talent.profile_remove_photo') }}';
-                                removeLink.onclick = (e) => removeMediaImage(removeLink, e);
-                                overlay.appendChild(removeLink);
-                            }
                         }
                     };
                     reader.readAsDataURL(file);
@@ -1994,12 +2009,11 @@
             toggleAddMoreButton();
         }
 
-        // Show/hide delete buttons for additional photos in edit mode
+        // Show/hide delete buttons for additional photos in edit mode (DISABLED)
         function toggleEditModeForPhotos() {
-            const isEditing = !editCard.classList.contains('d-none');
             const deleteButtons = document.querySelectorAll('.delete-media-btn');
             deleteButtons.forEach(btn => {
-                btn.style.display = isEditing ? 'flex' : 'none';
+                btn.style.display = 'none';
             });
         }
 
@@ -2017,31 +2031,12 @@
         }
         toggleEditModeForPhotos();
 
-        // Handle delete media buttons
+        // Handle delete media buttons (DISABLED)
         document.addEventListener('click', function(e) {
             if (e.target.closest('.delete-media-btn')) {
-                const btn = e.target.closest('.delete-media-btn');
-                const mediaId = btn.dataset.mediaId;
-                const photoItem = btn.closest('.photo-item');
-
-                if (mediaId && photoItem) {
-                    // Add to deleted_media_ids hidden input
-                    const form = document.querySelector('form[action*="profile"]');
-                    if (form) {
-                        let deletedInput = form.querySelector(`input[name="deleted_media_ids[]"][value="${mediaId}"]`);
-                        if (!deletedInput) {
-                            deletedInput = document.createElement('input');
-                            deletedInput.type = 'hidden';
-                            deletedInput.name = 'deleted_media_ids[]';
-                            deletedInput.value = mediaId;
-                            form.appendChild(deletedInput);
-                        }
-                    }
-
-                    // Hide the photo item
-                    photoItem.style.opacity = '0.5';
-                    photoItem.style.pointerEvents = 'none';
-                }
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             }
         });
 

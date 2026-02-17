@@ -41,7 +41,7 @@
             padding: 30px 26px 30px;
             text-align: center;
         }
-        
+
         /* Mobile Card Styles */
         .mobile-auth-card {
             display: none;
@@ -350,7 +350,7 @@
             margin-top: 6px;
             margin-bottom: 14px;
         }
-        
+
         .alert {
             text-align: left;
         }
@@ -384,7 +384,7 @@
                 display: block;
             }
         }
-        
+
         @media (max-width: 400px) {
             body {
                 padding: 20px 12px;
@@ -466,7 +466,7 @@
             <div class="logo-wrap">
                 <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Logo" style="width: 140px;">
             </div>
-            
+
             <div class="lang-toggle">
                 <button type="button" class="lang-btn active" data-lang="en">English</button>
                 <button type="button" class="lang-btn" data-lang="ar">عربي</button>
@@ -495,10 +495,10 @@
 
         <form method="POST" action="{{ route('talent.login.submit') }}" class="auth-form" novalidate>
             @csrf
-            
+
             <div id="mobile-label-en" class="field-label">Phone Number</div>
             <div id="mobile-label-ar" class="field-label" style="display: none; direction: rtl; text-align: right;">رقم الهاتف</div>
-            
+
             <div class="phone-wrapper">
                 <div class="country-code-display">
                     <span class="fi fi-kw country-flag" title="Kuwait"></span>
@@ -559,9 +559,9 @@
                 btn.addEventListener('click', () => {
                     langBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    
+
                     const isAr = btn.dataset.lang === 'ar';
-                    
+
                     if (isAr) {
                         contentEn.style.display = 'none';
                         contentAr.style.display = 'block';
@@ -601,7 +601,7 @@
                 function validatePhone() {
                     let inputValue = phoneInput.value.trim();
                     const phoneNumber = inputValue.replace(/\D/g, '');
-                    
+
                     if (phoneNumber.length === 0) {
                         phoneInput.classList.add('is-invalid');
                         errorMsg.textContent = 'Phone number is required.';
@@ -621,7 +621,7 @@
 
                 phoneInput.addEventListener('input', function(e) {
                     e.target.value = e.target.value.replace(/\D/g, '');
-                    
+
                     if (phoneInput.classList.contains('is-invalid')) {
                         validatePhone();
                     }
@@ -639,7 +639,7 @@
 
                     const inputValue = phoneInput.value.trim();
                     let phoneNumber = inputValue.replace(/\D/g, '');
-                    
+
                     // If it starts with 965, strip it for the phone_number field
                     if (phoneNumber.startsWith('965') && phoneNumber.length > 8) {
                         phoneNumber = phoneNumber.substring(3);
