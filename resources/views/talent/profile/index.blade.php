@@ -38,28 +38,47 @@
         display: flex;
         gap: 20px;
         align-items: center;
+        flex: 1;
     }
 
-    .profile-avatar {
+    .profile-summary-image {
         width: 80px;
         height: 80px;
-        border-radius: 50%;
-        background-color: #f3f4f6;
-        background-size: cover;
-        background-position: center;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #f3f4f6;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        position: relative;
+    }
+
+    .profile-summary-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .profile-summary-image span {
+        font-size: 32px;
+        font-weight: 600;
         color: #9ca3af;
-        border: 1px solid var(--border-color);
-        flex-shrink: 0;
+    }
+
+    .profile-name-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-dark);
+        line-height: 1.2;
     }
 
     .profile-names h1 {
         font-size: 20px;
-        font-weight: 700;
-        margin: 0 0 4px 0;
+        font-weight: 600;
+        margin: 0;
         color: var(--text-dark);
         line-height: 1.2;
     }
@@ -647,7 +666,64 @@
         return $resolvedUrl;
     };
 
-    $primaryAvatar = $resolveMediaUrl($profile->headshot_center_path ?? null);
+    // Collect all available profile images (similar to admin talentProfiles/show.blade.php)
+    $standardPhotoFields = [
+        'headshot_center_path' => 'Headshot (Center)',
+        'headshot_left_path'   => 'Headshot (Left)',
+        'headshot_right_path'  => 'Headshot (Right)',
+        'full_body_front_path' => 'Full Body (Front)',
+        'full_body_right_path' => 'Full Body (Right)',
+        'full_body_back_path'  => 'Full Body (Back)',
+    ];
+
+    $allPhotos = [];
+    foreach ($standardPhotoFields as $field => $label) {
+        $path = $profile->{$field};
+        if ($path) {
+            $allPhotos[] = $path;
+        }
+    }
+
+    // Collect from media relationship
+    $mediaItems = $profile->media()->get();
+    foreach ($mediaItems as $media) {
+        if ($media->file_path) {
+            $allPhotos[] = $media->file_path;
+        }
+    }
+
+    // Get random profile image (or first available)
+    $randomImagePath = null;
+    if (!empty($allPhotos)) {
+        $randomImagePath = $allPhotos[array_rand($allPhotos)];
+    }
+    $primaryAvatar = $randomImagePath ? $resolveMediaUrl($randomImagePath) : null;
+
+    // Get talent name
+    $talentName = $profile->display_name ?? $profile->legal_name ?? 'Not Set';
+
+    // Get phone number
+    $phoneNumber = $profile->whatsapp_number ?? $profile->mobile_number ?? ($profile->user->phone_number ?? null);
+    $phoneDisplay = $phoneNumber ? '+965 ' . $phoneNumber : 'Not Set';
+
+    // Get status
+    $status = $profile->verification_status ?? 'pending';
+    $statusLabels = [
+        'approved' => \App\Helpers\Bilingual::get('admin_talent_profile.approved') ?? 'Approved',
+        'pending' => \App\Helpers\Bilingual::get('admin_talent_profile.pending') ?? 'Pending',
+        'rejected' => \App\Helpers\Bilingual::get('admin_talent_profile.rejected') ?? 'Rejected',
+        'suspended' => \App\Helpers\Bilingual::get('admin_talent_profile.suspended') ?? 'Suspended',
+        'under_review' => 'Under Review',
+    ];
+    $statusLabel = $statusLabels[$status] ?? ucfirst($status);
+    $statusClass = match($status) {
+        'approved' => 'status-approved',
+        'pending' => 'status-pending',
+        'rejected' => 'status-rejected',
+        'suspended' => 'status-suspended',
+        'under_review' => 'status-pending',
+        default => 'status-pending',
+    };
 @endphp
 
 <div class="profile-dashboard">
@@ -655,25 +731,32 @@
     <!-- Top Card: Header -->
     <div class="dash-card profile-header">
         <div class="profile-info-wrap">
-            <div class="profile-avatar" style="{{ $primaryAvatar ? 'background-image: url('.e($primaryAvatar).')' : '' }}">
-                @if(! $primaryAvatar)
-                    <span>{{ substr($profile->legal_name, 0, 1) }}</span>
+            <!-- Profile Image -->
+            <div class="profile-summary-image">
+                @if($primaryAvatar)
+                    <img src="{{ e($primaryAvatar) }}" alt="{{ e($talentName) }}">
+                @else
+                    <span>{{ strtoupper(substr($talentName, 0, 1)) }}</span>
                 @endif
             </div>
-            <div class="profile-names">
-                <h1>{{ $profile->legal_name }}</h1>
-                <div class="profile-meta">
-                    <span>
-                        {{ $profile->gender ? ucfirst($profile->gender) : \App\Helpers\Bilingual::get('talent.profile_model') }}
-                        @if($profile->date_of_birth)
-                            • {{ \Carbon\Carbon::parse($profile->date_of_birth)->age }} {{ \App\Helpers\Bilingual::get('talent.profile_years') }}
-                        @endif
-                    </span>
-                    <span>{{ $profile->location ?? \App\Helpers\Bilingual::get('talent.profile_location') }}</span>
+
+            <!-- Profile Info -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Name and Profile Number -->
+                <div>
+                    <h1 class="profile-name-title">#{{ $profile->id }} - {{ $talentName }}</h1>
                 </div>
-                <!-- Static Rating for Visual Parity -->
-                <div class="rating-badge">
-                    <i class="fas fa-star"></i> 4.5 (12 reviews)
+
+                <!-- Status -->
+                <div>
+                    <span class="status-badge {{ $statusClass }}" style="display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                        {{ $statusLabel }}
+                    </span>
+                </div>
+
+                <!-- Phone Number -->
+                <div style="color: var(--text-gray); font-size: 14px;">
+                    <span>{{ $phoneDisplay }}</span>
                 </div>
             </div>
         </div>
@@ -683,6 +766,25 @@
             <i class="fas fa-pen"></i> {{ \App\Helpers\Bilingual::get('talent.profile_edit') }}
         </button>
     </div>
+
+    <style>
+        .status-badge.status-approved {
+            background: #e6f7ed;
+            color: #15803d;
+        }
+        .status-badge.status-pending {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+        .status-badge.status-rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .status-badge.status-suspended {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+    </style>
 
     @php
         $openEditCard = $errors->any();
@@ -900,7 +1002,7 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="stats-grid">
+    {{--  <div class="stats-grid">
         <!-- 1. Shoots Completed -->
         <div class="stat-card">
             <div class="stat-header">
@@ -936,7 +1038,7 @@
             <div class="stat-value">2h ago</div>
             <div class="stat-trend trend-neutral">In Kuwait</div>
         </div>
-    </div>
+    </div>  --}}
 
     <!-- Measurements Section -->
     <div class="dash-card">
