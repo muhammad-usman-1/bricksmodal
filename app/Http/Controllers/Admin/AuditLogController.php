@@ -144,7 +144,7 @@ class AuditLogController extends Controller
             
             // CSV Data
             foreach ($logs as $log) {
-                $time = $log->created_at->setTimezone('Asia/Kuwait')->format('Y-m-d H:i:s');
+                $time = $log->created_at->setTimezone('Asia/Kuwait')->format('Y-m-d h:i:s A');
                 $userName = $log->user ? $log->user->name : '';
                 $phone = $log->user_phone ? '+965 ' . $log->user_phone : '';
                 

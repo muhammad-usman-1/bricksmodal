@@ -34,7 +34,7 @@
                             {{ trans('global.created_at') }}
                         </th>
                         <td>
-                            {{ $label->created_at?->format('d M Y H:i') }}
+                            {{ $label->created_at?->format('d M Y h:i A') }}
                         </td>
                     </tr>
                     <tr>
@@ -42,7 +42,7 @@
                             {{ trans('global.updated_at') }}
                         </th>
                         <td>
-                            {{ $label->updated_at?->format('d M Y H:i') }}
+                            {{ $label->updated_at?->format('d M Y h:i A') }}
                         </td>
                     </tr>
                 </tbody>

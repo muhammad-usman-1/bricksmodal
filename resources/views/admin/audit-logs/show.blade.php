@@ -149,7 +149,7 @@
         <div class="detail-row">
             <div class="detail-label">Timestamp</div>
             <div class="detail-value">
-                {{ $auditLog->created_at->setTimezone('Asia/Kuwait')->format('F d, Y H:i:s') }} GMT+3
+                {{ $auditLog->created_at->setTimezone('Asia/Kuwait')->format('F d, Y h:i:s A') }} GMT+3
             </div>
         </div>
         <div class="detail-row">

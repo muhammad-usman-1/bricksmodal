@@ -386,7 +386,7 @@
                 <tr class="log-row" style="{{ $index >= 7 ? 'display: none;' : '' }}">
                     <td>
                         <div>{{ $log->created_at->setTimezone('Asia/Kuwait')->format('M d, Y') }}</div>
-                        <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->setTimezone('Asia/Kuwait')->format('H:i:s') }} GMT+3</div>
+                        <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->setTimezone('Asia/Kuwait')->format('h:i:s A') }} GMT+3</div>
                     </td>
                     <td>
                         @if($log->event_type == 'login_success')

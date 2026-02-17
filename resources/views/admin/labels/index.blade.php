@@ -51,7 +51,7 @@
                                 {{ $label->name }}
                             </td>
                             <td>
-                                {{ $label->created_at?->format('d M Y H:i') }}
+                                {{ $label->created_at?->format('d M Y h:i A') }}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">

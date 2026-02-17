@@ -211,22 +211,22 @@
                 <div class="kv-grid">
                     <div>
                         <div class="kv-label">{{ __('Requested At') }}</div>
-                        <div class="kv-value">{{ optional($castingApplication->payment_requested_at)->format('M d, Y H:i') ?? '—' }}</div>
+                        <div class="kv-value">{{ optional($castingApplication->payment_requested_at)->format('M d, Y h:i A') ?? '—' }}</div>
                         @if($castingApplication->payment_requested_at)
                             <div class="kv-sub">{{ $castingApplication->payment_requested_at->diffForHumans() }}</div>
                         @endif
                     </div>
                     <div>
                         <div class="kv-label">{{ __('Approval Date') }}</div>
-                        <div class="kv-value">{{ optional($castingApplication->payment_approved_at)->format('M d, Y H:i') ?? '—' }}</div>
+                        <div class="kv-value">{{ optional($castingApplication->payment_approved_at)->format('M d, Y h:i A') ?? '—' }}</div>
                     </div>
                     <div>
                         <div class="kv-label">{{ __('Release Date') }}</div>
-                        <div class="kv-value">{{ optional($castingApplication->payment_released_at)->format('M d, Y H:i') ?? '—' }}</div>
+                        <div class="kv-value">{{ optional($castingApplication->payment_released_at)->format('M d, Y h:i A') ?? '—' }}</div>
                     </div>
                     <div>
                         <div class="kv-label">{{ __('Received Date') }}</div>
-                        <div class="kv-value">{{ optional($castingApplication->payment_received_at)->format('M d, Y H:i') ?? '—' }}</div>
+                        <div class="kv-value">{{ optional($castingApplication->payment_received_at)->format('M d, Y h:i A') ?? '—' }}</div>
                     </div>
                 </div>
             </div>

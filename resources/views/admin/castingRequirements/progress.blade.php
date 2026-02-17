@@ -483,7 +483,7 @@
             try {
                 $carbonDate = \Carbon\Carbon::parse($rawDate);
                 $dateDisplay = $carbonDate->format('Y-m-d');
-                $timeOnly = $carbonDate->format('H:i');
+                $timeOnly = $carbonDate->format('h:i A');
                 $timeDisplay = $timeOnly . ($duration ? " ({$duration} Hours)" : '');
             } catch (\Exception $e) {
                  $dateDisplay = $project->shoot_date_time ?? '-';
