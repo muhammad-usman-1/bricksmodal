@@ -1,33 +1,81 @@
-@extends('layouts.app')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bricks Studio - Complete Your Profile</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=1.1">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}?v=1.1">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v=1.1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    @php
+        $bgImageUrl = isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png');
+    @endphp
+    
     <style>
-        body {
-            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
-            font-family: 'Space Grotesk', sans-serif;
-            color: #1f1f1f;
+        :root {
+            color-scheme: light only;
         }
-
-        .intro-shell {
-            min-height: calc(100vh - 40px);
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #ffffff url('{{ $bgImageUrl }}') center center / cover no-repeat fixed;
+            font-family: 'Space Grotesk', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 28px 16px 36px;
+            padding: 40px 20px;
         }
 
+        /* Desktop Card Styles */
         .intro-card {
             width: 100%;
             max-width: 506px;
             background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 20px 44px rgba(18, 33, 61, 0.12);
-            padding: 24px 22px 22px;
+            border-radius: 20px;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.08);
+            padding: 30px 26px 30px;
+            text-align: left;
             position: relative;
+        }
+
+        .logo-wrap {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-wrap img {
+            width: 140px;
+            height: auto;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #7c7c7c;
+            margin-top: 4px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #1a1a1a;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .lead {
+            font-family: 'Arimo', sans-serif;
+            font-size: 14px;
+            color: #6a7682;
+            margin: 0 0 24px;
         }
 
         /* Mobile Card Styles */
@@ -37,10 +85,11 @@
             max-width: 420px;
             background: #ffffff;
             border-radius: 24px;
-            padding: 40px 28px;
+            padding: 40px 34px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             text-align: left;
-            min-height: 600px;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .mobile-header {
@@ -52,16 +101,16 @@
 
         .mobile-header .logo-wrap {
             margin-bottom: 0 !important;
+            text-align: left;
         }
 
         .mobile-intro-card h1 {
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 800;
-            font-size: 44px;
+            font-size: 40px;
             line-height: 1.1;
             margin: 0 0 16px;
             color: #1a1a1a;
-            text-align: left;
             letter-spacing: -0.02em;
         }
 
@@ -102,7 +151,7 @@
             letter-spacing: -0.01em;
         }
 
-        .mobile-intro-card .info-box {
+        .info-box {
             display: flex;
             gap: 12px;
             padding: 16px;
@@ -110,51 +159,6 @@
             border: 1px solid #d7e2f5;
             border-radius: 14px;
             margin-bottom: 24px;
-        }
-
-        .logo-wrap {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .logo-wrap img {
-            width: 140px;
-            height: auto;
-        }
-
-        .eyebrow {
-            font-size: 11px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: #7c7c7c;
-            margin-top: 4px;
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 8px 0 6px;
-            color: #212121;
-            text-align: center;
-            font-family: 'Arimo', sans-serif;
-        }
-
-        .lead {
-            font-family: 'Arimo', sans-serif;
-            font-size: 13px;
-            color: #586272;
-            text-align: center;
-            margin: 0 0 16px;
-        }
-
-        .info-box {
-            display: flex;
-            gap: 12px;
-            padding: 14px;
-            background: #eef3fb;
-            border: 1px solid #d7e2f5;
-            border-radius: 12px;
-            margin-bottom: 16px;
         }
 
         .info-ico {
@@ -194,9 +198,9 @@
         .needs-list {
             list-style: none;
             padding: 0;
-            margin: 0 0 16px;
+            margin: 0 0 24px;
             display: grid;
-            gap: 12px;
+            gap: 16px;
         }
 
         .needs-item {
@@ -237,7 +241,7 @@
         }
 
         .estimate {
-            padding: 14px 14px 12px;
+            padding: 14px;
             border-radius: 12px;
             border: 1px solid #edf0f4;
             background: #f8fafc;
@@ -254,57 +258,62 @@
             color: #4b5563;
         }
 
-        .consent {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 13px;
-            color: #1f2937;
-            margin-bottom: 24px;
-        }
-
-        .consent input {
-            margin-top: 2px;
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            accent-color: #111111;
-            border: 1px solid #111111;
-        }
-
         .cta {
             width: 100%;
             border: none;
-            background: black;
+            background: #000000;
             color: #ffffff;
             height: 52px;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             text-decoration: none;
             cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .cta:hover {
+            opacity: 0.9;
         }
 
         .mobile-intro-card .cta {
             height: 60px;
-            border-radius: 12px;
             font-size: 16px;
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 40px 20px;
+                display: flex;
+                align-items: center;
+            }
             .intro-card {
                 display: none;
             }
             .mobile-intro-card {
                 display: block;
+                max-width: 100%;
+                border-radius: 24px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                background: #ffffff;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .mobile-intro-card {
+                padding: 40px 24px;
+            }
+            .mobile-intro-card h1 {
+                font-size: 34px;
             }
         }
     </style>
-
+</head>
+<body>
     <div class="intro-shell">
         <!-- Desktop Card -->
         <div class="intro-card">
@@ -363,7 +372,7 @@
                 </li>
             </ul>
 
-            <div class="estimate" style="margin-bottom: 14px;">
+            <div class="estimate">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
@@ -371,14 +380,9 @@
                 <div><strong>Estimated time: 5-10 minutes</strong><br><span style="color:#4b5563;">Make sure you have all required information ready</span></div>
             </div>
 
-            <label class="consent" style="margin-bottom: 12px; font-family: 'Arimo', sans-serif;">
-                <input type="checkbox" checked aria-label="Privacy acceptance">
-                <span>Any privacy acceptance text</span>
-            </label>
-
             <button type="button" class="cta" onclick="window.location='{{ $startRoute ?? route('talent.onboarding.show', 'profile') }}'">
                 Get Started
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M5 12h14" />
                     <path d="M13 6l6 6-6 6" />
                 </svg>
@@ -398,9 +402,10 @@
                 </div>
             </div>
 
+            <!-- English Content -->
             <div id="mobile-content-en">
-                <h1>Complete<br>Your Profile</h1>
-                <p class="lead" style="text-align: start;">One-time setup to get you started</p>
+                <h1>Complete Your Profile</h1>
+                <p class="lead">One-time setup to get you started</p>
 
                 <div class="info-box">
                     <div class="info-ico">i</div>
@@ -459,16 +464,17 @@
 
                 <button type="button" class="cta" onclick="window.location='{{ $startRoute ?? route('talent.onboarding.show', 'profile') }}'">
                     Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 12h14" />
                         <path d="M13 6l6 6-6 6" />
                     </svg>
                 </button>
             </div>
 
+            <!-- Arabic Content -->
             <div id="mobile-content-ar" style="display: none; direction: rtl; text-align: right;">
-                <h1 style="font-family: 'Arimo', sans-serif; text-align: right;">أكمل<br>ملفك الشخصي</h1>
-                <p class="lead" style="font-family: 'Arimo', sans-serif; text-align: right;">إعداد لمرة واحدة للبدء</p>
+                <h1 style="font-family: 'Arimo', sans-serif;">أكمل ملفك الشخصي</h1>
+                <p class="lead" style="font-family: 'Arimo', sans-serif;">إعداد لمرة واحدة للبدء</p>
 
                 <div class="info-box">
                     <div class="info-ico">i</div>
@@ -480,54 +486,54 @@
 
                 <div class="section-title" style="font-family: 'Arimo', sans-serif;">ماذا ستحتاج:</div>
                 <ul class="needs-list">
-                    <li class="needs-item" style="grid-template-columns: 32px 1fr;">
+                    <li class="needs-item">
                         <span class="badge-num" style="font-family: 'Space Grotesk', sans-serif;">1</span>
-                        <span class="needs-text" style="text-align: right;">
+                        <span class="needs-text">
                             <strong style="font-family: 'Arimo', sans-serif;">معلومات شخصية</strong>
                             <span style="font-family: 'Arimo', sans-serif;">الاسم، الجنسية، تفاصيل الاتصال</span>
                         </span>
                     </li>
-                    <li class="needs-item" style="grid-template-columns: 32px 1fr;">
+                    <li class="needs-item">
                         <span class="badge-num" style="font-family: 'Space Grotesk', sans-serif;">2</span>
-                        <span class="needs-text" style="text-align: right;">
+                        <span class="needs-text">
                             <strong style="font-family: 'Arimo', sans-serif;">الصفات البدنية</strong>
                             <span style="font-family: 'Arimo', sans-serif;">الطول، الوزن، والمواصفات</span>
                         </span>
                     </li>
-                    <li class="needs-item" style="grid-template-columns: 32px 1fr;">
+                    <li class="needs-item">
                         <span class="badge-num" style="font-family: 'Space Grotesk', sans-serif;">3</span>
-                        <span class="needs-text" style="text-align: right;">
+                        <span class="needs-text">
                             <strong style="font-family: 'Arimo', sans-serif;">قياسات الجسم</strong>
                             <span style="font-family: 'Arimo', sans-serif;">مقاسات الملابس، الفستان، والحذاء</span>
                         </span>
                     </li>
-                    <li class="needs-item" style="grid-template-columns: 32px 1fr;">
+                    <li class="needs-item">
                         <span class="badge-num" style="font-family: 'Space Grotesk', sans-serif;">4</span>
-                        <span class="needs-text" style="text-align: right;">
+                        <span class="needs-text">
                             <strong style="font-family: 'Arimo', sans-serif;">التحقق من الهوية</strong>
                             <span style="font-family: 'Arimo', sans-serif;">البطاقة المدنية أو جواز السفر</span>
                         </span>
                     </li>
-                    <li class="needs-item" style="grid-template-columns: 32px 1fr;">
+                    <li class="needs-item">
                         <span class="badge-num" style="font-family: 'Space Grotesk', sans-serif;">5</span>
-                        <span class="needs-text" style="text-align: right;">
+                        <span class="needs-text">
                             <strong style="font-family: 'Arimo', sans-serif;">الصور والفيديو</strong>
                             <span style="font-family: 'Arimo', sans-serif;">فيديو تعريفي قصير</span>
                         </span>
                     </li>
                 </ul>
 
-                <div class="estimate" style="direction: rtl; grid-template-columns: 28px 1fr;">
+                <div class="estimate" style="grid-template-columns: 28px 1fr;">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <div style="text-align: right;"><strong style="font-family: 'Arimo', sans-serif;">الوقت المقدر: 5-10 دقائق</strong></div>
+                    <div><strong style="font-family: 'Arimo', sans-serif;">الوقت المقدر: 5-10 دقائق</strong></div>
                 </div>
 
                 <button type="button" class="cta" onclick="window.location='{{ $startRoute ?? route('talent.onboarding.show', 'profile') }}'">
                     <span style="font-family: 'Arimo', sans-serif;">استمرار</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);">
                         <path d="M5 12h14" />
                         <path d="M13 6l6 6-6 6" />
                     </svg>
@@ -535,29 +541,39 @@
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const langBtns = document.querySelectorAll('.lang-btn');
             const contentEn = document.getElementById('mobile-content-en');
             const contentAr = document.getElementById('mobile-content-ar');
+            const mobileCard = document.querySelector('.mobile-intro-card');
 
             langBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     langBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    if (btn.dataset.lang === 'ar') {
+                    const isAr = btn.dataset.lang === 'ar';
+                    
+                    if (isAr) {
                         contentEn.style.display = 'none';
                         contentAr.style.display = 'block';
+                        mobileCard.style.direction = 'rtl';
+                        mobileCard.style.textAlign = 'right';
+                        document.querySelector('.mobile-header').style.flexDirection = 'row-reverse';
+                        document.querySelector('.mobile-header .logo-wrap').style.textAlign = 'right';
                     } else {
                         contentEn.style.display = 'block';
                         contentAr.style.display = 'none';
+                        mobileCard.style.direction = 'ltr';
+                        mobileCard.style.textAlign = 'left';
+                        document.querySelector('.mobile-header').style.flexDirection = 'row';
+                        document.querySelector('.mobile-header .logo-wrap').style.textAlign = 'left';
                     }
                 });
             });
         });
     </script>
-@endsection
+</body>
+</html>

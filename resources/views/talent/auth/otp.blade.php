@@ -1,33 +1,47 @@
-@extends('layouts.app')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bricks Studio - Verify Identity</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=1.1">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}?v=1.1">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v=1.1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
+    @php
+        $adminSettings = isset($adminSettings) ? $adminSettings : \App\Models\AdminSetting::singleton();
+        $bgImageUrl = $adminSettings->background_image_url ?: asset('images/models_bg.png');
+    @endphp
+    <link rel="preload" href="{{ $bgImageUrl }}" as="image">
     <style>
+        :root {
+            color-scheme: light only;
+        }
+        * {
+            box-sizing: border-box;
+        }
         body {
-            background: #ffffff url('{{ isset($adminSettings) && $adminSettings->background_image_url ? $adminSettings->background_image_url : asset('images/models_bg.png') }}') center center / cover no-repeat fixed;
+            margin: 0;
+            min-height: 100vh;
+            background: #ffffff url('{{ $bgImageUrl }}') center center / cover no-repeat fixed;
             font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .auth-shell {
-            min-height: calc(100vh - 60px);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 100px 20px 40px;
         }
-
         .auth-card {
             width: 100%;
             max-width: 380px;
-            background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.14);
-            padding: 32px 28px 24px;
+            background: #ffffff;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.08);
+            padding: 30px 26px 30px;
             text-align: center;
         }
-
+        
         /* Mobile Card Styles */
         .mobile-auth-card {
             display: none;
@@ -35,7 +49,7 @@
             max-width: 420px;
             background: #ffffff;
             border-radius: 24px;
-            padding: 40px 28px;
+            padding: 40px 34px; /* Increased side padding */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             text-align: left;
             box-sizing: border-box;
@@ -116,7 +130,7 @@
             flex: 1;
             max-width: 65px;
             height: 65px;
-            border: 1px solid #000000;
+            border: 1px solid #1a1a1a;
             border-radius: 12px;
             background: #ffffff;
             text-align: center;
@@ -187,21 +201,23 @@
             font-family: 'Arimo', sans-serif;
         }
 
-        .auth-card h1 {
+        h1 {
             font-family: 'Arimo', sans-serif;
             font-weight: 400;
             font-size: 20px;
             line-height: 30px;
             margin: 0 0 10px;
             color: #1a1a1a;
+            text-align: center;
         }
 
-        .auth-card .lead {
+        .lead {
             font-family: 'Arimo', sans-serif;
             font-size: 13px;
             line-height: 1.6;
             color: #4f4f4f;
             margin: 0 0 30px;
+            text-align: center;
         }
 
         .otp-grid {
@@ -251,25 +267,22 @@
             font-size: 12px;
             color: #555;
             margin-top: 12px;
+            text-align: center;
         }
 
-        .meta a,
-        .meta a:visited,
-        .meta a:hover,
-        .meta a:active {
+        .meta a {
             color: #3f3f3f;
             text-decoration: none;
         }
 
-        .alt-link,
-        .alt-link:visited,
-        .alt-link:hover,
-        .alt-link:active {
+        .alt-link {
             display: inline-block;
             margin-top: 14px;
             font-size: 12px;
             color: #3f3f3f;
             text-decoration: none;
+            text-align: center;
+            width: 100%;
         }
 
         .alt-link span {
@@ -285,6 +298,10 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 40px 20px;
+                align-items: center;
+            }
             .auth-card {
                 display: none;
             }
@@ -298,7 +315,7 @@
                 padding: 20px 12px;
             }
             .mobile-auth-card {
-                padding: 32px 20px;
+                padding: 32px 24px; /* Slightly increased from login's 20px */
                 max-width: 100%;
             }
             .mobile-auth-card h1 {
@@ -306,6 +323,7 @@
             }
             .mobile-auth-card .lead {
                 font-size: 13px;
+                white-space: normal;
             }
             .mobile-auth-card .otp-grid {
                 gap: 8px;
@@ -317,134 +335,124 @@
             }
         }
     </style>
+</head>
+<body>
+    <!-- Desktop Card -->
+    <div class="auth-card">
+        <img class="logo" src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
+        <div class="eyebrow">Studio</div>
+        <h1>Verify Identity</h1>
+        <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
 
-    <div class="auth-shell">
-        <!-- Desktop Card -->
-        <div class="auth-card">
-            <img class="logo" src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Model Logo">
-            <div class="eyebrow">Studio</div>
-            <h1>Verify Identity</h1>
-            <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
-
-            @if(isset($debugging))
-                @if(isset($otp) && !empty($otp))
-                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
-                    <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #92400e; letter-spacing: 4px; font-family: 'Courier New', monospace;">{{ $otp }}</div>
-                    <div style="font-size: 11px; color: #92400e; margin-top: 4px;">This OTP is stored in the database</div>
-                </div>
-                @else
-                <div style="background: #fee2e2; border: 1px solid #f87171; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
-                    <div style="font-size: 11px; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Debug Info</div>
-                    <div style="font-size: 12px; color: #991b1b;">OTP not found. Phone: {{ ($phone['phone_country_code'] ?? 'N/A') . ' ' . ($phone['phone_number'] ?? 'N/A') }}</div>
-                </div>
-                @endif
-            @endif
-
-            @if ($errors->any())
-                <div class="error-message">
-                    @foreach ($errors->all() as $error)
-                        {{ $error }}
-                    @endforeach
-                </div>
-            @endif
-
-            <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
-                @csrf
-                <div class="otp-grid">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                </div>
-                <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
-                <button type="submit" class="submit-btn">
-                    Verify & Login
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 17v-3" />
-                        <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
-                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
-                </button>
-                <div class="meta">
-                    <span class="countdown">55 secs left.</span>
-                    <a href="{{ route('talent.login.submit') }}">Resend code</a>
-                </div>
-                <a class="alt-link" href="{{ route('talent.login') }}"><span>Change Phone Number</span></a>
-            </form>
-        </div>
-
-        <!-- Mobile Card -->
-        <div class="mobile-auth-card">
-            <div class="mobile-header">
-                <div class="logo-wrap">
-                    <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Logo" style="width: 140px;">
-                </div>
-                
-                <div class="lang-toggle">
-                    <button type="button" class="lang-btn active" data-lang="en">English</button>
-                    <button type="button" class="lang-btn" data-lang="ar">عربي</button>
-                </div>
+        @if(isset($debugging) && isset($otp) && !empty($otp))
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
+                <div style="font-size: 24px; font-weight: 700; color: #92400e; letter-spacing: 4px; font-family: 'Courier New', monospace;">{{ $otp }}</div>
+                <div style="font-size: 11px; color: #92400e; margin-top: 4px;">This OTP is stored in the database</div>
             </div>
+        @endif
 
-            <div id="mobile-content-en">
-                <h1>Verify Your<br>Identity</h1>
-                <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+        @if ($errors->any())
+            <div class="error-message">
+                @foreach ($errors->all() as $error)
+                    {{ $error }}
+                @endforeach
             </div>
+        @endif
 
-            <div id="mobile-content-ar" style="display: none; direction: rtl; text-align: right;">
-                <h1 style="font-family: 'Arimo', sans-serif; text-align: right;">تحقق من<br>هويتك</h1>
-                <p class="lead" style="font-family: 'Arimo', sans-serif; text-align: right;">أدخل الرمز المرسل إلى<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+        <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
+            @csrf
+            <div class="otp-grid">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
             </div>
-
-            @if(isset($debugging) && isset($otp) && !empty($otp))
-                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
-                    <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #92400e; letter-spacing: 6px;">{{ $otp }}</div>
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="error-message" style="text-align: left;">
-                    @foreach ($errors->all() as $error)
-                        {{ $error }}
-                    @endforeach
-                </div>
-            @endif
-
-            <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
-                @csrf
-                <div class="otp-grid">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                    <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-                </div>
-                <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
-                <button type="submit" class="submit-btn" style="height: 60px;">
-                    <span id="mobile-btn-en">Verify & Login</span>
-                    <span id="mobile-btn-ar" style="display: none;">تحقق وتسجيل الدخول</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 17v-3" />
-                        <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
-                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
-                </button>
-                <div class="meta">
-                    <span class="countdown" data-en=" secs left." data-ar=" ثانية متبقية.">55 secs left.</span>
-                    <a href="{{ route('talent.login.submit') }}" id="mobile-resend-en">Resend code</a>
-                    <a href="{{ route('talent.login.submit') }}" id="mobile-resend-ar" style="display: none; direction: rtl; text-align: right;">إعادة إرسال الرمز</a>
-                </div>
-                <a class="alt-link" href="{{ route('talent.login') }}">
-                    <span id="mobile-change-en">Change Phone Number</span>
-                    <span id="mobile-change-ar" style="display: none;">تغيير رقم الهاتف</span>
-                </a>
-            </form>
-        </div>
+            <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
+            <button type="submit" class="submit-btn">
+                Verify & Login
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 17v-3" />
+                    <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+            </button>
+            <div class="meta">
+                <span class="countdown">55 secs left.</span>
+                <a href="{{ route('talent.login.submit') }}">Resend code</a>
+            </div>
+            <a class="alt-link" href="{{ route('talent.login') }}"><span>Change Phone Number</span></a>
+        </form>
     </div>
-@endsection
 
-@section('scripts')
+    <!-- Mobile Card -->
+    <div class="mobile-auth-card">
+        <div class="mobile-header">
+            <div class="logo-wrap">
+                <img src="{{ asset('images/bricks_logo.png') }}" alt="BRICKS Logo" style="width: 140px;">
+            </div>
+            
+            <div class="lang-toggle">
+                <button type="button" class="lang-btn active" data-lang="en">English</button>
+                <button type="button" class="lang-btn" data-lang="ar">عربي</button>
+            </div>
+        </div>
+
+        <div id="mobile-content-en">
+            <h1>Verify Your<br>Identity</h1>
+            <p class="lead">Enter the code sent to<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+        </div>
+
+        <div id="mobile-content-ar" style="display: none; direction: rtl; text-align: right;">
+            <h1 style="font-family: 'Arimo', sans-serif; text-align: right;">تحقق من<br>هويتك</h1>
+            <p class="lead" style="font-family: 'Arimo', sans-serif; text-align: right; white-space: normal;">أدخل الرمز المرسل إلى<br>{{ ($phone['phone_country_code'] ?? '') . ' ' . ($phone['phone_number'] ?? '') }}</p>
+        </div>
+
+        @if(isset($debugging) && isset($otp) && !empty($otp))
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+                <div style="font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">Testing Mode</div>
+                <div style="font-size: 28px; font-weight: 700; color: #92400e; letter-spacing: 6px;">{{ $otp }}</div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="error-message" style="text-align: left;">
+                @foreach ($errors->all() as $error)
+                    {{ $error }}
+                @endforeach
+            </div>
+        @endif
+
+        <form class="otp-form" method="POST" action="{{ route('talent.otp.verify') }}">
+            @csrf
+            <div class="otp-grid">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="otp-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <input type="hidden" name="otp" class="otp-hidden" value="{{ old('otp') }}">
+            <button type="submit" class="submit-btn" style="height: 60px;">
+                <span id="mobile-btn-en">Verify & Login</span>
+                <span id="mobile-btn-ar" style="display: none;">تحقق وتسجيل الدخول</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 17v-3" />
+                    <rect x="4" y="10" width="16" height="10" rx="2" ry="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+            </button>
+            <div class="meta">
+                <span class="countdown" data-en=" secs left." data-ar=" ثانية متبقية.">55 secs left.</span>
+                <a href="{{ route('talent.login.submit') }}" id="mobile-resend-en">Resend code</a>
+                <a href="{{ route('talent.login.submit') }}" id="mobile-resend-ar" style="display: none; direction: rtl; text-align: right;">إعادة إرسال الرمز</a>
+            </div>
+            <a class="alt-link" href="{{ route('talent.login') }}">
+                <span id="mobile-change-en">Change Phone Number</span>
+                <span id="mobile-change-ar" style="display: none; direction: rtl; text-align: right;">تغيير رقم الهاتف</span>
+            </a>
+        </form>
+    </div>
+
     <script>
         (function() {
             // Mobile Language Toggle Logic
@@ -573,4 +581,5 @@
             tick();
         })();
     </script>
-@endsection
+</body>
+</html>
