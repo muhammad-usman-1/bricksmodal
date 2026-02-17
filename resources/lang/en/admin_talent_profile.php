@@ -29,6 +29,7 @@ return [
     'shoe_size' => 'Shoe Size',
     'approve' => 'Approve',
     'reject' => 'Reject',
+    'delete' => 'Delete',
     'save' => 'Save',
     'cancel' => 'Cancel',
     'approved' => 'Approved',

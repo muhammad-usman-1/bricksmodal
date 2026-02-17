@@ -29,6 +29,7 @@ return [
     'shoe_size' => 'قياس الحذاء',
     'approve' => 'الموافقة',
     'reject' => 'رفض',
+    'delete' => 'حذف',
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
     'approved' => 'موافق عليه',
