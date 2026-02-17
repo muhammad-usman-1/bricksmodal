@@ -549,7 +549,7 @@ class TalentProfileController extends Controller
 
     public function unsuspend(Request $request, TalentProfile $talentProfile)
     {
-        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('talent_profile_suspend'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         // Check if there were previous notes about why it was suspended
         $talentProfile->update([
@@ -561,7 +561,7 @@ class TalentProfileController extends Controller
 
     public function suspend(Request $request, TalentProfile $talentProfile)
     {
-        abort_if(Gate::denies('talent_profile_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('talent_profile_suspend'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $talentProfile->update([
             'verification_status' => 'suspended',

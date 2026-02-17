@@ -123,6 +123,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 25,
                 'title' => 'talent_profile_approve',
             ],
+            [
+                'id'    => 44,
+                'title' => 'talent_profile_suspend',
+            ],
 
             // Payment Management
             [

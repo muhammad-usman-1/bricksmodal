@@ -172,12 +172,16 @@
                                 </td>
                                 <td>{{ $talent->updated_at->format('M d, Y') }}</td>
                                 <td style="text-align:right;">
-                                    <form action="{{ route('admin.talent-profiles.unsuspend', $talent) }}" method="POST" style="display:inline-block;" class="unsuspend-form">
-                                        @csrf
-                                        <button type="submit" class="action-btn">
-                                            <i class="fas fa-play"></i> Unsuspend
-                                        </button>
-                                    </form>
+                                    @can('talent_profile_suspend')
+                                        <form action="{{ route('admin.talent-profiles.unsuspend', $talent) }}" method="POST" style="display:inline-block;" class="unsuspend-form">
+                                            @csrf
+                                            <button type="submit" class="action-btn">
+                                                <i class="fas fa-play"></i> Unsuspend
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span style="color: var(--ink-500); font-size: 12px;">No permission</span>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

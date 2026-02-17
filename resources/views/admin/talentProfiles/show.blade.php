@@ -651,7 +651,7 @@
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <div class="actions-dropdown" id="talentActionsDropdown" role="menu" aria-label="Talent actions">
-                            @can('talent_profile_edit')
+                            @can('talent_profile_suspend')
                                 @if($talentProfile->verification_status === 'suspended')
                                     <button type="button" class="actions-item" id="talentActionUnsuspend">
                                         <i class="fas fa-play"></i> Unsuspend
@@ -661,6 +661,8 @@
                                         <i class="fas fa-pause"></i> Suspend
                                     </button>
                                 @endif
+                            @endcan
+                            @can('talent_profile_edit')
                                 <button type="button" class="actions-item" id="talentActionEdit">
                                     <i class="far fa-edit"></i> {{ \App\Helpers\Bilingual::get('admin_talent_profile.edit') }}
                                 </button>
