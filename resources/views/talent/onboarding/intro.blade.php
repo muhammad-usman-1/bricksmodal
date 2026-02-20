@@ -26,7 +26,7 @@
             margin: 0;
             min-height: 100vh;
             background: #ffffff url('{{ $bgImageUrl }}') center center / cover no-repeat fixed;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Arimo', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;

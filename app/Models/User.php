@@ -14,10 +14,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Collection;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use SoftDeletes, Notifiable, HasFactory;
+    use SoftDeletes, Notifiable, HasFactory, HasApiTokens;
 
     public $table = 'users';
 

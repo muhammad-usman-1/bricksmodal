@@ -27,7 +27,7 @@
             margin: 0;
             min-height: 100vh;
             background: #ffffff url('{{ $bgImageUrl }}') center center / cover no-repeat fixed;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Arimo', sans-serif;
             display: flex;
             align-items: flex-start;
             justify-content: center;
@@ -35,14 +35,14 @@
         }
         .terms-card {
             width: 100%;
-            max-width: 920px;
+            max-width: 700px;
             background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.08);
+
             padding: 30px 26px 30px;
             text-align: center;
         }
-        
+
         /* Mobile Card Styles */
         .mobile-terms-card {
             display: none;
@@ -283,7 +283,7 @@
             opacity: 0.55;
             cursor: not-allowed;
         }
-        
+
         .desktop-footer-cta {
             height: 52px;
             max-width: 300px;
@@ -397,7 +397,7 @@
             <div class="logo-wrap" style="text-align: left;">
                 <img src="{{ asset('images/bricks_logo.png') }}" alt="Bricks logo">
             </div>
-            
+
             <div class="lang-toggle">
                 <button type="button" class="lang-btn active" data-lang="en">English</button>
                 <button type="button" class="lang-btn" data-lang="ar">عربي</button>
@@ -465,7 +465,7 @@
             function setupTermsForm(form) {
                 const cb = form.querySelector('.accept_terms');
                 const btn = form.querySelector('.continueBtn');
-                
+
                 function sync() {
                     btn.disabled = !cb.checked;
                 }
@@ -491,7 +491,7 @@
             const langBtns = document.querySelectorAll('.lang-btn');
             const contentEn = document.getElementById('mobile-content-en');
             const contentAr = document.getElementById('mobile-content-ar');
-            
+
             const labelEn = document.getElementById('mobile-label-en');
             const labelAr = document.getElementById('mobile-label-ar');
             const btnEn = document.getElementById('mobile-btn-text-en');
@@ -503,7 +503,7 @@
                 btn.addEventListener('click', () => {
                     langBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    
+
                     if (btn.dataset.lang === 'ar') {
                         contentEn.style.display = 'none';
                         contentAr.style.display = 'block';

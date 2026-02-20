@@ -141,7 +141,7 @@
         <h1>Welcome Back</h1>
         <p>Sign in with Google to access your admin<br>dashboard</p>
 
-        <a class="btn google" href="{{ route('admin.login.google') }}">
+        <a class="btn google" href="{{ route('admin.login.google') }}" onclick="handleGoogleLogin(event)">
             <img src="{{ asset('images/GoogleIcon.png') }}" alt="Google Logo" width="18" height="18">
             Continue with Google
         </a>
@@ -163,5 +163,41 @@
             <span>Sign in as model</span>
         </a>
     </div>
+    <script>
+        function handleGoogleLogin(event) {
+            // Check if Google OAuth is properly configured
+            const googleUrl = event.target.closest('a').href;
+            
+            // Add error handling
+            try {
+                // Let the link proceed normally
+                return true;
+            } catch (error) {
+                console.error('Google login error:', error);
+                event.preventDefault();
+                alert('Google authentication is currently unavailable. Please use the "Continue" button to login with email and password.');
+                return false;
+            }
+        }
+
+        // Check for OAuth errors in URL parameters
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            
+            if (error) {
+                console.error('OAuth error:', error);
+                // Optionally show a user-friendly message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee; border: 1px solid #fcc; padding: 12px 20px; border-radius: 8px; color: #c33; z-index: 10000; font-size: 14px;';
+                errorDiv.textContent = 'Google authentication failed. Please use email and password to login.';
+                document.body.appendChild(errorDiv);
+                
+                setTimeout(function() {
+                    errorDiv.remove();
+                }, 5000);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -295,13 +295,25 @@ class LoginController extends Controller
 
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        try {
+            // Ensure redirect URI matches what's configured in Google Cloud Console
+            $redirectUri = config('services.google.redirect');
+            
+            return Socialite::driver('google')
+                ->scopes(['openid', 'profile', 'email'])
+                ->redirectUrl($redirectUri)
+                ->redirect();
+        } catch (\Exception $e) {
+            \Log::error('Google OAuth redirect error: ' . $e->getMessage());
+            return redirect()->route('landing')
+                ->with('error', 'oauth_error');
+        }
     }
 
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             $user = User::where('email', $googleUser->email)->first();
 
@@ -349,8 +361,15 @@ class LoginController extends Controller
             Auth::guard('admin')->login($user);
 
             return redirect()->intended(route('admin.home'));
+        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+            \Log::error('Google OAuth InvalidStateException: ' . $e->getMessage());
+            return redirect()->route('landing')->with('error', 'oauth_error');
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            \Log::error('Google OAuth ClientException: ' . $e->getMessage());
+            return redirect()->route('landing')->with('error', 'oauth_error');
         } catch (\Exception $e) {
-            return redirect()->route('admin.login')->withErrors(['google' => 'Google authentication failed.']);
+            \Log::error('Google OAuth error: ' . $e->getMessage());
+            return redirect()->route('landing')->with('error', 'oauth_error');
         }
     }
 
