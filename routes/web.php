@@ -25,7 +25,6 @@ use App\Http\Controllers\Talent\DashboardController as TalentDashboardController
 use App\Http\Controllers\Talent\OnboardingController;
 use App\Http\Controllers\Talent\ProfileController as TalentPortalProfileController;
 use App\Http\Controllers\Talent\NotificationController as TalentNotificationController;
-use Aacotroneo\Saml2\Http\Controllers\Saml2Controller;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/talent/login');
@@ -275,10 +274,31 @@ Route::middleware([])
     ->prefix('/saml2/')
     ->group(function() {
         Route::prefix('{idpName}')->group(function() {
-            Route::get('/logout', [Saml2Controller::class, 'logout'])->name('saml2_logout');
-            Route::get('/login', [Saml2Controller::class, 'login'])->name('saml2_login');
-            Route::get('/metadata', [Saml2Controller::class, 'metadata'])->name('saml2_metadata');
-            Route::post('/acs', [Saml2Controller::class, 'acs'])->name('saml2_acs');
-            Route::get('/sls', [Saml2Controller::class, 'sls'])->name('saml2_sls');
+            $saml2_controller = 'Aacotroneo\Saml2\Http\Controllers\Saml2Controller';
+            
+            Route::get('/logout', [
+                'as' => 'saml2_logout',
+                'uses' => $saml2_controller . '@logout',
+            ]);
+            
+            Route::get('/login', [
+                'as' => 'saml2_login',
+                'uses' => $saml2_controller . '@login',
+            ]);
+            
+            Route::get('/metadata', [
+                'as' => 'saml2_metadata',
+                'uses' => $saml2_controller . '@metadata',
+            ]);
+            
+            Route::post('/acs', [
+                'as' => 'saml2_acs',
+                'uses' => $saml2_controller . '@acs',
+            ]);
+            
+            Route::get('/sls', [
+                'as' => 'saml2_sls',
+                'uses' => $saml2_controller . '@sls',
+            ]);
         });
     });
