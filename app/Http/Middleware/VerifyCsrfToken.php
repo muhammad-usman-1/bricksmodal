@@ -12,6 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'saml2/*',       // Exclude all SAML2 routes from CSRF (Google sends POST without CSRF token)
     ];
 }
