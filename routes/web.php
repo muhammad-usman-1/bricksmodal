@@ -292,7 +292,8 @@ Route::middleware([])
                 'uses' => $saml2_controller . '@metadata',
             ]);
             
-            Route::post('/acs', [
+            // ACS endpoint - accept both GET and POST (some IdPs send GET requests)
+            Route::match(['get', 'post'], '/acs', [
                 'as' => 'saml2_acs',
                 'uses' => $saml2_controller . '@acs',
             ]);
