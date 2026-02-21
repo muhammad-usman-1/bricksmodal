@@ -62,17 +62,37 @@ class HandleSaml2Login
         }
 
         // Get name from SAML attributes
+        // Supports: firstName/lastName (Google Workspace standard mapping)
+        $firstName = null;
+        $lastName = null;
         $name = null;
-        if (isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'])) {
-            $name = is_array($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']) 
-                ? $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'][0] 
-                : $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-        } elseif (isset($attributes['name'])) {
-            $name = is_array($attributes['name']) ? $attributes['name'][0] : $attributes['name'];
-        } elseif (isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'])) {
-            $name = is_array($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname']) 
-                ? $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0] 
-                : $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
+
+        // Google Workspace standard attribute mapping (firstName, lastName)
+        if (isset($attributes['firstName'])) {
+            $firstName = is_array($attributes['firstName']) ? $attributes['firstName'][0] : $attributes['firstName'];
+        }
+        if (isset($attributes['lastName'])) {
+            $lastName = is_array($attributes['lastName']) ? $attributes['lastName'][0] : $attributes['lastName'];
+        }
+
+        // Build full name from firstName + lastName
+        if ($firstName || $lastName) {
+            $name = trim($firstName . ' ' . $lastName);
+        }
+
+        // Fallbacks for other formats
+        if (!$name) {
+            if (isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'])) {
+                $name = is_array($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'])
+                    ? $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'][0]
+                    : $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            } elseif (isset($attributes['name'])) {
+                $name = is_array($attributes['name']) ? $attributes['name'][0] : $attributes['name'];
+            } elseif (isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'])) {
+                $name = is_array($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'])
+                    ? $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0]
+                    : $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
+            }
         }
 
         // Find or create user
