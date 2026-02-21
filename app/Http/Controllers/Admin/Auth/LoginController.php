@@ -385,9 +385,13 @@ class LoginController extends Controller
     public function redirectToSaml()
     {
         try {
-            return redirect()->route('saml2_login', ['idpName' => 'google']);
+            // Use direct URL to avoid route resolution issues
+            $samlUrl = url('/saml2/google/login');
+            \Log::info('SAML2 redirecting to: ' . $samlUrl);
+            return redirect($samlUrl);
         } catch (\Exception $e) {
             \Log::error('SAML2 redirect error: ' . $e->getMessage());
+            \Log::error('SAML2 redirect stack trace: ' . $e->getTraceAsString());
             return redirect()->route('admin.login')
                 ->withErrors(['saml' => 'SAML SSO is not available. Please try again.']);
         }
