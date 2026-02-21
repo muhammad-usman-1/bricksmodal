@@ -274,7 +274,8 @@ Route::middleware([])
     ->prefix('/saml2/')
     ->group(function() {
         Route::prefix('{idpName}')->group(function() {
-            $saml2_controller = 'Aacotroneo\Saml2\Http\Controllers\Saml2Controller';
+            // Use full namespace with leading backslash to prevent namespace prepending
+            $saml2_controller = '\Aacotroneo\Saml2\Http\Controllers\Saml2Controller';
             
             Route::get('/logout', [
                 'as' => 'saml2_logout',
