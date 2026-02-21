@@ -141,7 +141,7 @@
         <h1>Welcome Back</h1>
         <p>Sign in with Google to access your admin<br>dashboard</p>
 
-        <a class="btn google" href="{{ route('admin.login.google') }}" onclick="handleGoogleLogin(event)">
+        <a class="btn google" href="{{ route('admin.login.saml') }}" onclick="handleGoogleLogin(event)">
             <img src="{{ asset('images/GoogleIcon.png') }}" alt="Google Logo" width="18" height="18">
             Continue with Google
         </a>

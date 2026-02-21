@@ -177,8 +177,9 @@ class LoginController extends Controller
         // Code is valid, complete the login
         $remember = session('login.remember', false);
         $intended = session('url.intended', route('admin.home'));
+        $isSaml2FA = session('saml2_2fa_required', false);
 
-        session()->forget(['login.id', 'login.remember', 'url.intended']);
+        session()->forget(['login.id', 'login.remember', 'url.intended', 'saml2_2fa_required']);
 
         Auth::guard('admin')->login($user, $remember);
         $request->session()->regenerate();
@@ -376,5 +377,19 @@ class LoginController extends Controller
     public function showUnauthorized()
     {
         return view('admin.auth.unauthorized');
+    }
+
+    /**
+     * Redirect to Google SAML SSO login
+     */
+    public function redirectToSaml()
+    {
+        try {
+            return redirect()->route('saml2_login', ['idpName' => 'google']);
+        } catch (\Exception $e) {
+            \Log::error('SAML2 redirect error: ' . $e->getMessage());
+            return redirect()->route('admin.login')
+                ->withErrors(['saml' => 'SAML SSO is not available. Please try again.']);
+        }
     }
 }

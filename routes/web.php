@@ -43,6 +43,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('login/2fa', [AdminLoginController::class, 'verify2FA'])->name('login.2fa.verify');
         Route::get('login/google', [AdminLoginController::class, 'redirectToGoogle'])->name('login.google');
         Route::get('login/google/callback', [AdminLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
+        Route::get('login/saml', [AdminLoginController::class, 'redirectToSaml'])->name('login.saml');
         Route::get('unauthorized', [AdminLoginController::class, 'showUnauthorized'])->name('unauthorized');
     });
 
