@@ -43,7 +43,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('login/2fa', [AdminLoginController::class, 'verify2FA'])->name('login.2fa.verify');
         Route::get('login/google', [AdminLoginController::class, 'redirectToGoogle'])->name('login.google');
         Route::get('login/google/callback', [AdminLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
-        Route::get('login/saml', [AdminLoginController::class, 'redirectToSaml'])->name('login.saml');
         Route::get('unauthorized', [AdminLoginController::class, 'showUnauthorized'])->name('unauthorized');
     });
 
@@ -269,38 +268,3 @@ Route::prefix('talent')->as('talent.')->group(function () {
     });
 });
 
-// SAML2 Routes - Manual registration (unconditional to ensure routes are always registered)
-Route::middleware([])
-    ->prefix('/saml2/')
-    ->group(function() {
-        Route::prefix('{idpName}')->group(function() {
-            // Use full namespace with leading backslash to prevent namespace prepending
-            $saml2_controller = '\Aacotroneo\Saml2\Http\Controllers\Saml2Controller';
-            
-            Route::get('/logout', [
-                'as' => 'saml2_logout',
-                'uses' => $saml2_controller . '@logout',
-            ]);
-            
-            Route::get('/login', [
-                'as' => 'saml2_login',
-                'uses' => $saml2_controller . '@login',
-            ]);
-            
-            Route::get('/metadata', [
-                'as' => 'saml2_metadata',
-                'uses' => $saml2_controller . '@metadata',
-            ]);
-            
-            // ACS endpoint - POST only (SAML 2.0 standard requires HTTP-POST binding)
-            Route::post('/acs', [
-                'as' => 'saml2_acs',
-                'uses' => $saml2_controller . '@acs',
-            ]);
-            
-            Route::get('/sls', [
-                'as' => 'saml2_sls',
-                'uses' => $saml2_controller . '@sls',
-            ]);
-        });
-    });

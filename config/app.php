@@ -185,8 +185,6 @@ return [
         /*
          * Package Service Providers...
          */
-        // Aacotroneo\Saml2\Saml2ServiceProvider::class, // Commented out - routes registered manually in web.php
-
         /*
          * Application Service Providers...
          */

@@ -18,9 +18,6 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        \Aacotroneo\Saml2\Events\Saml2LoginEvent::class => [
-            \App\Listeners\HandleSaml2Login::class,
-        ],
     ];
 
     /**
