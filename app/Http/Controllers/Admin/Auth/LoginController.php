@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
+use Aacotroneo\Saml2\Saml2Auth;
 
 class LoginController extends Controller
 {
@@ -375,5 +376,197 @@ class LoginController extends Controller
     public function showUnauthorized()
     {
         return view('admin.auth.unauthorized');
+    }
+
+    /**
+     * Initiate SAML SSO login
+     */
+    public function redirectToSaml()
+    {
+        try {
+            $saml2Auth = new Saml2Auth(Saml2Auth::loadOneLoginAuthFromIpdConfig('google', config('saml2.google')));
+            
+            return $saml2Auth->login(route('admin.home'));
+        } catch (\Exception $e) {
+            \Log::error('SAML SSO redirect error: ' . $e->getMessage());
+            return redirect()->route('landing')
+                ->with('error', 'saml_error');
+        }
+    }
+
+    /**
+     * Handle SAML Assertion Consumer Service (ACS) - receives SAML response
+     */
+    public function handleSamlAcs(Request $request)
+    {
+        try {
+            $saml2Auth = new Saml2Auth(Saml2Auth::loadOneLoginAuthFromIpdConfig('google', config('saml2.google')));
+            $saml2Auth->processResponse();
+            
+            $errors = $saml2Auth->getErrors();
+            if (!empty($errors)) {
+                \Log::error('SAML ACS errors: ' . implode(', ', $errors));
+                return redirect()->route('landing')
+                    ->with('error', 'saml_validation_error');
+            }
+
+            // Get SAML attributes
+            $samlAttributes = $saml2Auth->getSaml2User()->getAttributes();
+            $samlNameId = $saml2Auth->getSaml2User()->getNameId();
+            
+            // Extract email from SAML response
+            // Google typically sends email in 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress' or 'email'
+            $email = $samlNameId;
+            if (empty($email) && isset($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'])) {
+                $email = is_array($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']) 
+                    ? $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'][0]
+                    : $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+            } elseif (empty($email) && isset($samlAttributes['email'])) {
+                $email = is_array($samlAttributes['email']) ? $samlAttributes['email'][0] : $samlAttributes['email'];
+            }
+
+            if (empty($email)) {
+                \Log::error('SAML ACS: No email found in SAML response');
+                return redirect()->route('landing')
+                    ->with('error', 'saml_no_email');
+            }
+
+            // Extract name from SAML attributes
+            $name = null;
+            if (isset($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'])) {
+                $name = is_array($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'])
+                    ? $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'][0]
+                    : $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            } elseif (isset($samlAttributes['name'])) {
+                $name = is_array($samlAttributes['name']) ? $samlAttributes['name'][0] : $samlAttributes['name'];
+            } elseif (isset($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'])) {
+                $name = is_array($samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'])
+                    ? $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0]
+                    : $samlAttributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
+            }
+
+            // Find or create user
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                $creativeRoleId = Role::where('title', 'creative')->value('id');
+
+                $user = User::create([
+                    'name' => $name ?: Str::before($email, '@'),
+                    'email' => $email,
+                    'type' => User::TYPE_ADMIN,
+                    'password' => bcrypt(Str::random(16)),
+                ]);
+
+                if ($creativeRoleId) {
+                    $user->roles()->sync([$creativeRoleId]);
+                }
+
+                $user->notify(new AdminAccountCreated($user));
+            } else {
+                // Ensure user has admin type if they have admin role
+                if (!$user->type || $user->type !== User::TYPE_ADMIN) {
+                    if ($user->isAdmin() || $user->isSuperAdmin()) {
+                        $user->type = User::TYPE_ADMIN;
+                        if ($name && $user->name !== $name) {
+                            $user->name = $name;
+                        }
+                        $user->save();
+                    } else {
+                        $this->logLoginFailure($email, 'User does not have admin access', $request);
+                        return redirect()->route('admin.login')
+                            ->withErrors(['saml' => 'This account does not have admin access.']);
+                    }
+                } else {
+                    // Update name if provided and different
+                    if ($name && $user->name !== $name) {
+                        $user->name = $name;
+                        $user->save();
+                    }
+                }
+            }
+
+            if ($user->isSuperAdmin()) {
+                $user->notify(new NewAdminGoogleLogin($user, now()));
+            }
+
+            // Check if 2FA is enabled for SAML login
+            if ($user->hasTwoFactorEnabled()) {
+                // Store user ID and intended URL in session, then redirect to 2FA
+                session()->put('login.id', $user->id);
+                session()->put('login.remember', false);
+                session()->put('url.intended', route('admin.home'));
+
+                return redirect()->route('admin.login.2fa');
+            }
+
+            Auth::guard('admin')->login($user);
+            
+            // Log successful login
+            $this->logLoginSuccess($user, $request);
+
+            return redirect()->intended(route('admin.home'));
+        } catch (\Exception $e) {
+            \Log::error('SAML ACS error: ' . $e->getMessage());
+            \Log::error('SAML ACS stack trace: ' . $e->getTraceAsString());
+            return redirect()->route('landing')
+                ->with('error', 'saml_error');
+        }
+    }
+
+    /**
+     * Handle SAML Single Logout Service (SLS)
+     */
+    public function handleSamlSls(Request $request)
+    {
+        try {
+            $saml2Auth = new Saml2Auth(Saml2Auth::loadOneLoginAuthFromIpdConfig('google', config('saml2.google')));
+            
+            $user = Auth::guard('admin')->user();
+            
+            // Log logout event before processing
+            if ($user) {
+                $this->logLogout($user, $request);
+            }
+            
+            $saml2Auth->processSLO();
+            
+            $errors = $saml2Auth->getErrors();
+            if (!empty($errors)) {
+                \Log::error('SAML SLS errors: ' . implode(', ', $errors));
+            }
+
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('admin.login');
+        } catch (\Exception $e) {
+            \Log::error('SAML SLS error: ' . $e->getMessage());
+            
+            // Even if SLS fails, logout locally
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return redirect()->route('admin.login');
+        }
+    }
+
+    /**
+     * Get SAML Service Provider metadata
+     */
+    public function getSamlMetadata()
+    {
+        try {
+            $saml2Auth = new Saml2Auth(Saml2Auth::loadOneLoginAuthFromIpdConfig('google', config('saml2.google')));
+            $metadata = $saml2Auth->getMetadata();
+            
+            return response($metadata, 200)
+                ->header('Content-Type', 'text/xml');
+        } catch (\Exception $e) {
+            \Log::error('SAML Metadata error: ' . $e->getMessage());
+            abort(500, 'Unable to generate SAML metadata');
+        }
     }
 }

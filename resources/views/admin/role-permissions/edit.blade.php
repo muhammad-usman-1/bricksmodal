@@ -22,6 +22,30 @@
         font-weight: 600;
         color: #111827;
     }
+    .permission-checkbox {
+        accent-color: #000;
+    }
+    .permission-checkbox:checked {
+        background-color: #000 !important;
+        border-color: #000 !important;
+    }
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #000 !important;
+        border-color: #000 !important;
+    }
+    .custom-control-input:focus ~ .custom-control-label::before {
+        box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25) !important;
+    }
+    .custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+        border-color: #000 !important;
+    }
+    .permission-description {
+        font-size: 15px;
+        color: #6b7280;
+        margin-top: 2px;
+        margin-left: 28px;
+        line-height: 1.4;
+    }
     .role-indicator {
         background-color: #111827;
         color: white;
@@ -67,12 +91,62 @@
                 <div class="card-body p-4">
                     <div class="row" id="module-{{ str_replace(' ', '-', strtolower($module)) }}">
                         @foreach($modulePermissions as $perm)
-                            <div class="col-md-3 mb-3">
+                            @php
+                                $permissionDescriptions = [
+                                    'user_management_access' => 'Access to view and manage all admin users in the system',
+                                    'user_create' => 'Create new admin user accounts',
+                                    'user_edit' => 'Edit existing admin user information (name, email, roles, etc.)',
+                                    'user_delete' => 'Delete admin user accounts from the system',
+                                    'user_view' => 'View admin user details and information',
+                                    'role_management_access' => 'Access to view and manage system roles',
+                                    'role_create' => 'Create new roles with custom permission sets',
+                                    'role_edit' => 'Modify existing role names and permission assignments',
+                                    'role_delete' => 'Remove roles from the system',
+                                    'role_view' => 'View role details and assigned permissions',
+                                    'permission_management_access' => 'Access to the permission management interface',
+                                    'permission_assign' => 'Assign or remove permissions from roles',
+                                    'permission_view' => 'View available permissions and their assignments',
+                                    'project_management_access' => 'Access to the projects dashboard and casting requirements',
+                                    'casting_requirement_create' => 'Create new casting requirements/projects',
+                                    'casting_requirement_edit' => 'Edit existing casting requirements (details, dates, requirements)',
+                                    'casting_requirement_delete' => 'Delete casting requirements from the system',
+                                    'casting_requirement_view' => 'View casting requirement details and information',
+                                    'casting_application_manage' => 'Manage talent applications to casting requirements (approve, reject, shortlist)',
+                                    'casting_application_access' => 'Access to view casting applications',
+                                    'talent_management_access' => 'Access to the talent management dashboard',
+                                    'talent_profile_create' => 'Create new talent profiles manually',
+                                    'talent_profile_edit' => 'Edit existing talent profile information (photos, details, measurements)',
+                                    'talent_profile_delete' => 'Delete talent profiles from the system',
+                                    'talent_profile_view' => 'View talent profile details and information',
+                                    'talent_profile_approve' => 'Approve talent profiles for active use in the system',
+                                    'talent_profile_suspend' => 'Suspend or reactivate talent profiles',
+                                    'payment_management_access' => 'Access to the payment management dashboard',
+                                    'payment_request_manage' => 'Manage payment requests from talents (view, process)',
+                                    'payment_approve' => 'Approve payment requests for processing',
+                                    'payment_release' => 'Release approved payments to talents',
+                                    'bank_detail_manage' => 'Manage bank account details for payments',
+                                    'content_management_access' => 'Access to content management features',
+                                    'language_manage' => 'Manage system languages and translations',
+                                    'outfit_manage' => 'Manage outfit categories and options',
+                                    'email_template_manage' => 'Edit and manage email notification templates',
+                                    'system_settings_access' => 'Access to system-wide settings and configuration',
+                                    'profile_manage' => 'Manage your own admin profile settings (password, 2FA, etc.)',
+                                    'label_access' => 'Access to Arabic label management interface',
+                                    'label_create' => 'Create new Arabic labels for translations',
+                                    'label_edit' => 'Edit existing Arabic label translations',
+                                    'label_delete' => 'Delete Arabic labels from the system',
+                                    'header_label_access' => 'Access to the Arabic label dropdown in the header navigation',
+                                ];
+                                $description = $permissionDescriptions[$perm->title] ?? 'Permission for ' . ucwords(str_replace(['_','access','management'], [' ','',''],$perm->title));
+                                $displayTitle = $perm->title === 'header_label_access' ? 'Arabic Label Dropdown in Header' : ucwords(str_replace(['_','access','management'], [' ','',''],$perm->title));
+                            @endphp
+                            <div class="col-md-6 mb-3">
                                 <div class="custom-control custom-checkbox">
-                                    <input class="custom-control-input permission-checkbox" type="checkbox" name="permissions[{{ $role->id }}][]" value="{{ $perm->id }}" id="perm-{{ $perm->id }}" {{ $role->permissions->contains($perm->id) ? 'checked' : '' }}>
+                                    <input class="custom-control-input permission-checkbox" type="checkbox" name="permissions[{{ $role->id }}][]" value="{{ $perm->id }}" id="perm-{{ $perm->id }}" {{ $role->permissions->contains($perm->id) ? 'checked' : '' }} style="accent-color: #000;">
                                     <label class="custom-control-label permission-label" for="perm-{{ $perm->id }}">
-                                        {{ $perm->title === 'header_label_access' ? 'Arabic Label Dropdown in Header' : ucwords(str_replace(['_','access','management'], [' ','',''],$perm->title)) }}
+                                        {{ $displayTitle }}
                                     </label>
+                                    <div class="permission-description">{{ $description }}</div>
                                 </div>
                             </div>
                         @endforeach

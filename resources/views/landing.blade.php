@@ -141,7 +141,7 @@
         <h1>Welcome Back</h1>
         <p>Sign in with Google to access your admin<br>dashboard</p>
 
-        <a class="btn google" href="{{ route('admin.login.google') }}" onclick="handleGoogleLogin(event)">
+        <a class="btn google" href="{{ route('admin.login.saml') }}" onclick="handleGoogleLogin(event)">
             <img src="{{ asset('images/GoogleIcon.png') }}" alt="Google Logo" width="18" height="18">
             Continue with Google
         </a>
@@ -165,32 +165,42 @@
     </div>
     <script>
         function handleGoogleLogin(event) {
-            // Check if Google OAuth is properly configured
-            const googleUrl = event.target.closest('a').href;
+            // Check if Google SAML SSO is properly configured
+            const samlUrl = event.target.closest('a').href;
             
             // Add error handling
             try {
-                // Let the link proceed normally
+                // Let the link proceed normally - SAML will redirect to Google
                 return true;
             } catch (error) {
-                console.error('Google login error:', error);
+                console.error('Google SAML SSO error:', error);
                 event.preventDefault();
                 alert('Google authentication is currently unavailable. Please use the "Continue" button to login with email and password.');
                 return false;
             }
         }
 
-        // Check for OAuth errors in URL parameters
+        // Check for SAML errors in URL parameters
         window.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const error = urlParams.get('error');
             
             if (error) {
-                console.error('OAuth error:', error);
-                // Optionally show a user-friendly message
+                console.error('SAML SSO error:', error);
+                // Show a user-friendly message based on error type
+                let errorMessage = 'Google authentication failed. Please use email and password to login.';
+                
+                if (error === 'saml_validation_error') {
+                    errorMessage = 'SAML validation failed. Please contact support or use email and password to login.';
+                } else if (error === 'saml_no_email') {
+                    errorMessage = 'Unable to retrieve email from Google. Please use email and password to login.';
+                } else if (error === 'saml_error') {
+                    errorMessage = 'Google authentication error occurred. Please try again or use email and password to login.';
+                }
+                
                 const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee; border: 1px solid #fcc; padding: 12px 20px; border-radius: 8px; color: #c33; z-index: 10000; font-size: 14px;';
-                errorDiv.textContent = 'Google authentication failed. Please use email and password to login.';
+                errorDiv.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee; border: 1px solid #fcc; padding: 12px 20px; border-radius: 8px; color: #c33; z-index: 10000; font-size: 14px; max-width: 90%; text-align: center;';
+                errorDiv.textContent = errorMessage;
                 document.body.appendChild(errorDiv);
                 
                 setTimeout(function() {

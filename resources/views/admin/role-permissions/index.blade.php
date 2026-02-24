@@ -29,7 +29,7 @@
         display: inline-block;
     }
     .role-badge {
-        background-color: #111827;
+        background-color: black;
         color: #ffffff;
         border-radius: 6px;
         padding: 4px 12px;
@@ -51,10 +51,10 @@
         color: #dc2626;
     }
     .actions { display: inline-flex; gap: 12px; align-items: center; }
-    .action-icon { 
-        font-size: 14px; 
-        text-decoration: none !important; 
-        transition: none; 
+    .action-icon {
+        font-size: 14px;
+        text-decoration: none !important;
+        transition: none;
         border: none !important;
         outline: none !important;
         box-shadow: none !important;

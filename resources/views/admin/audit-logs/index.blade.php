@@ -383,7 +383,7 @@
             </thead>
             <tbody>
                 @foreach($logs as $index => $log)
-                <tr class="log-row" style="{{ $index >= 7 ? 'display: none;' : '' }}">
+                <tr class="log-row" style="{{ $index >= 50 ? 'display: none;' : '' }}">
                     <td>
                         <div>{{ $log->created_at->setTimezone('Asia/Kuwait')->format('M d, Y') }}</div>
                         <div style="color: var(--ink-500); font-size: 12px;">{{ $log->created_at->setTimezone('Asia/Kuwait')->format('h:i:s A') }} GMT+3</div>
@@ -558,7 +558,7 @@
         // Handle See More button click - client-side expansion
         const seeMoreBtn = document.getElementById('seeMoreBtn');
         const logRows = document.querySelectorAll('.log-row');
-        let visibleCount = 7; // Start with 7 visible rows
+        let visibleCount = 50; // Start with 50 visible rows
 
         if (seeMoreBtn && logRows.length > 0) {
             // Hide button if all rows are already visible
@@ -567,8 +567,8 @@
             }
 
             seeMoreBtn.addEventListener('click', function() {
-                // Show next 7 rows
-                const nextBatch = Math.min(visibleCount + 7, logRows.length);
+                // Show next 50 rows
+                const nextBatch = Math.min(visibleCount + 50, logRows.length);
 
                 for (let i = visibleCount; i < nextBatch; i++) {
                     if (logRows[i]) {
@@ -695,7 +695,7 @@
         function initializeSeeMore() {
             const seeMoreBtn = document.getElementById('seeMoreBtn');
             const logRows = document.querySelectorAll('.log-row');
-            let visibleCount = 7;
+            let visibleCount = 50;
 
             if (seeMoreBtn && logRows.length > 0) {
                 if (logRows.length <= visibleCount) {
@@ -705,7 +705,7 @@
                 }
 
                 seeMoreBtn.addEventListener('click', function() {
-                    const nextBatch = Math.min(visibleCount + 7, logRows.length);
+                    const nextBatch = Math.min(visibleCount + 50, logRows.length);
 
                     for (let i = visibleCount; i < nextBatch; i++) {
                         if (logRows[i]) {
